@@ -268,8 +268,8 @@ code {
   }
 
   .content {
-    font-size: 19px;
-    line-height: 1.8;
+    font-size: 18px;
+    line-height: 1.4;
   }
 
   .highlight {
@@ -299,7 +299,7 @@ code {
   }
 
   .article-title {
-    font-size: 42px;
+    font-size: 22px;
   }
 
   .article-duration {

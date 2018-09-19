@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1537360563122.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "6A5F153",
+    "lastKnownWriteTime" : 1537367043,
+    "last_content_update" : 1537367183651,
+    "path" : "E:/blogs/masumbuko/content/project.Rmd",
+    "project_path" : "content/project.Rmd",
+    "properties" : {
+        "cursorPosition" : "52,27",
+        "last_setup_crc32" : "64159C0Ac4e2d899",
+        "scrollLine" : "42"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

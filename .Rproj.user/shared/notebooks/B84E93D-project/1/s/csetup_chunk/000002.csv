@@ -1,0 +1,23 @@
+"0","knitr::opts_chunk$set(echo = FALSE)"
+"2","Warning messages:
+"
+"2","1: running command '""C:/PROGRA~1/R/R-3.4.4/bin/x64/Rscript"" ""--slave"" ""C:/Users/Semba/Documents/R/win-library/3.4/blogdown/scripts/render_page.R"" ""content/project.Rmd"" ""E:/blogs/masumbuko""' had status 1 
+"
+"2","2: running command '""C:/PROGRA~1/R/R-3.4.4/bin/x64/Rscript"" ""--slave"" ""C:/Users/Semba/Documents/R/win-library/3.4/blogdown/scripts/render_page.R"" ""content/project.Rmd"" ""E:/blogs/masumbuko""' had status 1 
+"
+"2","3: running command '""C:/PROGRA~1/R/R-3.4.4/bin/x64/Rscript"" ""--slave"" ""C:/Users/Semba/Documents/R/win-library/3.4/blogdown/scripts/render_page.R"" ""content/project.Rmd"" ""E:/blogs/masumbuko""' had status 1 
+"
+"2","4: running command '""C:/PROGRA~1/R/R-3.4.4/bin/x64/Rscript"" ""--slave"" ""C:/Users/Semba/Documents/R/win-library/3.4/blogdown/scripts/render_page.R"" ""content/project.Rmd"" ""E:/blogs/masumbuko""' had status 1 
+"
+"2","5: running command '""C:/PROGRA~1/R/R-3.4.4/bin/x64/Rscript"" ""--slave"" ""C:/Users/Semba/Documents/R/win-library/3.4/blogdown/scripts/render_page.R"" ""content/project.Rmd"" ""E:/blogs/masumbuko""' had status 1 
+"
+"2","6: running command '""C:/PROGRA~1/R/R-3.4.4/bin/x64/Rscript"" ""--slave"" ""C:/Users/Semba/Documents/R/win-library/3.4/blogdown/scripts/render_page.R"" ""content/project.Rmd"" ""E:/blogs/masumbuko""' had status 1 
+"
+"2","7: running command '""C:/PROGRA~1/R/R-3.4.4/bin/x64/Rscript"" ""--slave"" ""C:/Users/Semba/Documents/R/win-library/3.4/blogdown/scripts/render_page.R"" ""content/project.Rmd"" ""E:/blogs/masumbuko""' had status 1 
+"
+"2","8: running command '""C:/PROGRA~1/R/R-3.4.4/bin/x64/Rscript"" ""--slave"" ""C:/Users/Semba/Documents/R/win-library/3.4/blogdown/scripts/render_page.R"" ""content/project.Rmd"" ""E:/blogs/masumbuko""' had status 1 
+"
+"2","9: running command '""C:/PROGRA~1/R/R-3.4.4/bin/x64/Rscript"" ""--slave"" ""C:/Users/Semba/Documents/R/win-library/3.4/blogdown/scripts/render_page.R"" ""content/project.Rmd"" ""E:/blogs/masumbuko""' had status 1 
+"
+"2","10: running command '""C:/PROGRA~1/R/R-3.4.4/bin/x64/Rscript"" ""--slave"" ""C:/Users/Semba/Documents/R/win-library/3.4/blogdown/scripts/render_page.R"" ""content/project.Rmd"" ""E:/blogs/masumbuko""' had status 1 
+"

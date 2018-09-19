@@ -1,0 +1,64 @@
+---
+title: Project
+date: 019-09-19T21:48:51-07:00
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+1. Sustainable Oceans, Livelihoods and food Security Through Increased Capacity in Ecosystem research in the Western Indian Ocean*
+
+SOLSTICE-WIO is a four-year collaborative project funded by the UK Global Challenges Research Fund (GCRF). Launched in October 2017, it brings together local knowledge and international research expertise to address challenges facing the Western Indian Ocean region in a cost-effective way. SOLSTICE demonstrate its approach to strengthening research capacity through three case studies in Kenya, Tanzania and South Africa showin in Figure \@ref(fig:map). 
+
+```{r ,comment="", message=FALSE, warning=FALSE}
+
+library(leaflet)
+library(tidyverse)
+require(sf)
+require(tmap)
+
+```
+
+```{r map, fig.cap = "Area selected with SOLSTICE-WIO project as case study"}
+
+solstice = data.frame(lon = c(39.467081,40.463063,25.89750), 
+                      lat = c(-5.067736,-2.868382,-34.16461 ), 
+                      name = c("Smsll pelagic in Pemba channel", 
+                                "Northern Kenya Bank Fisheries",
+                                "Chokka Squid Fishery"),
+                      code = 1:3)
+
+leaflet(data = solstice)%>%
+  addTiles()%>%
+  addMarkers(lng = ~lon, lat = ~lat, popup = ~name)
+```
+
+
+2. Estuarize-WIO
+
+A socio-ecological assessment of fisheries  of the South West Indian Ocean. It focus on three main estuaries---Rufiji River in Tanzania, Tana River in Kenya and Bonais Senous in Mozambique in Figure \@ref(fig:estuarize). It identify essential links for improved governance. In this project, I contributs to studies on estuary biophysical attributes, surrounding habitats and land-use of *Rufiji and Ruvu Rivers*
+
+```{r estuarize, fig.cap="The Estuaries in the WIO region", comment= "", warning=FALSE, message=FALSE}
+
+estuarize = data.frame(lon = c( 40.528674,39.34318,36.957394), 
+                      lat = c(-2.530402,-7.774349,-17.996067 ), 
+                      name = c("Tana River: Kenya", 
+                                "Rufiji River: Tanzania",
+                                "Bonais Samour: MOzambique"),
+                      code = 1:3)
+
+estuarize.sf = estuarize%>%
+  st_as_sf(coords = c("lon", "lat"))%>%
+  st_set_crs(4326)
+
+
+tmap_mode("view")
+
+tm_shape(estuarize.sf)+
+  tm_bubbles(size = 1, col = "green", shape = 21, scale = 4/3,
+  legend.max.symbol.size = 1)
+```
+
