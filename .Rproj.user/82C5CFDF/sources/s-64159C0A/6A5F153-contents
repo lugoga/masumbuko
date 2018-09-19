@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 1. Sustainable Oceans, Livelihoods and food Security Through Increased Capacity in Ecosystem research in the Western Indian Ocean*
 
-SOLSTICE-WIO is a four-year collaborative project funded by the UK Global Challenges Research Fund (GCRF). Launched in October 2017, it brings together local knowledge and international research expertise to address challenges facing the Western Indian Ocean region in a cost-effective way. SOLSTICE demonstrate its approach to strengthening research capacity through three case studies in Kenya, Tanzania and South Africa showin in Figure \@ref(fig:map). 
+SOLSTICE-WIO is a four-year collaborative project funded by the UK Global Challenges Research Fund (GCRF). Launched in October 2017, it brings together local knowledge and international research expertise to address challenges facing the Western Indian Ocean region in a cost-effective way. SOLSTICE demonstrate its approach to strengthening research capacity through three case studies in Kenya, Tanzania and South Africa show in Figure \@ref(fig:map). 
 
 ```{r ,comment="", message=FALSE, warning=FALSE}
 
@@ -39,7 +39,7 @@ leaflet(data = solstice)%>%
 
 2. Estuarize-WIO
 
-A socio-ecological assessment of fisheries  of the South West Indian Ocean. It focus on three main estuaries---Rufiji River in Tanzania, Tana River in Kenya and Bonais Senous in Mozambique in Figure \@ref(fig:estuarize). It identify essential links for improved governance. In this project, I contributs to studies on estuary biophysical attributes, surrounding habitats and land-use of *Rufiji and Ruvu Rivers*
+A socio-ecological assessment of fisheries  of the South West Indian Ocean. It focus on three main estuaries---Rufiji River in Tanzania, Tana River in Kenya and Bonais Senous in Mozambique in Figure \@ref(fig:estuarize). It identify essential links for improved governance. In this project, I contribute to understand the estuary biophysical attributes, surrounding habitats and land-use of *Rufiji and Ruvu Rivers*
 
 ```{r estuarize, fig.cap="The Estuaries in the WIO region", comment= "", warning=FALSE, message=FALSE}
 
