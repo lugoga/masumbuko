@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1537346917110.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2313698665",
+    "id" : "E3AD3AC2",
+    "lastKnownWriteTime" : 1537350664,
+    "last_content_update" : 1537350664885,
+    "path" : "E:/blogs/masumbuko/content/post/2018-09-19-get-satellite-data-with-r.Rmd",
+    "project_path" : "content/post/2018-09-19-get-satellite-data-with-r.Rmd",
+    "properties" : {
+        "cursorPosition" : "14,7",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
