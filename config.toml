@@ -35,7 +35,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
 
 [params]
-    description = "A website that deals with R scripting for Marine Environments."
+    description = "A blog that deals with R scripting for Marine Environmental issues."
 
     # options for highlight.js (version, additional languages, and theme)
     highlightjsVersion = "9.11.0"

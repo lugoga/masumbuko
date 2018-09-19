@@ -21,16 +21,16 @@
     </item>
     
     <item>
-      <title>About</title>
-      <link>/project/</link>
+      <title>Course I Offer</title>
+      <link>/teaching/</link>
       <pubDate>Thu, 19 Sep 2019 21:48:51 -0700</pubDate>
       
-      <guid>/project/</guid>
+      <guid>/teaching/</guid>
       <description>This blog is owned and operated by Masumbuko Semba. He is a data scientist works at the Nelson Mandela African Institution of Science and Technology but now doing a doctoral degree in physical oceanogrphy at the University of Dar es Salaam. He specializes in Earth Observations, where he use open-source geo-spatial tools and satellite observations to understand the physical processes that cause changes in our environments. Among the project he is involved is Global Drifter Program, where he works with the Physical Oceanographic Division of the Atlantic Oceanographic and Meteorological Laboratory (AOML) of National Oceanic and Atmospheric Administration (NOAA) to understnd the ocean circulation in the Tropical Indian Ocean region.</description>
     </item>
     
     <item>
-      <title>About</title>
+      <title>List of Publications</title>
       <link>/publication/</link>
       <pubDate>Thu, 19 Sep 2019 21:48:51 -0700</pubDate>
       
@@ -39,11 +39,11 @@
     </item>
     
     <item>
-      <title>About</title>
-      <link>/teaching/</link>
+      <title>Project</title>
+      <link>/project/</link>
       <pubDate>Thu, 19 Sep 2019 21:48:51 -0700</pubDate>
       
-      <guid>/teaching/</guid>
+      <guid>/project/</guid>
       <description>This blog is owned and operated by Masumbuko Semba. He is a data scientist works at the Nelson Mandela African Institution of Science and Technology but now doing a doctoral degree in physical oceanogrphy at the University of Dar es Salaam. He specializes in Earth Observations, where he use open-source geo-spatial tools and satellite observations to understand the physical processes that cause changes in our environments. Among the project he is involved is Global Drifter Program, where he works with the Physical Oceanographic Division of the Atlantic Oceanographic and Meteorological Laboratory (AOML) of National Oceanic and Atmospheric Administration (NOAA) to understnd the ocean circulation in the Tropical Indian Ocean region.</description>
     </item>
     

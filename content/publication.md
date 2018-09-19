@@ -1,5 +1,5 @@
 ---
-title: "About"
+title: "List of Publications"
 date: "2019-09-19T21:48:51-07:00"
 ---
 

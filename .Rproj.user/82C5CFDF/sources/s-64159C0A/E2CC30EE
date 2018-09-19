@@ -5,15 +5,15 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "3420456147",
+    "hash" : "3035171442",
     "id" : "E2CC30EE",
-    "lastKnownWriteTime" : 1537350298,
-    "last_content_update" : 1537350298573,
+    "lastKnownWriteTime" : 1537351500,
+    "last_content_update" : 1537351500325,
     "path" : "E:/blogs/masumbuko/config.toml",
     "project_path" : "config.toml",
     "properties" : {
-        "cursorPosition" : "16,17",
-        "scrollLine" : "14"
+        "cursorPosition" : "37,85",
+        "scrollLine" : "19"
     },
     "relative_order" : 1,
     "source_on_save" : false,
