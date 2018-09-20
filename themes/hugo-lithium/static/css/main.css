@@ -27,6 +27,8 @@ a {
 
 code {
   background-color: rgba(0, 0, 0, 0.02);
+  font-family: monaco, Consolas, Lucida Console, monospace;
+  font-size: 15px
 }
 
 .wrapper {
