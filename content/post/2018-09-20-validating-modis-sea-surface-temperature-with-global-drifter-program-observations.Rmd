@@ -15,6 +15,7 @@ slug: validating-modis-sea-surface-temperature-with-global-drifter-program-obser
 ---
 
 ### Introduction
+In this routine, I am going to illustrate the routines of validating sea surface temperatures from Moderate resolution (MODIS) and drifters. Drifters serve as in-situ data against which the SST from MODIS is tested. The purpose is to assess how accurate the satellite observation is to the in-situ measurements. We will test the accuracy of the two dataset and look on their relationship.  
 
 
 ### Needed Packages
@@ -24,7 +25,7 @@ Several packages are needed for this routine (this assumes are installed already
 
 + [dplyr](https://dplyr.tidyverse.org/)^[Wickham, H., Francois, R., Henry, L., & Müller, K. (2015). dplyr: A grammar of data manipulation. R package version 0.4, 3.] used to manipulate and transform the modis and drifter data
 
-+ [tidyr](https://tidyr.tidyverse.org/)^[Wickham, H. (2016). tidyr: Easily Tidy Data with spread () and gather () Functions. Version 0.6. 0.] used to consistently tidy the data from wide form to long form and ensure each variable goes in a colum and every observation goes into a row
++ [tidyr](https://tidyr.tidyverse.org/)^[Wickham, H. (2016). tidyr: Easily Tidy Data with spread () and gather () Functions. Version 0.6. 0.] used to consistently tidy the data from wide form to long form and ensure each variable goes in a column and every observation goes into a row
 
 + [readr](https://readr.tidyverse.org/)^[Wickham, H., Hester, J., & Francois, R. (2016). Readr: read tabular data. URL https://github. com/hadley/readr. R package version 0.1, 1, 361.] for reading tabular drifter data
 
@@ -45,30 +46,34 @@ require(rerddapXtracto)
 
 ```
 
+### Drifter data
+### Loading the Data in R
+The drifter data downloaded from [Global Drifter Program ](www.aoml.noaa.gov/phod/gdp/) as tab delimited was imported into R workspace using the *read_table2()* function of readr^[Wickham, H., Hester, J., & Francois, R. (2016). Readr: read tabular data. URL https://github. com/hadley/readr. R package version 0.1, 1, 361.] package. Once the file was in the workspace, the column variables were assigned proper names. 
 
 ```{r drifter, comment="", message=FALSE, warning=FALSE}
-drifters = read_table2("./fig8_drifters.txt", 
+## read drifter dataset
+drifters = read_table2("./drifters.txt", 
                        col_names = FALSE, comment = "#")
 
+## rename the variables to their respective variable names
 drifters = drifters%>%
   select(id = 1, lon = 2, lat = 3, drogue = 4, 
          u = 5, v = 6, sst = 7, year = 8, month =9, day = 10, hour = 11)
 ```
 
 
-```{r date}
+### Transform date
+The dataset comes with four columns that present date---year, month, day, and hour. These variables were converted to date in R using the *JDymd()* function of insol^[Corripio, J. G. (2014). Insol: solar radiation. R package version, 1(1), 2014.] package. The date transformation involved two steps--converting to year, month, day variable into julian day and then convert the julian day to gregorian calendar. Once the date aligned with R format, the year, month, day and hour variables were dropped from the drifter dataset. The data in table \@ref(tab:tab1) show the date, identification number longitude, latitude and sea surface temperature of fifteen randomly selected drifters.
 
+
+```{r tab1, echo=FALSE}
+## transforming the date
 drifters = drifters%>%
-  mutate(jd = JDymd(year = year, month = month, day = day, 
-                    hour = hour), date = JD(jd, inverse = TRUE))%>%
+  mutate(jd = JDymd(year = year, month = month, day = day, hour = hour), 
+         date = JD(jd, inverse = TRUE))%>%
   select(date, id, lon, lat, u, v, sst)
 
-```
-
-
-The data in table \@ref(tab:tab1) show 15 drifters obtained from Global Drifter Program
-```{r tab1, echo=FALSE}
-
+## present into a table
 drifters%>%
   separate(date, c("Date", "Time"), sep = " ")%>%
   select(-Time)%>%
@@ -81,27 +86,158 @@ drifters%>%
 
 ```
 
+
+### Drifter selection
+
 ```{r, echo=FALSE}
 
-drifter.70973 = drifters%>%filter(id == 70973)
+drifter.70973 = drifters%>%filter(id == 70973)%>%mutate(date = as.Date(date))
+
+drifter.70973 = drifter.70973%>% mutate(date = as.Date(date), 
+         distance = geodDist(lon, lat, alongPath = T))
+
 
 ```
 
-Figure \@ref(fig:id1) is a drifter crossed the region between `r drifter.70973[1,1]` and `r drifter.70973[326,1]`
 
-```{r id1, fig.cap="Drifter with Id 70973 crossed within the tropical indian ocean", echo=FALSE}
+```{r, echo=FALSE}
+int = data.frame(drifter.70973[1,1], drifter.70973[326,1])%>%rename(begin = date, end = date.1)
+```
 
-# ggplot()+geom_sf(data = drifter.sf%>%filter(id == 70973))
+There are `r nrow(drifters)` observations from `r drifters%>%distinct(id)%>%nrow()` unique drifters. However, drifter 70973 was selected for validation. This drifter begun its way at latitude `r drifter.70973[1,4]` $^{\circ}$S and longitude `r drifter.70973[1,3]` $^{\circ}$E on `r drifter.70973[1,1]` and finished near Nungwi at latitude `r drifter.70973[326,4]` $^{\circ}$S and longitude `r drifter.70973[326,3]` $^{\circ}$E on `r drifter.70973[326,1]`. During its journey, which took `r interval(int$begin, int$end)%>%as.duration()%>%as.numeric("days")` days covering a distance of `r drifter.70973[326,8]%>%round(2)` kilometers, it made `r nrow(drifter.70973)` observations (Figure \@ref(fig:id1)). 
 
-  
+
+```{r id1, fig.cap="Sample locations of drifter with Id 70973 crossed within the tropical indian ocean", echo=FALSE}
+
+
 leaflet(data = drifter.70973%>%sample_frac(0.25))%>%
   addTiles()%>%
   addMarkers(lng = ~lon, lat = ~lat, popup = ~date)
 ```
 
 ```{r}
-drifter.sf = drifters%>%st_as_sf(coords = c("lon", "lat"))%>%st_set_crs(4326)
 
 ```
+
+Using the drifter geographical position, a simple feature was created that was used to create trajectory---a pathway along which drifter made several observation on its route (Figure \@ref(fig:traj))
+```{r traj, fig.cap="The Trajectory of Drifter with Id 70973, which crossed the tropical indian ocean for a period of one year"}
+
+## create a simple feature from tibble
+drifter.sf = drifters%>%
+  st_as_sf(coords = c("lon", "lat"))%>%
+  st_set_crs(4326)
+
+## make a trajectory form the simple feature points
+drifter.traj = drifter.sf%>%
+  group_by(id)%>%
+  summarise(do_union = FALSE)%>%
+  st_cast("LINESTRING")
+
+## make a map of trajectory
+leaflet(data = drifter.traj%>%filter(id == 70973))%>%
+  addTiles()%>%
+  addPolylines(color = "red", stroke = T, weight = 2.5)
+```
+
+
+### Modis Data
+The selected drifter dataset contains three variables---date, longitude and latitude of the drifter observation. These observations serves as trackline and was used to extract sea surface temperature from MODIS satellite. *xtracto()* function from **xtractomatic**^[Mendelssohn, R. (2017). xtractomatic: accessing environmental data from ERD’s ERDDAP server. R package version, 3(2).] package was used for extraction. Let's explore the metadata of the ERDAPP servers that deals with sst
+```{r, comment="", eval=FALSE}
+getInfo("mhsstd8day")
+```
+
+We observed that the [MODIS sst](http://oceancolor.gsfc.nasa.gov/) dataset span from `r dmy(050103)` to `r dmy(250818)` covering all the global oceans at spatial resolution of `r 0.0417*98`. The function xtracto() was used to extract sea surface temperature along the trackline of selected drifter with Id 70973.
+
+```{r, eval=FALSE}
+
+## extract sst along the trackline of drifter
+sst_modis = xtracto(dtype = "mhsstd8day",
+              xpos = drifter.70973$lon, 
+              ypos = drifter.70973$lat, 
+              tpos = drifter.70973$date, ,
+              xlen = 0.2, 
+              ylen = 0.2)
+
+```
+
+
+```{r, include=FALSE, comment="", warning=FALSE, message= FALSE}
+# write_csv(sst, "sst_modis.csv")
+sst_modis = read_csv("./sst_modis.csv")
+
+
+```
+### Stitching Drifter and MODIS dataset
+Once the data was extracted from MODIS and loaded in the workspace, it was cleaned by removing variables not needed and then bind it with the drifter dataset using the *bind_cols()* function from **dplyr**^[Wickham, H., Francois, R., Henry, L., & Müller, K. (2015). dplyr: A grammar of data manipulation. R package version 0.4, 3.] package. 
+
+```{r}
+sst.modis.clean =sst_modis%>%
+  select(satellite.date = 4, satellite.sst.mean = 1, satellite.sst.median = 10 )
+
+## bind the drifter data and extracted modis data
+drifter.modis = drifter.70973%>%
+  select(drifter.date = date, lon,lat, drifter.sst = sst)%>%
+  bind_cols(sst.modis.clean)%>%select(1,5,2,3, 4, 6,7)%>%
+  mutate(satellite.date = as.Date(satellite.date))
+```
+
+The table \@ref(tab:tab2) highlight information of of drifter and satellite sea surface temperature that were marked at the same geographical location. There are mismatch of Some drifter observations to the satellite data. This is because the modis data takes three days to cover the entire world and the day that satellite passed the region might misses some drifter observation. 
+
+```{r tab2 }
+## clean the data set and remove variables not wanted
+
+knitr::kable(drifter.modis%>%dplyr::sample_n(20), 
+             align = "c", digits = 2, 
+             col.names = c("Drifter Date","Modis Date","Longitude","Latitude",
+                           "Drifter SST","Satellite SST Mean",
+                           " Satellite SST Median") , 
+             caption = "Overview of merged drifter and satellite dataset")
+
+
+```
+
+
+### Validation
+```{r}
+rmse = pracma::rmserr(drifter.modis$drifter.sst, drifter.modis$satellite.sst.mean, summary = FALSE)
+
+estimator = c("Mean Absolute", "Mean Squared","Root Mean Square","Mean Absolute Percentage","Normalized Mean Squared","Relative Standard Deviation")
+
+rmse.t = rmse%>%as.data.frame()%>%t()%>%as.data.frame()%>%rename("Error" = V1)%>%data.frame(estimator)%>%as.tibble()%>%select(2,1)%>%  arrange(Error)
+```
+
+To assess the accuracy of MODIS sea surface temperature, I tested MODIS data against drifter observations using six different algorithms (Table \@ref(tab:tab3)). The `r rmse.t[1,1]` algorithm had the highest accuracy of `r rmse.t[1,2]`$^{\circ}$ Celcius and the `r rmse.t[6,1]` achieved the lowest accuracy of `r rmse.t[6,2]`$^{\circ}$ Celsius. In general, the sea surface temperature from modis showed a mean accuracy of `r mean(rmse.t$Error)`$^{\circ}$ Celsius. 
+```{r tab3}
+
+knitr::kable(rmse.t, digits = 2, align = "l", col.names = c("Estimator", "Value (Degree Celsius)"), caption = "Error estimates of surface current with various tools")
+```
+
+
+
+```{r, comment="", warning=FALSE, comment=FALSE}
+## computing the correlation coefficient
+pear = cor.test(drifter.modis$drifter.sst, drifter.modis$satellite.sst.mean)
+
+```
+
+The accuracy of the sea surface temperature is also supported by Figure \@ref(fig:fig3), which show the positive association of sea surface temperature between in-situ drifter observations and MODIS satellite data (R^2^ = 0.92). This association was significant ( t_(1,324)_ = t < `r pear$statistic` , *p* = `r pear$p.value`)
+
+```{r fig3, fig.cap= "Association of sea surface temperature from in-situ drifter observation and MODIS"}
+
+ggplot(data = drifter.modis, 
+       aes(x = drifter.sst, y = satellite.sst.mean))+
+  geom_point()+
+  geom_smooth(fill = "green", col = "red")+
+  theme(panel.background = element_rect(colour = 1),
+        axis.text = element_text(colour = 1, size = 12), 
+        axis.title = element_text(colour = 1, size = 14))+
+ geom_text(aes(x = 29, y = 26, 
+               label = paste("RSq = ", 0.92)), size = 4)+
+  scale_x_continuous(breaks = seq(25.5,31, .5))+
+  scale_y_continuous(breaks = seq(26,31, 1.5))+
+    labs(y=expression(~Modis~Sensor~SST~(~degree~C)), x=expression(~Drifter~Temperature~(~degree~C)))
+```
+### Conclusion
+Comparing MODIS satellite and drifter sea surface temperature showed a close match with an accuracy of `r mean(rmse.t$Error)`$^{\circ}$ Celsius and a strong and significant positive correlation (R^2^ = 0.92). The closeness of drifter and  MODIS sea surface temperature allows scientists in the region to use MODIS satellite data to tackle marine and coastal issues in the region.
 
 ### References

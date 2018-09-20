@@ -64,8 +64,7 @@
       <pubDate>Thu, 20 Sep 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/09/20/validating-modis-sea-surface-temperature-with-global-drifter-program-observations/</guid>
-      <description>IntroductionNeeded PackagesSeveral packages are needed for this routine (this assumes are installed already in the machine). The package include tidyverse1, which is a collection of R packages designed for reading and importing data; manipulating and transforming imported data and visualize the results. The routine used several packages in the tidyverse including;
-ggplot22 used for visualizing, mapping and exploring the data</description>
+      <description>IntroductionIn this routine, I am going to illustrate the routines of validating sea surface temperatures from Moderate resolution (MODIS) and drifters. Drifters serve as in-situ data against which the SST from MODIS is tested. The purpose is to assess how accurate the satellite observation is to the in-situ measurements. We will test the accuracy of the two dataset and look on their relationship.</description>
     </item>
     
     <item>
