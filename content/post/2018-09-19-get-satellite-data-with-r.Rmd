@@ -11,6 +11,9 @@ tags:
   - Drifter
   - R
   - Satellite
+  - Masumbuko Semba
+  - Indian Ocean
+  - Pemba Channel
 slug: get-satellite-data-with-r
 header:
   caption: ''

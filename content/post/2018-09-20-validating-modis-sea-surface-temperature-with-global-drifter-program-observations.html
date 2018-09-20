@@ -1,0 +1,235 @@
+---
+title: Validating MODIS Sea Surface Temperature with Global Drifter Program Observations
+author: Masumbuko Semba
+date: '2018-09-20'
+categories:
+  - R
+tags:
+  - Drifter
+  - Indian Ocean
+  - Masumbuko Semba
+  - MODIS
+  - Pemba Channel
+  - Satellite
+slug: validating-modis-sea-surface-temperature-with-global-drifter-program-observations
+---
+
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/leaflet/leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet/leaflet.js"></script>
+<link href="/rmarkdown-libs/leafletfix/leafletfix.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4-compressed.js"></script>
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4leaflet.js"></script>
+<link href="/rmarkdown-libs/rstudio_leaflet/rstudio_leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet-binding/leaflet.js"></script>
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+</div>
+<div id="needed-packages" class="section level3">
+<h3>Needed Packages</h3>
+<p>Several packages are needed for this routine (this assumes are installed already in the machine). The package include <a href="https://www.tidyverse.org/">tidyverse</a><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>, which is a collection of R packages designed for reading and importing data; manipulating and transforming imported data and visualize the results. The routine used several packages in the tidyverse including;</p>
+<ul>
+<li><p><a href="https://ggplot2.tidyverse.org/">ggplot2</a><a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> used for visualizing, mapping and exploring the data</p></li>
+<li><p><a href="https://dplyr.tidyverse.org/">dplyr</a><a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> used to manipulate and transform the modis and drifter data</p></li>
+<li><p><a href="https://tidyr.tidyverse.org/">tidyr</a><a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> used to consistently tidy the data from wide form to long form and ensure each variable goes in a colum and every observation goes into a row</p></li>
+<li><p><a href="https://readr.tidyverse.org/">readr</a><a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a> for reading tabular drifter data</p></li>
+<li><p><a href="https://github.com/rmendels/xtractomatic">xtractomatic</a><a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a> used to subset and extract satellite and other oceanographic related data from a remote server to the Area of Interest (AOI)</p></li>
+</ul>
+<pre class="r"><code>require(tidyverse)
+require(insol)
+require(lubridate)
+require(sf)
+require(oce)
+require(ocedata)
+require(leaflet)
+require(xtractomatic)
+require(rerddapXtracto)</code></pre>
+<pre class="r"><code>drifters = read_table2(&quot;./fig8_drifters.txt&quot;, 
+                       col_names = FALSE, comment = &quot;#&quot;)
+
+drifters = drifters%&gt;%
+  select(id = 1, lon = 2, lat = 3, drogue = 4, 
+         u = 5, v = 6, sst = 7, year = 8, month =9, day = 10, hour = 11)</code></pre>
+<pre class="r"><code>drifters = drifters%&gt;%
+  mutate(jd = JDymd(year = year, month = month, day = day, 
+                    hour = hour), date = JD(jd, inverse = TRUE))%&gt;%
+  select(date, id, lon, lat, u, v, sst)</code></pre>
+<p>The data in table <a href="#tab:tab1">1</a> show 15 drifters obtained from Global Drifter Program</p>
+<table>
+<caption><span id="tab:tab1">Table 1: </span>Sample of drifter observations</caption>
+<thead>
+<tr class="header">
+<th align="center">Date</th>
+<th align="center">ID</th>
+<th align="center">Longitude</th>
+<th align="center">Latitude</th>
+<th align="center">Zonal (U)</th>
+<th align="center">Meridional (V)</th>
+<th align="center">SST</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">2008-02-14</td>
+<td align="center">40549</td>
+<td align="center">41.71</td>
+<td align="center">-11.49</td>
+<td align="center">-0.37</td>
+<td align="center">-0.17</td>
+<td align="center">27.95</td>
+</tr>
+<tr class="even">
+<td align="center">2014-01-25</td>
+<td align="center">60656190</td>
+<td align="center">48.92</td>
+<td align="center">-2.17</td>
+<td align="center">-0.16</td>
+<td align="center">-0.72</td>
+<td align="center">27.16</td>
+</tr>
+<tr class="odd">
+<td align="center">2017-09-08</td>
+<td align="center">64821540</td>
+<td align="center">44.08</td>
+<td align="center">-3.96</td>
+<td align="center">-0.09</td>
+<td align="center">0.31</td>
+<td align="center">26.24</td>
+</tr>
+<tr class="even">
+<td align="center">2017-10-21</td>
+<td align="center">64821560</td>
+<td align="center">50.73</td>
+<td align="center">-9.12</td>
+<td align="center">-0.77</td>
+<td align="center">-0.14</td>
+<td align="center">27.27</td>
+</tr>
+<tr class="odd">
+<td align="center">2014-11-04</td>
+<td align="center">133648</td>
+<td align="center">51.01</td>
+<td align="center">-11.31</td>
+<td align="center">-0.30</td>
+<td align="center">0.08</td>
+<td align="center">26.85</td>
+</tr>
+<tr class="even">
+<td align="center">1999-06-01</td>
+<td align="center">9730553</td>
+<td align="center">50.81</td>
+<td align="center">-12.75</td>
+<td align="center">-0.36</td>
+<td align="center">0.07</td>
+<td align="center">26.83</td>
+</tr>
+<tr class="odd">
+<td align="center">1996-08-01</td>
+<td align="center">9423511</td>
+<td align="center">47.60</td>
+<td align="center">-12.99</td>
+<td align="center">0.36</td>
+<td align="center">0.04</td>
+<td align="center">NaN</td>
+</tr>
+<tr class="even">
+<td align="center">2008-11-18</td>
+<td align="center">71201</td>
+<td align="center">47.98</td>
+<td align="center">-11.58</td>
+<td align="center">-0.44</td>
+<td align="center">-0.25</td>
+<td align="center">27.02</td>
+</tr>
+<tr class="odd">
+<td align="center">2014-12-10</td>
+<td align="center">101833</td>
+<td align="center">43.49</td>
+<td align="center">-9.70</td>
+<td align="center">-0.51</td>
+<td align="center">0.30</td>
+<td align="center">29.05</td>
+</tr>
+<tr class="even">
+<td align="center">2015-04-07</td>
+<td align="center">132688</td>
+<td align="center">42.69</td>
+<td align="center">-7.04</td>
+<td align="center">-0.20</td>
+<td align="center">0.17</td>
+<td align="center">29.34</td>
+</tr>
+<tr class="odd">
+<td align="center">2015-06-20</td>
+<td align="center">127056</td>
+<td align="center">45.86</td>
+<td align="center">-9.87</td>
+<td align="center">-0.33</td>
+<td align="center">0.13</td>
+<td align="center">27.00</td>
+</tr>
+<tr class="even">
+<td align="center">2015-03-04</td>
+<td align="center">127055</td>
+<td align="center">44.04</td>
+<td align="center">-9.27</td>
+<td align="center">0.05</td>
+<td align="center">0.01</td>
+<td align="center">29.19</td>
+</tr>
+<tr class="odd">
+<td align="center">2005-02-01</td>
+<td align="center">2340549</td>
+<td align="center">39.84</td>
+<td align="center">-6.06</td>
+<td align="center">-0.12</td>
+<td align="center">0.65</td>
+<td align="center">NaN</td>
+</tr>
+<tr class="even">
+<td align="center">2014-05-29</td>
+<td align="center">109290</td>
+<td align="center">41.23</td>
+<td align="center">-4.39</td>
+<td align="center">0.08</td>
+<td align="center">0.34</td>
+<td align="center">27.51</td>
+</tr>
+<tr class="odd">
+<td align="center">2009-04-19</td>
+<td align="center">34174</td>
+<td align="center">48.08</td>
+<td align="center">-9.75</td>
+<td align="center">-0.65</td>
+<td align="center">0.18</td>
+<td align="center">28.84</td>
+</tr>
+</tbody>
+</table>
+<p>Figure <a href="#fig:id1">1</a> is a drifter crossed the region between 2010-11-02 03:00:00 and 2011-01-22 09:00:00</p>
+<div class="figure"><span id="fig:id1"></span>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-15.589,-14.3,-15.236,-11.824,-12.031,-10.812,-9.864,-15.121,-14.258,-6.471,-7.674,-10.154,-15.494,-9.444,-13.346,-9.299,-14.213,-5.728,-15.334,-15.509,-14.564,-10.812,-14.388,-14.373,-9.666,-10.043,-15.539,-10.398,-15.241,-14.579,-12.454,-15.491,-11.137,-9.7,-13.188,-13.264,-6.956,-14.416,-15.583,-15.343,-7.073,-14.169,-9.078,-15.241,-14.557,-15.086,-9.521,-15.108,-14.211,-9.641,-9.391,-9.375,-15.514,-10.704,-14.553,-15.106,-14.509,-11.085,-12.566,-15.619,-10.687,-15.565,-15.497,-13.985,-14.744,-7.304,-14.277,-12.229,-15.535,-15.369,-14.372,-14.422,-9.447,-15.464,-15.511,-15.563,-15.466,-5.722,-14.568,-15.368,-6.693,-14.864],[50.723,51.714,51.213,49.717,50.038,46.356,42.152,51.283,51.954,39.978,40.217,43.173,50.709,40.733,50.809,40.438,51.995,39.407,50.624,50.693,50.462,47.399,51.552,51.337,41.663,42.672,50.611,43.971,51.179,50.406,50.125,50.803,48.586,41.807,50.544,50.618,40.129,51.256,50.663,51.036,40.132,51.241,40.249,51.12,50.514,51.392,40.969,51.343,51.293,41.126,40.636,40.616,50.629,45.13,50.534,51.408,50.58,48.391,50.177,50.512,46.971,50.484,50.707,51.173,50.299,40.198,51.761,50.108,50.606,51.034,51.581,51.213,40.71,50.769,50.659,50.836,50.65,39.32,50.434,51.024,40.058,50.344],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["2010-11-26T12:00:00Z","2010-11-03T18:00:00Z","2010-12-02T18:00:00Z","2010-12-20T12:00:00Z","2010-12-19T12:00:00Z","2010-12-25T18:00:00Z","2011-01-01T00:00:00Z","2010-12-04T00:00:00Z","2010-11-02T12:00:00Z","2011-01-18T18:00:00Z","2011-01-16T06:00:00Z","2010-12-30T06:00:00Z","2010-11-23T18:00:00Z","2011-01-06T06:00:00Z","2010-12-16T00:00:00Z","2011-01-11T00:00:00Z","2010-11-02T00:00:00Z","2011-01-21T00:00:00Z","2010-11-17T18:00:00Z","2010-11-23T12:00:00Z","2010-11-11T06:00:00Z","2010-12-23T18:00:00Z","2010-11-04T18:00:00Z","2010-12-11T06:00:00Z","2011-01-02T00:00:00Z","2010-12-31T00:00:00Z","2010-11-22T12:00:00Z","2010-12-29T00:00:00Z","2010-12-02T12:00:00Z","2010-11-11T18:00:00Z","2010-12-18T12:00:00Z","2010-11-25T06:00:00Z","2010-12-22T06:00:00Z","2011-01-01T18:00:00Z","2010-12-17T00:00:00Z","2010-12-16T18:00:00Z","2011-01-17T18:00:00Z","2010-11-06T06:00:00Z","2010-11-18T18:00:00Z","2010-12-01T06:00:00Z","2011-01-17T12:00:00Z","2010-12-12T06:00:00Z","2011-01-12T12:00:00Z","2010-12-02T00:00:00Z","2010-11-10T18:00:00Z","2010-12-05T00:00:00Z","2011-01-05T00:00:00Z","2010-12-06T06:00:00Z","2010-12-12T00:00:00Z","2011-01-04T06:00:00Z","2011-01-08T12:00:00Z","2011-01-09T06:00:00Z","2010-11-23T00:00:00Z","2010-12-27T06:00:00Z","2010-11-10T12:00:00Z","2010-12-05T06:00:00Z","2010-11-10T00:00:00Z","2010-12-22T12:00:00Z","2010-12-18T06:00:00Z","2010-11-19T18:00:00Z","2010-12-24T18:00:00Z","2010-11-20T00:00:00Z","2010-11-27T00:00:00Z","2010-12-13T06:00:00Z","2010-11-13T18:00:00Z","2011-01-17T00:00:00Z","2010-11-03T12:00:00Z","2010-12-19T00:00:00Z","2010-11-22T00:00:00Z","2010-11-30T18:00:00Z","2010-11-04T12:00:00Z","2010-11-06T12:00:00Z","2011-01-06T12:00:00Z","2010-11-24T18:00:00Z","2010-11-23T06:00:00Z","2010-11-25T12:00:00Z","2010-11-18T06:00:00Z","2011-01-22T06:00:00Z","2010-11-11T12:00:00Z","2010-11-30T06:00:00Z","2011-01-18T06:00:00Z","2010-11-14T12:00:00Z"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-15.619,-5.722],"lng":[39.32,51.995]}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 1: Drifter with Id 70973 crossed within the tropical indian ocean
+</p>
+</div>
+<pre class="r"><code>drifter.sf = drifters%&gt;%st_as_sf(coords = c(&quot;lon&quot;, &quot;lat&quot;))%&gt;%st_set_crs(4326)</code></pre>
+</div>
+<div id="references" class="section level3">
+<h3>References</h3>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Wickham, H. (2017). Tidyverse: Easily install and load’tidyverse’packages. R package version, 1(1).<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Wickham, H. (2016). ggplot2: elegant graphics for data analysis. Springer.<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>Wickham, H., Francois, R., Henry, L., &amp; Müller, K. (2015). dplyr: A grammar of data manipulation. R package version 0.4, 3.<a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>Wickham, H. (2016). tidyr: Easily Tidy Data with spread () and gather () Functions. Version 0.6. 0.<a href="#fnref4">↩</a></p></li>
+<li id="fn5"><p>Wickham, H., Hester, J., &amp; Francois, R. (2016). Readr: read tabular data. URL <a href="https://github" class="uri">https://github</a>. com/hadley/readr. R package version 0.1, 1, 361.<a href="#fnref5">↩</a></p></li>
+<li id="fn6"><p>Mendelssohn, R. (2017). xtractomatic: accessing environmental data from ERD’s ERDDAP server. R package version, 3(2).<a href="#fnref6">↩</a></p></li>
+</ol>
+</div>

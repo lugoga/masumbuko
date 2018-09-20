@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pemba on Masumbuko Semba</title>
+    <link>/tags/pemba/</link>
+    <description>Recent content in Pemba on Masumbuko Semba</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 20 Sep 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/pemba/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Validating MODIS Sea Surface Temperature with Global Drifter Program Observations</title>
+      <link>/2018/09/20/validating-modis-sea-surface-temperature-with-global-drifter-program-observations/</link>
+      <pubDate>Thu, 20 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/09/20/validating-modis-sea-surface-temperature-with-global-drifter-program-observations/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

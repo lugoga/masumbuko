@@ -6,10 +6,20 @@
     <description>Recent content in R on Masumbuko Semba</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 18 Sep 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 20 Sep 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Validating MODIS Sea Surface Temperature with Global Drifter Program Observations</title>
+      <link>/2018/09/20/validating-modis-sea-surface-temperature-with-global-drifter-program-observations/</link>
+      <pubDate>Thu, 20 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/09/20/validating-modis-sea-surface-temperature-with-global-drifter-program-observations/</guid>
+      <description>IntroductionNeeded PackagesSeveral packages are needed for this routine (this assumes are installed already in the machine). The package include tidyverse1, which is a collection of R packages designed for reading and importing data; manipulating and transforming imported data and visualize the results. The routine used several packages in the tidyverse including;
+ggplot22 used for visualizing, mapping and exploring the data</description>
+    </item>
     
     <item>
       <title>Getting and Processing Satellite Data made easier in R</title>
