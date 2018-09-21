@@ -3,11 +3,11 @@ languageCode = "en-us"
 title = "Masumbuko Semba"
 theme = "hugo-lithium"
 googleAnalytics = ""
-disqusShortname = ""
+disqusShortname = "Semba"
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
 [permalinks]
-    post = "/:year/:month/:day/:slug/"
+    post = "/:month/:day/:year/:slug/"
 
 [[menu.main]]
     name = "About"
@@ -57,7 +57,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     MathJaxVersion = "2.7.1"
 
     [params.logo]
-    url = "logo.png"
+    url = "grani_logo-01.png"
     width = 50
     height = 50
     alt = "Logo"

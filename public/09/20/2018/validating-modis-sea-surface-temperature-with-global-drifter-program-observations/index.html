@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.48" />
+
+
+<title>Validating MODIS Sea Surface Temperature with Global Drifter Program Observations - Masumbuko Semba</title>
+<meta property="og:title" content="Validating MODIS Sea Surface Temperature with Global Drifter Program Observations - Masumbuko Semba">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga/masumbuko">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">7 min read</span>
+    
+
+    <h1 class="article-title">Validating MODIS Sea Surface Temperature with Global Drifter Program Observations</h1>
+
+    
+    <span class="article-date">2018/09/20</span>
+    
+
+    <div class="article-content">
+      <script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/leaflet/leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet/leaflet.js"></script>
+<link href="/rmarkdown-libs/leafletfix/leafletfix.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4-compressed.js"></script>
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4leaflet.js"></script>
+<link href="/rmarkdown-libs/rstudio_leaflet/rstudio_leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet-binding/leaflet.js"></script>
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>In this post, I am going to illustrate routines of how to validate sea surface temperatures from Moderate Resolution Imaging Spectroradiometer (MODIS) with drifters’ sea surface temperature. Drifters measurements serve as in-situ data against MODIS data. The purpose is to assess closeneness (accuracy) of satellite and in-situ SST. I will check the accuracy of acquired (satellite) and measured (drifter) SST, visualize their relationship and test the significance of the relationship.</p>
+</div>
+<div id="needed-packages" class="section level3">
+<h3>Needed Packages</h3>
+<p>Several packages are needed for this routine (this assumes are installed already in the machine).</p>
+<pre class="r"><code>require(tidyverse)
+require(insol)
+require(lubridate)
+require(sf)
+require(oce)
+require(ocedata)
+require(leaflet)
+require(xtractomatic)
+require(rerddapXtracto)</code></pre>
+</div>
+<div id="drifter-data" class="section level3">
+<h3>Drifter data</h3>
+<p>The drifter data downloaded from <a href="www.aoml.noaa.gov/phod/gdp/">Global Drifter Program</a> as tab delimited was imported into R workspace using the <em>read_table2()</em> function of readr<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> package. Once the file was in the workspace, the column variables were assigned proper names.</p>
+<pre class="r"><code>## read drifter dataset
+drifters = read_table2(&quot;./drifters.txt&quot;, 
+                       col_names = FALSE, comment = &quot;#&quot;)
+
+## rename the variables to their respective variable names
+drifters = drifters%&gt;%
+  select(id = 1, lon = 2, lat = 3, 
+         drogue = 4,  u = 5, v = 6, sst = 7, 
+         year = 8, month =9, day = 10, hour = 11)</code></pre>
+</div>
+<div id="transform-date" class="section level3">
+<h3>Transform date</h3>
+<p>The dataset comes with four columns that present date—year, month, day, and hour. These variables were converted to date in R using the <em>JDymd()</em> function of insol<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> package. The date transformation involved two steps–converting to year, month, day variable into julian day and then convert the julian day to gregorian calendar. Once the date aligned with R format, the year, month, day and hour variables were dropped from the drifter dataset. The data in table <a href="#tab:tab1">1</a> show the date, identification number longitude, latitude and sea surface temperature of fifteen randomly selected drifters.</p>
+<table>
+<caption><span id="tab:tab1">Table 1: </span>Sample of drifter observations</caption>
+<thead>
+<tr class="header">
+<th align="center">Date</th>
+<th align="center">ID</th>
+<th align="center">Longitude</th>
+<th align="center">Latitude</th>
+<th align="center">Zonal (U)</th>
+<th align="center">Meridional (V)</th>
+<th align="center">SST</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">2016-12-05</td>
+<td align="center">63040050</td>
+<td align="center">44.14</td>
+<td align="center">-11.18</td>
+<td align="center">-0.68</td>
+<td align="center">-0.57</td>
+<td align="center">NaN</td>
+</tr>
+<tr class="even">
+<td align="center">1999-07-11</td>
+<td align="center">9730553</td>
+<td align="center">46.42</td>
+<td align="center">-11.20</td>
+<td align="center">-0.81</td>
+<td align="center">-0.49</td>
+<td align="center">26.18</td>
+</tr>
+<tr class="odd">
+<td align="center">2011-08-18</td>
+<td align="center">37192</td>
+<td align="center">42.04</td>
+<td align="center">-3.06</td>
+<td align="center">0.06</td>
+<td align="center">0.27</td>
+<td align="center">26.33</td>
+</tr>
+<tr class="even">
+<td align="center">2009-07-07</td>
+<td align="center">75251</td>
+<td align="center">44.19</td>
+<td align="center">-12.18</td>
+<td align="center">-0.11</td>
+<td align="center">0.08</td>
+<td align="center">26.08</td>
+</tr>
+<tr class="odd">
+<td align="center">2007-01-22</td>
+<td align="center">63032</td>
+<td align="center">50.12</td>
+<td align="center">-9.93</td>
+<td align="center">-0.17</td>
+<td align="center">0.42</td>
+<td align="center">29.46</td>
+</tr>
+<tr class="even">
+<td align="center">2000-09-11</td>
+<td align="center">11599</td>
+<td align="center">47.59</td>
+<td align="center">-13.05</td>
+<td align="center">0.18</td>
+<td align="center">-0.32</td>
+<td align="center">NaN</td>
+</tr>
+<tr class="odd">
+<td align="center">2010-06-08</td>
+<td align="center">83519</td>
+<td align="center">49.10</td>
+<td align="center">-9.74</td>
+<td align="center">-0.54</td>
+<td align="center">-0.24</td>
+<td align="center">26.78</td>
+</tr>
+<tr class="even">
+<td align="center">2005-08-04</td>
+<td align="center">34361</td>
+<td align="center">41.22</td>
+<td align="center">-5.39</td>
+<td align="center">-0.22</td>
+<td align="center">0.54</td>
+<td align="center">25.14</td>
+</tr>
+<tr class="odd">
+<td align="center">2006-10-10</td>
+<td align="center">62195</td>
+<td align="center">43.12</td>
+<td align="center">-6.21</td>
+<td align="center">0.38</td>
+<td align="center">-0.05</td>
+<td align="center">26.73</td>
+</tr>
+<tr class="even">
+<td align="center">1998-01-27</td>
+<td align="center">9619176</td>
+<td align="center">41.76</td>
+<td align="center">-8.13</td>
+<td align="center">-0.13</td>
+<td align="center">-0.11</td>
+<td align="center">NaN</td>
+</tr>
+<tr class="odd">
+<td align="center">2000-03-30</td>
+<td align="center">8338</td>
+<td align="center">51.95</td>
+<td align="center">-13.84</td>
+<td align="center">-0.41</td>
+<td align="center">0.41</td>
+<td align="center">28.16</td>
+</tr>
+<tr class="even">
+<td align="center">2001-07-04</td>
+<td align="center">25021</td>
+<td align="center">50.26</td>
+<td align="center">-13.79</td>
+<td align="center">-0.15</td>
+<td align="center">0.78</td>
+<td align="center">25.15</td>
+</tr>
+<tr class="odd">
+<td align="center">2005-06-12</td>
+<td align="center">45957</td>
+<td align="center">45.58</td>
+<td align="center">-11.00</td>
+<td align="center">-0.47</td>
+<td align="center">0.14</td>
+<td align="center">27.62</td>
+</tr>
+<tr class="even">
+<td align="center">2004-06-21</td>
+<td align="center">7574</td>
+<td align="center">42.29</td>
+<td align="center">-5.02</td>
+<td align="center">-0.18</td>
+<td align="center">0.23</td>
+<td align="center">NaN</td>
+</tr>
+<tr class="odd">
+<td align="center">1999-01-10</td>
+<td align="center">9618972</td>
+<td align="center">46.08</td>
+<td align="center">-12.96</td>
+<td align="center">0.15</td>
+<td align="center">0.02</td>
+<td align="center">28.74</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="drifter-selection" class="section level3">
+<h3>Drifter selection</h3>
+<p>There are 94413 observations from 466 unique drifters. However, drifter 70973 was selected for validation. This drifter begun its way at latitude -14.213 <span class="math inline">\(^{\circ}\)</span>S and longitude 51.995 <span class="math inline">\(^{\circ}\)</span>E on 2010-11-02 and finished near Nungwi at latitude -5.722 <span class="math inline">\(^{\circ}\)</span>S and longitude 39.32 <span class="math inline">\(^{\circ}\)</span>E on 2011-01-22. During its journey, which took 81 days covering a distance of 2561.29 kilometers, it made 326 observations (Figure <a href="#fig:id1">1</a>).</p>
+<div class="figure"><span id="fig:id1"></span>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-6.821,-15.491,-14.416,-11.824,-11.323,-8.074,-15.334,-13.646,-13.552,-14.791,-14.982,-14.422,-14.507,-14.213,-9.646,-7.304,-15.511,-10.102,-9.679,-9.458,-9.4,-15.121,-10.804,-15.368,-9.521,-6.34,-15.403,-13.985,-10.398,-6.693,-13.854,-15.12,-14.947,-14.388,-13.081,-15.515,-14.258,-14.569,-14.3,-14.918,-11.94,-15.514,-10.759,-15.271,-15.388,-14.697,-15.362,-10.71,-10.838,-10.078,-14.263,-14.553,-15.583,-11.085,-14.455,-11.757,-10.908,-5.731,-15.619,-6.6,-10.793,-12.566,-7.962,-15.369,-10.756,-13.277,-9.467,-13.318,-9.408,-10.482,-14.738,-14.128,-14.557,-5.721,-9.291,-5.96,-15.541,-14.597,-13.779,-6.137,-7.421,-14.423],[40.084,50.803,51.256,49.717,49.043,40.194,50.624,50.98,50.945,50.31,50.398,51.213,50.625,51.995,41.549,40.198,50.659,42.988,41.34,40.766,40.648,51.283,45.478,51.024,40.969,39.889,50.643,51.173,43.971,40.058,51.102,51.389,50.389,51.552,50.484,50.659,51.954,50.491,51.714,51.37,49.904,50.629,45.293,51.083,51.057,51.373,50.842,47.192,47.76,42.828,51.819,50.534,50.663,48.391,50.789,49.633,47.971,39.354,50.645,40.018,47.319,50.177,40.193,51.034,46.699,50.674,40.852,50.744,40.675,44.463,50.321,51.24,50.514,39.32,40.397,39.685,50.687,51.398,51.066,39.79,40.206,51.168],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["2011-01-18","2010-11-25","2010-11-06","2010-12-20","2010-12-21","2011-01-15","2010-11-17","2010-12-14","2010-12-14","2010-11-14","2010-11-15","2010-11-06","2010-11-09","2010-11-02","2011-01-02","2011-01-17","2010-11-23","2010-12-30","2011-01-02","2011-01-06","2011-01-08","2010-12-04","2010-12-26","2010-11-30","2011-01-05","2011-01-19","2010-11-18","2010-12-13","2010-12-29","2011-01-18","2010-12-13","2010-12-05","2010-11-15","2010-11-04","2010-12-17","2010-11-18","2010-11-02","2010-11-11","2010-11-03","2010-12-07","2010-12-20","2010-11-23","2010-12-27","2010-12-01","2010-11-30","2010-12-09","2010-11-28","2010-12-24","2010-12-23","2010-12-30","2010-11-03","2010-11-10","2010-11-18","2010-12-22","2010-11-08","2010-12-20","2010-12-23","2011-01-21","2010-11-19","2011-01-18","2010-12-24","2010-12-18","2011-01-15","2010-11-30","2010-12-25","2010-12-16","2011-01-05","2010-12-16","2011-01-07","2010-12-28","2010-11-13","2010-12-12","2010-11-10","2011-01-21","2011-01-11","2011-01-20","2010-11-26","2010-12-10","2010-12-14","2011-01-19","2011-01-16","2010-11-06"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-15.619,-5.721],"lng":[39.32,51.995]}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 1: Sample locations of drifter with Id 70973 crossed within the tropical indian ocean
+</p>
+</div>
+<p>Using the drifter geographical position, a simple feature was created that was used to create trajectory—a pathway along which drifter made several observation on its route (Figure <a href="#fig:traj">2</a>)</p>
+<pre class="r"><code>## create a simple feature from tibble
+drifter.sf = drifters%&gt;%
+  st_as_sf(coords = c(&quot;lon&quot;, &quot;lat&quot;))%&gt;%
+  st_set_crs(4326)
+
+## make a trajectory form the simple feature points
+drifter.traj = drifter.sf%&gt;%
+  group_by(id)%&gt;%
+  summarise(do_union = FALSE)%&gt;%
+  st_cast(&quot;LINESTRING&quot;)
+
+## make a map of trajectory
+leaflet(data = drifter.traj%&gt;%filter(id == 70973))%&gt;%
+  addTiles()%&gt;%
+  addPolylines(color = &quot;red&quot;, stroke = T, weight = 2.5)</code></pre>
+<div class="figure"><span id="fig:traj"></span>
+<div id="htmlwidget-2" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addPolylines","args":[[[[{"lng":[51.995,51.966,51.954,51.913,51.88,51.819,51.761,51.714,51.657,51.617,51.581,51.552,51.52,51.468,51.4,51.343,51.284,51.256,51.213,51.168,51.088,51.04,50.979,50.931,50.883,50.854,50.823,50.789,50.755,50.703,50.649,50.625,50.58,50.553,50.534,50.514,50.491,50.462,50.434,50.406,50.402,50.379,50.353,50.333,50.347,50.346,50.321,50.299,50.31,50.322,50.344,50.334,50.363,50.389,50.398,50.405,50.428,50.468,50.498,50.511,50.557,50.599,50.625,50.624,50.643,50.65,50.659,50.663,50.645,50.577,50.547,50.512,50.484,50.497,50.514,50.521,50.519,50.51,50.532,50.579,50.606,50.6,50.611,50.606,50.629,50.659,50.693,50.709,50.73,50.719,50.76,50.769,50.801,50.803,50.836,50.837,50.817,50.756,50.723,50.687,50.707,50.705,50.733,50.767,50.807,50.842,50.877,50.917,50.937,50.945,50.971,51,51.02,51.024,51.057,51.034,51.028,51.036,51.049,51.083,51.12,51.148,51.179,51.213,51.206,51.217,51.236,51.254,51.283,51.315,51.339,51.368,51.392,51.408,51.399,51.389,51.37,51.343,51.327,51.336,51.343,51.34,51.368,51.37,51.35,51.348,51.363,51.341,51.373,51.403,51.434,51.447,51.418,51.398,51.349,51.341,51.324,51.337,51.323,51.334,51.293,51.241,51.24,51.223,51.211,51.173,51.165,51.102,51.066,51.005,50.98,50.945,50.944,50.907,50.898,50.834,50.809,50.744,50.674,50.618,50.544,50.484,50.408,50.312,50.238,50.177,50.125,50.104,50.108,50.087,50.038,49.973,49.904,49.815,49.717,49.633,49.475,49.364,49.205,49.043,48.825,48.586,48.391,48.226,47.971,47.76,47.582,47.399,47.319,47.192,47.081,46.971,46.823,46.699,46.55,46.356,46.114,45.89,45.686,45.478,45.293,45.13,44.955,44.799,44.633,44.463,44.284,44.134,43.971,43.817,43.67,43.507,43.343,43.173,42.988,42.828,42.672,42.51,42.385,42.283,42.152,42.043,41.915,41.807,41.663,41.549,41.437,41.34,41.278,41.232,41.204,41.185,41.15,41.126,41.08,41.028,40.969,40.895,40.852,40.806,40.766,40.733,40.71,40.705,40.689,40.676,40.672,40.675,40.658,40.648,40.636,40.646,40.632,40.616,40.597,40.598,40.578,40.542,40.515,40.479,40.438,40.397,40.355,40.342,40.3,40.281,40.249,40.198,40.167,40.113,40.102,40.074,40.07,40.085,40.102,40.103,40.136,40.156,40.194,40.193,40.225,40.217,40.223,40.206,40.198,40.161,40.132,40.129,40.084,40.058,40.018,39.978,39.889,39.839,39.79,39.753,39.685,39.603,39.548,39.468,39.407,39.391,39.354,39.32,39.32,39.32],"lat":[-14.213,-14.24,-14.258,-14.263,-14.263,-14.263,-14.277,-14.3,-14.315,-14.365,-14.372,-14.388,-14.372,-14.379,-14.358,-14.383,-14.396,-14.416,-14.422,-14.423,-14.415,-14.417,-14.413,-14.412,-14.404,-14.424,-14.434,-14.455,-14.442,-14.467,-14.489,-14.507,-14.509,-14.546,-14.553,-14.557,-14.569,-14.564,-14.568,-14.579,-14.6,-14.605,-14.632,-14.643,-14.688,-14.691,-14.738,-14.744,-14.791,-14.807,-14.864,-14.871,-14.919,-14.947,-14.982,-15.008,-15.03,-15.062,-15.09,-15.125,-15.199,-15.255,-15.304,-15.334,-15.403,-15.466,-15.515,-15.583,-15.619,-15.656,-15.659,-15.619,-15.565,-15.539,-15.504,-15.481,-15.467,-15.497,-15.531,-15.554,-15.535,-15.547,-15.539,-15.538,-15.514,-15.511,-15.509,-15.494,-15.488,-15.489,-15.478,-15.464,-15.471,-15.491,-15.563,-15.584,-15.608,-15.592,-15.589,-15.541,-15.497,-15.437,-15.424,-15.391,-15.37,-15.362,-15.39,-15.378,-15.377,-15.384,-15.389,-15.351,-15.348,-15.368,-15.388,-15.369,-15.368,-15.343,-15.331,-15.271,-15.241,-15.227,-15.241,-15.236,-15.23,-15.239,-15.207,-15.167,-15.121,-15.122,-15.102,-15.105,-15.086,-15.106,-15.108,-15.12,-15.115,-15.108,-15.069,-15.042,-14.983,-14.964,-14.941,-14.918,-14.893,-14.865,-14.804,-14.739,-14.697,-14.651,-14.64,-14.626,-14.622,-14.597,-14.555,-14.494,-14.429,-14.373,-14.342,-14.289,-14.211,-14.169,-14.128,-14.08,-14.022,-13.985,-13.925,-13.854,-13.779,-13.699,-13.646,-13.552,-13.523,-13.442,-13.403,-13.364,-13.346,-13.318,-13.277,-13.264,-13.188,-13.081,-12.939,-12.806,-12.674,-12.566,-12.454,-12.365,-12.229,-12.13,-12.031,-11.967,-11.94,-11.888,-11.824,-11.757,-11.638,-11.573,-11.453,-11.323,-11.245,-11.137,-11.085,-10.993,-10.908,-10.838,-10.806,-10.812,-10.793,-10.71,-10.693,-10.687,-10.718,-10.756,-10.798,-10.812,-10.856,-10.876,-10.817,-10.804,-10.759,-10.704,-10.652,-10.574,-10.536,-10.482,-10.466,-10.428,-10.398,-10.349,-10.302,-10.238,-10.187,-10.154,-10.102,-10.078,-10.043,-9.994,-9.965,-9.911,-9.864,-9.808,-9.762,-9.7,-9.666,-9.646,-9.665,-9.679,-9.696,-9.703,-9.716,-9.702,-9.68,-9.641,-9.597,-9.566,-9.521,-9.489,-9.467,-9.462,-9.458,-9.444,-9.447,-9.445,-9.435,-9.418,-9.412,-9.408,-9.401,-9.4,-9.391,-9.393,-9.383,-9.375,-9.364,-9.365,-9.338,-9.321,-9.303,-9.314,-9.299,-9.291,-9.267,-9.254,-9.204,-9.146,-9.078,-9.025,-8.949,-8.875,-8.806,-8.739,-8.674,-8.591,-8.505,-8.415,-8.307,-8.202,-8.074,-7.962,-7.819,-7.674,-7.56,-7.421,-7.304,-7.195,-7.073,-6.956,-6.821,-6.693,-6.6,-6.471,-6.34,-6.243,-6.137,-6.059,-5.96,-5.87,-5.809,-5.767,-5.728,-5.745,-5.731,-5.721,-5.722,-5.722]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"red","weight":2.5,"opacity":0.5,"fill":false,"fillColor":"red","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-15.659,-5.721],"lng":[39.32,51.995]}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 2: The Trajectory of Drifter with Id 70973, which crossed the tropical indian ocean for a period of one year
+</p>
+</div>
+</div>
+<div id="modis-data" class="section level3">
+<h3>Modis Data</h3>
+<p>The selected drifter dataset contains three variables—date, longitude and latitude of the drifter observation. These observations serves as trackline and was used to extract sea surface temperature from MODIS satellite. <em>xtracto()</em> function from <strong>xtractomatic</strong><a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> package was used for extraction. Let’s explore the metadata of the ERDAPP servers that deals with sst</p>
+<p>We observed that the <a href="http://oceancolor.gsfc.nasa.gov/">MODIS sst</a> dataset span from 2003-01-05 to 2018-08-25 covering all the global oceans at spatial resolution of 4.0866. The function xtracto() was used to extract sea surface temperature along the trackline of selected drifter with Id 70973.</p>
+<pre class="r"><code>## extract sst along the trackline of drifter
+sst_modis = xtracto(dtype = &quot;mhsstd8day&quot;,
+              xpos = drifter.70973$lon, 
+              ypos = drifter.70973$lat, 
+              tpos = drifter.70973$date, ,
+              xlen = 0.2, 
+              ylen = 0.2)</code></pre>
+</div>
+<div id="stitching-drifter-and-modis-dataset" class="section level3">
+<h3>Stitching Drifter and MODIS dataset</h3>
+<p>Once the data was extracted from MODIS and loaded in the workspace, it was cleaned by removing variables not needed and then bind it with the drifter dataset using the <em>bind_cols()</em> function from <strong>dplyr</strong><a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> package.</p>
+<pre class="r"><code>sst.modis.clean =sst_modis%&gt;%
+  select(satellite.date = 4, 
+         satellite.sst.mean = 1, 
+         satellite.sst.median = 10 )
+
+## bind the drifter data and extracted modis data
+drifter.modis = drifter.70973%&gt;%
+  select(drifter.date = date, lon,lat, drifter.sst = sst)%&gt;%
+  bind_cols(sst.modis.clean)%&gt;%select(1,5,2,3, 4, 6,7)%&gt;%
+  mutate(satellite.date = as.Date(satellite.date))</code></pre>
+<p>The table <a href="#tab:tab2">2</a> highlight information of of drifter and satellite sea surface temperature that were marked at the same geographical location. There are mismatch of Some drifter observations to the satellite data. This is because the modis data takes three days to cover the entire world and the day that satellite passed the region might misses some drifter observation.</p>
+<pre class="r"><code>## clean the data set and remove variables not wanted
+
+knitr::kable(drifter.modis%&gt;%dplyr::sample_n(20), 
+             align = &quot;c&quot;, digits = 2, 
+             col.names = c(&quot;Drifter Date&quot;,&quot;Modis Date&quot;,&quot;Longitude&quot;,&quot;Latitude&quot;,
+                           &quot;Drifter SST&quot;,&quot;Satellite SST Mean&quot;,
+                           &quot; Satellite SST Median&quot;) , 
+             caption = &quot;Overview of merged drifter and satellite dataset&quot;)</code></pre>
+<table>
+<caption><span id="tab:tab2">Table 2: </span>Overview of merged drifter and satellite dataset</caption>
+<thead>
+<tr class="header">
+<th align="center">Drifter Date</th>
+<th align="center">Modis Date</th>
+<th align="center">Longitude</th>
+<th align="center">Latitude</th>
+<th align="center">Drifter SST</th>
+<th align="center">Satellite SST Mean</th>
+<th align="center">Satellite SST Median</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">2010-12-14</td>
+<td align="center">2010-12-15</td>
+<td align="center">51.07</td>
+<td align="center">-13.78</td>
+<td align="center">27.71</td>
+<td align="center">27.39</td>
+<td align="center">27.40</td>
+</tr>
+<tr class="even">
+<td align="center">2010-12-29</td>
+<td align="center">2010-12-29</td>
+<td align="center">43.51</td>
+<td align="center">-10.24</td>
+<td align="center">28.89</td>
+<td align="center">29.84</td>
+<td align="center">29.84</td>
+</tr>
+<tr class="odd">
+<td align="center">2010-12-31</td>
+<td align="center">2010-12-29</td>
+<td align="center">42.38</td>
+<td align="center">-9.96</td>
+<td align="center">29.54</td>
+<td align="center">29.05</td>
+<td align="center">28.98</td>
+</tr>
+<tr class="even">
+<td align="center">2010-11-24</td>
+<td align="center">2010-11-21</td>
+<td align="center">50.77</td>
+<td align="center">-15.46</td>
+<td align="center">27.06</td>
+<td align="center">26.78</td>
+<td align="center">26.76</td>
+</tr>
+<tr class="odd">
+<td align="center">2010-12-13</td>
+<td align="center">2010-12-15</td>
+<td align="center">51.17</td>
+<td align="center">-13.98</td>
+<td align="center">27.74</td>
+<td align="center">27.42</td>
+<td align="center">27.41</td>
+</tr>
+<tr class="even">
+<td align="center">2010-11-13</td>
+<td align="center">2010-11-13</td>
+<td align="center">50.35</td>
+<td align="center">-14.69</td>
+<td align="center">26.30</td>
+<td align="center">26.17</td>
+<td align="center">26.06</td>
+</tr>
+<tr class="odd">
+<td align="center">2011-01-12</td>
+<td align="center">2011-01-13</td>
+<td align="center">40.25</td>
+<td align="center">-9.08</td>
+<td align="center">29.66</td>
+<td align="center">29.21</td>
+<td align="center">29.22</td>
+</tr>
+<tr class="even">
+<td align="center">2011-01-14</td>
+<td align="center">2011-01-13</td>
+<td align="center">40.07</td>
+<td align="center">-8.67</td>
+<td align="center">29.32</td>
+<td align="center">29.05</td>
+<td align="center">29.11</td>
+</tr>
+<tr class="odd">
+<td align="center">2011-01-10</td>
+<td align="center">2011-01-13</td>
+<td align="center">40.48</td>
+<td align="center">-9.31</td>
+<td align="center">29.27</td>
+<td align="center">28.95</td>
+<td align="center">28.97</td>
+</tr>
+<tr class="even">
+<td align="center">2011-01-03</td>
+<td align="center">2011-01-05</td>
+<td align="center">41.20</td>
+<td align="center">-9.72</td>
+<td align="center">29.77</td>
+<td align="center">30.79</td>
+<td align="center">30.76</td>
+</tr>
+<tr class="odd">
+<td align="center">2011-01-16</td>
+<td align="center">2011-01-13</td>
+<td align="center">40.23</td>
+<td align="center">-7.82</td>
+<td align="center">29.41</td>
+<td align="center">29.10</td>
+<td align="center">29.09</td>
+</tr>
+<tr class="even">
+<td align="center">2010-11-25</td>
+<td align="center">2010-11-21</td>
+<td align="center">50.84</td>
+<td align="center">-15.56</td>
+<td align="center">27.39</td>
+<td align="center">26.87</td>
+<td align="center">26.91</td>
+</tr>
+<tr class="odd">
+<td align="center">2010-11-26</td>
+<td align="center">2010-11-29</td>
+<td align="center">50.72</td>
+<td align="center">-15.59</td>
+<td align="center">27.56</td>
+<td align="center">27.12</td>
+<td align="center">27.15</td>
+</tr>
+<tr class="even">
+<td align="center">2010-12-01</td>
+<td align="center">2010-11-29</td>
+<td align="center">51.03</td>
+<td align="center">-15.37</td>
+<td align="center">27.30</td>
+<td align="center">26.99</td>
+<td align="center">27.01</td>
+</tr>
+<tr class="odd">
+<td align="center">2010-11-23</td>
+<td align="center">2010-11-21</td>
+<td align="center">50.66</td>
+<td align="center">-15.51</td>
+<td align="center">26.89</td>
+<td align="center">26.50</td>
+<td align="center">26.54</td>
+</tr>
+<tr class="even">
+<td align="center">2010-11-21</td>
+<td align="center">2010-11-21</td>
+<td align="center">50.53</td>
+<td align="center">-15.53</td>
+<td align="center">27.06</td>
+<td align="center">26.26</td>
+<td align="center">26.24</td>
+</tr>
+<tr class="odd">
+<td align="center">2010-11-10</td>
+<td align="center">2010-11-13</td>
+<td align="center">50.51</td>
+<td align="center">-14.56</td>
+<td align="center">26.28</td>
+<td align="center">26.04</td>
+<td align="center">26.04</td>
+</tr>
+<tr class="even">
+<td align="center">2011-01-13</td>
+<td align="center">2011-01-13</td>
+<td align="center">40.10</td>
+<td align="center">-8.81</td>
+<td align="center">29.52</td>
+<td align="center">28.92</td>
+<td align="center">28.93</td>
+</tr>
+<tr class="odd">
+<td align="center">2011-01-09</td>
+<td align="center">2011-01-05</td>
+<td align="center">40.60</td>
+<td align="center">-9.36</td>
+<td align="center">29.28</td>
+<td align="center">29.61</td>
+<td align="center">29.53</td>
+</tr>
+<tr class="even">
+<td align="center">2010-12-05</td>
+<td align="center">2010-12-07</td>
+<td align="center">51.39</td>
+<td align="center">-15.09</td>
+<td align="center">27.32</td>
+<td align="center">27.47</td>
+<td align="center">27.48</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="validation" class="section level3">
+<h3>Validation</h3>
+<pre class="r"><code>rmse = pracma::rmserr(drifter.modis$drifter.sst, 
+                      drifter.modis$satellite.sst.mean, 
+                      summary = FALSE)
+
+estimator = c(&quot;Mean Absolute&quot;, &quot;Mean Squared&quot;,
+              &quot;Root Mean Square&quot;,&quot;Mean Absolute Percentage&quot;,
+              &quot;Normalized Mean Squared&quot;,&quot;Relative Standard Deviation&quot;)
+
+rmse.t = rmse%&gt;%
+  as.data.frame()%&gt;%
+  t()%&gt;%
+  as.data.frame()%&gt;%
+  rename(&quot;Error&quot; = V1)%&gt;%
+  data.frame(estimator)%&gt;%
+  as.tibble()%&gt;%
+  select(2,1)%&gt;%  
+  arrange(Error)</code></pre>
+<p>To assess the accuracy of MODIS sea surface temperature, I tested MODIS data against drifter observations using six different algorithms (Table <a href="#tab:tab3">3</a>). The Mean Absolute Percentage algorithm had the highest accuracy of 0.014906<span class="math inline">\(^{\circ}\)</span> Celcius and the Root Mean Square achieved the lowest accuracy of 0.5587292<span class="math inline">\(^{\circ}\)</span> Celsius. In general, the sea surface temperature from modis showed a mean accuracy of 0.261438<span class="math inline">\(^{\circ}\)</span> Celsius.</p>
+<pre class="r"><code>knitr::kable(rmse.t, 
+             digits = 2, 
+             align = &quot;l&quot;, 
+             col.names = c(&quot;Estimator&quot;, &quot;Value (Degree Celsius)&quot;), 
+             caption = &quot;Error estimates of surface current with various tools&quot;)</code></pre>
+<table>
+<caption><span id="tab:tab3">Table 3: </span>Error estimates of surface current with various tools</caption>
+<thead>
+<tr class="header">
+<th align="left">Estimator</th>
+<th align="left">Value (Degree Celsius)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Mean Absolute Percentage</td>
+<td align="left">0.01</td>
+</tr>
+<tr class="even">
+<td align="left">Relative Standard Deviation</td>
+<td align="left">0.02</td>
+</tr>
+<tr class="odd">
+<td align="left">Normalized Mean Squared</td>
+<td align="left">0.24</td>
+</tr>
+<tr class="even">
+<td align="left">Mean Squared</td>
+<td align="left">0.31</td>
+</tr>
+<tr class="odd">
+<td align="left">Mean Absolute</td>
+<td align="left">0.42</td>
+</tr>
+<tr class="even">
+<td align="left">Root Mean Square</td>
+<td align="left">0.56</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>## computing the correlation coefficient
+pear = cor.test(drifter.modis$drifter.sst, 
+                drifter.modis$satellite.sst.mean)</code></pre>
+<p>The accuracy of the sea surface temperature is also supported by Figure <a href="#fig:fig3">3</a>, which show the positive association of sea surface temperature between in-situ drifter observations and MODIS satellite data (R<sup>2</sup> = 0.92). This association was significant ( t_(1,324)_ = t &lt; 41.5847664 , <em>p</em> = 5.951450210^{-132})</p>
+<pre class="r"><code>ggplot(data = drifter.modis, 
+       aes(x = drifter.sst, y = satellite.sst.mean))+
+  geom_point()+
+  geom_smooth(fill = &quot;green&quot;, col = &quot;red&quot;)+
+  theme(panel.background = element_rect(colour = 1),
+        axis.text = element_text(colour = 1, size = 12), 
+        axis.title = element_text(colour = 1, size = 14))+
+ geom_text(aes(x = 29, y = 26, 
+               label = paste(&quot;RSq = &quot;, 0.92)), size = 4)+
+  scale_x_continuous(breaks = seq(25.5,31, .5))+
+  scale_y_continuous(breaks = seq(26,31, 1.5))+
+    labs(y=expression(~Modis~Sensor~SST~(~degree~C)),
+         x=expression(~Drifter~Temperature~(~degree~C)))</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2018-09-20-validating-modis-sea-surface-temperature-with-global-drifter-program-observations_files/figure-html/fig3-1.png" alt="Association of sea surface temperature from in-situ drifter observation and MODIS" width="672" />
+<p class="caption">
+Figure 3: Association of sea surface temperature from in-situ drifter observation and MODIS
+</p>
+</div>
+</div>
+<div id="conclusion" class="section level3">
+<h3>Conclusion</h3>
+<p>Comparing MODIS satellite and drifter sea surface temperature showed a close match with an accuracy of 0.261438<span class="math inline">\(^{\circ}\)</span> Celsius and a strong and significant positive correlation (R<sup>2</sup> = 0.92). The closeness of drifter and MODIS sea surface temperature allows scientists in the region to use MODIS satellite data to tackle marine and coastal issues in the region.</p>
+</div>
+<div id="references" class="section level3">
+<h3>References</h3>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Wickham, H., Hester, J., &amp; Francois, R. (2016). Readr: read tabular data. URL <a href="https://github" class="uri">https://github</a>. com/hadley/readr. R package version 0.1, 1, 361.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Corripio, J. G. (2014). Insol: solar radiation. R package version, 1(1), 2014.<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>Mendelssohn, R. (2017). xtractomatic: accessing environmental data from ERD’s ERDDAP server. R package version, 3(2).<a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>Wickham, H., Francois, R., Henry, L., &amp; Müller, K. (2015). dplyr: A grammar of data manipulation. R package version 0.4, 3.<a href="#fnref4">↩</a></p></li>
+</ol>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//Semba.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

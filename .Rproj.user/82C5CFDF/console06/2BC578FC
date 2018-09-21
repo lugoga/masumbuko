@@ -12,97 +12,53 @@ Changes not staged for commit:[0K
         [0;31mmodified:   .Rproj.user/82C5CFDF/console06/2BC578FC[0m[0K
         [0;31mmodified:   .Rproj.user/82C5CFDF/console06/INDEX001[0m[0K
         [0;31mmodified:   .Rproj.user/82C5CFDF/sources/prop/98900512[0m[0K
-        [0;31mmodified:   .Rproj.user/82C5CFDF/sources/prop/B3FA6E7F[0m[0K
         [0;31mmodified:   config.toml[0m[0K
+        [0;31mmodified:   public/about/index.html[0m[0K
+        [0;31mmodified:   public/categories/index.html[0m[0K
+        [0;31mmodified:   public/categories/r/index.html[0m[0K
+        [0;31mmodified:   public/categories/r/index.xml[0m[0K
+        [0;31mmodified:   public/categories/technical/index.html[0m[0K
+        [0;31mmodified:   public/categories/technical/index.xml[0m[0K
+        [0;31mmodified:   public/categories/tool/index.html[0m[0K
+        [0;31mmodified:   public/categories/tool/index.xml[0m[0K
+        [0;31mmodified:   public/index.html[0m[0K
+        [0;31mmodified:   public/index.xml[0m[0K
+        [0;31mmodified:   public/links/index.html[0m[0K
+        [0;31mmodified:   public/post/index.html[0m[0K
+        [0;31mmodified:   public/post/index.xml[0m[0K
+        [0;31mmodified:   public/project---copy/index.html[0m[0K
+        [0;31mmodified:   public/project/index.html[0m[0K
+        [0;31mmodified:   public/publication/index.html[0m[0K
+        [0;31mmodified:   public/sitemap.xml[0m[0K
+        [0;31mmodified:   public/tags/argo/index.html[0m[0K
+        [0;31mmodified:   public/tags/argo/index.xml[0m[0K
+        [0;31mmodified:   public/tags/drifter/index.html[0m[0K
+        [0;31mmodified:   public/tags/drifter/index.xml[0m[0K
+        [0;31mmodified:   public/tags/index.html[0m[0K
+        [0;31mmodified:   public/tags/indian-ocean/index.html[0m[0K
+        [0;31mmodified:   public/tags/indian-ocean/index.xml[0m[0K
+        [0;31mmodified:   public/tags/masumbuko-semba/index.html[0m[0K
+        [0;31mmodified:   public/tags/masumbuko-semba/index.xml[0m[0K
+        [0;31mmodified:   public/tags/modis/index.html[0m[0K
+        [0;31mmodified:   public/tags/modis/index.xml[0m[0K
+        [0;31mmodified:   public/tags/pemba-channel/index.html[0m[0K
+        [0;31mmodified:   public/tags/pemba-channel/index.xml[0m[0K
+        [0;31mmodified:   public/tags/r/index.html[0m[0K
+        [0;31mmodified:   public/tags/r/index.xml[0m[0K
+        [0;31mmodified:   public/tags/satellite/index.html[0m[0K
+        [0;31mmodified:   public/tags/satellite/index.xml[0m[0K
+        [0;31mmodified:   public/teaching/index.html[0m[0K
+[0K
+Untracked files:[0K
+  (use "git add <file>..." to include in what will be committed)[0K
+[0K
+        [0;31mpublic/09/[0m[0K
+        [0;31mpublic/images/grani_logo-01.png[0m[0K
+        [0;31mpublic/images/grani_logo.png[0m[0K
+        [0;31mthemes/hugo-lithium/static/images/grani_logo-01.png[0m[0K
+        [0;31mthemes/hugo-lithium/static/images/grani_logo.png[0m[0K
 [0K
 no changes added to commit (use "git add" and/or "git commit -a")[0K
 [0K
 E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git a[0K[?25hd[0Kd[0K[28G[?25lE:\blogs\masumbuko>git add -[0K[?25hA[0K]0;  - git  add -A[?25l
-[0K[?25hwarning: LF will be replaced by CRLF in .Rproj.user/82C5CFDF/sources/prop/98900512.[0K[?25l
-The file will have its original line endings in your working directory.[0K
-[0K[?25hwarning: LF will be replaced by CRLF in .Rproj.user/82C5CFDF/sources/prop/B3FA6E7F.[0K[?25l
-The file will have its original line endings in your working directory.[0K
-[0K[?25h]0; [?25l
-E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git c[0K[?25ho[0Km[0Km[0Ki[0Kt[0K[31G[?25lE:\blogs\masumbuko>git commit -[0K[?25hm[0K[34G[?25lE:\blogs\masumbuko>git commit -m "[0K[?25h"[0K[35G[?25lE:\blogs\masumbuko>git commit -m "a"[0K[36G[?25h[?25lE:\blogs\masumbuko>git commit -m "ad"[0K[37G[?25h[?25lE:\blogs\masumbuko>git commit -m "add"[0K[38G[?25h[?25lE:\blogs\masumbuko>git commit -m "adde"[0K[39G[?25h[?25lE:\blogs\masumbuko>git commit -m "added"[0K[40G[?25h[?25lE:\blogs\masumbuko>git commit -m "added "[0K[41G[?25h[?25lE:\blogs\masumbuko>git commit -m "added t"[0K[42G[?25h[?25lE:\blogs\masumbuko>git commit -m "added th"[0K[43G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the"[0K[44G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the "[0K[45G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the n"[0K[46G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the ne"[0K[47G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the net"[0K[48G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the netl"[0K[49G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the netli"[0K[50G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the netlif"[0K[51G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the netlify"[0K[52G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the netlify "[0K[53G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the netlify"[0K[52G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the netlif"[0K[51G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the netli"[0K[50G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the netl"[0K[49G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the net"[0K[48G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the ne"[0K[47G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the n"[0K[46G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the "[0K[45G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the b"[0K[46G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the ba"[0K[47G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the bas"[0K[48G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the base"[0K[49G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseu"[0K[50G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseur"[0K[51G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl"[0K[52G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl "[0K[53G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl i"[0K[54G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in"[0K[55G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in "[0K[56G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in c"[0K[57G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in co"[0K[58G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in con"[0K[59G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in conf"[0K[60G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in confi"[0K[61G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config"[0K[62G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config."[0K[63G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.t"[0K[64G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.to"[0K[65G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.tom"[0K[66G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.toml"[0K[67G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.toml "[0K[68G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.toml f"[0K[69G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.toml fi"[0K[70G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.toml fil"[0K[71G[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.toml file"[0K[72G[?25h]0;  - git  commit -m "added the baseurl in config.toml file"[?25l
-[0K[?25h]0; [master 50bdbfe] added the baseurl in config.toml file[0K[?25l
- 5 files changed, 26 insertions(+), 9 deletions(-)[0K
-[0K
-E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git p[0K[?25hu[0Ks[0Kh[0K]0;  - git  push[?25l
-[0K[?25hEnter passphrase for key '/c/Users/Semba/.ssh/id_rsa':[0K[56G[?25l
-[0K[?25hEnumerating objects: 23, done.[0K[?25l
-Counting objects: 100% (23/23), done.[0K
-Delta compression using up to 8 threads.[0K
-Compressing objects: 100% (11/11), done.[0K
-Writing objects:  41% (5/12)[0K[1G[?25hWriting objects: 100% (12/12), 1.44 KiB | 1.44 MiB/s, done.[0K[?25l
-Total 12 (delta 4), reused 0 (delta 0)[0K
-[0K[?25hremote: Resolving deltas: 100% (4/4), completed with 4 local objects.[0K[?25l
-[0K[?25hTo github.com:lugoga/masumbuko.git[0K[?25l
-   2d12a68..50bdbfe  master -> master[0K
-[0K[?25h]0; [?25l
-E:\blogs\masumbuko>[0K[?25hgit push[0K[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.toml file"[0K[?25h[?25lE:\blogs\masumbuko>git add -A[0K[?25hwarning: LF will be replaced by CRLF in public/2018/09/20/validating-modis-sea-surface-temp[0Ke[?25l
-rature-with-global-drifter-program-observations/index.html.[0K
-The file will have its original line endings in your working directory.[0K
-[0K[?25h]0; [?25l
-E:\blogs\masumbuko>[0K[?25hgit add -A[0K[?25lE:\blogs\masumbuko>git status[0K[?25h[?25lE:\blogs\masumbuko>git add -A[0K[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.toml file"[0K[?25h[?25l
-[0K[?25h]0;  - git  commit -m "added the baseurl in config.toml file"]0; [master 810e339] added the baseurl in config.toml file[0K[?25l
- 4 files changed, 603 insertions(+), 519 deletions(-)[0K
-[0K
-E:\blogs\masumbuko>[0K[?25hgit commit -m "added the baseurl in config.toml file"[0K[?25lE:\blogs\masumbuko>git add -A[0K[?25h[?25lE:\blogs\masumbuko>git status[0K[?25h[?25lE:\blogs\masumbuko>git add -A[0K[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.toml file"[0K[?25h[?25lE:\blogs\masumbuko>git push[0K[?25h[?25l
-[0K[?25h]0;  - git  pushEnter passphrase for key '/c/Users/Semba/.ssh/id_rsa':[0K[56G[?25l
-[0K[?25hEnumerating objects: 31, done.[0K[?25l
-Counting objects: 100% (31/31), done.[0K
-Delta compression using up to 8 threads.[0K
-Compressing objects: 100% (14/14), done.[0K
-Writing objects: 100% (16/16), 4.93 KiB | 1.64 MiB/s, done.[0K
-Total 16 (delta 8), reused 0 (delta 0)[0K
-[0K[?25hremote: Resolving deltas: 100% (8/8), completed with 7 local objects.[0K[?25l
-[0K[?25hTo github.com:lugoga/masumbuko.git[0K[?25l
-   50bdbfe..810e339  master -> master[0K
-[0K[?25h]0; [?25l
-E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git s[0K[?25ht[0Ka[0Kt[0Ku[0Ks[0K]0;  - git  status[?25l
-[0K[?25h]0; On branch master[0K[?25l
-Your branch is up to date with 'origin/master'.[0K
-[0K
-Changes not staged for commit:[0K
-  (use "git add <file>..." to update what will be committed)[0K
-  (use "git checkout -- <file>..." to discard changes in working directory)[0K
-[0K
-        [0;31mmodified:   .Rproj.user/82C5CFDF/console06/2BC578FC[0m[0K
-[0K
-no changes added to commit (use "git add" and/or "git commit -a")[0K
-[0K
-E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git s[0K[?25ht[0Ka[0Kt[0Ku[0Ks[0K]0;  - git  status[?25l
-[0K[?25h[?25lOn branch master[0K[1G[?25h]0; [?25l
-Your branch is up to date with 'origin/master'.[0K
-[0K
-Changes not staged for commit:[0K
-  (use "git add <file>..." to update what will be committed)[0K
-  (use "git checkout -- <file>..." to discard changes in working directory)[0K
-[0K
-        [0;31mmodified:   .Rproj.user/82C5CFDF/console06/2BC578FC[0m[0K
-[0K
-no changes added to commit (use "git add" and/or "git commit -a")[0K
-[0K
-E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git a[0K[?25hd[0Kd[0K[28G[?25lE:\blogs\masumbuko>git add -[0K[?25hA[0K]0;  - git  add -A[?25l
-[0K[?25h]0; error: open(".Rproj.user/82C5CFDF/console06/2BC578FC"): Permission denied[0K[?25l
-error: unable to index file .Rproj.user/82C5CFDF/console06/2BC578FC[0K
-fatal: updating files failed[0K
-[0K
-E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git c[0K[?25ho[0Km[0Km[0Ki[0Kt[0K[31G[?25lE:\blogs\masumbuko>git commit -[0K[?25hm[0K[34G[?25lE:\blogs\masumbuko>git commit -m "[0K[?25h"[0K[35G[?25lE:\blogs\masumbuko>git commit -m "m"[0K[36G[?25h[?25lE:\blogs\masumbuko>git commit -m "mi"[0K[37G[?25h[?25lE:\blogs\masumbuko>git commit -m "min"[0K[38G[?25h[?25lE:\blogs\masumbuko>git commit -m "mino"[0K[39G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor"[0K[40G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor "[0K[41G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor c"[0K[42G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor ch"[0K[43G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor cha"[0K[44G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor chan"[0K[45G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor chang"[0K[46G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor change"[0K[47G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor changes"[0K[48G[?25h]0;  - git  commit -m "minor changes"[?25l
-[0K[?25h]0; On branch master[0K[?25l
-Your branch is up to date with 'origin/master'.[0K
-[0K
-Changes not staged for commit:[0K
-        [0;31mmodified:   .Rproj.user/82C5CFDF/console06/2BC578FC[0m[0K
-[0K
-no changes added to commit[0K
-[0K
-E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git p[0K[?25hu[0Ks[0Kh[0K]0;  - git  push[?25l
-[0K[?25hEnter passphrase for key '/c/Users/Semba/.ssh/id_rsa':[0K[56G[?25l
-[0K[?25h]0; Everything up-to-date[0K[?25l
-[0K
-E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git p[0K[?25hu[0Ks[0Kh[0K[?25l
-[0K[?25h]0;  - git  pushEnter passphrase for key '/c/Users/Semba/.ssh/id_rsa':[0K[56G[?25l
-[0K[?25h]0; Everything up-to-date[0K[?25l
-[0K
-E:\blogs\masumbuko>[0K[?25h
+[0K[?25h
