@@ -61,4 +61,81 @@ Untracked files:[0K
 no changes added to commit (use "git add" and/or "git commit -a")[0K
 [0K
 E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git a[0K[?25hd[0Kd[0K[28G[?25lE:\blogs\masumbuko>git add -[0K[?25hA[0K]0;  - git  add -A[?25l
-[0K[?25h
+[0K[?25hwarning: LF will be replaced by CRLF in .Rproj.user/82C5CFDF/sources/prop/98900512.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/about/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/categories/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/categories/r/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/categories/technical/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/categories/tool/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/links/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/post/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/project---copy/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/project/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/publication/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/sitemap.xml.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/argo/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/drifter/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/indian-ocean/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/masumbuko-semba/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/modis/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/pemba-channel/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/r/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/satellite/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/teaching/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/09/18/2018/get-satellite-data-with-r/index.h[0Kt[?25l
+ml.[0K
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/09/20/2018/validating-modis-sea-surface-temp[0Ke[?25l
+rature-with-global-drifter-program-observations/index.html.[0K
+The file will have its original line endings in your working directory.[0K
+[0K[?25h]0; [?25l
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git c[0K[?25ho[0Km[0Km[0Ki[0Kt[0K[31G[?25lE:\blogs\masumbuko>git commit -[0K[?25hm[0K[34G[?25lE:\blogs\masumbuko>git commit -m "[0K[?25hc[0Kh[0Ka[0Kn[0Kg[0Ke[0K[42G[?25lE:\blogs\masumbuko>git commit -m "change t[0K[?25hh[0Ke[0K[46G[?25lE:\blogs\masumbuko>git commit -m "change the l[0K[?25ho[0Kg[0Ko[0K"[0K[?25l
+[0K[?25h]0;  - git  commit -m "change the logo"]0; [master f6f29af] change the logo[0K[?25l
+ 45 files changed, 1850 insertions(+), 204 deletions(-)[0K
+ rewrite .Rproj.user/82C5CFDF/console06/2BC578FC (90%)[0K
+ create mode 100644 public/09/18/2018/get-satellite-data-with-r/index.html[0K
+ create mode 100644 public/09/20/2018/validating-modis-sea-surface-temperature-with-global-[0Kd
+rifter-program-observations/index.html[0K
+ create mode 100644 public/images/grani_logo-01.png[0K
+ create mode 100644 public/images/grani_logo.png[0K
+ create mode 100644 themes/hugo-lithium/static/images/grani_logo-01.png[0K
+ create mode 100644 themes/hugo-lithium/static/images/grani_logo.png[0K
+[0K
+E:\blogs\masumbuko>git[0K[?25h[24G[?25lE:\blogs\masumbuko>git p[0K[?25hu[0Ks[0Kh[0K]0;  - git  push[?25l
+[0K[?25hEnter passphrase for key '/c/Users/Semba/.ssh/id_rsa':[0K[56G[?25l
+[0K[?25hEnumerating objects: 150, done.[0K[?25l
+Counting objects: 100% (150/150), done.[0K
+Delta compression using up to 8 threads.[0K
+Compressing objects:  17% (12/70)[0K[1G[?25hCompressing objects: 100% (70/70), done.[0K[?25l
+Writing objects:  48% (40/82)[0K[1G[?25hWriting objects: 100% (82/82), 38.26 KiB | 1.91 MiB/s, done.[0K[?25l
+Total 82 (delta 43), reused 0 (delta 0)[0K
+[0K[?25h[?25lremote: Resolving deltas:  32% (14/43)[0K[1G[?25hremote: Resolving deltas: 100% (43/43), completed with 37 local objects.[0K[?25l
+[0K[?25hTo github.com:lugoga/masumbuko.git[0K[?25l
+   6b1926f..f6f29af  master -> master[0K
+[0K[?25h]0; [?25l
+E:\blogs\masumbuko>[0K[?25h

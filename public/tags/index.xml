@@ -21,11 +21,38 @@
     </item>
     
     <item>
+      <title>Ctd</title>
+      <link>/tags/ctd/</link>
+      <pubDate>Sat, 22 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/ctd/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Depth</title>
+      <link>/tags/depth/</link>
+      <pubDate>Sat, 22 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/depth/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Drifter</title>
       <link>/tags/drifter/</link>
       <pubDate>Thu, 20 Sep 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/drifter/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Fluorescence</title>
+      <link>/tags/fluorescence/</link>
+      <pubDate>Sat, 22 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/fluorescence/</guid>
       <description></description>
     </item>
     
@@ -75,11 +102,29 @@
     </item>
     
     <item>
+      <title>Salinity</title>
+      <link>/tags/salinity/</link>
+      <pubDate>Sat, 22 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/salinity/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Satellite</title>
       <link>/tags/satellite/</link>
       <pubDate>Thu, 20 Sep 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/satellite/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Temperature</title>
+      <link>/tags/temperature/</link>
+      <pubDate>Sat, 22 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/temperature/</guid>
       <description></description>
     </item>
     

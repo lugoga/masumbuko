@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.48" />
+
+
+<title>Processing ship-based CTD measurements in Pemba Channel with R from CTD Measurements - Masumbuko Semba</title>
+<meta property="og:title" content="Processing ship-based CTD measurements in Pemba Channel with R from CTD Measurements - Masumbuko Semba">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga/masumbuko">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">8 min read</span>
+    
+
+    <h1 class="article-title">Processing ship-based CTD measurements in Pemba Channel with R from CTD Measurements</h1>
+
+    
+    <span class="article-date">2018/09/22</span>
+    
+
+    <div class="article-content">
+      <p>This post introduces to simple analysis of CTD data using oce<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> package in R<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> environment. CTD stands for conductivity, temperature, and depth, and refers to a package of electronic instruments that measure these properties.A CTD device’s primary function is to detect how the conductivity and temperature of the water column changes relative to depth. Conductivity is a measure of how well a solution conducts electricity. Conductivity is directly related to salinity, which is the concentration of salt and other inorganic compounds in seawater. Salinity is one of the most basic measurements used by ocean scientists. When combined with temperature data, salinity measurements can be used to determine seawater density which is a primary driving force for major ocean currents.</p>
+<p>CTDs can provide profiles of chemical and physical parameters through the entire water column. The CTD data used in this post were collected with South African Ship Agulhas II June-July 2018. The ship cruised and made nine casts along the Pemba and Zanzibar channel. This expedition was done under the Second International Indian Ocean Expedition (IIOE–2). The IIOE–2 aim to systematically explore our coastal waters, which are poorly known with prime purpose of discovering and advancing the knowledge.</p>
+<pre class="r"><code>require(oce)
+require(ocedata)
+require(sf)
+require(leaflet)
+require(tidyverse)</code></pre>
+<p>Oce package has functions that read the SBE files (.cnv). For example the <em>read.ctd()</em> function read the CTD file directly</p>
+<pre class="r"><code>stn1 = read.ctd(&quot;./ctd18/stn001.cnv&quot;)</code></pre>
+<p>This produce a CTD profile that has both downcast and upcast. Figure <a href="#fig:fig1">1</a> for example show the location of the cast on a map and temperature and salinity profiles of raw measurements. You notice that the cast contain bad data for both profiles</p>
+<pre class="r"><code>par(mfrow = c(1,2))
+stn1%&gt;%plot(which = 5)
+stn1%&gt;%plot(which = 1)</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2018-09-21-vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements_files/figure-html/fig1-1.png" alt="Profile of raw CTD with both downcast and upcast measurements" width="672" />
+<p class="caption">
+Figure 1: Profile of raw CTD with both downcast and upcast measurements
+</p>
+</div>
+<p>We can clean the data and remove the bad data, however before we clean the data we must careful choose the casts—whether to select downcast or upcast. oce package has a plotScan() function that help us assess the cast with good data. Figure <a href="#fig:fig2">2</a> show the pressure, temperature and salinity measurement against scan number. It is very clear that the first 15000 cast—representing downcast made good measurements and above cast number 15000 we see a jagged lines of poor measurements from the upcast. Note also the spice of temperature and salinity in the downcast scan number.</p>
+<pre class="r"><code>par(mfrow = c(1,3))
+
+stn1%&gt;%plotScan(which = 1, xtype = &quot;scan&quot;, type = &quot;l&quot;, main = &quot;Pressure&quot;)
+stn1%&gt;%plotScan(which = 3, xtype = &quot;scan&quot;, type = &quot;l&quot;, main = &quot;Temperature&quot;)
+stn1%&gt;%plotScan(which = 4, xtype = &quot;scan&quot;, type = &quot;l&quot;, main = &quot;Salinity&quot;)</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2018-09-21-vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements_files/figure-html/fig2-1.png" alt="Scan number against pressure, temperature and salinity measurement of raw CTD" width="672" />
+<p class="caption">
+Figure 2: Scan number against pressure, temperature and salinity measurement of raw CTD
+</p>
+</div>
+<p>Figure <a href="#fig:fig2">2</a> reveal the desired downcast measurements and the need to drop the upcast measurement. We can manually trim the upcast using the cut-point of scan number in figure <a href="#fig:fig2">2</a>, which is 14000. Although the plot for pressure appear pleasing after trimming the upcast manually, we still see some spikes in temperature and salinity (Figure <a href="#fig:fig3">3</a>)</p>
+<pre class="r"><code>## Trim upcast scan manually
+
+stn1.clean = stn1%&gt;%
+  ctdTrim(&quot;range&quot;, 
+          parameters = list(item = &quot;scan&quot;, 
+                            from = 0, 
+                            to = 14000))
+par(mfrow = c(1,3))
+stn1.clean%&gt;%plotScan(which = 1, xtype = &quot;scan&quot;, type = &quot;l&quot;, main = &quot;Pressure&quot;)
+stn1.clean%&gt;%plotScan(which = 3, xtype = &quot;scan&quot;, type = &quot;l&quot;, main = &quot;Temperature&quot;)
+stn1.clean%&gt;%plotScan(which = 4, xtype = &quot;scan&quot;, type = &quot;l&quot;, main = &quot;Salinity&quot;)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2018-09-21-vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements_files/figure-html/fig3-1.png" alt="Downcast scan number against pressure, temperature and salinity measurement of manually selected scan number" width="672" />
+<p class="caption">
+Figure 3: Downcast scan number against pressure, temperature and salinity measurement of manually selected scan number
+</p>
+</div>
+<p>Kelly &amp; Richards (2007) pointed that selecting values from downcast based on plotted information as the most robust one of trimming CTD data. However, if you work for several cast this method is tedious. It is possible to parse the argument for downcast in the ctdTrim() function to automatically detect the downcast (see figure <a href="#fig:fig4">4</a>) and the profile of downcast (Figure <a href="#fig:fig5">5</a>) compared to profiles untrimmed cast (Figure <a href="#fig:fig1">1</a>).</p>
+<pre class="r"><code>## purse the downcast argument in ctdTrim to drop the upcast
+stn1.d = stn1%&gt;%
+  ctdTrim(method = &quot;downcast&quot;)
+
+par(mfrow = c(1,3))
+stn1.d%&gt;%plotScan(which = 1, xtype = &quot;scan&quot;, type = &quot;l&quot;, main = &quot;Pressure&quot;)
+stn1.d%&gt;%plotScan(which = 3, xtype = &quot;scan&quot;, type = &quot;l&quot;, main = &quot;Temperature&quot;)
+stn1.d%&gt;%plotScan(which = 4, xtype = &quot;scan&quot;, type = &quot;l&quot;, main = &quot;Salinity&quot;)</code></pre>
+<div class="figure"><span id="fig:fig4"></span>
+<img src="/post/2018-09-21-vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements_files/figure-html/fig4-1.png" alt="Downcast scan number against pressure, temperature and salinity measurement directy dicted with ctdTrim" width="672" />
+<p class="caption">
+Figure 4: Downcast scan number against pressure, temperature and salinity measurement directy dicted with ctdTrim
+</p>
+</div>
+<pre class="r"><code>par(mfrow = c(1,2))
+stn1.d%&gt;%plot(which = 5)
+stn1.d%&gt;%plot(which = 1)</code></pre>
+<div class="figure"><span id="fig:fig5"></span>
+<img src="/post/2018-09-21-vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements_files/figure-html/fig5-1.png" alt="Profiles of trimmed CTD with only downcast measurements" width="672" />
+<p class="caption">
+Figure 5: Profiles of trimmed CTD with only downcast measurements
+</p>
+</div>
+<p>If there are more than one cast that are required for plotting hydrographic section, the casts must be in the same standard pressure. Oce has ctdDecimate() function which handles that issue. It align the CTD data to the standard pressure. For example Figure <a href="#fig:fig6">6</a> profiles of temperature and salinity looks cleaner than Figure (fig:fig5) because Figure <a href="#fig:fig6">6</a> measurements were aligned in ten meter interval of pressure (chunk below)</p>
+<pre class="r"><code>## drop the upcast and align in 10 meter interval of pressure
+stn1.d = stn1%&gt;%
+  ctdTrim(method = &quot;downcast&quot;)%&gt;%
+  ctdDecimate(p = 10)
+
+par(mfrow = c(1,2))
+stn1.d%&gt;%plot(which = 5)
+stn1.d%&gt;%plot(which = 1)</code></pre>
+<div class="figure"><span id="fig:fig6"></span>
+<img src="/post/2018-09-21-vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements_files/figure-html/fig6-1.png" alt="Profiles of trimmed CTD with only downcast measurements aligned in the standard 10 meter interval pressure" width="672" />
+<p class="caption">
+Figure 6: Profiles of trimmed CTD with only downcast measurements aligned in the standard 10 meter interval pressure
+</p>
+</div>
+<p>So far I have dealing with single CTD cast. Oceanographers often deals with multiple casts,stitched together to form a hydrographic section. Therefore, an iteration is required to process multiple CTD files and R has function to deal with looping routines. For R to iterate, the location of the file and the file path has to be determined.</p>
+<pre class="r"><code>### Identify the list in the directory
+files = dir(path = &quot;./ctd18/&quot;, pattern = &quot;.cnv&quot;, full.names = TRUE )</code></pre>
+<p>The loop through to read the CTD files from the nine stations. However, before we loop, a container to store the files during the looping process is required. I preallocated the file using the list() and then loop the process with a <strong>FOR</strong> function</p>
+<pre class="r"><code>## preallocate the container to store the individual 
+ctd = list()
+
+### Loop the CNV file and create a list of casted CTD
+for (i in 1:length(files)){
+  
+ctd[[i]]  = read.ctd(files[i])%&gt;%
+  ctdTrim(method = &quot;downcast&quot;)%&gt;% # select downcast
+  ctdDecimate(p = 1) # align to the same standard pressure
+}</code></pre>
+<p>Because the ctd files for each station are stored as list, a format required for creating section of the nine profiles.</p>
+<pre class="r"><code>### Make a section of CTD cast from the List
+section = ctd%&gt;%as.section()</code></pre>
+<p>Figure <a href="#fig:fig7">7</a> show the hydrographic section of the nine CTD casts traversed within the Pemba and Zanzibar channel during the southeast monsoon season. The section reveal a similar temperature pattern from surface to 40 meter depth. The range from 26 to 28 ^<span class="math inline">\(\circ\)</span>C with temperature above 27 lay between latitude 6.5^<span class="math inline">\(\circ\)</span> and 6.3^ <span class="math inline">\(\circ\)</span>S (Figure <a href="#fig:fig7">7</a>).</p>
+<pre class="r"><code>par(mfrow = c(1,2))
+section%&gt;%plot(which = &quot;map&quot;, showStations = TRUE, showStart = TRUE)
+section%&gt;%plot(which = &quot;temperature&quot;, xtype = &quot;latitude&quot;, ztype = &quot;image&quot;, ylim = c(40,4.5), zlim = c(26,27.8), eos = &quot;gsw&quot;)</code></pre>
+<div class="figure"><span id="fig:fig7"></span>
+<img src="/post/2018-09-21-vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements_files/figure-html/fig7-1.png" alt="Vertical structure of temperature with the coastal water of 40 meter depth. A map show the location of the CTD stations" width="672" />
+<p class="caption">
+Figure 7: Vertical structure of temperature with the coastal water of 40 meter depth. A map show the location of the CTD stations
+</p>
+</div>
+<p>Because CTD casts often have different pressure levels at each station, it is recommended to grid them. I will only show how to subset the casts taken in deeper water and then align them to the same pressure levels and plot the sections. The image and contour for temperature (Figure <a href="#fig:fig8">8</a>), salinity (Figure <a href="#fig:fig9">9</a>), oxygen (Figure <a href="#fig:fig10">10</a>), fluorescence (Figure <a href="#fig:fig11">11</a>) and turbidity (Figure <a href="#fig:fig12">12</a>).</p>
+<pre class="r"><code>###subset and grid section
+section.gridded = section%&gt;%
+  subset(latitude &gt;= -5.5)%&gt;%
+  sectionGrid(p = seq(0,500,2))</code></pre>
+<pre class="r"><code>## plot the gridded section
+
+par(mfrow = c(1,2))
+
+section.gridded%&gt;%
+  plot(which = &quot;temperature&quot;, xtype = &quot;latitude&quot;, 
+       ztype = &quot;image&quot;, ylim = c(400,4.5), 
+        eos = &quot;gsw&quot;)
+
+section.gridded%&gt;%
+  plot(which = &quot;temperature&quot;, xtype = &quot;latitude&quot;, 
+       ztype = &quot;contour&quot;, ylim = c(400,4.5), 
+       eos = &quot;gsw&quot;)</code></pre>
+<div class="figure"><span id="fig:fig8"></span>
+<img src="/post/2018-09-21-vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements_files/figure-html/fig8-1.png" alt="Temperatue section plotted as contour and image" width="672" />
+<p class="caption">
+Figure 8: Temperatue section plotted as contour and image
+</p>
+</div>
+<pre class="r"><code>## plot the gridded section
+
+par(mfrow = c(1,2))
+
+section.gridded%&gt;%
+  plot(which = &quot;salinity&quot;, xtype = &quot;latitude&quot;, 
+       ztype = &quot;image&quot;, ylim = c(400,4.5), 
+       eos = &quot;gsw&quot;)
+
+section.gridded%&gt;%
+  plot(which = &quot;salinity&quot;, xtype = &quot;latitude&quot;, 
+       ztype = &quot;contour&quot;, ylim = c(400,4.5), 
+       eos = &quot;gsw&quot;)</code></pre>
+<div class="figure"><span id="fig:fig9"></span>
+<img src="/post/2018-09-21-vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements_files/figure-html/fig9-1.png" alt="Salinity section plotted as contour and image" width="672" />
+<p class="caption">
+Figure 9: Salinity section plotted as contour and image
+</p>
+</div>
+<pre class="r"><code>## plot the gridded section
+
+par(mfrow = c(1,2))
+
+section.gridded%&gt;%
+  plot(which = &quot;oxygen&quot;, xtype = &quot;latitude&quot;, 
+       ztype = &quot;image&quot;, ylim = c(400,4.5), 
+        eos = &quot;gsw&quot;)
+
+section.gridded%&gt;%
+  plot(which = &quot;oxygen&quot;, xtype = &quot;latitude&quot;, 
+       ztype = &quot;contour&quot;, ylim = c(400,4.5), 
+       eos = &quot;gsw&quot;)</code></pre>
+<div class="figure"><span id="fig:fig10"></span>
+<img src="/post/2018-09-21-vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements_files/figure-html/fig10-1.png" alt="Oxygen section plotted as contour and image" width="672" />
+<p class="caption">
+Figure 10: Oxygen section plotted as contour and image
+</p>
+</div>
+<pre class="r"><code>## plot the gridded section
+
+par(mfrow = c(1,2))
+
+section.gridded%&gt;%
+  plot(which = &quot;fluorescence&quot;, xtype = &quot;latitude&quot;, 
+       ztype = &quot;image&quot;, ylim = c(400,4.5), 
+        eos = &quot;gsw&quot;)
+
+section.gridded%&gt;%
+  plot(which = &quot;fluorescence&quot;, xtype = &quot;latitude&quot;, 
+       ztype = &quot;contour&quot;, ylim = c(400,4.5), 
+       eos = &quot;gsw&quot;)</code></pre>
+<div class="figure"><span id="fig:fig11"></span>
+<img src="/post/2018-09-21-vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements_files/figure-html/fig11-1.png" alt="Fluorescence section plotted as contour and image" width="672" />
+<p class="caption">
+Figure 11: Fluorescence section plotted as contour and image
+</p>
+</div>
+<pre class="r"><code>## plot the gridded section
+
+par(mfrow = c(1,2))
+
+section.gridded%&gt;%
+  plot(which = &quot;turbidity2&quot;, xtype = &quot;latitude&quot;, 
+       ztype = &quot;image&quot;, ylim = c(400,4.5), 
+        eos = &quot;gsw&quot;)
+
+section.gridded%&gt;%
+  plot(which = &quot;turbidity2&quot;, xtype = &quot;latitude&quot;, 
+       ztype = &quot;contour&quot;, ylim = c(400,4.5), 
+       eos = &quot;gsw&quot;)</code></pre>
+<div class="figure"><span id="fig:fig12"></span>
+<img src="/post/2018-09-21-vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements_files/figure-html/fig12-1.png" alt="turbidity section plotted as contour and image" width="672" />
+<p class="caption">
+Figure 12: turbidity section plotted as contour and image
+</p>
+</div>
+<div id="make-a-data-frame-of-ctd-cast-from-the-list" class="section level3">
+<h3>Make a data frame of CTD cast from the List</h3>
+<p>We have seen the oce package make it eay to read, summarize and visualize CTD data. So far we dealt with oce package processing and plotting, which use base graphic package. The next post will deal with tranforming oce dataset format into a tibble—a modern data frame. A tibble allows to tidy<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>, manipulate<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> CTD data and visualize<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a> profiles and section easily with tidyverse<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a>.</p>
+</div>
+<div id="cited-literature" class="section level3">
+<h3>Cited Literature</h3>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Kelley, D., &amp; Richards, C. (2017). oce: Analysis of Oceanographic Data. R package version 0.9-22.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Team, R. C. (2015). R: A language and environment for statistical computing.<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>Wickham, H. (2016). tidyr: Easily Tidy Data with spread () and gather () Functions. Version 0.6. 0.<a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>Wickham, H., Francois, R., Henry, L., &amp; Müller, K. (2015). dplyr: A grammar of data manipulation. R package version 0.4, 3.<a href="#fnref4">↩</a></p></li>
+<li id="fn5"><p>Wickham, H. (2016). ggplot2: elegant graphics for data analysis. Springer.<a href="#fnref5">↩</a></p></li>
+<li id="fn6"><p>Wickham, H. (2017). Tidyverse: Easily install and load’tidyverse’packages. R package version, 1(1).<a href="#fnref6">↩</a></p></li>
+</ol>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//Semba.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+
