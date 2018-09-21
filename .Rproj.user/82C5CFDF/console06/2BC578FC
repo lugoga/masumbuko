@@ -39,4 +39,24 @@ Total 12 (delta 4), reused 0 (delta 0)[0K
 [0K[?25hTo github.com:lugoga/masumbuko.git[0K[?25l
    2d12a68..50bdbfe  master -> master[0K
 [0K[?25h]0; [?25l
-E:\blogs\masumbuko>[0K[?25hgit push[0K[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.toml file"[0K[?25h[?25lE:\blogs\masumbuko>git add -A[0K[?25h
+E:\blogs\masumbuko>[0K[?25hgit push[0K[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.toml file"[0K[?25h[?25lE:\blogs\masumbuko>git add -A[0K[?25hwarning: LF will be replaced by CRLF in public/2018/09/20/validating-modis-sea-surface-temp[0Ke[?25l
+rature-with-global-drifter-program-observations/index.html.[0K
+The file will have its original line endings in your working directory.[0K
+[0K[?25h]0; [?25l
+E:\blogs\masumbuko>[0K[?25hgit add -A[0K[?25lE:\blogs\masumbuko>git status[0K[?25h[?25lE:\blogs\masumbuko>git add -A[0K[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.toml file"[0K[?25h[?25l
+[0K[?25h]0;  - git  commit -m "added the baseurl in config.toml file"]0; [master 810e339] added the baseurl in config.toml file[0K[?25l
+ 4 files changed, 603 insertions(+), 519 deletions(-)[0K
+[0K
+E:\blogs\masumbuko>[0K[?25hgit commit -m "added the baseurl in config.toml file"[0K[?25lE:\blogs\masumbuko>git add -A[0K[?25h[?25lE:\blogs\masumbuko>git status[0K[?25h[?25lE:\blogs\masumbuko>git add -A[0K[?25h[?25lE:\blogs\masumbuko>git commit -m "added the baseurl in config.toml file"[0K[?25h[?25lE:\blogs\masumbuko>git push[0K[?25h[?25l
+[0K[?25h]0;  - git  pushEnter passphrase for key '/c/Users/Semba/.ssh/id_rsa':[0K[56G[?25l
+[0K[?25hEnumerating objects: 31, done.[0K[?25l
+Counting objects: 100% (31/31), done.[0K
+Delta compression using up to 8 threads.[0K
+Compressing objects: 100% (14/14), done.[0K
+Writing objects: 100% (16/16), 4.93 KiB | 1.64 MiB/s, done.[0K
+Total 16 (delta 8), reused 0 (delta 0)[0K
+[0K[?25hremote: Resolving deltas: 100% (8/8), completed with 7 local objects.[0K[?25l
+[0K[?25hTo github.com:lugoga/masumbuko.git[0K[?25l
+   50bdbfe..810e339  master -> master[0K
+[0K[?25h]0; [?25l
+E:\blogs\masumbuko>[0K[?25h

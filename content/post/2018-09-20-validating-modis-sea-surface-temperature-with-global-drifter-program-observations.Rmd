@@ -245,7 +245,7 @@ pear = cor.test(drifter.modis$drifter.sst,
 
 The accuracy of the sea surface temperature is also supported by Figure \@ref(fig:fig3), which show the positive association of sea surface temperature between in-situ drifter observations and MODIS satellite data (R^2^ = 0.92). This association was significant ( t_(1,324)_ = t < `r pear$statistic` , *p* = `r pear$p.value`)
 
-```{r fig3, fig.cap= "Association of sea surface temperature from in-situ drifter observation and MODIS"}
+```{r fig3, fig.cap= "Association of sea surface temperature from in-situ drifter observation and MODIS", comment="", warning=FALSE, message=FALSE}
 
 ggplot(data = drifter.modis, 
        aes(x = drifter.sst, y = satellite.sst.mean))+
@@ -258,7 +258,8 @@ ggplot(data = drifter.modis,
                label = paste("RSq = ", 0.92)), size = 4)+
   scale_x_continuous(breaks = seq(25.5,31, .5))+
   scale_y_continuous(breaks = seq(26,31, 1.5))+
-    labs(y=expression(~Modis~Sensor~SST~(~degree~C)), x=expression(~Drifter~Temperature~(~degree~C)))
+    labs(y=expression(~Modis~Sensor~SST~(~degree~C)),
+         x=expression(~Drifter~Temperature~(~degree~C)))
 ```
 ### Conclusion
 Comparing MODIS satellite and drifter sea surface temperature showed a close match with an accuracy of `r mean(rmse.t$Error)`$^{\circ}$ Celsius and a strong and significant positive correlation (R^2^ = 0.92). The closeness of drifter and  MODIS sea surface temperature allows scientists in the region to use MODIS satellite data to tackle marine and coastal issues in the region.
