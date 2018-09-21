@@ -12,22 +12,27 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 [[menu.main]]
     name = "About"
     url = "/about/"
+    weight = 1
 
 [[menu.main]]
     name = "Links"
-    url = "/links/"    
+    url = "/links/" 
+    weight = 6
     
 [[menu.main]]
     name = "Posts"
     url = "/post/"
+    weight = 2
     
 [[menu.main]]
     name = "Projects"
     url = "/project/"
+    weight = 4
     
 [[menu.main]]
     name = "Publications"
     url = "/publication/"
+    weight = 3
     
 #[[menu.main]]
   #  name = "Teaching"
@@ -36,6 +41,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 [[menu.main]]
     name = "GitHub"
     url = "https://github.com/lugoga/masumbuko"
+    weight = 5
 
 
 [params]

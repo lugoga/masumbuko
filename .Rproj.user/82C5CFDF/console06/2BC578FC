@@ -71,4 +71,38 @@ Changes not staged for commit:[0K
 [0K
 no changes added to commit (use "git add" and/or "git commit -a")[0K
 [0K
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git s[0K[?25ht[0Ka[0Kt[0Ku[0Ks[0K]0;  - git  status[?25l
+[0K[?25h[?25lOn branch master[0K[1G[?25h]0; [?25l
+Your branch is up to date with 'origin/master'.[0K
+[0K
+Changes not staged for commit:[0K
+  (use "git add <file>..." to update what will be committed)[0K
+  (use "git checkout -- <file>..." to discard changes in working directory)[0K
+[0K
+        [0;31mmodified:   .Rproj.user/82C5CFDF/console06/2BC578FC[0m[0K
+[0K
+no changes added to commit (use "git add" and/or "git commit -a")[0K
+[0K
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git a[0K[?25hd[0Kd[0K[28G[?25lE:\blogs\masumbuko>git add -[0K[?25hA[0K]0;  - git  add -A[?25l
+[0K[?25h]0; error: open(".Rproj.user/82C5CFDF/console06/2BC578FC"): Permission denied[0K[?25l
+error: unable to index file .Rproj.user/82C5CFDF/console06/2BC578FC[0K
+fatal: updating files failed[0K
+[0K
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git c[0K[?25ho[0Km[0Km[0Ki[0Kt[0K[31G[?25lE:\blogs\masumbuko>git commit -[0K[?25hm[0K[34G[?25lE:\blogs\masumbuko>git commit -m "[0K[?25h"[0K[35G[?25lE:\blogs\masumbuko>git commit -m "m"[0K[36G[?25h[?25lE:\blogs\masumbuko>git commit -m "mi"[0K[37G[?25h[?25lE:\blogs\masumbuko>git commit -m "min"[0K[38G[?25h[?25lE:\blogs\masumbuko>git commit -m "mino"[0K[39G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor"[0K[40G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor "[0K[41G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor c"[0K[42G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor ch"[0K[43G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor cha"[0K[44G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor chan"[0K[45G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor chang"[0K[46G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor change"[0K[47G[?25h[?25lE:\blogs\masumbuko>git commit -m "minor changes"[0K[48G[?25h]0;  - git  commit -m "minor changes"[?25l
+[0K[?25h]0; On branch master[0K[?25l
+Your branch is up to date with 'origin/master'.[0K
+[0K
+Changes not staged for commit:[0K
+        [0;31mmodified:   .Rproj.user/82C5CFDF/console06/2BC578FC[0m[0K
+[0K
+no changes added to commit[0K
+[0K
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git p[0K[?25hu[0Ks[0Kh[0K]0;  - git  push[?25l
+[0K[?25hEnter passphrase for key '/c/Users/Semba/.ssh/id_rsa':[0K[56G[?25l
+[0K[?25h]0; Everything up-to-date[0K[?25l
+[0K
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git p[0K[?25hu[0Ks[0Kh[0K[?25l
+[0K[?25h]0;  - git  pushEnter passphrase for key '/c/Users/Semba/.ssh/id_rsa':[0K[56G[?25l
+[0K[?25h]0; Everything up-to-date[0K[?25l
+[0K
 E:\blogs\masumbuko>[0K[?25h

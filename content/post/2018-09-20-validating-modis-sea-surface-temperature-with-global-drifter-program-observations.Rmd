@@ -15,23 +15,11 @@ slug: validating-modis-sea-surface-temperature-with-global-drifter-program-obser
 ---
 
 ### Introduction
-In this post, I am going to illustrate the routines of validating sea surface temperatures from Moderate resolution (MODIS) and drifters. Drifters serve as in-situ data against which the SST from MODIS is tested. The purpose is to assess how accurate the satellite observation is to the in-situ measurements. We will test the accuracy of the two dataset and look on their relationship.  
+In this post, I am going to illustrate routines of how to validate sea surface temperatures from Moderate Resolution Imaging Spectroradiometer (MODIS) with drifters' sea surface temperature. Drifters measurements serve as in-situ data against MODIS data. The purpose is to assess closeneness (accuracy) of satellite and in-situ SST. I will check the accuracy of acquired (satellite) and measured (drifter) SST, visualize their relationship and test the significance of the relationship.  
 
 
 ### Needed Packages
-Several packages are needed for this routine (this assumes are installed already in the machine). The package include [tidyverse](https://www.tidyverse.org/)^[Wickham, H. (2017). Tidyverse: Easily install and load’tidyverse’packages. R package version, 1(1).], which is a collection of R packages designed for reading and importing data; manipulating and transforming imported data and visualize the results. The routine used several packages in the tidyverse including;
-
-+ [ggplot2](https://ggplot2.tidyverse.org/)^[Wickham, H. (2016). ggplot2: elegant graphics for data analysis. Springer.] used for visualizing, mapping and exploring the data
-
-+ [dplyr](https://dplyr.tidyverse.org/)^[Wickham, H., Francois, R., Henry, L., & Müller, K. (2015). dplyr: A grammar of data manipulation. R package version 0.4, 3.] used to manipulate and transform the modis and drifter data
-
-+ [tidyr](https://tidyr.tidyverse.org/)^[Wickham, H. (2016). tidyr: Easily Tidy Data with spread () and gather () Functions. Version 0.6. 0.] used to consistently tidy the data from wide form to long form and ensure each variable goes in a column and every observation goes into a row
-
-+ [readr](https://readr.tidyverse.org/)^[Wickham, H., Hester, J., & Francois, R. (2016). Readr: read tabular data. URL https://github. com/hadley/readr. R package version 0.1, 1, 361.] for reading tabular drifter data
-
-+ [xtractomatic](https://github.com/rmendels/xtractomatic)^[Mendelssohn, R. (2017). xtractomatic: accessing environmental data from ERD’s ERDDAP server. R package version, 3(2).] used to subset and extract satellite and other oceanographic related data from a remote server to the Area of Interest (AOI)
-
-
+Several packages are needed for this routine (this assumes are installed already in the machine).
 
 ```{r package, comment="", warning=FALSE, message=FALSE}
 require(tidyverse)
@@ -47,7 +35,6 @@ require(rerddapXtracto)
 ```
 
 ### Drifter data
-### Loading the Data in R
 The drifter data downloaded from [Global Drifter Program ](www.aoml.noaa.gov/phod/gdp/) as tab delimited was imported into R workspace using the *read_table2()* function of readr^[Wickham, H., Hester, J., & Francois, R. (2016). Readr: read tabular data. URL https://github. com/hadley/readr. R package version 0.1, 1, 361.] package. Once the file was in the workspace, the column variables were assigned proper names. 
 
 ```{r drifter, comment="", message=FALSE, warning=FALSE}
@@ -145,7 +132,8 @@ leaflet(data = drifter.traj%>%filter(id == 70973))%>%
 
 ### Modis Data
 The selected drifter dataset contains three variables---date, longitude and latitude of the drifter observation. These observations serves as trackline and was used to extract sea surface temperature from MODIS satellite. *xtracto()* function from **xtractomatic**^[Mendelssohn, R. (2017). xtractomatic: accessing environmental data from ERD’s ERDDAP server. R package version, 3(2).] package was used for extraction. Let's explore the metadata of the ERDAPP servers that deals with sst
-```{r, comment="", eval=FALSE}
+
+```{r, comment="", eval=FALSE, include= F}
 getInfo("mhsstd8day")
 ```
 

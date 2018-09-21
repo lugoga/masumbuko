@@ -17,7 +17,7 @@
       <pubDate>Thu, 20 Sep 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/09/20/validating-modis-sea-surface-temperature-with-global-drifter-program-observations/</guid>
-      <description>IntroductionIn this post, I am going to illustrate the routines of validating sea surface temperatures from Moderate resolution (MODIS) and drifters. Drifters serve as in-situ data against which the SST from MODIS is tested. The purpose is to assess how accurate the satellite observation is to the in-situ measurements. We will test the accuracy of the two dataset and look on their relationship.</description>
+      <description>IntroductionIn this post, I am going to illustrate routines of how to validate sea surface temperatures from Moderate Resolution Imaging Spectroradiometer (MODIS) with drifters’ sea surface temperature. Drifters measurements serve as in-situ data against MODIS data. The purpose is to assess closeneness (accuracy) of satellite and in-situ SST. I will check the accuracy of acquired (satellite) and measured (drifter) SST, visualize their relationship and test the significance of the relationship.</description>
     </item>
     
   </channel>
