@@ -122,8 +122,9 @@ drifters = read_table2(&quot;./drifters.txt&quot;,
 
 ## rename the variables to their respective variable names
 drifters = drifters%&gt;%
-  select(id = 1, lon = 2, lat = 3, drogue = 4, 
-         u = 5, v = 6, sst = 7, year = 8, month =9, day = 10, hour = 11)</code></pre>
+  select(id = 1, lon = 2, lat = 3, 
+         drogue = 4,  u = 5, v = 6, sst = 7, 
+         year = 8, month =9, day = 10, hour = 11)</code></pre>
 </div>
 <div id="transform-date" class="section level3">
 <h3>Transform date</h3>
@@ -143,139 +144,139 @@ drifters = drifters%&gt;%
 </thead>
 <tbody>
 <tr class="odd">
-<td align="center">1998-12-11</td>
-<td align="center">9618972</td>
-<td align="center">45.95</td>
-<td align="center">-15.35</td>
-<td align="center">0.23</td>
-<td align="center">0.29</td>
-<td align="center">28.24</td>
+<td align="center">2005-03-29</td>
+<td align="center">52952</td>
+<td align="center">47.40</td>
+<td align="center">-10.21</td>
+<td align="center">-0.81</td>
+<td align="center">0.09</td>
+<td align="center">29.25</td>
 </tr>
 <tr class="even">
-<td align="center">2009-05-21</td>
-<td align="center">63814</td>
-<td align="center">44.80</td>
-<td align="center">-10.77</td>
-<td align="center">-0.44</td>
-<td align="center">0.21</td>
-<td align="center">28.04</td>
+<td align="center">2001-04-17</td>
+<td align="center">28437</td>
+<td align="center">42.69</td>
+<td align="center">-12.38</td>
+<td align="center">0.28</td>
+<td align="center">0.46</td>
+<td align="center">28.69</td>
 </tr>
 <tr class="odd">
-<td align="center">2013-06-07</td>
-<td align="center">109375</td>
-<td align="center">47.19</td>
-<td align="center">-10.35</td>
-<td align="center">-0.66</td>
-<td align="center">0.00</td>
-<td align="center">24.97</td>
-</tr>
-<tr class="even">
-<td align="center">2003-06-22</td>
-<td align="center">34379</td>
-<td align="center">41.88</td>
-<td align="center">-8.97</td>
-<td align="center">-0.36</td>
-<td align="center">-0.05</td>
-<td align="center">26.76</td>
-</tr>
-<tr class="odd">
-<td align="center">2014-05-26</td>
-<td align="center">109290</td>
-<td align="center">41.27</td>
-<td align="center">-5.43</td>
-<td align="center">-0.20</td>
-<td align="center">0.06</td>
-<td align="center">27.50</td>
-</tr>
-<tr class="even">
-<td align="center">2014-05-29</td>
-<td align="center">116212</td>
-<td align="center">49.66</td>
-<td align="center">-3.87</td>
-<td align="center">0.04</td>
-<td align="center">0.16</td>
-<td align="center">28.26</td>
-</tr>
-<tr class="odd">
-<td align="center">2005-05-30</td>
-<td align="center">2344299</td>
-<td align="center">42.85</td>
-<td align="center">-11.21</td>
-<td align="center">-0.87</td>
-<td align="center">0.10</td>
-<td align="center">27.17</td>
-</tr>
-<tr class="even">
-<td align="center">2013-05-11</td>
-<td align="center">109373</td>
-<td align="center">49.66</td>
-<td align="center">-11.55</td>
-<td align="center">-0.75</td>
-<td align="center">0.60</td>
-<td align="center">26.71</td>
-</tr>
-<tr class="odd">
-<td align="center">2011-09-20</td>
-<td align="center">88654</td>
-<td align="center">51.66</td>
-<td align="center">-15.25</td>
-<td align="center">-0.22</td>
-<td align="center">0.19</td>
-<td align="center">24.28</td>
-</tr>
-<tr class="even">
-<td align="center">2000-11-26</td>
-<td align="center">18735</td>
-<td align="center">45.95</td>
-<td align="center">-9.18</td>
-<td align="center">-0.19</td>
-<td align="center">-0.23</td>
-<td align="center">NaN</td>
-</tr>
-<tr class="odd">
-<td align="center">2008-03-30</td>
-<td align="center">40549</td>
-<td align="center">44.80</td>
-<td align="center">-12.58</td>
-<td align="center">-0.27</td>
-<td align="center">-0.35</td>
-<td align="center">29.04</td>
-</tr>
-<tr class="even">
-<td align="center">2009-11-12</td>
-<td align="center">34178</td>
-<td align="center">47.06</td>
-<td align="center">-10.80</td>
-<td align="center">-1.00</td>
-<td align="center">-0.04</td>
-<td align="center">27.41</td>
-</tr>
-<tr class="odd">
-<td align="center">2005-08-13</td>
-<td align="center">52954</td>
-<td align="center">41.59</td>
-<td align="center">-11.12</td>
-<td align="center">-0.07</td>
-<td align="center">-0.05</td>
-<td align="center">25.47</td>
-</tr>
-<tr class="even">
-<td align="center">2017-01-04</td>
-<td align="center">60751430</td>
-<td align="center">42.21</td>
-<td align="center">-13.74</td>
-<td align="center">-0.07</td>
+<td align="center">2010-03-06</td>
+<td align="center">83519</td>
+<td align="center">48.51</td>
+<td align="center">-9.41</td>
 <td align="center">0.20</td>
-<td align="center">29.57</td>
+<td align="center">0.05</td>
+<td align="center">29.89</td>
+</tr>
+<tr class="even">
+<td align="center">2011-10-20</td>
+<td align="center">88675</td>
+<td align="center">40.84</td>
+<td align="center">-2.43</td>
+<td align="center">0.18</td>
+<td align="center">0.34</td>
+<td align="center">26.19</td>
 </tr>
 <tr class="odd">
-<td align="center">2015-12-11</td>
-<td align="center">139775</td>
-<td align="center">47.17</td>
-<td align="center">-10.30</td>
-<td align="center">-0.64</td>
-<td align="center">0.30</td>
-<td align="center">29.81</td>
+<td align="center">2014-07-28</td>
+<td align="center">109535</td>
+<td align="center">49.13</td>
+<td align="center">-7.24</td>
+<td align="center">-0.08</td>
+<td align="center">0.01</td>
+<td align="center">26.28</td>
+</tr>
+<tr class="even">
+<td align="center">2014-06-06</td>
+<td align="center">101702</td>
+<td align="center">51.11</td>
+<td align="center">-15.93</td>
+<td align="center">-0.24</td>
+<td align="center">0.28</td>
+<td align="center">26.80</td>
+</tr>
+<tr class="odd">
+<td align="center">2016-11-02</td>
+<td align="center">63041080</td>
+<td align="center">51.29</td>
+<td align="center">-14.60</td>
+<td align="center">-0.10</td>
+<td align="center">-0.16</td>
+<td align="center">26.09</td>
+</tr>
+<tr class="even">
+<td align="center">2002-04-10</td>
+<td align="center">13562</td>
+<td align="center">42.04</td>
+<td align="center">-8.55</td>
+<td align="center">-0.06</td>
+<td align="center">-0.26</td>
+<td align="center">29.29</td>
+</tr>
+<tr class="odd">
+<td align="center">2014-09-10</td>
+<td align="center">109535</td>
+<td align="center">46.75</td>
+<td align="center">-8.37</td>
+<td align="center">-0.09</td>
+<td align="center">-0.01</td>
+<td align="center">25.37</td>
+</tr>
+<tr class="even">
+<td align="center">2014-08-31</td>
+<td align="center">109361</td>
+<td align="center">42.89</td>
+<td align="center">-13.82</td>
+<td align="center">0.74</td>
+<td align="center">-0.27</td>
+<td align="center">25.95</td>
+</tr>
+<tr class="odd">
+<td align="center">2014-08-09</td>
+<td align="center">133656</td>
+<td align="center">50.30</td>
+<td align="center">-14.30</td>
+<td align="center">-0.13</td>
+<td align="center">0.44</td>
+<td align="center">24.81</td>
+</tr>
+<tr class="even">
+<td align="center">2014-01-26</td>
+<td align="center">101590</td>
+<td align="center">41.75</td>
+<td align="center">-8.53</td>
+<td align="center">-0.34</td>
+<td align="center">0.17</td>
+<td align="center">28.71</td>
+</tr>
+<tr class="odd">
+<td align="center">2002-07-09</td>
+<td align="center">20591</td>
+<td align="center">44.93</td>
+<td align="center">-14.63</td>
+<td align="center">-0.06</td>
+<td align="center">-0.29</td>
+<td align="center">25.38</td>
+</tr>
+<tr class="even">
+<td align="center">1997-11-01</td>
+<td align="center">9619176</td>
+<td align="center">46.13</td>
+<td align="center">-12.76</td>
+<td align="center">-0.08</td>
+<td align="center">0.20</td>
+<td align="center">26.85</td>
+</tr>
+<tr class="odd">
+<td align="center">1998-10-04</td>
+<td align="center">9618972</td>
+<td align="center">42.68</td>
+<td align="center">-14.67</td>
+<td align="center">0.12</td>
+<td align="center">0.18</td>
+<td align="center">NaN</td>
 </tr>
 </tbody>
 </table>
@@ -285,7 +286,7 @@ drifters = drifters%&gt;%
 <p>There are 94413 observations from 466 unique drifters. However, drifter 70973 was selected for validation. This drifter begun its way at latitude -14.213 <span class="math inline">\(^{\circ}\)</span>S and longitude 51.995 <span class="math inline">\(^{\circ}\)</span>E on 2010-11-02 and finished near Nungwi at latitude -5.722 <span class="math inline">\(^{\circ}\)</span>S and longitude 39.32 <span class="math inline">\(^{\circ}\)</span>E on 2011-01-22. During its journey, which took 81 days covering a distance of 2561.29 kilometers, it made 326 observations (Figure <a href="#fig:id1">1</a>).</p>
 <div class="figure"><span id="fig:id1"></span>
 <div id="htmlwidget-1" style="width:672px;height:480px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-1">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-10.574,-14.553,-15.334,-5.722,-9.025,-14.509,-14.739,-14.211,-15.539,-14.423,-14.3,-8.074,-15.467,-12.939,-15.121,-11.085,-9.383,-14.919,-9.391,-14.6,-14.277,-10.798,-14.688,-8.739,-15.378,-13.364,-14.494,-14.651,-6.059,-15.511,-10.856,-15.086,-9.393,-15.368,-12.566,-15.384,-13.442,-9.291,-15.589,-9.679,-7.962,-15.115,-8.202,-15.09,-9.994,-14.807,-9.146,-14.918,-15.497,-6.471,-10.993,-8.674,-9.204,-9.401,-14.489,-9.467,-11.824,-10.536,-7.195,-14.315,-15.108,-13.854,-10.804,-10.71,-6.6,-15.105,-14.568,-15.391,-14.128,-14.697,-14.941,-15.241,-14.379,-13.985,-15.239,-11.245,-14.422,-13.318,-15.106,-9.418,-14.605,-13.188],[44.799,50.534,50.624,39.32,40.198,50.58,51.341,51.293,50.497,51.168,51.714,40.194,50.519,50.408,51.283,48.391,40.632,50.363,40.636,50.402,51.761,46.55,50.347,40.074,50.917,50.834,51.341,51.403,39.753,50.659,46.114,51.392,40.646,51.024,50.177,50.945,50.907,40.397,50.723,41.34,40.193,51.37,40.156,50.498,42.51,50.322,40.281,51.37,50.51,39.978,48.226,40.07,40.3,40.658,50.649,40.852,49.717,44.633,40.161,51.657,51.399,51.102,45.478,47.192,40.018,51.368,50.434,50.767,51.24,51.373,51.368,51.179,51.468,51.173,51.217,48.825,51.213,50.744,51.408,40.676,50.379,50.544],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["2010-12-27","2010-11-10","2010-11-17","2011-01-22","2011-01-12","2010-11-10","2010-12-08","2010-12-12","2010-11-20","2010-11-06","2010-11-03","2011-01-15","2010-11-21","2010-12-17","2010-12-04","2010-12-22","2011-01-09","2010-11-15","2011-01-08","2010-11-12","2010-11-03","2010-12-25","2010-11-13","2011-01-13","2010-11-28","2010-12-15","2010-12-10","2010-12-09","2011-01-19","2010-11-23","2010-12-26","2010-12-05","2011-01-08","2010-11-30","2010-12-18","2010-11-29","2010-12-15","2011-01-11","2010-11-26","2011-01-02","2011-01-15","2010-12-06","2011-01-15","2010-11-16","2010-12-31","2010-11-14","2011-01-12","2010-12-07","2010-11-21","2011-01-18","2010-12-22","2011-01-14","2011-01-12","2011-01-08","2010-11-09","2011-01-05","2010-12-20","2010-12-28","2011-01-17","2010-11-04","2010-12-05","2010-12-13","2010-12-26","2010-12-24","2011-01-18","2010-12-04","2010-11-11","2010-11-27","2010-12-12","2010-12-09","2010-12-07","2010-12-02","2010-11-05","2010-12-13","2010-12-03","2010-12-22","2010-11-06","2010-12-16","2010-12-05","2011-01-07","2010-11-12","2010-12-17"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-15.589,-5.722],"lng":[39.32,51.761]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-13.277,-14.08,-15.108,-15.362,-8.591,-15.467,-15.584,-13.985,-10.876,-15.122,-9.762,-15.471,-15.464,-10.806,-5.728,-14.643,-10.817,-5.96,-9.965,-9.364,-10.704,-15.241,-14.396,-10.078,-14.564,-14.423,-14.342,-15.539,-7.962,-10.187,-9.383,-9.303,-15.304,-8.806,-9.467,-15.589,-6.471,-10.466,-12.566,-14.128,-7.304,-5.809,-14.568,-8.739,-14.688,-15.583,-7.819,-14.546,-8.074,-15.388,-7.073,-15.351,-13.346,-14.434,-15.491,-15.368,-15.239,-14.982,-15.207,-14.864,-15.121,-15.538,-9.393,-8.415,-14.417,-14.738,-9.703,-9.146,-15.478,-12.031,-15.115,-9.665,-15.37,-10.043,-14.509,-15.424,-15.042,-10.856,-12.13,-14.983,-15.069,-10.908],[50.674,51.223,51.343,50.842,40.085,50.519,50.837,51.173,45.89,51.315,41.915,50.801,50.769,47.582,39.407,50.333,45.686,39.685,42.385,40.597,45.13,51.12,51.284,42.828,50.462,51.168,51.323,50.497,40.193,43.343,40.632,40.515,50.625,40.102,40.852,50.723,39.978,44.284,50.177,51.24,40.198,39.548,50.434,40.074,50.347,50.663,40.225,50.553,40.194,51.057,40.132,51,50.809,50.823,50.803,51.024,51.217,50.398,51.236,50.344,51.283,50.606,40.646,40.103,51.04,50.321,41.232,40.281,50.76,50.038,51.37,41.437,50.807,42.672,50.58,50.733,51.336,46.114,50.087,51.343,51.327,47.971],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["2010-12-16","2010-12-12","2010-12-06","2010-11-28","2011-01-14","2010-11-21","2010-11-25","2010-12-13","2010-12-26","2010-12-04","2011-01-01","2010-11-25","2010-11-24","2010-12-23","2011-01-21","2010-11-12","2010-12-26","2011-01-20","2010-12-31","2011-01-09","2010-12-27","2010-12-02","2010-11-06","2010-12-30","2010-11-11","2010-11-06","2010-12-11","2010-11-20","2011-01-15","2010-12-30","2011-01-09","2011-01-10","2010-11-17","2011-01-13","2011-01-05","2010-11-26","2011-01-18","2010-12-28","2010-12-18","2010-12-12","2011-01-17","2011-01-20","2010-11-11","2011-01-13","2010-11-13","2010-11-18","2011-01-16","2010-11-10","2011-01-15","2010-11-30","2011-01-17","2010-11-29","2010-12-16","2010-11-08","2010-11-25","2010-11-30","2010-12-03","2010-11-15","2010-12-03","2010-11-14","2010-12-04","2010-11-22","2011-01-08","2011-01-14","2010-11-07","2010-11-13","2011-01-03","2011-01-12","2010-11-24","2010-12-19","2010-12-06","2011-01-02","2010-11-28","2010-12-31","2010-11-10","2010-11-27","2010-12-06","2010-12-26","2010-12-19","2010-12-07","2010-12-06","2010-12-23"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-15.589,-5.728],"lng":[39.407,51.37]}},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 Figure 1: Sample locations of drifter with Id 70973 crossed within the tropical indian ocean
 </p>
@@ -331,7 +332,9 @@ sst_modis = xtracto(dtype = &quot;mhsstd8day&quot;,
 <h3>Stitching Drifter and MODIS dataset</h3>
 <p>Once the data was extracted from MODIS and loaded in the workspace, it was cleaned by removing variables not needed and then bind it with the drifter dataset using the <em>bind_cols()</em> function from <strong>dplyr</strong><a href="#fn10" class="footnoteRef" id="fnref10"><sup>10</sup></a> package.</p>
 <pre class="r"><code>sst.modis.clean =sst_modis%&gt;%
-  select(satellite.date = 4, satellite.sst.mean = 1, satellite.sst.median = 10 )
+  select(satellite.date = 4, 
+         satellite.sst.mean = 1, 
+         satellite.sst.median = 10 )
 
 ## bind the drifter data and extracted modis data
 drifter.modis = drifter.70973%&gt;%
@@ -362,197 +365,213 @@ knitr::kable(drifter.modis%&gt;%dplyr::sample_n(20),
 </thead>
 <tbody>
 <tr class="odd">
-<td align="center">2010-11-24</td>
-<td align="center">2010-11-21</td>
-<td align="center">50.73</td>
-<td align="center">-15.49</td>
-<td align="center">26.85</td>
-<td align="center">26.62</td>
-<td align="center">26.62</td>
+<td align="center">2011-01-08</td>
+<td align="center">2011-01-05</td>
+<td align="center">40.65</td>
+<td align="center">-9.39</td>
+<td align="center">29.30</td>
+<td align="center">29.47</td>
+<td align="center">29.45</td>
 </tr>
 <tr class="even">
-<td align="center">2010-11-22</td>
-<td align="center">2010-11-21</td>
-<td align="center">50.61</td>
-<td align="center">-15.54</td>
+<td align="center">2010-12-05</td>
+<td align="center">2010-12-07</td>
+<td align="center">51.39</td>
+<td align="center">-15.09</td>
 <td align="center">27.32</td>
-<td align="center">26.36</td>
-<td align="center">26.39</td>
+<td align="center">27.47</td>
+<td align="center">27.48</td>
 </tr>
 <tr class="odd">
-<td align="center">2010-11-19</td>
-<td align="center">2010-11-21</td>
-<td align="center">50.58</td>
-<td align="center">-15.66</td>
-<td align="center">26.92</td>
-<td align="center">26.25</td>
-<td align="center">26.24</td>
-</tr>
-<tr class="even">
-<td align="center">2010-11-15</td>
-<td align="center">2010-11-13</td>
-<td align="center">50.41</td>
-<td align="center">-15.01</td>
-<td align="center">26.31</td>
-<td align="center">26.28</td>
-<td align="center">26.25</td>
-</tr>
-<tr class="odd">
-<td align="center">2010-11-17</td>
-<td align="center">2010-11-13</td>
-<td align="center">50.60</td>
-<td align="center">-15.26</td>
-<td align="center">26.44</td>
-<td align="center">26.21</td>
-<td align="center">26.22</td>
-</tr>
-<tr class="even">
-<td align="center">2011-01-05</td>
-<td align="center">2011-01-05</td>
-<td align="center">40.81</td>
-<td align="center">-9.46</td>
-<td align="center">29.28</td>
-<td align="center">29.81</td>
-<td align="center">29.59</td>
-</tr>
-<tr class="odd">
-<td align="center">2010-11-06</td>
 <td align="center">2010-11-05</td>
-<td align="center">51.26</td>
-<td align="center">-14.42</td>
-<td align="center">26.38</td>
+<td align="center">2010-11-05</td>
+<td align="center">51.40</td>
+<td align="center">-14.36</td>
+<td align="center">26.43</td>
 <td align="center">26.39</td>
-<td align="center">26.40</td>
+<td align="center">26.41</td>
 </tr>
 <tr class="even">
-<td align="center">2011-01-12</td>
-<td align="center">2011-01-13</td>
-<td align="center">40.28</td>
-<td align="center">-9.15</td>
-<td align="center">29.24</td>
-<td align="center">29.19</td>
-<td align="center">29.16</td>
+<td align="center">2010-12-01</td>
+<td align="center">2010-11-29</td>
+<td align="center">51.08</td>
+<td align="center">-15.27</td>
+<td align="center">27.64</td>
+<td align="center">26.94</td>
+<td align="center">26.98</td>
+</tr>
+<tr class="odd">
+<td align="center">2010-11-18</td>
+<td align="center">2010-11-21</td>
+<td align="center">50.65</td>
+<td align="center">-15.47</td>
+<td align="center">26.52</td>
+<td align="center">26.53</td>
+<td align="center">26.60</td>
+</tr>
+<tr class="even">
+<td align="center">2010-12-03</td>
+<td align="center">2010-11-29</td>
+<td align="center">51.22</td>
+<td align="center">-15.24</td>
+<td align="center">27.45</td>
+<td align="center">26.99</td>
+<td align="center">27.00</td>
 </tr>
 <tr class="odd">
 <td align="center">2010-12-26</td>
 <td align="center">2010-12-23</td>
-<td align="center">45.48</td>
-<td align="center">-10.80</td>
-<td align="center">29.27</td>
-<td align="center">29.03</td>
-<td align="center">29.02</td>
+<td align="center">46.11</td>
+<td align="center">-10.86</td>
+<td align="center">29.20</td>
+<td align="center">28.76</td>
+<td align="center">28.74</td>
 </tr>
 <tr class="even">
-<td align="center">2010-11-09</td>
+<td align="center">2010-12-31</td>
+<td align="center">2010-12-29</td>
+<td align="center">42.67</td>
+<td align="center">-10.04</td>
+<td align="center">28.70</td>
+<td align="center">29.22</td>
+<td align="center">29.07</td>
+</tr>
+<tr class="odd">
+<td align="center">2011-01-19</td>
+<td align="center">2011-01-21</td>
+<td align="center">39.89</td>
+<td align="center">-6.34</td>
+<td align="center">29.21</td>
+<td align="center">28.85</td>
+<td align="center">28.87</td>
+</tr>
+<tr class="even">
+<td align="center">2010-12-04</td>
+<td align="center">2010-12-07</td>
+<td align="center">51.37</td>
+<td align="center">-15.11</td>
+<td align="center">27.43</td>
+<td align="center">27.49</td>
+<td align="center">27.48</td>
+</tr>
+<tr class="odd">
+<td align="center">2010-12-14</td>
+<td align="center">2010-12-15</td>
+<td align="center">51.07</td>
+<td align="center">-13.78</td>
+<td align="center">27.71</td>
+<td align="center">27.39</td>
+<td align="center">27.40</td>
+</tr>
+<tr class="even">
+<td align="center">2010-11-03</td>
 <td align="center">2010-11-05</td>
-<td align="center">50.76</td>
-<td align="center">-14.44</td>
-<td align="center">26.31</td>
-<td align="center">26.59</td>
-<td align="center">26.58</td>
-</tr>
-<tr class="odd">
-<td align="center">2011-01-04</td>
-<td align="center">2011-01-05</td>
-<td align="center">41.15</td>
-<td align="center">-9.68</td>
-<td align="center">29.14</td>
-<td align="center">30.78</td>
-<td align="center">30.68</td>
-</tr>
-<tr class="even">
-<td align="center">2010-11-11</td>
-<td align="center">2010-11-13</td>
-<td align="center">50.46</td>
-<td align="center">-14.56</td>
-<td align="center">26.29</td>
-<td align="center">26.02</td>
-<td align="center">26.03</td>
-</tr>
-<tr class="odd">
-<td align="center">2011-01-09</td>
-<td align="center">2011-01-05</td>
-<td align="center">40.63</td>
-<td align="center">-9.38</td>
-<td align="center">29.17</td>
-<td align="center">29.53</td>
-<td align="center">29.48</td>
-</tr>
-<tr class="even">
-<td align="center">2010-12-20</td>
-<td align="center">2010-12-23</td>
-<td align="center">49.63</td>
-<td align="center">-11.76</td>
-<td align="center">28.69</td>
-<td align="center">28.20</td>
-<td align="center">28.28</td>
-</tr>
-<tr class="odd">
-<td align="center">2010-11-16</td>
-<td align="center">2010-11-13</td>
-<td align="center">50.50</td>
-<td align="center">-15.09</td>
-<td align="center">26.33</td>
-<td align="center">26.16</td>
+<td align="center">51.82</td>
+<td align="center">-14.26</td>
+<td align="center">26.46</td>
+<td align="center">26.13</td>
 <td align="center">26.13</td>
 </tr>
-<tr class="even">
-<td align="center">2010-12-15</td>
-<td align="center">2010-12-15</td>
-<td align="center">50.90</td>
-<td align="center">-13.40</td>
-<td align="center">28.40</td>
-<td align="center">27.26</td>
-<td align="center">27.27</td>
-</tr>
 <tr class="odd">
-<td align="center">2010-12-30</td>
-<td align="center">2010-12-29</td>
-<td align="center">43.34</td>
-<td align="center">-10.19</td>
-<td align="center">28.79</td>
-<td align="center">29.59</td>
-<td align="center">29.61</td>
-</tr>
-<tr class="even">
-<td align="center">2010-12-13</td>
-<td align="center">2010-12-15</td>
-<td align="center">51.16</td>
-<td align="center">-13.93</td>
-<td align="center">28.06</td>
-<td align="center">27.39</td>
-<td align="center">27.38</td>
-</tr>
-<tr class="odd">
-<td align="center">2010-11-06</td>
 <td align="center">2010-11-05</td>
-<td align="center">51.28</td>
-<td align="center">-14.40</td>
-<td align="center">26.35</td>
-<td align="center">26.38</td>
-<td align="center">26.39</td>
+<td align="center">2010-11-05</td>
+<td align="center">51.47</td>
+<td align="center">-14.38</td>
+<td align="center">26.40</td>
+<td align="center">26.40</td>
+<td align="center">26.42</td>
 </tr>
 <tr class="even">
-<td align="center">2011-01-15</td>
+<td align="center">2010-12-07</td>
+<td align="center">2010-12-07</td>
+<td align="center">51.37</td>
+<td align="center">-14.94</td>
+<td align="center">28.09</td>
+<td align="center">27.43</td>
+<td align="center">27.40</td>
+</tr>
+<tr class="odd">
+<td align="center">2010-12-01</td>
+<td align="center">2010-11-29</td>
+<td align="center">51.03</td>
+<td align="center">-15.37</td>
+<td align="center">27.30</td>
+<td align="center">26.99</td>
+<td align="center">27.01</td>
+</tr>
+<tr class="even">
+<td align="center">2011-01-09</td>
+<td align="center">2011-01-05</td>
+<td align="center">40.60</td>
+<td align="center">-9.37</td>
+<td align="center">29.20</td>
+<td align="center">29.61</td>
+<td align="center">29.53</td>
+</tr>
+<tr class="odd">
+<td align="center">2010-12-19</td>
+<td align="center">2010-12-15</td>
+<td align="center">50.09</td>
+<td align="center">-12.13</td>
+<td align="center">28.42</td>
+<td align="center">27.45</td>
+<td align="center">27.45</td>
+</tr>
+<tr class="even">
+<td align="center">2010-12-29</td>
+<td align="center">2010-12-29</td>
+<td align="center">43.51</td>
+<td align="center">-10.24</td>
+<td align="center">28.89</td>
+<td align="center">29.84</td>
+<td align="center">29.84</td>
+</tr>
+<tr class="odd">
+<td align="center">2010-11-15</td>
+<td align="center">2010-11-13</td>
+<td align="center">50.39</td>
+<td align="center">-14.95</td>
+<td align="center">26.35</td>
+<td align="center">26.26</td>
+<td align="center">26.23</td>
+</tr>
+<tr class="even">
 <td align="center">2011-01-13</td>
-<td align="center">40.16</td>
-<td align="center">-8.20</td>
-<td align="center">29.44</td>
-<td align="center">29.16</td>
-<td align="center">29.16</td>
+<td align="center">2011-01-13</td>
+<td align="center">40.07</td>
+<td align="center">-8.74</td>
+<td align="center">29.41</td>
+<td align="center">28.94</td>
+<td align="center">28.97</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div id="validation" class="section level3">
 <h3>Validation</h3>
-<pre class="r"><code>rmse = pracma::rmserr(drifter.modis$drifter.sst, drifter.modis$satellite.sst.mean, summary = FALSE)
+<pre class="r"><code>rmse = pracma::rmserr(drifter.modis$drifter.sst, 
+                      drifter.modis$satellite.sst.mean, 
+                      summary = FALSE)
 
-estimator = c(&quot;Mean Absolute&quot;, &quot;Mean Squared&quot;,&quot;Root Mean Square&quot;,&quot;Mean Absolute Percentage&quot;,&quot;Normalized Mean Squared&quot;,&quot;Relative Standard Deviation&quot;)
+estimator = c(&quot;Mean Absolute&quot;, &quot;Mean Squared&quot;,
+              &quot;Root Mean Square&quot;,&quot;Mean Absolute Percentage&quot;,
+              &quot;Normalized Mean Squared&quot;,&quot;Relative Standard Deviation&quot;)
 
-rmse.t = rmse%&gt;%as.data.frame()%&gt;%t()%&gt;%as.data.frame()%&gt;%rename(&quot;Error&quot; = V1)%&gt;%data.frame(estimator)%&gt;%as.tibble()%&gt;%select(2,1)%&gt;%  arrange(Error)</code></pre>
+rmse.t = rmse%&gt;%
+  as.data.frame()%&gt;%
+  t()%&gt;%
+  as.data.frame()%&gt;%
+  rename(&quot;Error&quot; = V1)%&gt;%
+  data.frame(estimator)%&gt;%
+  as.tibble()%&gt;%
+  select(2,1)%&gt;%  
+  arrange(Error)</code></pre>
 <p>To assess the accuracy of MODIS sea surface temperature, I tested MODIS data against drifter observations using six different algorithms (Table <a href="#tab:tab3">3</a>). The Mean Absolute Percentage algorithm had the highest accuracy of 0.014906<span class="math inline">\(^{\circ}\)</span> Celcius and the Root Mean Square achieved the lowest accuracy of 0.5587292<span class="math inline">\(^{\circ}\)</span> Celsius. In general, the sea surface temperature from modis showed a mean accuracy of 0.261438<span class="math inline">\(^{\circ}\)</span> Celsius.</p>
-<pre class="r"><code>knitr::kable(rmse.t, digits = 2, align = &quot;l&quot;, col.names = c(&quot;Estimator&quot;, &quot;Value (Degree Celsius)&quot;), caption = &quot;Error estimates of surface current with various tools&quot;)</code></pre>
+<pre class="r"><code>knitr::kable(rmse.t, 
+             digits = 2, 
+             align = &quot;l&quot;, 
+             col.names = c(&quot;Estimator&quot;, &quot;Value (Degree Celsius)&quot;), 
+             caption = &quot;Error estimates of surface current with various tools&quot;)</code></pre>
 <table>
 <caption><span id="tab:tab3">Table 3: </span>Error estimates of surface current with various tools</caption>
 <thead>
@@ -589,7 +608,8 @@ rmse.t = rmse%&gt;%as.data.frame()%&gt;%t()%&gt;%as.data.frame()%&gt;%rename(&qu
 </tbody>
 </table>
 <pre class="r"><code>## computing the correlation coefficient
-pear = cor.test(drifter.modis$drifter.sst, drifter.modis$satellite.sst.mean)</code></pre>
+pear = cor.test(drifter.modis$drifter.sst, 
+                drifter.modis$satellite.sst.mean)</code></pre>
 <p>The accuracy of the sea surface temperature is also supported by Figure <a href="#fig:fig3">3</a>, which show the positive association of sea surface temperature between in-situ drifter observations and MODIS satellite data (R<sup>2</sup> = 0.92). This association was significant ( t_(1,324)_ = t &lt; 41.5847664 , <em>p</em> = 5.951450210^{-132})</p>
 <pre class="r"><code>ggplot(data = drifter.modis, 
        aes(x = drifter.sst, y = satellite.sst.mean))+
