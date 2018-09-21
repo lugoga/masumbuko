@@ -1,4 +1,4 @@
-baseurl = "/"
+baseurl = "https://semba-blog.netlify.com/"
 languageCode = "en-us"
 title = "Masumbuko Semba"
 theme = "hugo-lithium"
