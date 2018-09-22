@@ -65,7 +65,7 @@
 
   <article class="article">
     
-    <span class="article-duration">7 min read</span>
+    <span class="article-duration">8 min read</span>
     
 
     <h1 class="article-title">Processing CTD measurements in R with Oce and tidyverse packages</h1>
@@ -583,12 +583,55 @@ knitr::kable(ctd.tb.all.info, digits = 2, align = &quot;c&quot;,
 </tr>
 </tbody>
 </table>
-<p><strong>Leaflet</strong><a href="#fn7" class="footnoteRef" id="fnref7"><sup>7</sup></a> package developed by Cheng and others (2017) was used to create an interactive map using the geographical positions (longitude and latitude) of the CTD casts in coastal water of the Pemba and Zanzibar channel (Figure <a href="#fig:fig2"><strong>??</strong></a>).</p>
+<p><strong>Leaflet</strong><a href="#fn7" class="footnoteRef" id="fnref7"><sup>7</sup></a> package developed by Cheng and others (2017) was used to create an interactive map using the geographical positions (longitude and latitude) of the CTD casts in coastal water of the Pemba and Zanzibar channel (Figure <a href="#fig:fig2"><strong>??</strong></a>). Because the map is interactive, you can zoom and pan. You can also click on the symbol and a station name will popup.</p>
 <pre class="r"><code>leaflet(data = ctd.tb.all.info)%&gt;%
   addTiles()%&gt;%
   addMarkers(lng = ~lon, lat = ~lat, popup = ~station)</code></pre>
 <div id="htmlwidget-1" style="width:672px;height:480px;" class="leaflet html-widget"></div>
 <script type="application/json" data-for="htmlwidget-1">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-5.02016666666667,-5.265,-5.437,-5.714,-5.92533333333333,-6.1355,-6.2595,-6.4895,-6.67183333333333],[39.2936666666667,39.2406666666667,39.187,39.1095,39.0703333333333,38.9923333333333,39.0065,39.2426666666667,39.3546666666667],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["AM00882","AM00883","AM00884","AM00885","AM00886","AM00887","AM00888","AM00889","AM00890"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-6.67183333333333,-5.02016666666667],"lng":[38.9923333333333,39.3546666666667]}},"evals":[],"jsHooks":[]}</script>
+<p>Figure <a href="#fig:fig3"><strong>??</strong></a> show the vertical structure of temperature for the nine stations. BUt the the hydrographic section leaves the gap between the stations. This is because the <em>geom_raster()</em> requirest equally spaced interval. To achive this, I used akima package to interpolate temperature based on equal spaced latitude and pressure. The figur <a href="#fig:fig4"><strong>??</strong></a> show the vertical structure of interpolated temperature from the surface to 40 meter deep of the the nine stations.</p>
+<pre class="r"><code>ggplot(data = ctd.tb.all%&gt;%na.omit(), 
+       aes(x = lat, y = pressure))+
+  geom_raster(aes(fill = temperature), interpolate = FALSE)+
+  scale_y_reverse()+
+  scale_fill_gradientn(colours = oceColorsJet(120), name = &quot;Temperature&quot;)+
+  theme_bw()+
+  theme(legend.key.height = unit(3.5, &quot;lines&quot;), 
+        axis.text = element_text(colour = 1, size = 10),
+        axis.title = element_text(colour = 1, size = 12),
+        panel.grid = element_blank())+
+  labs(x = &quot;Latitude&quot;, y = &quot;Pressure (dba)&quot;)</code></pre>
+<p><img src="/post/2018-09-22-processing-ctd-measurements-in-r-with-oce-and-tidyverse-packages_files/figure-html/fig3-1.png" width="672" /></p>
+<pre class="r"><code># temp.interp = interpBarnes(x = ctd.tb.all$lat, 
+#                            y = ctd.tb.all$pressure, 
+#                            z = ctd.tb.all$temperature)
+
+ctd.tb.all = ctd.tb.all%&gt;%na.omit()
+
+temp.interp = akima::interp(x = ctd.tb.all$lat, 
+              y = ctd.tb.all$pressure, 
+              z = ctd.tb.all$temperature, 
+              duplicate = &quot;mean&quot;, nx = 200, ny = 200)
+
+temp.interp = akima::interp2xyz(temp.interp)%&gt;%as.tibble()%&gt;%rename(latitude = x, pressure = y, temperature = z)%&gt;%na.omit()%&gt;%filter(pressure &lt;=40 &amp; pressure &gt; 4)
+  
+  
+  ggplot(data = temp.interp, aes(x = latitude, y = pressure))+
+    geom_raster(aes(fill = temperature), interpolate = TRUE)+
+    geom_contour(aes(z = temperature), col = 1)+
+    scale_fill_gradientn(colours = oce.colorsJet(120), name = &quot;Temperature&quot;)+
+    scale_y_reverse()+
+    theme_bw()+
+    theme(legend.key.height = unit(3.5, &quot;lines&quot;), 
+          axis.text = element_text(colour = 1, size = 10),
+          axis.title = element_text(colour = 1, size = 12),
+          panel.grid = element_blank())+
+    labs(x = &quot;Latitude&quot;, y = &quot;Pressure (dba)&quot;)</code></pre>
+<p><img src="/post/2018-09-22-processing-ctd-measurements-in-r-with-oce-and-tidyverse-packages_files/figure-html/fig4-1.png" width="672" /></p>
+<div id="conclusion" class="section level3">
+<h3>Conclusion</h3>
+<p>This post illustrate the processing of oceanographic data in R using a combination of packages to achieve a standard plot of temperature profile and section.</p>
+</div>
 <div id="cited-articles" class="section level3">
 <h3>Cited Articles</h3>
 </div>
