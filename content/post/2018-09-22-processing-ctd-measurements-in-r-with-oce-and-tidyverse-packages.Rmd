@@ -1,0 +1,200 @@
+---
+title: Processing CTD measurements in R with Oce and tidyverse packages
+author: Masumbuko Semba
+date: '2018-09-22'
+slug: processing-ctd-measurements-in-r-with-oce-and-tidyverse-packages
+categories:
+  - Oceanography
+  - R
+  - Technical
+tags:
+  - CTD
+  - Indian Ocean
+  - Masumbuko Semba
+  - Pemba Channel
+  - Salinity
+  - Temperature
+  - Depth
+  - Tanzania
+  - IIOE-2
+---
+
+In the [previous post](https://semba-blog.netlify.com/09/21/2018/vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements/), I illustrate how to process ship-based CTD data with *oce*^[Kelley, D., & Richards, C. (2017). oce: Analysis of Oceanographic Data. R package version 0.9-22.] package in **R**^[eam, R. C. (2015). R: A language and environment for statistical computing.] enviroment. We saw the power of this package in reading, summarizing and visualizing CTD data. The downside of oce package in my opinion is its strickest nature of relying on R base for data processing and plotting---preventing customization. Therefore, in this post I will illustrate how to tranforming oce dataset format into a tibble---a modern data frame. Once we have CTD measurements, we can use the power of *tidyverse*^[Wickham, H. (2017). Tidyverse: Easily install and load’tidyverse’packages. R package version, 1(1).] package to easy tidy^[Wickham, H. (2016). tidyr: Easily Tidy Data with spread () and gather () Functions. Version 0.6. 0.], manipulate^[Wickham, H., Francois, R., Henry, L., & Müller, K. (2015). dplyr: A grammar of data manipulation. R package version 0.4, 3.] CTD data and visualize^[Wickham, H. (2016). ggplot2: elegant graphics for data analysis. Springer.] the results in a more elegent way.
+
+You need to install several packages (if not yet installed) that I am goint to use in this post.
+
+```{r package, message=FALSE, comment="", warning=FALSE}
+require(oce)
+require(ocedata)
+require(sf)
+require(leaflet)
+require(tidyverse)
+
+```
+
+Since I need to process all the CTD stations at once, I loop them. Before I loop the files, the path of each file must be determined, which can easily done in R with the *dir()* function.
+
+```{r}
+### Identify the list in the directory
+files = dir(path = "./ctd18/", pattern = ".cnv", full.names = TRUE )
+
+```
+
+The loop through to read the CTD files from the nine stations. However, before we loop, a container to store the files during the looping process is required. I preallocated the file using the *list()* and then loop the process with a **FOR** function
+```{r}
+
+## preallocate the container to store the individual 
+ctd = list()
+
+### Loop the CNV file and create a list of casted CTD
+for (i in 1:length(files)){
+  
+ctd[[i]]  = read.ctd(files[i])%>%
+  ctdTrim(method = "downcast")%>% # select downcast
+  ctdDecimate(p = 1) # align to the same standard pressure
+}
+```
+
+Once the list of CTD stations are created, each station can individually separated from a list and transform it from oce format to a tibble. This involves extracting CTD measurement of the first station, then use *mutate()* from **dpyr** package to adding station name, date of cast, longitude and latitude of station. I used the pipe operator **(%>%)** to chain the process.
+
+```{r,  include=FALSE}
+
+ctd.tb = ctd[[1]]@data%>%as.data.frame()%>%
+  dplyr::mutate(cruise = ctd[[1]]@metadata$cruise,
+               station = ctd[[1]]@metadata$station,
+               date = ctd[[1]]@metadata$date, 
+               lon = ctd[[1]]@metadata$longitude,
+               lat = ctd[[1]]@metadata$latitude)
+
+
+```
+
+Table \@ref(tab:tab1) show the the randomly selected cleaned CTD measurements of Station AM00882 casted. For simplist, the data were aligned in the standard pressure interval of 20 meters.
+```{r tab1}
+## select variables of interest
+ctd.tb = ctd.tb%>%
+  select(cruise, station, date, lon,lat, 
+         pressure, depth, temperature, 
+         conductivity, salinity, oxygen, 
+         fluorescence, turbidity = turbidity2)
+
+## summarize the table of station 1
+knitr::kable(ctd.tb%>%
+               dplyr::slice(seq(1,500,20))%>%
+               select(-c(cruise, station, depth, turbidity))%>%
+               mutate(date = as.Date(date)), 
+             digits = 2, caption = "Summary of CTD measurement at station AM00882 spaced at 20 meter interval", 
+             col.names = c("Date", "Longitude", "Latitude","Pressure", "Temperature",
+                           "Conductivity","Salinity", "O2", "Fluorescence"),
+             align = "c")
+
+
+```
+
+I then used ggplot2 package to make standard oceanographic profiles of temperature, salinity and oxygen (Figure \@ref(fig:fig1)).
+```{r fig1, fig.cap="Profile of Temperature, salinity and oxygen collected at Station AM00882 ", warning=FALSE, message=FALSE}
+
+temp = ggplot(data = ctd.tb, aes(x = temperature, y = pressure))+
+  geom_path(col = "red")+
+  scale_y_reverse()+
+  scale_x_continuous(position = "top", breaks = seq(12,30,6))+
+  theme_bw()+
+  theme(axis.text = element_text(colour = "black", size = 10),
+        axis.title = element_text(colour = "black", size = 12),
+        panel.grid = element_blank(),
+        panel.background = element_rect(colour = "black", fill = NULL))+
+    labs(y="Pressure (dbar)",
+         x=expression(Temperature~(~degree~C)))
+
+ salinity = ggplot(data = ctd.tb, aes(x = salinity, y = pressure))+
+  geom_path(col = "red")+
+  scale_y_reverse()+
+  scale_x_continuous(position = "top", breaks = seq(34.8,35.4,0.1))+
+  theme_bw()+
+  theme(axis.text = element_text(colour = "black", size = 10),
+        axis.title = element_text(colour = "black", size = 12),
+        panel.grid = element_blank(),
+        panel.background = element_rect(colour = "black", fill = NULL))+
+    labs(y="Pressure (dbar)",
+         x= "Salinity")
+ 
+ oxygen = ggplot(data = ctd.tb, aes(x = oxygen, y = pressure))+
+  geom_path(col = "red")+
+  scale_y_reverse()+
+  scale_x_continuous(position = "top", breaks = seq(2.2,4,.5))+
+  theme_bw()+
+  theme(axis.text = element_text(colour = "black", size = 10),
+        axis.title = element_text(colour = "black", size = 12),
+        panel.grid = element_blank(),
+        panel.background = element_rect(colour = "black", fill = NULL))+
+    labs(y="Pressure (dbar)",
+         x=expression(Oxygen~(~mlL^-1)))
+ 
+ cowplot::plot_grid(temp, salinity, oxygen, nrow = 1)
+```
+
+That is for a single station, but hydrographic section requires more than one stations stitched together to render smoothed profiles based on either time, distance, latitude or longitude. Therefore, I am going to loop through to make a tibble of several stations and then plot the hydrogphic section with ggplot2 package. In a nutshell, the process involves three steps. First, create empty container with *NULL()* function that will store individual tibble generate. Second, a dplyr's *bind_row() *function was used to stitch to the bottom each generated file in a sequential order. Third, dplyr's select() function was used to pick variable of interest and drop the rest. Note that the selection process is done outside the loop boundary, because this is done after the looping process is complete. You can also chain the selection process inside the loop and you will have no problem.
+
+```{r,  include=FALSE}
+ctd.tb.all = NULL
+
+for (j in 1:9){
+
+ctd.tb = ctd[[j]]@data%>%as.data.frame()%>%
+  dplyr::mutate(cruise = ctd[[j]]@metadata$cruise,
+               station = ctd[[j]]@metadata$station,
+               date = ctd[[j]]@metadata$date, 
+               lon = ctd[[j]]@metadata$longitude,
+               lat = ctd[[j]]@metadata$latitude)
+
+ctd.tb.all = ctd.tb.all%>%bind_rows(ctd.tb)
+}
+
+
+## select variables of interest
+ctd.tb.all = ctd.tb.all%>%
+  select(cruise, station, date, lon,lat, 
+         pressure, depth, temperature, 
+         conductivity, salinity, oxygen, 
+         fluorescence, turbidity = turbidity2)
+```
+
+Table \@ref(tab:tab2) show the stations, number of scan, the minimum and maximum depth in each station. 
+```{r tab2}
+ctd.tb.all.summary = ctd.tb.all%>%
+  group_by(station)%>%
+  summarise(count = n(), 
+            min.depth = min(depth, na.rm = TRUE), 
+            max.depth = max(depth, na.rm = TRUE))
+
+knitr::kable(ctd.tb.all.summary, digits = 2, align = "c", 
+             col.names = c("Station", "Counts", 
+                           "Minimum Depth (m)", 
+                           "Maximum Depth (m)"),
+             caption = "The summary of the nine stations")
+```
+
+
+Using the *distinct()* function from dplyr package, I was able to identify the unique date and time of CTD cast and the longitude and latitude of each station (Table \@ref(tab:tab3)). 
+```{r tab3}
+ctd.tb.all.info = ctd.tb.all%>%
+  distinct(station, lon, lat, date)%>%
+  separate(date, c("date", "time"), sep = " ")
+
+knitr::kable(ctd.tb.all.info, digits = 2, align = "c", 
+             col.names = c("Station", "Date of cast", "Time of cast", "Longitude", "Latitude"),
+             caption = "The geographical locations, the date and time of casts of the nine stations")
+```
+
+**Leaflet**^[Cheng, J., Karambelkar, B., Xie, Y., Wickham, H., Russell, K., & Johnson, K. Leaflet: Create Interactive Web Maps with the JavaScript “Leaflet” Library (2017). URL https://CRAN. R-project. org/package= leaflet. R package version, 1(1), 134.] package developed by Cheng and others (2017) was used to create an interactive map using the geographical positions (longitude and latitude) of the CTD casts in coastal water of the Pemba and Zanzibar channel (Figure \@ref(fig:fig2)).
+```{r fig2, fig.cap=""}
+
+leaflet(data = ctd.tb.all.info)%>%
+  addTiles()%>%
+  addMarkers(lng = ~lon, lat = ~lat, popup = ~station)
+```
+
+
+
+
+### Cited Articles

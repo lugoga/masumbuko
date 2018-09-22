@@ -1,6 +1,5 @@
 ---
 title: Processing ship-based CTD measurements in Pemba Channel with R
-  from CTD Measurements
 author: Masumbuko Semba
 date: '2018-09-21'
 slug: vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements
@@ -254,15 +253,6 @@ section.gridded%>%
 
 ### Make a data frame of CTD cast from the List
 We have seen the oce package make it eay to read, summarize and visualize CTD data. So far we dealt with oce package processing and plotting, which use base graphic package. The next post will deal with tranforming oce dataset format into a tibble---a modern data frame. A tibble allows to tidy^[Wickham, H. (2016). tidyr: Easily Tidy Data with spread () and gather () Functions. Version 0.6. 0.], manipulate^[Wickham, H., Francois, R., Henry, L., & Müller, K. (2015). dplyr: A grammar of data manipulation. R package version 0.4, 3.] CTD data and visualize^[Wickham, H. (2016). ggplot2: elegant graphics for data analysis. Springer.] profiles and section easily with tidyverse^[Wickham, H. (2017). Tidyverse: Easily install and load’tidyverse’packages. R package version, 1(1).].
-
-```{r, eval=FALSE, include=FALSE}
-ctd[[1]]@data%>%as.data.frame()%>%
-  dplyr::mutate(cruise = ctd[[1]]@metadata$cruise,
-                station = ctd[[1]]@metadata$station,
-                date = ctd[[1]]@metadata$date, 
-                lon = ctd[[1]]@metadata$longitude,
-                lat = ctd[[1]]@metadata$latitude)
-```
 
 
 ### Cited Literature

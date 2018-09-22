@@ -1,0 +1,550 @@
+---
+title: Processing CTD measurements in R with Oce and tidyverse packages
+author: Masumbuko Semba
+date: '2018-09-22'
+slug: processing-ctd-measurements-in-r-with-oce-and-tidyverse-packages
+categories:
+  - Oceanography
+  - R
+  - Technical
+tags:
+  - CTD
+  - Indian Ocean
+  - Masumbuko Semba
+  - Pemba Channel
+  - Salinity
+  - Temperature
+  - Depth
+  - Tanzania
+  - IIOE-2
+---
+
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/leaflet/leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet/leaflet.js"></script>
+<link href="/rmarkdown-libs/leafletfix/leafletfix.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4-compressed.js"></script>
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4leaflet.js"></script>
+<link href="/rmarkdown-libs/rstudio_leaflet/rstudio_leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet-binding/leaflet.js"></script>
+
+
+<p>In the <a href="https://semba-blog.netlify.com/09/21/2018/vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements/">previous post</a>, I illustrate how to process ship-based CTD data with <em>oce</em><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> package in <strong>R</strong><a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> enviroment. We saw the power of this package in reading, summarizing and visualizing CTD data. The downside of oce package in my opinion is its strickest nature of relying on R base for data processing and plotting—preventing customization. Therefore, in this post I will illustrate how to tranforming oce dataset format into a tibble—a modern data frame. Once we have CTD measurements, we can use the power of <em>tidyverse</em><a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> package to easy tidy<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a>, manipulate<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a> CTD data and visualize<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a> the results in a more elegent way.</p>
+<p>You need to install several packages (if not yet installed) that I am goint to use in this post.</p>
+<pre class="r"><code>require(oce)
+require(ocedata)
+require(sf)
+require(leaflet)
+require(tidyverse)</code></pre>
+<p>Since I need to process all the CTD stations at once, I loop them. Before I loop the files, the path of each file must be determined, which can easily done in R with the <em>dir()</em> function.</p>
+<pre class="r"><code>### Identify the list in the directory
+files = dir(path = &quot;./ctd18/&quot;, pattern = &quot;.cnv&quot;, full.names = TRUE )</code></pre>
+<p>The loop through to read the CTD files from the nine stations. However, before we loop, a container to store the files during the looping process is required. I preallocated the file using the <em>list()</em> and then loop the process with a <strong>FOR</strong> function</p>
+<pre class="r"><code>## preallocate the container to store the individual 
+ctd = list()
+
+### Loop the CNV file and create a list of casted CTD
+for (i in 1:length(files)){
+  
+ctd[[i]]  = read.ctd(files[i])%&gt;%
+  ctdTrim(method = &quot;downcast&quot;)%&gt;% # select downcast
+  ctdDecimate(p = 1) # align to the same standard pressure
+}</code></pre>
+<p>Once the list of CTD stations are created, each station can individually separated from a list and transform it from oce format to a tibble. This involves extracting CTD measurement of the first station, then use <em>mutate()</em> from <strong>dpyr</strong> package to adding station name, date of cast, longitude and latitude of station. I used the pipe operator <strong>(%&gt;%)</strong> to chain the process.</p>
+<p>Table <a href="#tab:tab1">1</a> show the the randomly selected cleaned CTD measurements of Station AM00882 casted. For simplist, the data were aligned in the standard pressure interval of 20 meters.</p>
+<pre class="r"><code>## select variables of interest
+ctd.tb = ctd.tb%&gt;%
+  select(cruise, station, date, lon,lat, 
+         pressure, depth, temperature, 
+         conductivity, salinity, oxygen, 
+         fluorescence, turbidity = turbidity2)
+
+## summarize the table of station 1
+knitr::kable(ctd.tb%&gt;%
+               dplyr::slice(seq(1,500,20))%&gt;%
+               select(-c(cruise, station, depth, turbidity))%&gt;%
+               mutate(date = as.Date(date)), 
+             digits = 2, caption = &quot;Summary of CTD measurement at station AM00882 spaced at 20 meter interval&quot;, 
+             col.names = c(&quot;Date&quot;, &quot;Longitude&quot;, &quot;Latitude&quot;,&quot;Pressure&quot;, &quot;Temperature&quot;,
+                           &quot;Conductivity&quot;,&quot;Salinity&quot;, &quot;O2&quot;, &quot;Fluorescence&quot;),
+             align = &quot;c&quot;)</code></pre>
+<table>
+<caption><span id="tab:tab1">Table 1: </span>Summary of CTD measurement at station AM00882 spaced at 20 meter interval</caption>
+<thead>
+<tr class="header">
+<th align="center">Date</th>
+<th align="center">Longitude</th>
+<th align="center">Latitude</th>
+<th align="center">Pressure</th>
+<th align="center">Temperature</th>
+<th align="center">Conductivity</th>
+<th align="center">Salinity</th>
+<th align="center">O2</th>
+<th align="center">Fluorescence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">0</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">20</td>
+<td align="center">26.93</td>
+<td align="center">5.51</td>
+<td align="center">34.96</td>
+<td align="center">3.96</td>
+<td align="center">0.34</td>
+</tr>
+<tr class="odd">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">40</td>
+<td align="center">26.92</td>
+<td align="center">5.50</td>
+<td align="center">34.96</td>
+<td align="center">3.94</td>
+<td align="center">0.34</td>
+</tr>
+<tr class="even">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">60</td>
+<td align="center">26.90</td>
+<td align="center">5.50</td>
+<td align="center">34.96</td>
+<td align="center">3.95</td>
+<td align="center">0.31</td>
+</tr>
+<tr class="odd">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">80</td>
+<td align="center">26.89</td>
+<td align="center">5.50</td>
+<td align="center">34.96</td>
+<td align="center">3.94</td>
+<td align="center">0.33</td>
+</tr>
+<tr class="even">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">100</td>
+<td align="center">26.87</td>
+<td align="center">5.50</td>
+<td align="center">34.96</td>
+<td align="center">3.92</td>
+<td align="center">0.35</td>
+</tr>
+<tr class="odd">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">120</td>
+<td align="center">23.28</td>
+<td align="center">5.16</td>
+<td align="center">35.17</td>
+<td align="center">3.34</td>
+<td align="center">0.17</td>
+</tr>
+<tr class="even">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">140</td>
+<td align="center">18.19</td>
+<td align="center">4.64</td>
+<td align="center">35.22</td>
+<td align="center">2.55</td>
+<td align="center">0.06</td>
+</tr>
+<tr class="odd">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">160</td>
+<td align="center">17.45</td>
+<td align="center">4.56</td>
+<td align="center">35.20</td>
+<td align="center">2.53</td>
+<td align="center">0.06</td>
+</tr>
+<tr class="even">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">180</td>
+<td align="center">16.66</td>
+<td align="center">4.49</td>
+<td align="center">35.19</td>
+<td align="center">2.49</td>
+<td align="center">0.02</td>
+</tr>
+<tr class="odd">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">200</td>
+<td align="center">16.51</td>
+<td align="center">4.47</td>
+<td align="center">35.19</td>
+<td align="center">2.52</td>
+<td align="center">0.02</td>
+</tr>
+<tr class="even">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">220</td>
+<td align="center">15.49</td>
+<td align="center">4.37</td>
+<td align="center">35.19</td>
+<td align="center">2.58</td>
+<td align="center">0.02</td>
+</tr>
+<tr class="odd">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">240</td>
+<td align="center">14.61</td>
+<td align="center">4.28</td>
+<td align="center">35.15</td>
+<td align="center">2.62</td>
+<td align="center">0.01</td>
+</tr>
+<tr class="even">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">260</td>
+<td align="center">12.44</td>
+<td align="center">4.06</td>
+<td align="center">35.07</td>
+<td align="center">3.17</td>
+<td align="center">0.02</td>
+</tr>
+<tr class="odd">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">280</td>
+<td align="center">12.10</td>
+<td align="center">4.03</td>
+<td align="center">35.04</td>
+<td align="center">3.27</td>
+<td align="center">0.02</td>
+</tr>
+<tr class="even">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">300</td>
+<td align="center">12.02</td>
+<td align="center">4.02</td>
+<td align="center">35.03</td>
+<td align="center">3.32</td>
+<td align="center">0.01</td>
+</tr>
+<tr class="odd">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">320</td>
+<td align="center">11.74</td>
+<td align="center">3.99</td>
+<td align="center">35.01</td>
+<td align="center">3.41</td>
+<td align="center">0.01</td>
+</tr>
+<tr class="even">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">340</td>
+<td align="center">11.65</td>
+<td align="center">3.98</td>
+<td align="center">35.00</td>
+<td align="center">3.39</td>
+<td align="center">0.01</td>
+</tr>
+<tr class="odd">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">360</td>
+<td align="center">11.34</td>
+<td align="center">3.95</td>
+<td align="center">34.97</td>
+<td align="center">3.35</td>
+<td align="center">0.01</td>
+</tr>
+<tr class="even">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">380</td>
+<td align="center">11.14</td>
+<td align="center">3.93</td>
+<td align="center">34.95</td>
+<td align="center">3.36</td>
+<td align="center">0.03</td>
+</tr>
+<tr class="odd">
+<td align="center">2018-06-18</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+<td align="center">400</td>
+<td align="center">10.92</td>
+<td align="center">3.91</td>
+<td align="center">34.93</td>
+<td align="center">3.36</td>
+<td align="center">0.04</td>
+</tr>
+</tbody>
+</table>
+<p>I then used ggplot2 package to make standard oceanographic profiles of temperature, salinity and oxygen (Figure <a href="#fig:fig1">1</a>).</p>
+<pre class="r"><code>temp = ggplot(data = ctd.tb, aes(x = temperature, y = pressure))+
+  geom_path(col = &quot;red&quot;)+
+  scale_y_reverse()+
+  scale_x_continuous(position = &quot;top&quot;, breaks = seq(12,30,6))+
+  theme_bw()+
+  theme(axis.text = element_text(colour = &quot;black&quot;, size = 10),
+        axis.title = element_text(colour = &quot;black&quot;, size = 12),
+        panel.grid = element_blank(),
+        panel.background = element_rect(colour = &quot;black&quot;, fill = NULL))+
+    labs(y=&quot;Pressure (dbar)&quot;,
+         x=expression(Temperature~(~degree~C)))
+
+ salinity = ggplot(data = ctd.tb, aes(x = salinity, y = pressure))+
+  geom_path(col = &quot;red&quot;)+
+  scale_y_reverse()+
+  scale_x_continuous(position = &quot;top&quot;, breaks = seq(34.8,35.4,0.1))+
+  theme_bw()+
+  theme(axis.text = element_text(colour = &quot;black&quot;, size = 10),
+        axis.title = element_text(colour = &quot;black&quot;, size = 12),
+        panel.grid = element_blank(),
+        panel.background = element_rect(colour = &quot;black&quot;, fill = NULL))+
+    labs(y=&quot;Pressure (dbar)&quot;,
+         x= &quot;Salinity&quot;)
+ 
+ oxygen = ggplot(data = ctd.tb, aes(x = oxygen, y = pressure))+
+  geom_path(col = &quot;red&quot;)+
+  scale_y_reverse()+
+  scale_x_continuous(position = &quot;top&quot;, breaks = seq(2.2,4,.5))+
+  theme_bw()+
+  theme(axis.text = element_text(colour = &quot;black&quot;, size = 10),
+        axis.title = element_text(colour = &quot;black&quot;, size = 12),
+        panel.grid = element_blank(),
+        panel.background = element_rect(colour = &quot;black&quot;, fill = NULL))+
+    labs(y=&quot;Pressure (dbar)&quot;,
+         x=expression(Oxygen~(~mlL^-1)))
+ 
+ cowplot::plot_grid(temp, salinity, oxygen, nrow = 1)</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2018-09-22-processing-ctd-measurements-in-r-with-oce-and-tidyverse-packages_files/figure-html/fig1-1.png" alt="Profile of Temperature, salinity and oxygen collected at Station AM00882 " width="672" />
+<p class="caption">
+Figure 1: Profile of Temperature, salinity and oxygen collected at Station AM00882
+</p>
+</div>
+<p>That is for a single station, but hydrographic section requires more than one stations stitched together to render smoothed profiles based on either time, distance, latitude or longitude. Therefore, I am going to loop through to make a tibble of several stations and then plot the hydrogphic section with ggplot2 package. In a nutshell, the process involves three steps. First, create empty container with <em>NULL()</em> function that will store individual tibble generate. Second, a dplyr’s <em>bind_row() </em>function was used to stitch to the bottom each generated file in a sequential order. Third, dplyr’s select() function was used to pick variable of interest and drop the rest. Note that the selection process is done outside the loop boundary, because this is done after the looping process is complete. You can also chain the selection process inside the loop and you will have no problem.</p>
+<p>Table <a href="#tab:tab2">2</a> show the stations, number of scan, the minimum and maximum depth in each station.</p>
+<pre class="r"><code>ctd.tb.all.summary = ctd.tb.all%&gt;%
+  group_by(station)%&gt;%
+  summarise(count = n(), 
+            min.depth = min(depth, na.rm = TRUE), 
+            max.depth = max(depth, na.rm = TRUE))
+
+knitr::kable(ctd.tb.all.summary, digits = 2, align = &quot;c&quot;, 
+             col.names = c(&quot;Station&quot;, &quot;Counts&quot;, 
+                           &quot;Minimum Depth (m)&quot;, 
+                           &quot;Maximum Depth (m)&quot;),
+             caption = &quot;The summary of the nine stations&quot;)</code></pre>
+<table>
+<caption><span id="tab:tab2">Table 2: </span>The summary of the nine stations</caption>
+<thead>
+<tr class="header">
+<th align="center">Station</th>
+<th align="center">Counts</th>
+<th align="center">Minimum Depth (m)</th>
+<th align="center">Maximum Depth (m)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">AM00882</td>
+<td align="center">409</td>
+<td align="center">3.46</td>
+<td align="center">405.35</td>
+</tr>
+<tr class="even">
+<td align="center">AM00883</td>
+<td align="center">489</td>
+<td align="center">3.14</td>
+<td align="center">484.76</td>
+</tr>
+<tr class="odd">
+<td align="center">AM00884</td>
+<td align="center">354</td>
+<td align="center">2.24</td>
+<td align="center">350.57</td>
+</tr>
+<tr class="even">
+<td align="center">AM00885</td>
+<td align="center">66</td>
+<td align="center">2.36</td>
+<td align="center">64.94</td>
+</tr>
+<tr class="odd">
+<td align="center">AM00886</td>
+<td align="center">45</td>
+<td align="center">3.10</td>
+<td align="center">43.66</td>
+</tr>
+<tr class="even">
+<td align="center">AM00887</td>
+<td align="center">28</td>
+<td align="center">2.45</td>
+<td align="center">26.77</td>
+</tr>
+<tr class="odd">
+<td align="center">AM00888</td>
+<td align="center">28</td>
+<td align="center">2.07</td>
+<td align="center">26.90</td>
+</tr>
+<tr class="even">
+<td align="center">AM00889</td>
+<td align="center">47</td>
+<td align="center">3.44</td>
+<td align="center">45.68</td>
+</tr>
+<tr class="odd">
+<td align="center">AM00890</td>
+<td align="center">104</td>
+<td align="center">3.91</td>
+<td align="center">102.19</td>
+</tr>
+</tbody>
+</table>
+<p>Using the <em>distinct()</em> function from dplyr package, I was able to identify the unique date and time of CTD cast and the longitude and latitude of each station (Table <a href="#tab:tab3">3</a>).</p>
+<pre class="r"><code>ctd.tb.all.info = ctd.tb.all%&gt;%
+  distinct(station, lon, lat, date)%&gt;%
+  separate(date, c(&quot;date&quot;, &quot;time&quot;), sep = &quot; &quot;)
+
+knitr::kable(ctd.tb.all.info, digits = 2, align = &quot;c&quot;, 
+             col.names = c(&quot;Station&quot;, &quot;Date of cast&quot;, &quot;Time of cast&quot;, &quot;Longitude&quot;, &quot;Latitude&quot;),
+             caption = &quot;The geographical locations, the date and time of casts of the nine stations&quot;)</code></pre>
+<table>
+<caption><span id="tab:tab3">Table 3: </span>The geographical locations, the date and time of casts of the nine stations</caption>
+<thead>
+<tr class="header">
+<th align="center">Station</th>
+<th align="center">Date of cast</th>
+<th align="center">Time of cast</th>
+<th align="center">Longitude</th>
+<th align="center">Latitude</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">AM00882</td>
+<td align="center">2018-06-18</td>
+<td align="center">05:27:07</td>
+<td align="center">39.29</td>
+<td align="center">-5.02</td>
+</tr>
+<tr class="even">
+<td align="center">AM00883</td>
+<td align="center">2018-06-18</td>
+<td align="center">13:32:50</td>
+<td align="center">39.24</td>
+<td align="center">-5.26</td>
+</tr>
+<tr class="odd">
+<td align="center">AM00884</td>
+<td align="center">2018-06-18</td>
+<td align="center">19:22:04</td>
+<td align="center">39.19</td>
+<td align="center">-5.44</td>
+</tr>
+<tr class="even">
+<td align="center">AM00885</td>
+<td align="center">2018-06-19</td>
+<td align="center">00:03:26</td>
+<td align="center">39.11</td>
+<td align="center">-5.71</td>
+</tr>
+<tr class="odd">
+<td align="center">AM00886</td>
+<td align="center">2018-06-19</td>
+<td align="center">05:32:23</td>
+<td align="center">39.07</td>
+<td align="center">-5.93</td>
+</tr>
+<tr class="even">
+<td align="center">AM00887</td>
+<td align="center">2018-06-19</td>
+<td align="center">09:54:46</td>
+<td align="center">38.99</td>
+<td align="center">-6.14</td>
+</tr>
+<tr class="odd">
+<td align="center">AM00888</td>
+<td align="center">2018-06-19</td>
+<td align="center">13:35:21</td>
+<td align="center">39.01</td>
+<td align="center">-6.26</td>
+</tr>
+<tr class="even">
+<td align="center">AM00889</td>
+<td align="center">2018-06-19</td>
+<td align="center">18:28:52</td>
+<td align="center">39.24</td>
+<td align="center">-6.49</td>
+</tr>
+<tr class="odd">
+<td align="center">AM00890</td>
+<td align="center">2018-06-19</td>
+<td align="center">23:17:05</td>
+<td align="center">39.35</td>
+<td align="center">-6.67</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Leaflet</strong><a href="#fn7" class="footnoteRef" id="fnref7"><sup>7</sup></a> package developed by Cheng and others (2017) was used to create an interactive map using the geographical positions (longitude and latitude) of the CTD casts in coastal water of the Pemba and Zanzibar channel (Figure <a href="#fig:fig2"><strong>??</strong></a>).</p>
+<pre class="r"><code>leaflet(data = ctd.tb.all.info)%&gt;%
+  addTiles()%&gt;%
+  addMarkers(lng = ~lon, lat = ~lat, popup = ~station)</code></pre>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-5.02016666666667,-5.265,-5.437,-5.714,-5.92533333333333,-6.1355,-6.2595,-6.4895,-6.67183333333333],[39.2936666666667,39.2406666666667,39.187,39.1095,39.0703333333333,38.9923333333333,39.0065,39.2426666666667,39.3546666666667],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["AM00882","AM00883","AM00884","AM00885","AM00886","AM00887","AM00888","AM00889","AM00890"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-6.67183333333333,-5.02016666666667],"lng":[38.9923333333333,39.3546666666667]}},"evals":[],"jsHooks":[]}</script>
+<div id="cited-articles" class="section level3">
+<h3>Cited Articles</h3>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Kelley, D., &amp; Richards, C. (2017). oce: Analysis of Oceanographic Data. R package version 0.9-22.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>eam, R. C. (2015). R: A language and environment for statistical computing.<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>Wickham, H. (2017). Tidyverse: Easily install and load’tidyverse’packages. R package version, 1(1).<a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>Wickham, H. (2016). tidyr: Easily Tidy Data with spread () and gather () Functions. Version 0.6. 0.<a href="#fnref4">↩</a></p></li>
+<li id="fn5"><p>Wickham, H., Francois, R., Henry, L., &amp; Müller, K. (2015). dplyr: A grammar of data manipulation. R package version 0.4, 3.<a href="#fnref5">↩</a></p></li>
+<li id="fn6"><p>Wickham, H. (2016). ggplot2: elegant graphics for data analysis. Springer.<a href="#fnref6">↩</a></p></li>
+<li id="fn7"><p>Cheng, J., Karambelkar, B., Xie, Y., Wickham, H., Russell, K., &amp; Johnson, K. Leaflet: Create Interactive Web Maps with the JavaScript “Leaflet” Library (2017). URL <a href="https://CRAN" class="uri">https://CRAN</a>. R-project. org/package= leaflet. R package version, 1(1), 134.<a href="#fnref7">↩</a></p></li>
+</ol>
+</div>

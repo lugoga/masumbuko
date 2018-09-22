@@ -6,10 +6,19 @@
     <description>Recent content in Pemba Channel on Masumbuko Semba</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 20 Sep 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 22 Sep 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/pemba-channel/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Processing CTD measurements in R with Oce and tidyverse packages</title>
+      <link>/09/22/2018/processing-ctd-measurements-in-r-with-oce-and-tidyverse-packages/</link>
+      <pubDate>Sat, 22 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/09/22/2018/processing-ctd-measurements-in-r-with-oce-and-tidyverse-packages/</guid>
+      <description>In the previous post, I illustrate how to process ship-based CTD data with oce1 package in R2 enviroment. We saw the power of this package in reading, summarizing and visualizing CTD data. The downside of oce package in my opinion is its strickest nature of relying on R base for data processing and plotting—preventing customization. Therefore, in this post I will illustrate how to tranforming oce dataset format into a tibble—a modern data frame.</description>
+    </item>
     
     <item>
       <title>Validating MODIS Sea Surface Temperature with Global Drifter Program Observations</title>

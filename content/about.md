@@ -8,6 +8,9 @@ Masumbuko Semba is data scientist works at the [**Nelson Mandela African Institu
 You can contact me by filling the form below
 
 <form name="contact" method="POST" netlify>
+	<p>
+    <label>Name: <input type="text" name="name" /></label>
+  </p>
   <p>
     <label>Email: <input type="text" name="name" /></label>
   </p>

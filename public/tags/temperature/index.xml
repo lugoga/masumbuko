@@ -6,13 +6,22 @@
     <description>Recent content in Temperature on Masumbuko Semba</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 21 Sep 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 22 Sep 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/temperature/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Processing ship-based CTD measurements in Pemba Channel with R from CTD Measurements</title>
+      <title>Processing CTD measurements in R with Oce and tidyverse packages</title>
+      <link>/09/22/2018/processing-ctd-measurements-in-r-with-oce-and-tidyverse-packages/</link>
+      <pubDate>Sat, 22 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/09/22/2018/processing-ctd-measurements-in-r-with-oce-and-tidyverse-packages/</guid>
+      <description>In the previous post, I illustrate how to process ship-based CTD data with oce1 package in R2 enviroment. We saw the power of this package in reading, summarizing and visualizing CTD data. The downside of oce package in my opinion is its strickest nature of relying on R base for data processing and plotting—preventing customization. Therefore, in this post I will illustrate how to tranforming oce dataset format into a tibble—a modern data frame.</description>
+    </item>
+    
+    <item>
+      <title>Processing ship-based CTD measurements in Pemba Channel with R</title>
       <link>/09/21/2018/vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements/</link>
       <pubDate>Fri, 21 Sep 2018 00:00:00 +0000</pubDate>
       
