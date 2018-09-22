@@ -2,7 +2,7 @@
 title: Processing ship-based CTD measurements in Pemba Channel with R
   from CTD Measurements
 author: Masumbuko Semba
-date: '2018-09-22'
+date: '2018-09-21'
 slug: vertical-structure-of-temperature-salinity-and-fluorescence-of-the-pemba-channel-from-ctd-measurements
 categories:
   - Oceanography
