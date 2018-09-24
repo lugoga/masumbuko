@@ -64,4 +64,115 @@ Untracked files:[0K
 no changes added to commit (use "git add" and/or "git commit -a")[0K
 [0K
 E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git a[0K[?25hd[0Kd[0K[28G[?25lE:\blogs\masumbuko>git add -[0K[?25hA[0K[?25l
-[0K[?25h]0;  - git  add -A
+[0K[?25h]0;  - git  add -Awarning: LF will be replaced by CRLF in .Rproj.user/82C5CFDF/sources/prop/98900512.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in .Rproj.user/82C5CFDF/sources/prop/B3FA6E7F.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in .Rproj.user/82C5CFDF/sources/prop/INDEX.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in .Rproj.user/shared/notebooks/paths.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/09/20/2018/validating-modis-sea-surface-temperature-with-global-drifter-program-obse[0Kr[?25l
+vations/index.html.[0K
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/categories/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/categories/index.xml.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/categories/oceanography/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/categories/r/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/css/main.css.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/post/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/sitemap.xml.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/drifter/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/index.xml.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/indian-ocean/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/masumbuko-semba/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/pemba-channel/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in themes/hugo-lithium/static/css/main.css.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/09/24/2018/surface-current-in-pemba-channel-drifter-perspective/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/rmarkdown-libs/kePrint/kePrint.js.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in public/tags/surface-current/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25hwarning: LF will be replaced by CRLF in static/rmarkdown-libs/kePrint/kePrint.js.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25h]0; [?25l
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git c[0K[?25ho[0Km[0Km[0Ki[0Kt[0K[31G[?25lE:\blogs\masumbuko>git commit -[0K[?25hm[0K[34G[?25lE:\blogs\masumbuko>git commit -m "[0K[?25hn[0Ke[0Kw[0K[39G[?25lE:\blogs\masumbuko>git commit -m "new p[0K[?25ho[0Ks[0Kt[0K[44G[?25lE:\blogs\masumbuko>git commit -m "new post o[0K[?25hn[0K[47G[?25lE:\blogs\masumbuko>git commit -m "new post on d[0K[?25hr[0Ki[0Kf[0Kt[0Ke[0Kr[0K"[0K]0;  - git  commit -m "new post on drifter"[?25l
+[0K[?25h]0; [master 1cf3229] new post on drifter[0K[?25l
+ 49 files changed, 2582 insertions(+), 511 deletions(-)[0K
+ rewrite .Rproj.user/82C5CFDF/console06/INDEX001 (83%)[0K
+ create mode 100644 content/post/2018-09-24-surface-current-in-pemba-channel-drifter-perspective.Rmd[0K
+ create mode 100644 content/post/2018-09-24-surface-current-in-pemba-channel-drifter-perspective.html[0K
+ create mode 100644 public/09/24/2018/surface-current-in-pemba-channel-drifter-perspective/index.html[0K
+ create mode 100644 public/images/data_science_model-01.png[0K
+ create mode 100644 public/images/data_science_model.png[0K
+ create mode 100644 public/img/data_science_model.png[0K
+ create mode 100644 public/post/2018-09-24-surface-current-in-pemba-channel-drifter-perspective_files/figure-html/current-1.png[0K
+ create mode 100644 public/post/2018-09-24-surface-current-in-pemba-channel-drifter-perspective_files/figure-html/unnamed-chunk-6-1[0K.
+png[0K
+ create mode 100644 public/post/data_science_model.png[0K
+ create mode 100644 public/rmarkdown-libs/kePrint/kePrint.js[0K
+ create mode 100644 public/tags/surface-current/index.html[0K
+ create mode 100644 public/tags/surface-current/index.xml[0K
+ create mode 100644 static/img/data_science_model.png[0K
+ create mode 100644 static/post/2018-09-24-surface-current-in-pemba-channel-drifter-perspective_files/figure-html/current-1.png[0K
+ create mode 100644 static/post/2018-09-24-surface-current-in-pemba-channel-drifter-perspective_files/figure-html/unnamed-chunk-6-1[0K.
+png[0K
+ create mode 100644 static/rmarkdown-libs/kePrint/kePrint.js[0K
+ create mode 100644 themes/hugo-lithium/static/images/data_science_model.png[0K
+[0K
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git p[0K[?25hu[0Ks[0Kh[0K]0;  - git  push[?25l
+[0K[?25hEnter passphrase for key '/c/Users/Semba/.ssh/id_rsa':[0K[56G[?25l
+[0K[?25hEnumerating objects: 146, done.[0K[?25l
+Counting objects: 100% (145/145), done.[0K
+Delta compression using up to 8 threads.[0K
+Compressing objects:   6% (5/73)[0K[19G[?25h[?25lCompressing objects: 100% (73/73), done.[0K
+Writing objects:  34% (28/82)[0K[1G[?25h[?25lWriting objects:  64% (53/82)[0K[1G[?25hWriting objects: 100% (82/82), 158.12 KiB | 2.36 MiB/s, done.[0K[?25l
+Total 82 (delta 43), reused 0 (delta 0)[0K
+[0K[?25h[?25lremote: Resolving deltas:  20% (9/43)[0K[1G[?25hremote: Resolving deltas: 100% (43/43), completed with 31 local objects.[0K[?25l
+[0K[?25hTo github.com:lugoga/masumbuko.git[0K[?25l
+   8718d14..1cf3229  master -> master[0K
+[0K[?25h]0; [?25l
+E:\blogs\masumbuko>[0K[?25hgit push[0K]0;  - git  push[?25l
+[0K[?25hEnter passphrase for key '/c/Users/Semba/.ssh/id_rsa':[0K[56G[?25l
+[0K[?25h]0; Everything up-to-date[0K[?25l
+[0K
+E:\blogs\masumbuko>[0K[?25hgit push[0K[?25l
+[0K[?25h]0;  - git  pushEnter passphrase for key '/c/Users/Semba/.ssh/id_rsa':[0K[56G[?25l
+Enter passphrase for key '/c/Users/Semba/.ssh/id_rsa':[0K[56G[?25h[?25l
+[0K[?25h]0; Everything up-to-date[0K[?25l
+[0K
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git s[0K[?25ht[0Ka[0Kt[0Ku[0Ks[0K]0;  - git  status[?25l
+[0K[?25hOn branch master[0K[?25l
+Your branch is up to date with 'origin/master'.[0K
+[0K
+Changes not staged for commit:[0K
+  (use "git add <file>..." to update what will be committed)[0K
+  (use "git checkout -- <file>..." to discard changes in working directory)[0K
+[0K
+        [0;31mmodified:   .Rproj.user/82C5CFDF/console06/2BC578FC[0m[0K
+        [0;31mmodified:   content/post/2018-09-24-surface-current-in-pemba-channel-drifter-perspective.Rmd[0m[0K
+        [0;31mmodified:   content/post/2018-09-24-surface-current-in-pemba-channel-drifter-perspective.html[0m[0K
+        [0;31mmodified:   public/09/24/2018/surface-current-in-pemba-channel-drifter-perspective/index.html[0m[0K
+[0K
+no changes added to commit (use "git add" and/or "git commit -a")[0K
+[0K[?25h]0; [?25l
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git a[0K[?25hd[0Kd[0K[28G[?25lE:\blogs\masumbuko>git add -[0K[?25hA[0K]0;  - git  add -A[?25l
+[0K[?25h
