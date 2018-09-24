@@ -175,4 +175,23 @@ Changes not staged for commit:[0K
 no changes added to commit (use "git add" and/or "git commit -a")[0K
 [0K[?25h]0; [?25l
 E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git a[0K[?25hd[0Kd[0K[28G[?25lE:\blogs\masumbuko>git add -[0K[?25hA[0K]0;  - git  add -A[?25l
-[0K[?25h
+[0K[?25hwarning: LF will be replaced by CRLF in public/09/24/2018/surface-current-in-pemba-channel-drifter-perspective/index.html.[0K[?25l
+The file will have its original line endings in your working directory.[0K
+[0K[?25h]0; [?25l
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git c[0K[?25ho[0Km[0Km[0Ki[0Kt[0K[31G[?25lE:\blogs\masumbuko>git commit -[0K[?25hm[0K[34G[?25lE:\blogs\masumbuko>git commit -m "[0K[?25h"[0K[35G[?25lE:\blogs\masumbuko>git commit -m "u"[0K[36G[?25h[?25lE:\blogs\masumbuko>git commit -m "up"[0K[37G[?25h[?25lE:\blogs\masumbuko>git commit -m "upd"[0K[38G[?25h[?25lE:\blogs\masumbuko>git commit -m "upda"[0K[39G[?25h[?25lE:\blogs\masumbuko>git commit -m "updat"[0K[40G[?25h[?25lE:\blogs\masumbuko>git commit -m "update"[0K[41G[?25h[?25lE:\blogs\masumbuko>git commit -m "updated"[0K[42G[?25h[?25lE:\blogs\masumbuko>git commit -m "updated "[0K[43G[?25h[?25lE:\blogs\masumbuko>git commit -m "updated p"[0K[44G[?25h[?25lE:\blogs\masumbuko>git commit -m "updated po"[0K[45G[?25h[?25lE:\blogs\masumbuko>git commit -m "updated pos"[0K[46G[?25h[?25lE:\blogs\masumbuko>git commit -m "updated post"[0K[47G[?25h]0;  - git  commit -m "updated post"[?25l
+[0K[?25h]0; [master 26359fb] updated post[0K[?25l
+ 4 files changed, 361 insertions(+), 246 deletions(-)[0K
+[0K
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git p[0K[?25hu[0Ks[0Kh[0K[29G[28G[?25l
+[0K[?25h]0;  - git  pushEnter passphrase for key '/c/Users/Semba/.ssh/id_rsa':[0K[56G[?25l
+[0K[?25hEnumerating objects: 31, done.[0K[?25l
+Counting objects: 100% (31/31), done.[0K
+Delta compression using up to 8 threads.[0K
+Compressing objects: 100% (14/14), done.[0K
+Writing objects: 100% (16/16), 4.36 KiB | 1.45 MiB/s, done.[0K
+Total 16 (delta 8), reused 0 (delta 0)[0K
+[0K[?25hremote: Resolving deltas: 100% (8/8), completed with 7 local objects.[0K[?25l
+[0K[?25h]0; To github.com:lugoga/masumbuko.git[0K[?25l
+   1cf3229..26359fb  master -> master[0K
+[0K
+E:\blogs\masumbuko>[0K[?25h

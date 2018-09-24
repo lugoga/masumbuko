@@ -132,18 +132,18 @@ $$
 pemba = pemba%>%mutate(velocity = sqrt(u^2 + v^2))
 
 pemba%>%separate(date, c("date", "time"), sep = " ")%>%
-  select(date, lon,lat, u, v, velocity)%>%
+  select(date, season, lon,lat, u, v, velocity)%>%
   sample_n(12)%>%
   kable("html", align = "c", digits = 2,
         caption = "Overview of the zonal, meridional and surface current velocity", 
-        col.names = c("Date", "Longitude", "Latitude", "U", "V", "Velocity"))%>%
+        col.names = c("Date","Season", "Longitude", "Latitude", "U", "V", "Velocity"))%>%
   kable_styling()%>%
-  add_header_above(c("", "Location Information" = 2, "Surface Current" = 3))%>%
-  add_header_above(c("" , "Surface Current Information" = 5))%>% 
+  add_header_above(c("", "Location Information" = 3, "Surface Current" = 3))%>%
+  add_header_above(c("" , "Surface Current Information" = 6))%>% 
   column_spec(1:6, width = "8cm")%>%
-  column_spec(1, background = "lightpink", bold = F, color = 1)%>%
-  column_spec(2:3, background = "lightgreen", bold = F, color = "black")%>%
-  column_spec(4:6, background = "lightblue", bold = F, color = "black")
+  column_spec(1:2, background = "lightpink", bold = F, color = 1)%>%
+  column_spec(3:4, background = "lightgreen", bold = F, color = "black")%>%
+  column_spec(5:7, background = "lightblue", bold = F, color = "black")
 ```
 
 
