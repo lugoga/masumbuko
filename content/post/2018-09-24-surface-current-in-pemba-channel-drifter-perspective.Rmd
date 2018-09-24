@@ -1,0 +1,195 @@
+---
+title: 'Surface Current in Pemba channel: Drifter Perspective'
+author: Masumbuko Semba
+date: '2018-09-24'
+slug: surface-current-in-pemba-channel-drifter-perspective
+categories:
+  - Oceanography
+  - R
+tags:
+  - Drifter
+  - Indian Ocean
+  - Masumbuko Semba
+  - Pemba Channel
+  - surface current
+editor_options: 
+  chunk_output_type: inline
+---
+
+###Introduction
+Surface Currents are driven by global wind systems that are fueled by energy from the sun^[Sverdrup, H. U. (1947). Wind-driven currents in a baroclinic ocean; with application to the equatorial currents of the eastern Pacific. Proceedings of the National Academy of Sciences, 33(11), 318-326.]. These currents inturn transfer heat from the tropics to the polar regions, influencing local and global climate^[Bryden, H. L., & Hall, M. M. (1980). Heat transport by currents across 25 N latitude in the Atlantic Ocean. Science, 207(4433), 884-886.]. Ocean currents are an important abiotic factor that significantly influences food webs and reproduction of marine organisms and the marine ecosystems that they inhabit^[Treml, E. A., Halpin, P. N., Urban, D. L., & Pratson, L. F. (2008). Modeling population connectivity by ocean currents, a graph-theoretic approach for marine conservation. Landscape Ecology, 23(1), 19-36.]. Many species with limited mobility depend on this "liquid wind" to bring food and nutrients to them and to distribute larvae and reproductive cells. Even fish and mammals living in the ocean may have their destinations and food supply affected by currents.
+
+Upwelling currents bring cold nutrient-rich waters from the ocean bottom to the surface, supporting many of the most important fisheries and ecosystems in the world^[Bakun, A. (1990). Global climate change and intensification of coastal ocean upwelling. Science, 247(4939), 198-201.]. These currents support the growth of phytoplankton and seaweed which provide the energy base for consumers higher in the food chain, including fish, marine mammals, and humans^[Hutchins, D. A., & Bruland, K. W. (1998). Iron-limited diatom growth and Si: N uptake ratios in a coastal upwelling regime. Nature, 393(6685), 561.].
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning=FALSE, message=FALSE, comment=""}
+require(tidyverse)
+require(lubridate)
+require(leaflet)
+require(insol)
+require(kableExtra)
+require(sf)
+require(ggsci)
+```
+
+
+### Processing the data
+This post rely on the data processint model proposed by Hadley Wickham in his book [R for Data Science](http://r4ds.had.co.nz/introduction.html)^[Wickham, H., & Grolemund, G. (2016). R for data science: import, tidy, transform, visualize, and model data. " O'Reilly Media, Inc.".]. First step is to *import* The data. the drifter data were imported them from the local directory into R. This means load the data stored in folder within the machine into the R workspace. 
+
+
+```{r, warning=FALSE, message=FALSE, comment=""}
+## load the dataset
+drifter = read_table2("./drifters.txt", comment = "#", 
+                      col_names = FALSE)
+
+```
+
+
+Once the drifter data was imported into the R environment, it is in the right place to *tidy* it. Tidying data means storing it in a consistent form that matches the semantics of the dataset with the eay it is stored. Quooting Hadley (2017) stated that the data is tide when *each column is a variable, and each row is an observation*. Tidy data is an import data processing stage because it organize the data in a consistent structure that help exploration and visualization of data. The tidying of drifter data involved replacing variable names to the ones that make sense and present the variable
+
+```{r}
+
+
+# renmae the variable 
+ drifter = drifter%>%rename(id = X1, lon = X2, lat = X3, drogue = X4, u = X5, v = X6, 
+         sst = X7, year = X8, month = X9, day = X10, hour = X11)
+```
+Once the drifter data was tidy, it was *transformed*. Transformation includes combining year, month, day and hour variable into date format that R recognize. Once te date-time variable was create, it was separated into two invidual variables---date and time. The drifter dataset comes with dates separated into columns---year, month, day and hour. These four columns were transformed to form date and time presented in table \@ref(tab:tab1)
+
+
+
+```{r tab, warning=FALSE}
+## make date format variable
+drifter = drifter%>%
+  mutate(date = make_datetime(year = year, 
+                              month = month, 
+                              day = day, 
+                              hour = hour+3, 
+                              min = 0,sec = 0))
+
+
+## present the table of time
+drifter%>%select(year, month, day, hour, date)%>%separate(date, c("date", "time"), sep = " ")%>%sample_n(10)%>%
+  arrange(date)%>%
+  kable("html", escape = FALSE, align = "c",
+        col.names = c("Year  ", "Month", "Day", "Hour", "Date", "Local Time"),
+        caption = "Overview raw drifter date comes as raw and transformed date in R format")%>%
+  kable_styling(latex_options = c("striped", "hover"), full_width = TRUE)%>%
+  column_spec(1:6, width = "8cm")%>%
+  column_spec(5:6, background = "lightseagreen", color = "black", bold = F)%>%
+  column_spec(1:4, background = "lightpink", bold = F, color = "black")%>%
+  # row_spec(6:10, color = "ivory", background = "#D7261E", bold = T)%>%
+  add_header_above(c( "Drifter Date Variables" = 4, "Fomated Date" = 2))%>%
+  add_header_above(c("Sample Drifter in Pemba" = 6))# span all five columns
+```
+
+```{r include=FALSE, warning=FALSE}
+##read Africa continental shapefile that we will use throught the munuscript as basemap dataset for maps
+africa = read_sf("E:/GIS/Tanzania spatial data Bank/EAF14 Tanzania spatial datasets/africa/Spatial/AdmInfr/afcntry.shp")
+
+## clean the file
+tz.ke = africa%>%select(-c(FIPS_CNTRY, REGIONA, EMPTY, EMPTY2))%>%
+  filter(CNTRY_NAME == "Tanzania" | CNTRY_NAME == "Kenya")
+
+```
+
+
+The month component was then extracted from the date variable and then used the month information to create monsoon season. The  months were grouped into two consipicuous monsoon seasons. The first season was northeast, which includes months from October to March. The second season is the southeast that start in April and span to September.  
+
+```{r}
+ pemba =  drifter%>%
+  filter(lon >38.8 & lon < 41 & lat >-6,  lat < -4)%>%
+  mutate(season = month, 
+         season = replace(season, season %in% c(10,11,12,1,2,3), "NE"),
+         season = replace(season, season %in% c(4,5,6,7,8,9), "SE"))
+  
+
+
+```
+
+Once the seasons were determined, a new variable of current velocity was created. Velocity was computed from the meridional (V) and zonal (U) components using the equation \@ref(eq:drifter). The seasonal mean surface current was calculated with equation \@ref(eq:mu). The sample of the drifter observation is shown in table \@ref(tab:tab2) 
+
+$$
+\begin{equation} 
+Velocity \:(ms^{-1})\:=\: \sqrt{(U^2+V^2)} (\#eq:drifter)
+\end{equation}
+$$
+
+
+$$
+  \begin{equation}
+  \mu \:=\: \sum \: \frac{(n_1 \:+\: n_2 + \:n..... +\: n_\infty)}{N}  (\#eq:mu)
+  \end{equation}
+$$
+
+
+```{r tab2}
+# compute surface current velocity
+pemba = pemba%>%mutate(velocity = sqrt(u^2 + v^2))
+
+pemba%>%separate(date, c("date", "time"), sep = " ")%>%
+  select(date, lon,lat, u, v, velocity)%>%
+  sample_n(12)%>%
+  kable("html", align = "c", digits = 2,
+        caption = "Overview of the zonal, meridional and surface current velocity", 
+        col.names = c("Date", "Longitude", "Latitude", "U", "V", "Velocity"))%>%
+  kable_styling()%>%
+  add_header_above(c("", "Location Information" = 2, "Surface Current" = 3))%>%
+  add_header_above(c("" , "Surface Current Information" = 5))%>% 
+  column_spec(1:6, width = "8cm")%>%
+  column_spec(1, background = "lightpink", bold = F, color = 1)%>%
+  column_spec(2:3, background = "lightgreen", bold = F, color = "black")%>%
+  column_spec(4:6, background = "lightblue", bold = F, color = "black")
+```
+
+
+
+Figure \@ref(fig:current) show the seasonal difference of surface current in the Pemba channel. The southe east monsoon has more drifter observation and well distributed surface current (Figure \@ref(fig:current)b) compared to the northeast monsoon season (Figure \@ref(fig:current)a)
+
+```{r current, fig.cap="Seasonal variation of surface current vector in the Pemba channel during a) northeast b)  and b) southeast monsoon seasons", warning=FALSE, message=FALSE, comment=""}
+## current flow 
+
+ne.map = ggplot(data = pemba%>%filter(season == "NE"))+
+  geom_segment(aes(x = lon, xend = lon+u/8, y = lat, yend = lat+v/8),
+               arrow = arrow(angle = 15,length = unit(0.08, "inches"), type = "closed"), col = "black")+
+  geom_sf(data = tz.ke, fill = "grey80", col = 1)+
+  coord_sf(xlim = c(38.9,40), ylim = c(-5.8,-4.1))+
+  scale_x_continuous(breaks = c(39.2, 39.8))+
+  scale_y_continuous(breaks = c(-5.5, -4.2))+
+  theme_bw()+
+  theme(panel.background = element_rect(colour = 1, fill = NA),
+        axis.text.x = element_text(colour = 1, size = 11),
+        axis.text.y = element_text(colour = 1, size = 11),
+        legend.position = "right", panel.grid.major = element_line(colour = NA))+
+  geom_label(aes(x = 39.0, y = -5.75, label = "1.0 m/s\n"), 
+             size = 4, label.padding = unit(0.2, "lines"))+
+  geom_segment(aes(x = 38.9, xend = 39.1, y = -5.77, yend = -5.77))+
+  labs(x = NULL, y = NULL)
+
+se.map = ggplot(data = pemba%>%filter(season == "SE"))+
+  geom_segment(aes(x = lon, xend = lon+u/8, y = lat, yend = lat+v/8),
+               arrow = arrow(angle = 15,length = unit(0.08, "inches"), type = "closed"), col = "black")+
+  geom_sf(data = tz.ke, fill = "grey80", col = 1)+
+  coord_sf(xlim = c(38.9,40), ylim = c(-5.8,-4.1))+
+  scale_x_continuous(breaks = c(39.2, 39.8))+
+  scale_y_continuous(breaks = c(-5.5, -4.2))+
+  theme_bw()+
+  theme(panel.background = element_rect(colour = 1, fill = NA),
+        axis.text.x = element_text(colour = 1, size = 11),
+        axis.text.y = element_text(colour = 1, size = 11),
+        legend.position = "right", panel.grid.major = element_line(colour = NA))+
+  geom_label(aes(x = 39.0, y = -5.75, label = "1.0 m/s\n"), 
+             size = 4, label.padding = unit(0.2, "lines"))+
+  geom_segment(aes(x = 38.9, xend = 39.1, y = -5.77, yend = -5.77))+
+  labs(x = NULL, y = NULL)
+
+cowplot::plot_grid(ne.map, se.map, label_x = 0.2, label_y = 0.98, labels = c("A", "B"))
+```
+
+
+
+
+### Cited References
+

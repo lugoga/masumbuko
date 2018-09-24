@@ -6,10 +6,19 @@
     <description>Recent content in R on Masumbuko Semba</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 22 Sep 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 24 Sep 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Surface Current in Pemba channel: Drifter Perspective</title>
+      <link>/09/24/2018/surface-current-in-pemba-channel-drifter-perspective/</link>
+      <pubDate>Mon, 24 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/09/24/2018/surface-current-in-pemba-channel-drifter-perspective/</guid>
+      <description>IntroductionSurface Currents are driven by global wind systems that are fueled by energy from the sun1. These currents inturn transfer heat from the tropics to the polar regions, influencing local and global climate2. Ocean currents are an important abiotic factor that significantly influences food webs and reproduction of marine organisms and the marine ecosystems that they inhabit3. Many species with limited mobility depend on this “liquid wind” to bring food and nutrients to them and to distribute larvae and reproductive cells.</description>
+    </item>
     
     <item>
       <title>Processing CTD measurements in R with Oce and tidyverse packages</title>

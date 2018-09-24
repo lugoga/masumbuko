@@ -1,0 +1,698 @@
+---
+title: 'Surface Current in Pemba channel: Drifter Perspective'
+author: Masumbuko Semba
+date: '2018-09-24'
+slug: surface-current-in-pemba-channel-drifter-perspective
+categories:
+  - Oceanography
+  - R
+tags:
+  - Drifter
+  - Indian Ocean
+  - Masumbuko Semba
+  - Pemba Channel
+  - surface current
+editor_options: 
+  chunk_output_type: inline
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>Surface Currents are driven by global wind systems that are fueled by energy from the sun<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>. These currents inturn transfer heat from the tropics to the polar regions, influencing local and global climate<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>. Ocean currents are an important abiotic factor that significantly influences food webs and reproduction of marine organisms and the marine ecosystems that they inhabit<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>. Many species with limited mobility depend on this “liquid wind” to bring food and nutrients to them and to distribute larvae and reproductive cells. Even fish and mammals living in the ocean may have their destinations and food supply affected by currents.</p>
+<p>Upwelling currents bring cold nutrient-rich waters from the ocean bottom to the surface, supporting many of the most important fisheries and ecosystems in the world<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a>. These currents support the growth of phytoplankton and seaweed which provide the energy base for consumers higher in the food chain, including fish, marine mammals, and humans<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a>.</p>
+<pre class="r"><code>require(tidyverse)
+require(lubridate)
+require(leaflet)
+require(insol)
+require(kableExtra)
+require(sf)
+require(ggsci)</code></pre>
+</div>
+<div id="processing-the-data" class="section level3">
+<h3>Processing the data</h3>
+<p>This post rely on the data processint model proposed by Hadley Wickham in his book <a href="http://r4ds.had.co.nz/introduction.html">R for Data Science</a><a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a>. First step is to <em>import</em> The data. the drifter data were imported them from the local directory into R. This means load the data stored in folder within the machine into the R workspace.</p>
+<pre class="r"><code>## load the dataset
+drifter = read_table2(&quot;./drifters.txt&quot;, comment = &quot;#&quot;, 
+                      col_names = FALSE)</code></pre>
+<p>Once the drifter data was imported into the R environment, it is in the right place to <em>tidy</em> it. Tidying data means storing it in a consistent form that matches the semantics of the dataset with the eay it is stored. Quooting Hadley (2017) stated that the data is tide when <em>each column is a variable, and each row is an observation</em>. Tidy data is an import data processing stage because it organize the data in a consistent structure that help exploration and visualization of data. The tidying of drifter data involved replacing variable names to the ones that make sense and present the variable</p>
+<pre class="r"><code># renmae the variable 
+ drifter = drifter%&gt;%rename(id = X1, lon = X2, lat = X3, drogue = X4, u = X5, v = X6, 
+         sst = X7, year = X8, month = X9, day = X10, hour = X11)</code></pre>
+<p>Once the drifter data was tidy, it was <em>transformed</em>. Transformation includes combining year, month, day and hour variable into date format that R recognize. Once te date-time variable was create, it was separated into two invidual variables—date and time. The drifter dataset comes with dates separated into columns—year, month, day and hour. These four columns were transformed to form date and time presented in table <a href="#tab:tab1"><strong>??</strong></a></p>
+<pre class="r"><code>## make date format variable
+drifter = drifter%&gt;%
+  mutate(date = make_datetime(year = year, 
+                              month = month, 
+                              day = day, 
+                              hour = hour+3, 
+                              min = 0,sec = 0))
+
+
+## present the table of time
+drifter%&gt;%select(year, month, day, hour, date)%&gt;%separate(date, c(&quot;date&quot;, &quot;time&quot;), sep = &quot; &quot;)%&gt;%sample_n(10)%&gt;%
+  arrange(date)%&gt;%
+  kable(&quot;html&quot;, escape = FALSE, align = &quot;c&quot;,
+        col.names = c(&quot;Year  &quot;, &quot;Month&quot;, &quot;Day&quot;, &quot;Hour&quot;, &quot;Date&quot;, &quot;Local Time&quot;),
+        caption = &quot;Overview raw drifter date comes as raw and transformed date in R format&quot;)%&gt;%
+  kable_styling(latex_options = c(&quot;striped&quot;, &quot;hover&quot;), full_width = TRUE)%&gt;%
+  column_spec(1:6, width = &quot;8cm&quot;)%&gt;%
+  column_spec(5:6, background = &quot;lightseagreen&quot;, color = &quot;black&quot;, bold = F)%&gt;%
+  column_spec(1:4, background = &quot;lightpink&quot;, bold = F, color = &quot;black&quot;)%&gt;%
+  # row_spec(6:10, color = &quot;ivory&quot;, background = &quot;#D7261E&quot;, bold = T)%&gt;%
+  add_header_above(c( &quot;Drifter Date Variables&quot; = 4, &quot;Fomated Date&quot; = 2))%&gt;%
+  add_header_above(c(&quot;Sample Drifter in Pemba&quot; = 6))# span all five columns</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:tab">Table 1: </span>Overview raw drifter date comes as raw and transformed date in R format
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="6">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Sample Drifter in Pemba
+</div>
+</th>
+</tr>
+<tr>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Drifter Date Variables
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Fomated Date
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+Year
+</th>
+<th style="text-align:center;">
+Month
+</th>
+<th style="text-align:center;">
+Day
+</th>
+<th style="text-align:center;">
+Hour
+</th>
+<th style="text-align:center;">
+Date
+</th>
+<th style="text-align:center;">
+Local Time
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+1995
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+8
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+27
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+18
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+1995-08-27
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+21:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2007
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+1
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+11
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+12
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+2007-01-11
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2007
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+5
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+9
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+18
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+2007-05-09
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+21:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2011
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+3
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+19
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+6
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+2011-03-19
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+09:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2011
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+9
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+18
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+0
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+2011-09-18
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+03:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2011
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+12
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+25
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+18
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+2011-12-25
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+21:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2014
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+12
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+15
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+12
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+2014-12-15
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2015
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+11
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+27
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+12
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+2015-11-27
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2016
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+10
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+13
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+0
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+2016-10-13
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+03:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2017
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+1
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+13
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+18
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+2017-01-13
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+21:00:00
+</td>
+</tr>
+</tbody>
+</table>
+<p>The month component was then extracted from the date variable and then used the month information to create monsoon season. The months were grouped into two consipicuous monsoon seasons. The first season was northeast, which includes months from October to March. The second season is the southeast that start in April and span to September.</p>
+<pre class="r"><code> pemba =  drifter%&gt;%
+  filter(lon &gt;38.8 &amp; lon &lt; 41 &amp; lat &gt;-6,  lat &lt; -4)%&gt;%
+  mutate(season = month, 
+         season = replace(season, season %in% c(10,11,12,1,2,3), &quot;NE&quot;),
+         season = replace(season, season %in% c(4,5,6,7,8,9), &quot;SE&quot;))</code></pre>
+<p>Once the seasons were determined, a new variable of current velocity was created. Velocity was computed from the meridional (V) and zonal (U) components using the equation <a href="#eq:drifter">(1)</a>. The seasonal mean surface current was calculated with equation <a href="#eq:mu">(2)</a>. The sample of the drifter observation is shown in table <a href="#tab:tab2">2</a></p>
+<p><span class="math display" id="eq:drifter">\[
+\begin{equation} 
+Velocity \:(ms^{-1})\:=\: \sqrt{(U^2+V^2)} \tag{1}
+\end{equation}
+\]</span></p>
+<p><span class="math display" id="eq:mu">\[
+  \begin{equation}
+  \mu \:=\: \sum \: \frac{(n_1 \:+\: n_2 + \:n..... +\: n_\infty)}{N}  \tag{2}
+  \end{equation}
+\]</span></p>
+<pre class="r"><code># compute surface current velocity
+pemba = pemba%&gt;%mutate(velocity = sqrt(u^2 + v^2))
+
+pemba%&gt;%separate(date, c(&quot;date&quot;, &quot;time&quot;), sep = &quot; &quot;)%&gt;%
+  select(date, lon,lat, u, v, velocity)%&gt;%
+  sample_n(12)%&gt;%
+  kable(&quot;html&quot;, align = &quot;c&quot;, digits = 2,
+        caption = &quot;Overview of the zonal, meridional and surface current velocity&quot;, 
+        col.names = c(&quot;Date&quot;, &quot;Longitude&quot;, &quot;Latitude&quot;, &quot;U&quot;, &quot;V&quot;, &quot;Velocity&quot;))%&gt;%
+  kable_styling()%&gt;%
+  add_header_above(c(&quot;&quot;, &quot;Location Information&quot; = 2, &quot;Surface Current&quot; = 3))%&gt;%
+  add_header_above(c(&quot;&quot; , &quot;Surface Current Information&quot; = 5))%&gt;% 
+  column_spec(1:6, width = &quot;8cm&quot;)%&gt;%
+  column_spec(1, background = &quot;lightpink&quot;, bold = F, color = 1)%&gt;%
+  column_spec(2:3, background = &quot;lightgreen&quot;, bold = F, color = &quot;black&quot;)%&gt;%
+  column_spec(4:6, background = &quot;lightblue&quot;, bold = F, color = &quot;black&quot;)</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:tab2">Table 2: </span>Overview of the zonal, meridional and surface current velocity
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="5">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Surface Current Information
+</div>
+</th>
+</tr>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Location Information
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="3">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Surface Current
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+Date
+</th>
+<th style="text-align:center;">
+Longitude
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+<th style="text-align:center;">
+U
+</th>
+<th style="text-align:center;">
+V
+</th>
+<th style="text-align:center;">
+Velocity
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2005-05-16
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.50
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-4.25
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.23
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.55
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.60
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2013-08-10
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.19
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-4.44
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.39
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.80
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.89
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2008-12-27
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+39.93
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-4.75
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+-0.17
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.47
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.50
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2011-08-10
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+39.91
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-4.59
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.21
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.61
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.64
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2008-08-12
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.02
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-5.88
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+-0.19
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.93
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.95
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2015-05-03
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.42
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-5.60
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.03
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.29
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.29
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2014-02-20
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.74
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-4.57
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.20
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.15
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.25
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2006-10-07
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.98
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-5.12
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+-0.17
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.18
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.25
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2009-08-19
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.52
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-4.82
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+-0.03
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.27
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.27
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2007-06-29
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+39.81
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-4.76
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+-0.04
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.00
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.04
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2013-06-22
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.00
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-4.65
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+-0.17
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+1.24
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+1.25
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2014-09-22
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+39.27
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-5.55
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+-0.06
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.28
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.29
+</td>
+</tr>
+</tbody>
+</table>
+<p>Figure <a href="#fig:current">1</a> show the seasonal difference of surface current in the Pemba channel. The southe east monsoon has more drifter observation and well distributed surface current (Figure <a href="#fig:current">1</a>b) compared to the northeast monsoon season (Figure <a href="#fig:current">1</a>a)</p>
+<pre class="r"><code>## current flow 
+
+ne.map = ggplot(data = pemba%&gt;%filter(season == &quot;NE&quot;))+
+  geom_segment(aes(x = lon, xend = lon+u/8, y = lat, yend = lat+v/8),
+               arrow = arrow(angle = 15,length = unit(0.08, &quot;inches&quot;), type = &quot;closed&quot;), col = &quot;black&quot;)+
+  geom_sf(data = tz.ke, fill = &quot;grey80&quot;, col = 1)+
+  coord_sf(xlim = c(38.9,40), ylim = c(-5.8,-4.1))+
+  scale_x_continuous(breaks = c(39.2, 39.8))+
+  scale_y_continuous(breaks = c(-5.5, -4.2))+
+  theme_bw()+
+  theme(panel.background = element_rect(colour = 1, fill = NA),
+        axis.text.x = element_text(colour = 1, size = 11),
+        axis.text.y = element_text(colour = 1, size = 11),
+        legend.position = &quot;right&quot;, panel.grid.major = element_line(colour = NA))+
+  geom_label(aes(x = 39.0, y = -5.75, label = &quot;1.0 m/s\n&quot;), 
+             size = 4, label.padding = unit(0.2, &quot;lines&quot;))+
+  geom_segment(aes(x = 38.9, xend = 39.1, y = -5.77, yend = -5.77))+
+  labs(x = NULL, y = NULL)
+
+se.map = ggplot(data = pemba%&gt;%filter(season == &quot;SE&quot;))+
+  geom_segment(aes(x = lon, xend = lon+u/8, y = lat, yend = lat+v/8),
+               arrow = arrow(angle = 15,length = unit(0.08, &quot;inches&quot;), type = &quot;closed&quot;), col = &quot;black&quot;)+
+  geom_sf(data = tz.ke, fill = &quot;grey80&quot;, col = 1)+
+  coord_sf(xlim = c(38.9,40), ylim = c(-5.8,-4.1))+
+  scale_x_continuous(breaks = c(39.2, 39.8))+
+  scale_y_continuous(breaks = c(-5.5, -4.2))+
+  theme_bw()+
+  theme(panel.background = element_rect(colour = 1, fill = NA),
+        axis.text.x = element_text(colour = 1, size = 11),
+        axis.text.y = element_text(colour = 1, size = 11),
+        legend.position = &quot;right&quot;, panel.grid.major = element_line(colour = NA))+
+  geom_label(aes(x = 39.0, y = -5.75, label = &quot;1.0 m/s\n&quot;), 
+             size = 4, label.padding = unit(0.2, &quot;lines&quot;))+
+  geom_segment(aes(x = 38.9, xend = 39.1, y = -5.77, yend = -5.77))+
+  labs(x = NULL, y = NULL)
+
+cowplot::plot_grid(ne.map, se.map, label_x = 0.2, label_y = 0.98, labels = c(&quot;A&quot;, &quot;B&quot;))</code></pre>
+<div class="figure"><span id="fig:current"></span>
+<img src="/post/2018-09-24-surface-current-in-pemba-channel-drifter-perspective_files/figure-html/current-1.png" alt="Seasonal variation of surface current vector in the Pemba channel during a) northeast b)  and b) southeast monsoon seasons" width="672" />
+<p class="caption">
+Figure 1: Seasonal variation of surface current vector in the Pemba channel during a) northeast b) and b) southeast monsoon seasons
+</p>
+</div>
+</div>
+<div id="cited-references" class="section level3">
+<h3>Cited References</h3>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Sverdrup, H. U. (1947). Wind-driven currents in a baroclinic ocean; with application to the equatorial currents of the eastern Pacific. Proceedings of the National Academy of Sciences, 33(11), 318-326.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Bryden, H. L., &amp; Hall, M. M. (1980). Heat transport by currents across 25 N latitude in the Atlantic Ocean. Science, 207(4433), 884-886.<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>Treml, E. A., Halpin, P. N., Urban, D. L., &amp; Pratson, L. F. (2008). Modeling population connectivity by ocean currents, a graph-theoretic approach for marine conservation. Landscape Ecology, 23(1), 19-36.<a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>Bakun, A. (1990). Global climate change and intensification of coastal ocean upwelling. Science, 247(4939), 198-201.<a href="#fnref4">↩</a></p></li>
+<li id="fn5"><p>Hutchins, D. A., &amp; Bruland, K. W. (1998). Iron-limited diatom growth and Si: N uptake ratios in a coastal upwelling regime. Nature, 393(6685), 561.<a href="#fnref5">↩</a></p></li>
+<li id="fn6"><p>Wickham, H., &amp; Grolemund, G. (2016). R for data science: import, tidy, transform, visualize, and model data. &quot; O’Reilly Media, Inc.“.<a href="#fnref6">↩</a></p></li>
+</ol>
+</div>

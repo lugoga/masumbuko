@@ -248,6 +248,8 @@ ggplot(data = drifter.modis,
   scale_y_continuous(breaks = seq(26,31, 1.5))+
     labs(y=expression(~Modis~Sensor~SST~(~degree~C)),
          x=expression(~Drifter~Temperature~(~degree~C)))
+
+
 ```
 ### Conclusion
 Comparing MODIS satellite and drifter sea surface temperature showed a close match with an accuracy of `r mean(rmse.t$Error)`$^{\circ}$ Celsius and a strong and significant positive correlation (R^2^ = 0.92). The closeness of drifter and  MODIS sea surface temperature allows scientists in the region to use MODIS satellite data to tackle marine and coastal issues in the region.
