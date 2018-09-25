@@ -40,7 +40,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     
 [[menu.main]]
     name = "GitHub"
-    url = "https://github.com/lugoga/masumbuko"
+    url = "https://github.com/lugoga"
     weight = 5
 
 

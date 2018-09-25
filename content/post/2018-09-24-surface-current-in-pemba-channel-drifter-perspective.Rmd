@@ -145,6 +145,25 @@ pemba%>%separate(date, c("date", "time"), sep = " ")%>%
   column_spec(3:4, background = "lightgreen", bold = F, color = "black")%>%
   column_spec(5:7, background = "lightblue", bold = F, color = "black")
 ```
+Figure \@ref(fig:distr) show that the northeast period has higher surface current speed than the northeast monsoon which are randomly distributed between longitude 39 ${^\circ}$E to 41 ${^\circ}$E. Thea area in the Pemba Channel between longitude 39.8 ${^\circ}$E to 40.2 ${^\circ}$E receive some drifters that moves at a relatively speed above 1.5 ms^-1^ during the southeast monsoon seasons (Figure \@ref(fig:distr))
+
+```{r distr, warning=FALSE, message=FALSE, fig.cap="The surface current distribution in the pemba channel"}
+
+ggplot(data = pemba, aes(x =  lon, y = velocity, col = season))+
+  geom_point()+
+  stat_ellipse()+
+  geom_smooth(se = F, size = 1.2)+
+  scale_color_jco(limits = c("SE", "NE"))+
+  theme(panel.grid = element_blank(),
+        panel.background = element_rect(fill = NA, colour = 1),
+        legend.position = c(.92,.85),
+        legend.background = element_rect(fill = NA, colour = 1),
+        axis.text = element_text(size = 11, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black"))+
+  scale_x_continuous(breaks = seq(38.5, 41.5,0.5), 
+                     labels =  scales::unit_format(unit = "E", sep = " ", accuracy = 0.1)) +
+  labs(x = "", y = expression(~Surface~Current~Speed~(ms^-1)))
+```
 
 
 
