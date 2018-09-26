@@ -1,8 +1,8 @@
 [0mMicrosoft Windows [Version 10.0.17134.285][0K[?25l
 (c) 2018 Microsoft Corporation. All rights reserved.[0K
 [0K
-E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git s[0K[?25ht[0Ka[0Ku[0K[?25lE:\blogs\masumbuko>git sta[0K[?25ht[0Ku[0Ks[0K]0;  - git  status[?25l
-[0K[?25h]0; On branch master[0K[?25l
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git s[0K[?25ht[0Ka[0Kt[0Ku[0Ks[0K]0;  - git  status[?25l
+[0K[?25hOn branch master[0K[?25l
 Your branch is up to date with 'origin/master'.[0K
 [0K
 Changes not staged for commit:[0K
@@ -23,5 +23,5 @@ ed-drifter-observations_files/figure-html/vector-1.png[0m[0K
 ed-drifter-observations_files/figure-html/vector-1.png[0m[0K
 [0K
 no changes added to commit (use "git add" and/or "git commit -a")[0K
-[0K
-E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git a[0K[?25hd[0Kd[0K[28G[?25lE:\blogs\masumbuko>git add -[0K[?25hA[0K
+[0K[?25h]0; [?25l
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git a[0K[?25hd[0Kd[0K[28G[?25lE:\blogs\masumbuko>git add -[0K[?25h[30G[29G[?25lE:\blogs\masumbuko>git add -A[0K[?25h

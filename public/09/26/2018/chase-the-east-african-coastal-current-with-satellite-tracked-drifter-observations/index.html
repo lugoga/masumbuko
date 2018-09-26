@@ -19,6 +19,11 @@
 
 
 
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
 <link rel="stylesheet" href="/css/fonts.css" media="all">
 <link rel="stylesheet" href="/css/main.css" media="all">
 
@@ -60,7 +65,7 @@
 
   <article class="article">
     
-    <span class="article-duration">3 min read</span>
+    <span class="article-duration">5 min read</span>
     
 
     <h1 class="article-title">The East African Coastal Current captured with satellite-tracked drifter observations</h1>
@@ -85,14 +90,63 @@
 
 <p>My interest to explore the EACC comes from its role in linking the boundary currents north of Madagascar and at the equator. It is long established that the East African Coastal Current flows northward along the coast of Tanzania throughout the year<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>. However, until now we have a rough sketch of the East african coastal current and its seanoal variations. In this post, I am going to illustrate to you how to process drifter data that capture nicely the pathways of the EACC. The EACC must have been known to naviagators for a long time. Its waters form part of a maritime trade routes first described about 1900 years ago<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>. Compared to the more dramatic reversing Somali Current, the EACC has received relatively little attention from oceanographers.</p>
 <p>Early references work in the EACC are given by Lutjerharms<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>. The EACC is not clearly resolved in the <em>Atlas of the International Indian Ocean Expedition</em><a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> nor in the more detailed seasonal charts of Citeau and others<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a>. In this post I used drifter’s observations from Global Drifter Program to highlight the surface current flow of East African Coastal Current (EACC) during the northeast and southeast monsoon season.</p>
-<p>Figure <a href="#fig:vector">1</a> show Surface current vectors compiled from drifters during the northeast (Figure <a href="#fig:vector">1</a>) and southeast monsoon season (Figure <a href="#fig:vector">1</a>).</p>
+<div id="needed-packages" class="section level3">
+<h3>Needed Packages</h3>
+<p>We need to load some packages into R that are used to process the data. The chunk below show the list of packages I selected that I will use to import the data, manipulate, transform and last presented the results in form of maps. One of the package is the tidyverse, which loads five other packages — ggplot2, tibble, tidyr, readr, purrr, and dplyr packages. These are considered to be the core of the tidyverse because are mostly used in almost every analysis.</p>
+<pre class="r"><code>require(tidyverse)
+require(lubridate)
+require(leaflet)
+require(insol)
+require(kableExtra)
+require(sf)
+require(tmap)</code></pre>
+</div>
+<div id="data-manipulation" class="section level3">
+<h3>Data Manipulation</h3>
+<p>Once the packages are loaded in R, I used the dplyr’s function <em>read_table2()</em> to import the data into R’s workspace. <em>read_table2()</em> is designed to read the type of textual data where each column is separated by one (or more) columns of space.</p>
+<pre class="r"><code>## load the dataset
+drifter = read_table2(&quot;./drifters.txt&quot;, comment = &quot;#&quot;, 
+                      col_names = FALSE)</code></pre>
+<p>Once the data was in the workspace, I found the data comes without column names and it also contains columns with empty cells. In this case, the first process I did is to rename the variables with appropriate names using the <em>dpyr’s function rename()</em>.</p>
+<pre class="r"><code>drifter = drifter%&gt;%select(id = X1, lon = X2, lat = X3, 
+                           drogue = X4, u = X5, v = X6, 
+                           sst = X7, year = X8, month = X9, 
+                           day = X10, hour = X11)</code></pre>
+<p>Because the monsoon season affects the surface current circulation in the tropical Indian Ocean Region, I create a seasonal variable from the month variable and computed the surface current velocity based on the equation <a href="#eq:drifter">(1)</a>.</p>
+<p><span class="math display" id="eq:drifter">\[
+\begin{equation} 
+Velocity \:(ms^{-1})\:=\: \sqrt{(U^2+V^2)} \tag{1}
+\end{equation}
+\]</span></p>
+</div>
+<div id="creating-trajectory" class="section level3">
+<h3>Creating Trajectory</h3>
+<p>I used <em>sf</em> package that implements a formal standard called “Simple Features” that specifies a storage and access model of spatial geometries (point, line, polygon). A feature geometry is called simple when it consists of points connected by straight line pieces, and does not intersect itself. Using the unique identification number of drifters, point features were created first and then transformed into trajectories.</p>
+<pre class="r"><code>## create simple features
+drifter.sf = drifter%&gt;%
+  select(season, id, lon,lat ,u,v)%&gt;%
+  mutate(velocity = sqrt(u^2 + v^2))%&gt;%
+  st_as_sf(coords = c(&quot;lon&quot;, &quot;lat&quot;))%&gt;%
+  st_set_crs(4326)
+
+## create trajectory
+drifter.traj = drifter.sf%&gt;%
+  group_by(id, season)%&gt;%
+  summarise(vel = mean(velocity, na.rm = TRUE), do_union = FALSE)%&gt;%
+  st_cast(&quot;LINESTRING&quot;)
+
+# drop some trajectory with one point
+drifter.traj = drifter.traj%&gt;%filter(id != 52950 &amp; id != 9421944 &amp; id != 9918672)</code></pre>
+</div>
+<div id="results" class="section level3">
+<h3>Results</h3>
+<p>Figure <a href="#fig:vector">1</a> show Surface current vectors compiled from drifters. The South Equatorial current and East African Coastal Current are more prominent during the southeast monsoon season (Figure <a href="#fig:vector">1</a>) compared to the northeast season (Figure <a href="#fig:vector">1</a>). This observation matches those reported by Barale<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a> described that the South Equatorial Current, flowing westward with the Trades north of 22 <sup>o</sup>S, divides into a north-flowing stream that feeds the northward East Africa Coastal Current, and a south-flowing stream that feeds the East Madagascar Current. The East African Coastal Current runs northward throughout the year between 11 <span class="math inline">\({^\circ}\)</span>S and 3 <span class="math inline">\({^\circ}\)</span>S.</p>
 <div class="figure"><span id="fig:vector"></span>
 <img src="/post/2018-09-26-chase-the-east-african-coastal-current-with-satellite-tracked-drifter-observations_files/figure-html/vector-1.png" alt="Surface current from drifter observations a)northeast, b)southeast monsoon season" width="672" />
 <p class="caption">
 Figure 1: Surface current from drifter observations a)northeast, b)southeast monsoon season
 </p>
 </div>
-<p>Barale<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a> described that the South Equatorial Current, flowing westward with the Trades north of 22 <span class="math inline">\({^\circ}\)</span>S, divides into a north-flowing stream that feeds the northward East Africa Coastal Current, and a south-flowing stream that feeds the East Madagascar Current. The East African Coastal Current runs northward throughout the year between 11 <span class="math inline">\({^\circ}\)</span>S and 3 <span class="math inline">\({^\circ}\)</span>S.</p>
 <p>Drifter observation in figure <a href="#fig:all">2</a> reveals the same picture that the northern branch of the south equatorial current (SEC) in the Indian Ocean passing through the northern extremity of Madagascar Island and continuing westward to the coast of Africa near 11 <span class="math inline">\({^\circ}\)</span>S. There it splits into the north-flowing East African COastal Current (EACC) and a branch flowing south into the Mozambique Channel. The comparison of surface current in the tropical Indian Ocean suggest that most of the water of the South Equatorial Current goes into the East African Coastal Current than Mozambique Channel (Figure <a href="#fig:all">2</a>).</p>
 <div class="figure"><span id="fig:all"></span>
 <div id="htmlwidget-1" style="width:672px;height:480px;" class="leaflet html-widget"></div>
@@ -115,6 +169,14 @@ Figure 3: Surface current flow during the southeast monsoon season
 <p class="caption">
 Figure 4: Surface current flow during the northeast monsoon season
 </p>
+</div>
+</div>
+<div id="conclusion" class="section level3">
+<h3>Conclusion</h3>
+<p>Surface current vector (Figure <a href="#fig:vector">1</a>) and surface current trajectories (Figure <a href="#fig:se">3</a> &amp; <a href="#fig:ne">4</a>) reveal the previous studies focused on the east african coastal current and south equatorial current. However, the drifter observation show much detailed pathways of the surface current during the southeast and northeast monsoon season.</p>
+</div>
+<div id="cited-references" class="section level3">
+<h3>Cited References</h3>
 </div>
 <div class="footnotes">
 <hr />
@@ -171,6 +233,18 @@ Figure 4: Surface current flow during the northeast monsoon season
 
     </div>
     
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
 
     
 <script src="/js/math-code.js"></script>
