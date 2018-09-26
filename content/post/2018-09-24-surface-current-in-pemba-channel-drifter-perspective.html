@@ -39,8 +39,8 @@ require(ggsci)</code></pre>
 drifter = read_table2(&quot;./drifters.txt&quot;, comment = &quot;#&quot;, 
                       col_names = FALSE)</code></pre>
 <p>Once the drifter data was imported into the R environment, it is in the right place to <em>tidy</em> it. Tidying data means storing it in a consistent form that matches the semantics of the dataset with the eay it is stored. Quoting Hadley (2017) stated that the data is tide when <em>each column is a variable, and each row is an observation</em>. Tidy data is an import data processing stage because it organize the data in a consistent structure that help exploration and visualization of data. The tidying of drifter data involved replacing variable names to the ones that make sense and present the variable</p>
-<pre class="r"><code># renmae the variable 
- drifter = drifter%&gt;%rename(id = X1, lon = X2, lat = X3, drogue = X4, u = X5, v = X6, 
+<pre class="r"><code># select and renmae the variable 
+ drifter = drifter%&gt;%select(id = X1, lon = X2, lat = X3, drogue = X4, u = X5, v = X6, 
          sst = X7, year = X8, month = X9, day = X10, hour = X11)</code></pre>
 <p>Once the drifter data was tidy, it was <em>transformed</em>. Transformation includes combining year, month, day and hour variable into date format that R recognize. Once te date-time variable was create, it was separated into two individual variables—date and time. The drifter dataset comes with dates separated into columns—year, month, day and hour. These four columns were transformed to form date and time presented in table <a href="#tab:tab1"><strong>??</strong></a></p>
 <pre class="r"><code>## make date format variable
@@ -113,39 +113,119 @@ Local Time
 <tbody>
 <tr>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-1995
+1998
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
 8
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-5
+28
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+0
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+1998-08-28
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+03:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2002
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+8
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+0
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+2002-08-02
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+03:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2003
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+1
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+11
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+18
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+2003-01-11
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+21:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2003
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
 6
 </td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-1995-08-05
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+6
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+18
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-09:00:00
+2003-06-06
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+21:00:00
 </td>
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-1996
+2003
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-11
+9
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-7
+18
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+18
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+2003-09-18
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
+21:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+2005
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+3
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
+26
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
 12
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-1996-11-07
+2005-03-26
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
 15:00:00
@@ -153,22 +233,22 @@ Local Time
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-2001
+2005
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-11
+5
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-17
+15
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-12
+0
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-2001-11-17
+2005-05-15
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-15:00:00
+03:00:00
 </td>
 </tr>
 <tr>
@@ -176,59 +256,19 @@ Local Time
 2007
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-6
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-7
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-6
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-2007-06-07
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-09:00:00
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-2010
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-4
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-29
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-12
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-2010-04-29
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-15:00:00
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-2011
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-8
+3
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
 18
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-18
+0
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-2011-08-18
+2007-03-18
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-21:00:00
+03:00:00
 </td>
 </tr>
 <tr>
@@ -239,16 +279,16 @@ Local Time
 9
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-22
+20
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-0
+6
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-2011-09-22
+2011-09-20
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-03:00:00
+09:00:00
 </td>
 </tr>
 <tr>
@@ -256,59 +296,19 @@ Local Time
 2013
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-4
+10
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-27
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-6
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-2013-04-27
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-09:00:00
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-2014
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-7
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-7
+25
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
 6
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-2014-07-07
+2013-10-25
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
 09:00:00
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-2015
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-2
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-3
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightpink;">
-0
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-2015-02-03
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightseagreen;">
-03:00:00
 </td>
 </tr>
 </tbody>
@@ -401,114 +401,22 @@ Velocity
 <tbody>
 <tr>
 <td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-1996-11-28
+2006-10-11
 </td>
 <td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
 NE
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
-39.67
+39.38
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
--5.92
+-4.82
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
--0.32
+0.42
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.65
-</td>
-<td style="text-align:center;color: black;background-color: lightblue;">
-0.73
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-2010-08-02
-</td>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-SE
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
-40.16
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
--5.84
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
--0.01
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.64
-</td>
-<td style="text-align:center;color: black;background-color: lightblue;">
-0.64
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-2014-02-21
-</td>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-NE
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
-40.87
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
--4.58
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.17
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
--0.07
-</td>
-<td style="text-align:center;color: black;background-color: lightblue;">
-0.18
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-2016-01-10
-</td>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-NE
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
-40.29
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
--4.36
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.21
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.51
-</td>
-<td style="text-align:center;color: black;background-color: lightblue;">
-0.55
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-2017-07-04
-</td>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-SE
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
-39.28
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
--5.24
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
--0.29
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.86
+0.79
 </td>
 <td style="text-align:center;color: black;background-color: lightblue;">
 0.90
@@ -516,163 +424,255 @@ SE
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-2009-08-20
+2002-03-09
 </td>
 <td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-SE
+NE
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
 40.46
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
--4.16
+-5.40
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.02
+0.06
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.60
+0.39
 </td>
 <td style="text-align:center;color: black;background-color: lightblue;">
-0.60
+0.39
 </td>
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-2010-08-04
+2009-04-21
 </td>
 <td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
 SE
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
-40.11
+40.38
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
--4.95
+-5.62
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
--0.20
+-0.25
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.87
+1.15
 </td>
 <td style="text-align:center;color: black;background-color: lightblue;">
-0.89
+1.18
 </td>
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-1999-08-26
-</td>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-SE
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
-40.13
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
--5.17
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
--0.01
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.87
-</td>
-<td style="text-align:center;color: black;background-color: lightblue;">
-0.87
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-2017-11-27
+2008-12-29
 </td>
 <td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
 NE
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
-40.60
+40.65
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
--4.22
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.37
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.61
-</td>
-<td style="text-align:center;color: black;background-color: lightblue;">
-0.71
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-2015-05-07
-</td>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-SE
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
-40.47
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
--5.18
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.05
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-0.03
-</td>
-<td style="text-align:center;color: black;background-color: lightblue;">
-0.06
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-2001-08-04
-</td>
-<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-SE
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
-39.59
-</td>
-<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
--5.18
+-5.68
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
 -0.02
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
--0.05
+0.22
 </td>
 <td style="text-align:center;color: black;background-color: lightblue;">
-0.06
+0.22
 </td>
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
-2006-03-23
+2009-01-20
 </td>
 <td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
 NE
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
-40.09
+40.63
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
--4.90
+-4.81
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.07
 </td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
 0.10
 </td>
+<td style="text-align:center;color: black;background-color: lightblue;">
+0.12
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2009-01-18
+</td>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.57
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-4.85
+</td>
 <td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
-1.02
+0.04
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.14
 </td>
 <td style="text-align:center;color: black;background-color: lightblue;">
-1.02
+0.14
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2009-10-16
+</td>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.08
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-4.24
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.67
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.72
+</td>
+<td style="text-align:center;color: black;background-color: lightblue;">
+0.98
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2015-05-06
+</td>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+SE
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.44
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-5.21
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.07
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.10
+</td>
+<td style="text-align:center;color: black;background-color: lightblue;">
+0.12
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2015-01-21
+</td>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.49
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-4.87
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+-0.15
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.05
+</td>
+<td style="text-align:center;color: black;background-color: lightblue;">
+0.16
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2012-04-17
+</td>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+SE
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.90
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-5.95
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+-0.08
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.71
+</td>
+<td style="text-align:center;color: black;background-color: lightblue;">
+0.72
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2015-04-22
+</td>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+SE
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.89
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-4.61
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.12
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.40
+</td>
+<td style="text-align:center;color: black;background-color: lightblue;">
+0.41
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+2002-11-20
+</td>
+<td style="text-align:center;width: 8cm; color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+40.05
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightgreen;">
+-5.29
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+0.15
+</td>
+<td style="text-align:center;width: 8cm; color: black;background-color: lightblue;">
+1.16
+</td>
+<td style="text-align:center;color: black;background-color: lightblue;">
+1.17
 </td>
 </tr>
 </tbody>

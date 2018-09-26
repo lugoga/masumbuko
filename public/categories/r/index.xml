@@ -6,10 +6,19 @@
     <description>Recent content in R on Masumbuko Semba</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 24 Sep 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 26 Sep 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>The East African Coastal Current captured with satellite-tracked drifter observations</title>
+      <link>/09/26/2018/chase-the-east-african-coastal-current-with-satellite-tracked-drifter-observations/</link>
+      <pubDate>Wed, 26 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/09/26/2018/chase-the-east-african-coastal-current-with-satellite-tracked-drifter-observations/</guid>
+      <description>My interest to explore the EACC comes from its role in linking the boundary currents north of Madagascar and at the equator. It is long established that the East African Coastal Current flows northward along the coast of Tanzania throughout the year1. However, until now we have a rough sketch of the East african coastal current and its seanoal variations. In this post, I am going to illustrate to you how to process drifter data that capture nicely the pathways of the EACC.</description>
+    </item>
     
     <item>
       <title>Surface Current in Pemba channel: Drifter Perspective</title>

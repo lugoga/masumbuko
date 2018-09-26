@@ -54,8 +54,8 @@ Once the drifter data was imported into the R environment, it is in the right pl
 ```{r}
 
 
-# renmae the variable 
- drifter = drifter%>%rename(id = X1, lon = X2, lat = X3, drogue = X4, u = X5, v = X6, 
+# select and renmae the variable 
+ drifter = drifter%>%select(id = X1, lon = X2, lat = X3, drogue = X4, u = X5, v = X6, 
          sst = X7, year = X8, month = X9, day = X10, hour = X11)
 ```
 Once the drifter data was tidy, it was *transformed*. Transformation includes combining year, month, day and hour variable into date format that R recognize. Once te date-time variable was create, it was separated into two individual variables---date and time. The drifter dataset comes with dates separated into columns---year, month, day and hour. These four columns were transformed to form date and time presented in table \@ref(tab:tab1)
