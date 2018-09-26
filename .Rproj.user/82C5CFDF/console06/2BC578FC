@@ -1,10 +1,9 @@
-[0m[0KMicrosoft Windows [Version 10.0.17134.285][0K[?25l
+[0mMicrosoft Windows [Version 10.0.17134.285][0K[?25l
 (c) 2018 Microsoft Corporation. All rights reserved.[0K
 [0K
-E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git s[0K[?25ht[0Ka[0Kt[0Ku[0Ks[0K]0;  - git  status[?25l
-[0K[?25hOn branch master[0K[?25l
-Your branch is ahead of 'origin/master' by 1 commit.[0K
-  (use "git push" to publish your local commits)[0K
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git s[0K[?25ht[0Ka[0Ku[0K[?25lE:\blogs\masumbuko>git sta[0K[?25ht[0Ku[0Ks[0K]0;  - git  status[?25l
+[0K[?25h]0; On branch master[0K[?25l
+Your branch is up to date with 'origin/master'.[0K
 [0K
 Changes not staged for commit:[0K
   (use "git add <file>..." to update what will be committed)[0K
@@ -12,65 +11,17 @@ Changes not staged for commit:[0K
 [0K
         [0;31mmodified:   .Rproj.user/82C5CFDF/console06/2BC578FC[0m[0K
         [0;31mmodified:   .Rproj.user/82C5CFDF/console06/INDEX001[0m[0K
-        [0;31mmodified:   .Rproj.user/82C5CFDF/sources/prop/INDEX[0m[0K
-        [0;31mmodified:   .Rproj.user/shared/notebooks/paths[0m[0K
-        [0;31mmodified:   content/post/2018-09-24-surface-current-in-pemba-channel-drifter-perspective.Rmd[0m[0K
-        [0;31mmodified:   content/post/2018-09-24-surface-current-in-pemba-channel-drifter-perspective.html[0m[0K
-        [0;31mmodified:   public/09/24/2018/surface-current-in-pemba-channel-drifter-perspective/index.html[0m[0K
-        [0;31mmodified:   public/categories/index.html[0m[0K
-        [0;31mmodified:   public/categories/index.xml[0m[0K
-        [0;31mmodified:   public/categories/oceanography/index.html[0m[0K
-        [0;31mmodified:   public/categories/oceanography/index.xml[0m[0K
-        [0;31mmodified:   public/categories/r/index.html[0m[0K
-        [0;31mmodified:   public/categories/r/index.xml[0m[0K
-        [0;31mmodified:   public/index.html[0m[0K
-        [0;31mmodified:   public/index.xml[0m[0K
-        [0;31mmodified:   public/post/index.html[0m[0K
-        [0;31mmodified:   public/post/index.xml[0m[0K
-        [0;31mmodified:   public/sitemap.xml[0m[0K
-        [0;31mmodified:   public/tags/drifter/index.html[0m[0K
-        [0;31mmodified:   public/tags/drifter/index.xml[0m[0K
-        [0;31mmodified:   public/tags/index.html[0m[0K
-        [0;31mmodified:   public/tags/index.xml[0m[0K
-        [0;31mmodified:   public/tags/indian-ocean/index.html[0m[0K
-        [0;31mmodified:   public/tags/indian-ocean/index.xml[0m[0K
-        [0;31mmodified:   public/tags/masumbuko-semba/index.html[0m[0K
-        [0;31mmodified:   public/tags/masumbuko-semba/index.xml[0m[0K
-        [0;31mmodified:   public/tags/pemba-channel/index.html[0m[0K
-        [0;31mmodified:   public/tags/pemba-channel/index.xml[0m[0K
-        [0;31mmodified:   public/tags/r/index.html[0m[0K
-        [0;31mmodified:   public/tags/r/index.xml[0m[0K
-        [0;31mmodified:   public/tags/salinity/index.html[0m[0K
-        [0;31mmodified:   public/tags/salinity/index.xml[0m[0K
-        [0;31mmodified:   public/tags/satellite/index.html[0m[0K
-        [0;31mmodified:   public/tags/satellite/index.xml[0m[0K
-        [0;31mmodified:   public/tags/surface-current/index.html[0m[0K
-        [0;31mmodified:   public/tags/surface-current/index.xml[0m[0K
-[0K
-Untracked files:[0K
-  (use "git add <file>..." to include in what will be committed)[0K
-[0K
-        [0;31mcontent/post/2018-09-26-chase-the-east-african-coastal-current-with-satellite-tracked-drifter[0K-
-observations.Rmd[0m[0K
-        [0;31mcontent/post/2018-09-26-chase-the-east-african-coastal-current-with-satellite-tracked-drifter[0K-
-observations.html[0m[0K
-        [0;31mcontent/post/south.dbf[0m[0K[?25h]0; [?25l
-        [0;31mcontent/post/south.prj[0m[0K
-        [0;31mcontent/post/south.shp[0m[0K
-        [0;31mcontent/post/south.shx[0m[0K
-        [0;31mpublic/09/26/[0m[0K
-        [0;31mpublic/post/2018-09-26-chase-the-east-african-coastal-current-with-satellite-tracked-drifter-[0Ko
-bservations_files/[0m[0K
-        [0;31mpublic/post/south.dbf[0m[0K
-        [0;31mpublic/post/south.prj[0m[0K
-        [0;31mpublic/post/south.shp[0m[0K
-        [0;31mpublic/post/south.shx[0m[0K
-        [0;31mpublic/rmarkdown-libs/leaflet-measure/[0m[0K
-        [0;31mstatic/post/2018-09-26-chase-the-east-african-coastal-current-with-satellite-tracked-drifter-[0Ko
-bservations_files/[0m[0K
-        [0;31mstatic/rmarkdown-libs/leaflet-measure/[0m[0K
+        [0;31mmodified:   content/post/2018-09-26-chase-the-east-african-coastal-current-with-satellite-tra[0Kc
+ked-drifter-observations.Rmd[0m[0K
+        [0;31mmodified:   content/post/2018-09-26-chase-the-east-african-coastal-current-with-satellite-tra[0Kc
+ked-drifter-observations.html[0m[0K
+        [0;31mmodified:   public/09/26/2018/chase-the-east-african-coastal-current-with-satellite-tracked-d[0Kr
+ifter-observations/index.html[0m[0K
+        [0;31mmodified:   public/post/2018-09-26-chase-the-east-african-coastal-current-with-satellite-trac[0Kk
+ed-drifter-observations_files/figure-html/vector-1.png[0m[0K
+        [0;31mmodified:   static/post/2018-09-26-chase-the-east-african-coastal-current-with-satellite-trac[0Kk
+ed-drifter-observations_files/figure-html/vector-1.png[0m[0K
 [0K
 no changes added to commit (use "git add" and/or "git commit -a")[0K
 [0K
-E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git a[0K[?25hd[0Kd[0K[28G[?25lE:\blogs\masumbuko>git add -[0K[?25hA[0K]0;  - git  add -A[?25l
-[0K[?25h
+E:\blogs\masumbuko>[0K[?25hg[0Ki[0Kt[0K[24G[?25lE:\blogs\masumbuko>git a[0K[?25hd[0Kd[0K[28G[?25lE:\blogs\masumbuko>git add -[0K[?25hA[0K

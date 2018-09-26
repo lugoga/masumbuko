@@ -16,6 +16,8 @@ tags:
   - surface current
   - Salinity
 ---
+
+
 My interest to explore the EACC comes from its role in linking the boundary currents north of Madagascar and at the equator. It is long established that the East African Coastal Current flows northward along the coast of Tanzania throughout the year^[Nyandwi, N. (2013). The Effects Of Monsoons on the East African Coastal Current Through the Zanzibar Channel, Tanzania. The Journal of Ocean Technology, 8(4), 65-74.].  However, until now we have a rough sketch of the East african coastal current and its seanoal variations. In this post, I am going to illustrate to you how to process drifter data that capture nicely the pathways of the EACC. The EACC must have been known to naviagators for a long time. Its waters form part of a maritime trade routes first described about 1900 years ago^[Huntingford, G. W. B., The Periplus of the Erythraean Sea, 225 pp.,Hakluyt Society, London, 1980.]. Compared to the more dramatic reversing Somali Current, the EACC has received relatively little attention from oceanographers.
 
 Early references work in the EACC are given by Lutjerharms^[Lutjeharms J.R.E., A Guide to Research Done Concerning Ocean Currents and Water Masses in the South West Indian Ocean,577 pp. University of Cape Town, South Africa, 1972]. The EACC is not clearly resolved in the *Atlas of the International Indian Ocean Expedition*^[Wyrtki, K., Oceanographic Atlas of the International Indian Ocean
@@ -25,7 +27,7 @@ Coop., Brest, France, 1973.]. In this post I used drifter's observations from Gl
  
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
@@ -135,9 +137,9 @@ cowplot::plot_grid(ne,se, nrow = 1, labels = c("a)", "b)"), label_x = 0.15, labe
 
 ```
 
-Barale^[Barale, V. (2014). The African Marginal and Enclosed Seas: An Overview. In V. Barale & M. Gade (Eds.), Remote Sensing of the African Seas (pp. 4-29): Springer Science.] described that the South Equatorial Current, flowing westward with the Trades north of 22 ${^{\circ}$S, divides into a north-flowing stream that feeds the northward East Africa Coastal Current, and a south-flowing stream that feeds the East Madagascar Current. The East African Coastal Current runs northward throughout the year between 11 {^{\circ}$S,nd 3 {^{\circ}$S. 
+Barale^[Barale, V. (2014). The African Marginal and Enclosed Seas: An Overview. In V. Barale & M. Gade (Eds.), Remote Sensing of the African Seas (pp. 4-29): Springer Science.] described that the South Equatorial Current, flowing westward with the Trades north of 22 ${^\circ}$S, divides into a north-flowing stream that feeds the northward East Africa Coastal Current, and a south-flowing stream that feeds the East Madagascar Current. The East African Coastal Current runs northward throughout the year between 11 ${^\circ}$S and 3 ${^\circ}$S. 
 
-Drifter observation in figure \@ref(fig:all) reveals the same picture that the northern branch of the south equatorial current (SEC) in the Indian Ocean passing through the northern extremity of Madagascar Island and continuing westward to the coast of Africa near 11 ${^\circ}$ S.  There it splits into the north-flowing East African COastal Current (EACC) and a branch flowing south into the Mozambique Channel. The comparison of surface current in the tropical Indian Ocean suggest that most of the water of the South Equatorial Current goes into the East African Coastal Current than Mozambique Channel (Figure \@ref(fig:all)).
+Drifter observation in figure \@ref(fig:all) reveals the same picture that the northern branch of the south equatorial current (SEC) in the Indian Ocean passing through the northern extremity of Madagascar Island and continuing westward to the coast of Africa near 11 ${^\circ}$S.  There it splits into the north-flowing East African COastal Current (EACC) and a branch flowing south into the Mozambique Channel. The comparison of surface current in the tropical Indian Ocean suggest that most of the water of the South Equatorial Current goes into the East African Coastal Current than Mozambique Channel (Figure \@ref(fig:all)).
 
 ```{r all,warning=FALSE, message=FALSE, comment="", fig.cap="Surface current flow in the tropical Indian Ocean"}
 
@@ -153,28 +155,6 @@ leaflet(data = drifter.traj)%>%
 
 Like previous studies, drifter reveals clearly the EACC as part of the boundary current system off the East Africa, which flows northward both in northeast (Figure \@ref(fig:ne)) and southeast monsoon season (Figure \@ref(fig:se)). 
 
-
-
-```{r ne, warning=FALSE, message=FALSE, comment="", fig.cap="Surface current flow during the northeast monsoon season"}
-## northeast monsoon season
-leaflet(data = drifter.traj%>%filter(season == "NE"))%>%
-  addTiles()%>%
-   addPolylines(color = "green",  weight = 0.75)%>%
-  fitBounds(lng1 = 39.6, lat1 = -13, lng2 = 45.1, lat2 = -3)%>%
-  addMeasure(position = "bottomleft",
-            primaryLengthUnit = "kilometers")
-```
-
-
-```{r se,warning=FALSE, message=FALSE, comment="", fig.cap="Surface current flow during the southeast monsoon season"}
-## southeast monsoon season
-leaflet(data = drifter.traj%>%filter(season == "SE"))%>%
-  addTiles()%>%
-   addPolylines(color = "green",  weight = 0.75)%>%
-  fitBounds(lng1 = 39.6, lat1 = -13, lng2 = 45.1, lat2 = -3)%>%
-  addMeasure(position = "bottomleft",
-            primaryLengthUnit = "kilometers")
-```
 
 
 ```{r, eval=FALSE}
@@ -203,11 +183,19 @@ eacc.traj = drifter.traj%>%right_join(eacc.id, by = "id")%>%select(id, season = 
   
 ```
 
-```{r, warning=FALSE, message=FALSE, comment=""}
-leaflet(data = eacc.traj)%>%
+```{r se, warning=FALSE, message=FALSE, comment="",  fig.cap="Surface current flow during the southeast monsoon season"}
+leaflet(data = eacc.traj%>%filter(season == "SE"))%>%
   addTiles()%>%
    addPolylines(color = "green",  weight = 0.75)%>%
   fitBounds(lng1 = 39.6, lat1 = -13, lng2 = 45.1, lat2 = -3)
 
 ```
 
+
+```{r ne, warning=FALSE, message=FALSE, comment="",  fig.cap="Surface current flow during the northeast monsoon season"}
+leaflet(data = eacc.traj%>%filter(season == "NE"))%>%
+  addTiles()%>%
+   addPolylines(color = "green",  weight = 0.75)%>%
+  fitBounds(lng1 = 39.6, lat1 = -13, lng2 = 45.1, lat2 = -3)
+
+```
