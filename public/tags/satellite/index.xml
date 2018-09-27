@@ -6,10 +6,19 @@
     <description>Recent content in Satellite on Masumbuko Semba</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 26 Sep 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 28 Sep 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/satellite/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Surface current from Drifters</title>
+      <link>/09/28/2018/surface-current-from-drifters/</link>
+      <pubDate>Fri, 28 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/09/28/2018/surface-current-from-drifters/</guid>
+      <description>Needed PackagesWe need to load some packages into R that are used to process the data. The chunk below show the list of packages I selected that I will use to import the data, manipulate, transform and last presented the results in form of maps. One of the package is the tidyverse, which loads five other packages — ggplot2, tibble, tidyr, readr, purrr, and dplyr packages. These are considered to be the core of the tidyverse because are mostly used in almost every analysis.</description>
+    </item>
     
     <item>
       <title>The East African Coastal Current captured with satellite-tracked drifter observations</title>

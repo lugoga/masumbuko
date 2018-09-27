@@ -1,0 +1,230 @@
+---
+title: Surface current from Drifters
+author: Masumbuko Semba
+date: '2018-09-28'
+slug: surface-current-from-drifters
+categories:
+  - Oceanography
+  - R
+tags:
+  - Drifter
+  - Indian Ocean
+  - Masumbuko Semba
+  - Pemba Channel
+  - Tanzania
+  - surface current
+  - Satellite
+  - IIOE-2
+  - Depth
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+```
+
+### Needed Packages
+We need to load some packages into R that are used to process the data. The  chunk below show the list of packages I selected that I will use to import the data, manipulate, transform and last presented the results in form of maps. One of the package is the tidyverse, which loads five other packages --- ggplot2, tibble, tidyr, readr, purrr, and dplyr packages. These are considered to be the core of the tidyverse because are mostly used in almost every analysis. In addition to tidyverse, I used Other packages like*sf*^[Edzer Pebesma (2018). sf: Simple Features for R. R package version 0.6-3. https://CRAN.R-project.org/package=sf] package to handles well spatial data, *lubridate*^[Garrett Grolemund, Hadley Wickham (2011). Dates and Times Made Easy with lubridate. Journal of
+  Statistical Software, 40(3), 1-25. URL http://www.jstatsoft.org/v40/i03/.] for date and time manipulation and *kableExtra*^[Hao Zhu (2018). kableExtra: Construct Complex Table with 'kable' and Pipe Syntax. R package version
+  0.9.0. https://CRAN.R-project.org/package=kableExtra] for stylish reporting od data in tabular forms.
+
+```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
+require(tidyverse)
+require(lubridate)
+require(kableExtra)
+require(sf)
+
+```
+
+
+###  Data Manipulation
+I obtained drifter observations as rectangular data. This means a dataset organized in such way that column are associated with variables and rows are associated with observations. Wickham term this type of data arrangement as tidy. I used used the dplyr's function *read_table2()* to import the data into R's workspace. *read_table2()* is designed to read the type of textual data where each column is separated by one (or more) columns of space. 
+
+```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
+## load the dataset
+drifter = read_table2("./drifters.txt", comment = "#", 
+                      col_names = FALSE)
+
+```
+
+Once the data was in the workspace, I found the data comes without column names and it also contains columns with empty cells. In this case, the first process I did is to rename the variables with appropriate names using the *dpyr's function rename()*. 
+
+```{r, echo= TRUE}
+drifter = drifter%>%select(id = X1, lon = X2, lat = X3, 
+                           drogue = X4, u = X5, v = X6, 
+                           sst = X7, year = X8, month = X9, 
+                           day = X10, hour = X11)
+```
+
+
+Because the monsoon season affects the surface current circulation in the tropical Indian Ocean Region, I create a seasonal variable from the month variable and computed the surface current velocity based on the equation \@ref(eq:drifter).
+```{r}
+
+drifter = drifter%>%
+  mutate(season = month, 
+         season = replace(season, season %in% c(10,11,12,1,2,3), "NE"),
+         season = replace(season, season %in% c(4,5,6,7,8,9), "SE"))
+```
+
+$$
+\begin{equation} 
+Velocity \:(ms^{-1})\:=\: \sqrt{(U^2+V^2)} (\#eq:drifter)
+\end{equation}
+$$
+
+### Creating Simple features
+I used *sf* package that implements a formal standard called “Simple Features” that specifies a storage and access model of spatial geometries (point, line, polygon). A feature geometry is called simple when it consists of points connected by straight line pieces, and does not intersect itself. Using the unique identification number of drifters, point features were created first and then transformed into trajectories. 
+
+```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
+## create simple features
+drifter.sf = drifter%>%
+  select(season, id, lon,lat ,u,v)%>%
+  mutate(velocity = sqrt(u^2 + v^2))%>%
+  st_as_sf(coords = c("lon", "lat"))%>%
+  st_set_crs(4326)
+```
+
+### Create rectangular grids
+We first make a rectangular grid over the bounding domain of the drifter observations> parsed the simpe point feature of drifter observation into the sf's function *st_make_grid()* and opted for 1600 grids (40 $\:\times \:$ 40). The grid generated was simple feature geometry list-column (sfc) format, which prevent computation. To make computation in this file, I converted from *sfc* to *sf* with *st_sf()* function. 
+```{r}
+drifter.grid = drifter.sf%>%st_make_grid(n = 40, what = "polygons")
+
+drifter.grid = drifter.grid%>%st_sf()
+
+```
+
+the index and number of drifter contained in the grids were determined and then the median of zonal (U) meridional (V) components and velocity of each grid were computed. In this approach, the total number of observations within a grid were determined using equation \@ref(eq:obs). Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation \@ref(eq:u), the median meridional component inequation \@ref(eq:v) and the median median velocity in equation \@ref(eq:velocity) for each grid.
+
+$$
+\begin{equation}
+\tau_i \:=\:\sum_{i=n}^{n} x_{i} (\#eq:obs)
+\end{equation}
+$$
+
+
+$$
+  \begin{equation}
+  \varphi = \frac{\sum(\varphi_i + \varphi_{i+1} + \varphi_{i+3} + \varphi_{i+ \cdots n})}{\sum_{i = n}N} (\#eq:u)
+  \end{equation}
+$$
+
+
+
+$$
+  \begin{equation}
+  \lambda = \frac{\sum(\lambda_i + \lambda_{i+1} + \lambda_{i+3} + \lambda_{i+ \cdots n})}{\sum_{i = n}N} (\#eq:v)
+  \end{equation}
+$$
+
+
+
+$$
+  \begin{equation}
+  \upsilon = \frac{\sum(\upsilon_i + \upsilon_{i+1} + \upsilon_{i+3} + \upsilon_{i+ \cdots n})}{\sum_{i = n}N} (\#eq:velocity)
+  \end{equation}
+$$
+
+```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
+
+drifter.mut = drifter.grid%>%
+          # make a variable od ID for each grid rect
+  mutate(id = 1:n(), 
+         # calculate index of drfter contained in grid rect
+         drifter.contained = lapply(st_contains(st_sf(geometry), drifter.sf), identity),
+        # calculate number of drifters contained in grid rect
+         n.drifter = sapply(drifter.contained,length), 
+        # calculate median of U component in grid rect
+         median.u = sapply(drifter.contained, function(x) {median(drifter.sf[x,]$u, na.rm = TRUE)}),
+        # calculate median of V component in grid rect
+         median.v= sapply(drifter.contained, function(x) {median(drifter.sf[x,]$v, na.rm = TRUE)}),
+        # calculate median of surface current velocity in grid rect
+         median.velocity = sapply(drifter.contained, function(x) {median(drifter.sf[x,]$velocity, na.rm = TRUE)}))%>%
+  # make n_drifter NA if 0
+  mutate(n.drifter = replace(n.drifter,n.drifter==0, NA))
+
+
+drifter.mut = drifter.mut%>%select(n.drifter, median.u, median.v, median.velocity)
+```
+
+
+```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
+coordinates = drifter.mut%>%
+  st_centroid()%>%st_coordinates()%>%
+  as.tibble()%>%
+  rename(lon = X, lat = Y)
+
+drifter.mut.vector = drifter.mut
+st_geometry(drifter.mut.vector) = NULL
+drifter.mut.vector = coordinates%>%bind_cols(drifter.mut.vector)
+
+
+```
+
+### Results
+
+Figure \@ref(fig:fig1)
+```{r fig1, fig.cap="Density of observations (Number of drifter per grid"}
+ggplot()+
+  geom_sf(data = drifter.mut%>%filter(!is.na(n.drifter)),
+                 aes(fill = n.drifter), col = NA)+
+  geom_sf(data = spData::world, fill = "grey80", col = "black")+
+  coord_sf(xlim = c(38,51), ylim = c(-15,-1))+
+  scale_fill_gradientn(name = "Drifters",
+                       colours = oce::oceColorsJet(120),
+                       breaks = seq(0,300,70))+
+  theme_bw()+
+  theme(legend.key.height = unit(1, "lines"),
+        legend.position = c(.1,.16),
+        legend.background = element_rect(fill = "white", colour = 1),
+        axis.text = element_text(size = 11, colour = 1))
+```
+
+Figure \@ref(fig:fig2)
+```{r fig2, fig.cap="near-surface currents derived from satellite-tracked drifter trajectories"}
+ggplot()+
+  geom_segment(data = drifter.mut.vector, 
+               aes(x = lon, xend = lon+median.u, y = lat, yend = lat+median.v),
+               arrow = arrow(angle = 30,length = unit(0.09, "cm"), type = "closed"), col = "black")+
+  geom_sf(data = spData::world, fill = "grey80", col = "black")+
+  coord_sf(xlim = c(38,51), ylim = c(-15,-1))+
+  # scale_x_continuous(breaks = c(39.2, 39.8))+
+  # scale_y_continuous(breaks = c(-5.5, -4.2))+
+  theme_bw()+
+  theme(panel.background = element_rect(colour = 1, fill = NA),
+        axis.text.x = element_text(colour = 1, size = 11),
+        axis.text.y = element_text(colour = 1, size = 11),
+        legend.position = "right", panel.grid.major = element_line(colour = NA))+
+  geom_label(aes(x = 39.0, y = -14.8, label = "1.0 m/s\n"),
+             size = 4, label.padding = unit(0.2, "lines"))+
+  geom_segment(aes(x = 38.5, xend = 39.5, y = -15, yend = -15))+
+  labs(x = NULL, y = NULL)
+```
+
+Figure \@ref(fig:fig3)
+```{r fig3, fig.cap="near-surface currents vector overlaid on surface current velocity", warning=FALSE, message=FALSE, comment=""}
+
+
+ggplot()+
+  geom_sf(data = drifter.mut%>%filter(n.drifter > 0),
+                 aes(fill = median.velocity), col = NA)+
+  geom_segment(data = drifter.mut.vector, 
+               aes(x = lon, xend = lon+median.u, y = lat, yend = lat+median.v),
+               arrow = arrow(angle = 30,length = unit(0.09, "cm"), type = "closed"), col = "black")+
+  geom_sf(data = spData::world, fill = "grey80", col = "black")+
+  coord_sf(xlim = c(38,51), ylim = c(-15,-1))+
+  scale_fill_gradientn(name = "Velocity\n (cm/s)",
+                       colours = oce::oceColorsJet(120),
+                       breaks = seq(0,1.5,0.35))+
+  theme_bw()+
+  theme(legend.key.height = unit(1.0, "lines"),
+        axis.text = element_text(size = 11, colour = 1),
+        legend.position = c(.1,.18),
+        legend.background = element_rect(fill = "white", colour = 1))+
+  geom_label(aes(x = 38.5, y = -9.7, label = "1.0 m/s\n"),
+             size = 4, label.padding = unit(0.2, "lines"))+
+  geom_segment(aes(x = 38.0, xend = 39.0, y = -9.9, yend = -9.9))+
+  labs(x = NULL, y = NULL)
+```

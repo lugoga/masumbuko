@@ -1,0 +1,144 @@
+---
+title: Surface current from Drifters
+author: Masumbuko Semba
+date: '2018-09-28'
+slug: surface-current-from-drifters
+categories:
+  - Oceanography
+  - R
+tags:
+  - Drifter
+  - Indian Ocean
+  - Masumbuko Semba
+  - Pemba Channel
+  - Tanzania
+  - surface current
+  - Satellite
+  - IIOE-2
+  - Depth
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<div id="needed-packages" class="section level3">
+<h3>Needed Packages</h3>
+<p>We need to load some packages into R that are used to process the data. The chunk below show the list of packages I selected that I will use to import the data, manipulate, transform and last presented the results in form of maps. One of the package is the tidyverse, which loads five other packages — ggplot2, tibble, tidyr, readr, purrr, and dplyr packages. These are considered to be the core of the tidyverse because are mostly used in almost every analysis. In addition to tidyverse, I used Other packages like<em>sf</em><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> package to handles well spatial data, <em>lubridate</em><a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> for date and time manipulation and <em>kableExtra</em><a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> for stylish reporting od data in tabular forms.</p>
+<pre class="r"><code>require(tidyverse)
+require(lubridate)
+require(kableExtra)
+require(sf)</code></pre>
+</div>
+<div id="data-manipulation" class="section level3">
+<h3>Data Manipulation</h3>
+<p>I obtained drifter observations as rectangular data. This means a dataset organized in such way that column are associated with variables and rows are associated with observations. Wickham term this type of data arrangement as tidy. I used used the dplyr’s function <em>read_table2()</em> to import the data into R’s workspace. <em>read_table2()</em> is designed to read the type of textual data where each column is separated by one (or more) columns of space.</p>
+<pre class="r"><code>## load the dataset
+drifter = read_table2(&quot;./drifters.txt&quot;, comment = &quot;#&quot;, 
+                      col_names = FALSE)</code></pre>
+<p>Once the data was in the workspace, I found the data comes without column names and it also contains columns with empty cells. In this case, the first process I did is to rename the variables with appropriate names using the <em>dpyr’s function rename()</em>.</p>
+<pre class="r"><code>drifter = drifter%&gt;%select(id = X1, lon = X2, lat = X3, 
+                           drogue = X4, u = X5, v = X6, 
+                           sst = X7, year = X8, month = X9, 
+                           day = X10, hour = X11)</code></pre>
+<p>Because the monsoon season affects the surface current circulation in the tropical Indian Ocean Region, I create a seasonal variable from the month variable and computed the surface current velocity based on the equation <a href="#eq:drifter">(1)</a>.</p>
+<p><span class="math display" id="eq:drifter">\[
+\begin{equation} 
+Velocity \:(ms^{-1})\:=\: \sqrt{(U^2+V^2)} \tag{1}
+\end{equation}
+\]</span></p>
+</div>
+<div id="creating-simple-features" class="section level3">
+<h3>Creating Simple features</h3>
+<p>I used <em>sf</em> package that implements a formal standard called “Simple Features” that specifies a storage and access model of spatial geometries (point, line, polygon). A feature geometry is called simple when it consists of points connected by straight line pieces, and does not intersect itself. Using the unique identification number of drifters, point features were created first and then transformed into trajectories.</p>
+<pre class="r"><code>## create simple features
+drifter.sf = drifter%&gt;%
+  select(season, id, lon,lat ,u,v)%&gt;%
+  mutate(velocity = sqrt(u^2 + v^2))%&gt;%
+  st_as_sf(coords = c(&quot;lon&quot;, &quot;lat&quot;))%&gt;%
+  st_set_crs(4326)</code></pre>
+</div>
+<div id="create-rectangular-grids" class="section level3">
+<h3>Create rectangular grids</h3>
+<p>We first make a rectangular grid over the bounding domain of the drifter observations&gt; parsed the simpe point feature of drifter observation into the sf’s function <em>st_make_grid()</em> and opted for 1600 grids (40 <span class="math inline">\(\:\times \:\)</span> 40). The grid generated was simple feature geometry list-column (sfc) format, which prevent computation. To make computation in this file, I converted from <em>sfc</em> to <em>sf</em> with <em>st_sf()</em> function.</p>
+<p>the index and number of drifter contained in the grids were determined and then the median of zonal (U) meridional (V) components and velocity of each grid were computed. In this approach, the total number of observations within a grid were determined using equation <a href="#eq:obs">(2)</a>. Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation <a href="#eq:u">(3)</a>, the median meridional component inequation <a href="#eq:v">(4)</a> and the median median velocity in equation <a href="#eq:velocity">(5)</a> for each grid.</p>
+<p><span class="math display" id="eq:obs">\[
+\begin{equation}
+\tau_i \:=\:\sum_{i=n}^{n} x_{i} \tag{2}
+\end{equation}
+\]</span></p>
+<p><span class="math display" id="eq:u">\[
+  \begin{equation}
+  \varphi = \frac{\sum(\varphi_i + \varphi_{i+1} + \varphi_{i+3} + \varphi_{i+ \cdots n})}{\sum_{i = n}N} \tag{3}
+  \end{equation}
+\]</span></p>
+<p><span class="math display" id="eq:v">\[
+  \begin{equation}
+  \lambda = \frac{\sum(\lambda_i + \lambda_{i+1} + \lambda_{i+3} + \lambda_{i+ \cdots n})}{\sum_{i = n}N} \tag{4}
+  \end{equation}
+\]</span></p>
+<p><span class="math display" id="eq:velocity">\[
+  \begin{equation}
+  \upsilon = \frac{\sum(\upsilon_i + \upsilon_{i+1} + \upsilon_{i+3} + \upsilon_{i+ \cdots n})}{\sum_{i = n}N} \tag{5}
+  \end{equation}
+\]</span></p>
+<pre class="r"><code>drifter.mut = drifter.grid%&gt;%
+          # make a variable od ID for each grid rect
+  mutate(id = 1:n(), 
+         # calculate index of drfter contained in grid rect
+         drifter.contained = lapply(st_contains(st_sf(geometry), drifter.sf), identity),
+        # calculate number of drifters contained in grid rect
+         n.drifter = sapply(drifter.contained,length), 
+        # calculate median of U component in grid rect
+         median.u = sapply(drifter.contained, function(x) {median(drifter.sf[x,]$u, na.rm = TRUE)}),
+        # calculate median of V component in grid rect
+         median.v= sapply(drifter.contained, function(x) {median(drifter.sf[x,]$v, na.rm = TRUE)}),
+        # calculate median of surface current velocity in grid rect
+         median.velocity = sapply(drifter.contained, function(x) {median(drifter.sf[x,]$velocity, na.rm = TRUE)}))%&gt;%
+  # make n_drifter NA if 0
+  mutate(n.drifter = replace(n.drifter,n.drifter==0, NA))
+
+
+drifter.mut = drifter.mut%&gt;%select(n.drifter, median.u, median.v, median.velocity)</code></pre>
+<pre class="r"><code>coordinates = drifter.mut%&gt;%
+  st_centroid()%&gt;%st_coordinates()%&gt;%
+  as.tibble()%&gt;%
+  rename(lon = X, lat = Y)
+
+drifter.mut.vector = drifter.mut
+st_geometry(drifter.mut.vector) = NULL
+drifter.mut.vector = coordinates%&gt;%bind_cols(drifter.mut.vector)</code></pre>
+</div>
+<div id="results" class="section level3">
+<h3>Results</h3>
+Figure <a href="#fig:fig1">1</a>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/fig1-1.png" alt="Density of observations (Number of drifter per grid" width="672" />
+<p class="caption">
+Figure 1: Density of observations (Number of drifter per grid
+</p>
+</div>
+<p>Figure <a href="#fig:fig2">2</a></p>
+<pre><code>## Warning: Removed 183 rows containing missing values (geom_segment).</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/fig2-1.png" alt="near-surface currents derived from satellite-tracked drifter trajectories" width="672" />
+<p class="caption">
+Figure 2: near-surface currents derived from satellite-tracked drifter trajectories
+</p>
+</div>
+Figure <a href="#fig:fig3">3</a>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/fig3-1.png" alt="near-surface currents vector overlaid on surface current velocity" width="672" />
+<p class="caption">
+Figure 3: near-surface currents vector overlaid on surface current velocity
+</p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Edzer Pebesma (2018). sf: Simple Features for R. R package version 0.6-3. <a href="https://CRAN.R-project.org/package=sf" class="uri">https://CRAN.R-project.org/package=sf</a><a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Garrett Grolemund, Hadley Wickham (2011). Dates and Times Made Easy with lubridate. Journal of Statistical Software, 40(3), 1-25. URL <a href="http://www.jstatsoft.org/v40/i03/" class="uri">http://www.jstatsoft.org/v40/i03/</a>.<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>Hao Zhu (2018). kableExtra: Construct Complex Table with ‘kable’ and Pipe Syntax. R package version 0.9.0. <a href="https://CRAN.R-project.org/package=kableExtra" class="uri">https://CRAN.R-project.org/package=kableExtra</a><a href="#fnref3">↩</a></p></li>
+</ol>
+</div>
