@@ -1,5 +1,5 @@
 ---
-title: Surface current from Drifters
+title: Surface current in the Tropical Indian Ocean Region from Drifter Observations
 author: Masumbuko Semba
 date: '2018-09-28'
 slug: surface-current-from-drifters
@@ -22,6 +22,10 @@ editor_options:
 
 
 
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p><a href="https://semba-blog.netlify.com/09/26/2018/chase-the-east-african-coastal-current-with-satellite-tracked-drifter-observations/">In the previous post</a> I showed how to track the East African Coastal Current using trajectories od drifters. In this post, we dive deeper, focusing on creating grids and fill them with number of drifter the median surface current and present them in form of maps. The aim of this routine is to illustrate how to process drifter data in R using tidyverse and other packages.</p>
+</div>
 <div id="needed-packages" class="section level3">
 <h3>Needed Packages</h3>
 <p>We need to load some packages into R that are used to process the data. The chunk below show the list of packages I selected that I will use to import the data, manipulate, transform and last presented the results in form of maps. One of the package is the tidyverse, which loads five other packages — ggplot2, tibble, tidyr, readr, purrr, and dplyr packages. These are considered to be the core of the tidyverse because are mostly used in almost every analysis. In addition to tidyverse, I used Other packages like<em>sf</em><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> package to handles well spatial data, <em>lubridate</em><a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> for date and time manipulation and <em>kableExtra</em><a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> for stylish reporting od data in tabular forms.</p>
@@ -50,7 +54,7 @@ Velocity \:(ms^{-1})\:=\: \sqrt{(U^2+V^2)} \tag{1}
 </div>
 <div id="creating-simple-features" class="section level3">
 <h3>Creating Simple features</h3>
-<p>I used <em>sf</em> package that implements a formal standard called “Simple Features” that specifies a storage and access model of spatial geometries (point, line, polygon). A feature geometry is called simple when it consists of points connected by straight line pieces, and does not intersect itself. Using the unique identification number of drifters, point features were created first and then transformed into trajectories.</p>
+<p>I used <em>sf</em> package that implements a formal standard called “Simple Features” that specifies a storage and access model of spatial geometries (point, line, polygon). A feature geometry is called simple when it consists of points connected by straight line pieces, and does not intersect itself. Using the unique identification number of drifters. A sf’s function <em>st_as_sf()</em> was used to create point features using longitude and latitude information of drifter dataset and then set the Coordinate system to World Geodetic System of 1984 (WGS84).</p>
 <pre class="r"><code>## create simple features
 drifter.sf = drifter%&gt;%
   select(season, id, lon,lat ,u,v)%&gt;%
@@ -60,8 +64,17 @@ drifter.sf = drifter%&gt;%
 </div>
 <div id="create-rectangular-grids" class="section level3">
 <h3>Create rectangular grids</h3>
-<p>We first make a rectangular grid over the bounding domain of the drifter observations&gt; parsed the simpe point feature of drifter observation into the sf’s function <em>st_make_grid()</em> and opted for 1600 grids (40 <span class="math inline">\(\:\times \:\)</span> 40). The grid generated was simple feature geometry list-column (sfc) format, which prevent computation. To make computation in this file, I converted from <em>sfc</em> to <em>sf</em> with <em>st_sf()</em> function.</p>
-<p>the index and number of drifter contained in the grids were determined and then the median of zonal (U) meridional (V) components and velocity of each grid were computed. In this approach, the total number of observations within a grid were determined using equation <a href="#eq:obs">(2)</a>. Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation <a href="#eq:u">(3)</a>, the median meridional component inequation <a href="#eq:v">(4)</a> and the median median velocity in equation <a href="#eq:velocity">(5)</a> for each grid.</p>
+<p>Because I wanted to have the distribution of drifter data in equally spaced grid, I first created gridded polygons with the sf’s function <em>st_make_grid()</em> and opted for 1600 grids (40 <span class="math inline">\(\:\times \:\)</span> 40) (Figure <a href="#fig:grids">1</a>). The grid generated was simple feature geometry list-column (sfc) format, which prevent computation. To allow further analysis and computation, the <em>sfc</em> gridded file was transformed to <em>sf</em> using <em>st_sf()</em> function.</p>
+<div class="figure"><span id="fig:grids"></span>
+<img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/grids-1.png" alt="The Tropical Indian Ocean Area has been sliced into equal spaced grids" width="672" />
+<p class="caption">
+Figure 1: The Tropical Indian Ocean Area has been sliced into equal spaced grids
+</p>
+</div>
+</div>
+<div id="filling-the-grids-with-values" class="section level3">
+<h3>Filling the grids with values</h3>
+<p>Once the gridding process was complete, the total number of drifter in each grid was calculated. The total number of observations within a grid were calculate using equation <a href="#eq:obs">(2)</a>. Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation <a href="#eq:u">(3)</a>, the median meridional component inequation <a href="#eq:v">(4)</a> and the median median velocity in equation <a href="#eq:velocity">(5)</a> for each grid.</p>
 <p><span class="math display" id="eq:obs">\[
 \begin{equation}
 \tau_i \:=\:\sum_{i=n}^{n} x_{i} \tag{2}
@@ -111,28 +124,32 @@ drifter.mut.vector = coordinates%&gt;%bind_cols(drifter.mut.vector)</code></pre>
 </div>
 <div id="results" class="section level3">
 <h3>Results</h3>
-Figure <a href="#fig:fig1">1</a>
+mapping the surface current reveals the spatial distribution of drifter observations vary across the tropical Indian Ocean region (Figure <a href="#fig:fig1">2</a>). A large proportion of the area has less than 100 drifter observation except the west side of Madagascar and Comoros Islands that receive more than 150 observations (Figure <a href="#fig:fig1">2</a>)
 <div class="figure"><span id="fig:fig1"></span>
-<img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/fig1-1.png" alt="Density of observations (Number of drifter per grid" width="672" />
+<img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/fig1-1.png" alt="Cumulative drifter observations (Number of drifter per grid) in the Tropical Indian Ocean Region" width="672" />
 <p class="caption">
-Figure 1: Density of observations (Number of drifter per grid
+Figure 2: Cumulative drifter observations (Number of drifter per grid) in the Tropical Indian Ocean Region
 </p>
 </div>
-<p>Figure <a href="#fig:fig2">2</a></p>
-<pre><code>## Warning: Removed 183 rows containing missing values (geom_segment).</code></pre>
+<p>The surface current vectors in Figure <a href="#fig:fig2">3</a> was compiled from climatological drifter observations from the Global Drifter Program. In this figure the surface circulation agrees quite well with results found by Swallow <em>et al</em>,, (1991)<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a>.</p>
 <div class="figure"><span id="fig:fig2"></span>
-<img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/fig2-1.png" alt="near-surface currents derived from satellite-tracked drifter trajectories" width="672" />
+<img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/fig2-1.png" alt="Climatological mean of near-surface currents derived from satellite-tracked drifter trajectories" width="672" />
 <p class="caption">
-Figure 2: near-surface currents derived from satellite-tracked drifter trajectories
+Figure 3: Climatological mean of near-surface currents derived from satellite-tracked drifter trajectories
 </p>
 </div>
-Figure <a href="#fig:fig3">3</a>
+<p>When these vectors are superimposed with surface current velocity, a clear pattern of surface circulation is revealed (Figure <a href="#fig:fig3">4</a>). Figure <a href="#fig:fig2">3</a> and <a href="#fig:fig3">4</a> suggest that there is an increase in median current velocity northward from 7.5 <span class="math inline">\({^\circ}\)</span>S toward the equator, though in detail it is evidently complicated by the presence of the islands Mafia, Zanzibar, and Pemba, in the path of the EACC. The westward flow feeding into the EACC appears to be mainly, but not entirely, concentrated between latitudes 9 <span class="math inline">\({^\circ}\)</span>S øS and 11<span class="math inline">\({^\circ}\)</span>S. It appears to be more concentrated in northern summer (Figure <a href="#fig:fig3">4</a>).</p>
+<p>Drifter reveal the existance of prominent features like the East African Coastal Current and the South Equatorial Current, particulary where the currents are strong. Drifter also shows the split of the south equatorial current into the north flowing East African Coastal Current and south flowing into the Mozambique Channel at about 11 <span class="math inline">\({^\circ}\)</span>S (Figure <a href="#fig:fig3">4</a>). The surface velocity of EACC reaches a maximum of 1.5ms<sup>-1</sup>, which is the highest when compared to the SEC and the Maozambique Channel (Figure <a href="#fig:fig3">4</a>). Although not clear, a southern gyres is also apparent from drifters.</p>
 <div class="figure"><span id="fig:fig3"></span>
-<img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/fig3-1.png" alt="near-surface currents vector overlaid on surface current velocity" width="672" />
+<img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/fig3-1.png" alt="Climatological median of near-surface currents vector overlaid on surface current velocity" width="672" />
 <p class="caption">
-Figure 3: near-surface currents vector overlaid on surface current velocity
+Figure 4: Climatological median of near-surface currents vector overlaid on surface current velocity
 </p>
 </div>
+</div>
+<div id="conclusion" class="section level3">
+<h3>Conclusion</h3>
+<p>At the surface, it is clear from Figures <a href="#fig:fig2">3</a> and <a href="#fig:fig3">4</a> that in the climatological median of surface current from drifters show the southern end of the EACC is close to 11 <span class="math inline">\(^{\circ}\)</span>S. ### Cited References</p>
 </div>
 <div class="footnotes">
 <hr />
@@ -140,5 +157,6 @@ Figure 3: near-surface currents vector overlaid on surface current velocity
 <li id="fn1"><p>Edzer Pebesma (2018). sf: Simple Features for R. R package version 0.6-3. <a href="https://CRAN.R-project.org/package=sf" class="uri">https://CRAN.R-project.org/package=sf</a><a href="#fnref1">↩</a></p></li>
 <li id="fn2"><p>Garrett Grolemund, Hadley Wickham (2011). Dates and Times Made Easy with lubridate. Journal of Statistical Software, 40(3), 1-25. URL <a href="http://www.jstatsoft.org/v40/i03/" class="uri">http://www.jstatsoft.org/v40/i03/</a>.<a href="#fnref2">↩</a></p></li>
 <li id="fn3"><p>Hao Zhu (2018). kableExtra: Construct Complex Table with ‘kable’ and Pipe Syntax. R package version 0.9.0. <a href="https://CRAN.R-project.org/package=kableExtra" class="uri">https://CRAN.R-project.org/package=kableExtra</a><a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>Swallow, J. C., Schott, F., &amp; Fieux, M. (1991). Structure and transport of the East African Coastal Current. Journal of Geophysical Research: Oceans, 96(C12), 22245-22257. <a href="doi:doi:10.1029/91JC01942" class="uri">doi:doi:10.1029/91JC01942</a><a href="#fnref4">↩</a></p></li>
 </ol>
 </div>

@@ -12,12 +12,13 @@
     
     
     <item>
-      <title>Surface current from Drifters</title>
+      <title>Surface current in the Tropical Indian Ocean Region from Drifter Observations</title>
       <link>/09/28/2018/surface-current-from-drifters/</link>
       <pubDate>Fri, 28 Sep 2018 00:00:00 +0000</pubDate>
       
       <guid>/09/28/2018/surface-current-from-drifters/</guid>
-      <description>Needed PackagesWe need to load some packages into R that are used to process the data. The chunk below show the list of packages I selected that I will use to import the data, manipulate, transform and last presented the results in form of maps. One of the package is the tidyverse, which loads five other packages — ggplot2, tibble, tidyr, readr, purrr, and dplyr packages. These are considered to be the core of the tidyverse because are mostly used in almost every analysis.</description>
+      <description>IntroductionIn the previous post I showed how to track the East African Coastal Current using trajectories od drifters. In this post, we dive deeper, focusing on creating grids and fill them with number of drifter the median surface current and present them in form of maps. The aim of this routine is to illustrate how to process drifter data in R using tidyverse and other packages.
+Needed PackagesWe need to load some packages into R that are used to process the data.</description>
     </item>
     
     <item>

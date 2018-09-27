@@ -1,5 +1,5 @@
 ---
-title: Surface current from Drifters
+title: Surface current in the Tropical Indian Ocean Region from Drifter Observations
 author: Masumbuko Semba
 date: '2018-09-28'
 slug: surface-current-from-drifters
@@ -19,7 +19,8 @@ tags:
 editor_options: 
   chunk_output_type: console
 ---
-
+### Introduction 
+[In the previous post](https://semba-blog.netlify.com/09/26/2018/chase-the-east-african-coastal-current-with-satellite-tracked-drifter-observations/) I showed how to track the East African Coastal Current using trajectories od drifters. In this post, we dive deeper, focusing on creating grids and fill them with number of drifter the median surface current and present them in form of maps. The aim of this routine is to illustrate how to process drifter data in R using tidyverse and other packages.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -76,7 +77,7 @@ Velocity \:(ms^{-1})\:=\: \sqrt{(U^2+V^2)} (\#eq:drifter)
 $$
 
 ### Creating Simple features
-I used *sf* package that implements a formal standard called “Simple Features” that specifies a storage and access model of spatial geometries (point, line, polygon). A feature geometry is called simple when it consists of points connected by straight line pieces, and does not intersect itself. Using the unique identification number of drifters, point features were created first and then transformed into trajectories. 
+I used *sf* package that implements a formal standard called “Simple Features” that specifies a storage and access model of spatial geometries (point, line, polygon). A feature geometry is called simple when it consists of points connected by straight line pieces, and does not intersect itself. Using the unique identification number of drifters. A sf's function *st_as_sf()* was used to create point features using longitude and latitude information of drifter dataset and then set the Coordinate system to World Geodetic System of 1984 (WGS84). 
 
 ```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
 ## create simple features
@@ -88,15 +89,31 @@ drifter.sf = drifter%>%
 ```
 
 ### Create rectangular grids
-We first make a rectangular grid over the bounding domain of the drifter observations> parsed the simpe point feature of drifter observation into the sf's function *st_make_grid()* and opted for 1600 grids (40 $\:\times \:$ 40). The grid generated was simple feature geometry list-column (sfc) format, which prevent computation. To make computation in this file, I converted from *sfc* to *sf* with *st_sf()* function. 
+Because I wanted to have the distribution of drifter data in equally spaced grid, I first created gridded polygons with the sf's function *st_make_grid()* and opted for 1600 grids (40 $\:\times \:$ 40) (Figure \@ref(fig:grids)). The grid generated was simple feature geometry list-column (sfc) format, which prevent computation. To allow further analysis and computation, the *sfc* gridded file was transformed to *sf* using *st_sf()* function. 
 ```{r}
+# create grids
 drifter.grid = drifter.sf%>%st_make_grid(n = 40, what = "polygons")
-
+#
+# transform sfc into sf
 drifter.grid = drifter.grid%>%st_sf()
+
 
 ```
 
-the index and number of drifter contained in the grids were determined and then the median of zonal (U) meridional (V) components and velocity of each grid were computed. In this approach, the total number of observations within a grid were determined using equation \@ref(eq:obs). Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation \@ref(eq:u), the median meridional component inequation \@ref(eq:v) and the median median velocity in equation \@ref(eq:velocity) for each grid.
+```{r grids, fig.cap="The Tropical Indian Ocean Area has been sliced into equal spaced grids"}
+ggplot()+
+  geom_sf(data = drifter.grid, fill = "white", col = "black")+
+  geom_sf(data = spData::world, fill = "grey85")+
+  coord_sf(xlim = c(38,51), ylim = c(-15,-1))+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = NA, colour = "black"),
+        axis.text = element_text(size = 11, colour = "black"))+
+  ggsn::scalebar(location = "bottomleft", x.min = 38, x.max = 52, y.min = -15, y.max = -1, dist = 200, dd2km = TRUE, model = "WGS84", st.dist = 0.02, st.size = 4)
+```
+
+
+### Filling the grids with values
+Once the gridding process was complete, the total number of drifter in each grid was calculated. The total number of observations within a grid were calculate using equation \@ref(eq:obs). Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation \@ref(eq:u), the median meridional component inequation \@ref(eq:v) and the median median velocity in equation \@ref(eq:velocity) for each grid.
 
 $$
 \begin{equation}
@@ -164,9 +181,8 @@ drifter.mut.vector = coordinates%>%bind_cols(drifter.mut.vector)
 ```
 
 ### Results
-
-Figure \@ref(fig:fig1)
-```{r fig1, fig.cap="Density of observations (Number of drifter per grid"}
+mapping the surface current reveals the spatial distribution of drifter observations vary across the tropical Indian Ocean region (Figure \@ref(fig:fig1)). A large proportion of the area has less than 100 drifter observation except the west side of Madagascar and Comoros Islands that receive more than 150 observations (Figure \@ref(fig:fig1))
+```{r fig1, fig.cap="Cumulative drifter observations (Number of drifter per grid) in the Tropical Indian Ocean Region"}
 ggplot()+
   geom_sf(data = drifter.mut%>%filter(!is.na(n.drifter)),
                  aes(fill = n.drifter), col = NA)+
@@ -182,8 +198,10 @@ ggplot()+
         axis.text = element_text(size = 11, colour = 1))
 ```
 
-Figure \@ref(fig:fig2)
-```{r fig2, fig.cap="near-surface currents derived from satellite-tracked drifter trajectories"}
+The surface current vectors in Figure \@ref(fig:fig2) was compiled from climatological drifter observations from the Global Drifter Program. In this figure the surface circulation agrees quite well with results found by Swallow *et al*,, (1991)^[Swallow, J. C., Schott, F., & Fieux, M. (1991). Structure and transport of the East African Coastal Current. Journal of Geophysical Research: Oceans, 96(C12), 22245-22257. doi:doi:10.1029/91JC01942]. 
+
+
+```{r fig2, fig.cap="Climatological mean of near-surface currents derived from satellite-tracked drifter trajectories", warning=FALSE, message=FALSE, comment=""}
 ggplot()+
   geom_segment(data = drifter.mut.vector, 
                aes(x = lon, xend = lon+median.u, y = lat, yend = lat+median.v),
@@ -203,8 +221,11 @@ ggplot()+
   labs(x = NULL, y = NULL)
 ```
 
-Figure \@ref(fig:fig3)
-```{r fig3, fig.cap="near-surface currents vector overlaid on surface current velocity", warning=FALSE, message=FALSE, comment=""}
+When these vectors are superimposed with surface current velocity, a clear pattern of surface circulation is revealed (Figure \@ref(fig:fig3)). Figure \@ref(fig:fig2) and \@ref(fig:fig3) suggest that there is an increase in median current velocity northward from 7.5 ${^\circ}$S toward the equator, though in detail it is evidently complicated by the presence of the islands Mafia, Zanzibar, and Pemba, in the path of the EACC. The westward flow feeding into the EACC appears to be mainly, but not entirely, concentrated between latitudes 9 ${^\circ}$S øS and 11${^\circ}$S. It appears to be more concentrated in northern summer (Figure \@ref(fig:fig3)).
+
+Drifter reveal the existance of prominent features like the East African Coastal Current and the South Equatorial Current, particulary where the currents are strong. Drifter also shows the split of the south equatorial current into the north flowing East African Coastal Current and south flowing into the Mozambique Channel at about 11 ${^\circ}$S (Figure \@ref(fig:fig3)). The surface velocity of EACC reaches a maximum of 1.5ms^-1^, which is the highest when compared to the SEC and the Maozambique Channel (Figure \@ref(fig:fig3)). Although not clear, a southern gyres is also apparent from drifters. 
+
+```{r fig3, fig.cap="Climatological median of near-surface currents vector overlaid on surface current velocity", warning=FALSE, message=FALSE, comment=""}
 
 
 ggplot()+
@@ -228,3 +249,8 @@ ggplot()+
   geom_segment(aes(x = 38.0, xend = 39.0, y = -9.9, yend = -9.9))+
   labs(x = NULL, y = NULL)
 ```
+
+### Conclusion
+At the surface, it is clear from Figures \@ref(fig:fig2) and \@ref(fig:fig3) that in the
+climatological median of surface current from drifters show the southern end of the EACC is close to 11 $^{\circ}$S. 
+### Cited References
