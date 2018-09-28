@@ -17,7 +17,7 @@ tags:
   - IIOE-2
   - Depth
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 ### Introduction 
 [In the previous post](https://semba-blog.netlify.com/09/26/2018/chase-the-east-african-coastal-current-with-satellite-tracked-drifter-observations/) I showed how to track the East African Coastal Current using trajectories od drifters. In this post, we dive deeper, focusing on creating grids and fill them with number of drifter the median surface current and present them in form of maps. The goal of this routine is to illustrate how to process drifter data in R using tidyverse and other packages.
@@ -47,7 +47,8 @@ I obtained drifter observations as rectangular data. This means a dataset organi
 ```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
 ## load the dataset
 drifter = read_table2("./drifters.txt", comment = "#", 
-                      col_names = FALSE)
+                     col_names = FALSE)
+
 
 ```
 
@@ -113,7 +114,7 @@ ggplot()+
 
 
 ### Filling the grids with values
-Once the gridding process was complete, the total number of drifter in each grid was calculated. The total number of observations within a grid were calculate using equation \@ref(eq:obs). Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation \@ref(eq:u), the median meridional component in equation \@ref(eq:v) and the median median velocity in equation \@ref(eq:velocity) for each grid.
+Once the gridding process was complete, the total number of drifter in each grid was calculated. This approach has been used previously and successfully with sparsely sampled, inhomogenous oceanographic data sets^[Lumpkin, R., & Johnson, G. C. (2013). Global ocean surface velocities from drifters: Mean, variance, El Niño–Southern Oscillation response, and seasonal cycle. Journal of Geophysical Research: Oceans, 118(6), 2992-3006.]. The total number of observations within a grid were calculate using equation \@ref(eq:obs). Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation \@ref(eq:u), the median meridional component in equation \@ref(eq:v) and the median median velocity in equation \@ref(eq:velocity) for each grid.
 
 $$
 \begin{equation}
@@ -181,7 +182,20 @@ drifter.mut.vector = coordinates%>%bind_cols(drifter.mut.vector)
 ```
 
 ### Results
-mapping the surface current reveals the spatial distribution of drifter observations vary across the tropical Indian Ocean region (Figure \@ref(fig:fig1)). A large proportion of the area has less than 100 drifter observation except the west side of Madagascar and Comoros Islands that receive more than 150 observations (Figure \@ref(fig:fig1))
+The information of binned drifter are shown in table \@ref(tab:tab1). The centroid are the longitude and latitude position extracted from the center of each grid. These information include number of observations, zonal, meridional meridional values and computed velocity for each grid. The number of drifter in a grid (Table \@ref(tab:tab1)) was used to map the distribution of drifters observations within the region. The distribution of surface current was also mapped using the velocity variable (Table \@ref(tab:tab1))
+```{r tab1}
+drifter.mut.vector%>%sample_n(12)%>%
+  kable("html",digits = 2, align = "c", caption = "Number of drifter observation and current velocity in sampled grids", col.names = c("Longitude", "Latitude", "In a Grid", "Zonal", "Meridional", "Velocity"))%>%
+  kable_styling(bootstrap_options =  c("hover", "striped"), full_width = TRUE)%>%
+  add_header_above(c("Grid Centroid" = 2, "Number of Drifter" = 1,"Surface Current  (m/s)" = 3))%>%
+  column_spec(1:6,  color = "black", bold = F)
+ 
+
+```
+
+Figure \@ref(fig:fig1) reveals the spatial distribution of drifter observations vary across the tropical Indian Ocean region. A large proportion of the area has less than 100 drifter observation except the west side of Madagascar and Comoros Islands that receive more than 150 observations (Figure \@ref(fig:fig1))
+
+
 ```{r fig1, fig.cap="Cumulative drifter observations (Number of drifter per grid) in the Tropical Indian Ocean Region"}
 ggplot()+
   geom_sf(data = drifter.mut%>%filter(!is.na(n.drifter)),
@@ -221,9 +235,11 @@ ggplot()+
   labs(x = NULL, y = NULL)
 ```
 
-When these vectors are superimposed with surface current velocity, a clear pattern of surface circulation is revealed (Figure \@ref(fig:fig3)). Figure \@ref(fig:fig2) and \@ref(fig:fig3) suggest that there is an increase in median current velocity northward from 7.5 ${^\circ}$S toward the equator, though in detail it is evidently complicated by the presence of the islands Mafia, Zanzibar, and Pemba, in the path of the EACC. The westward flow feeding into the EACC appears to be mainly, but not entirely, concentrated between latitudes 9 ${^\circ}$S øS and 11${^\circ}$S. It appears to be more concentrated in northern summer (Figure \@ref(fig:fig3)).
+When these vectors are superimposed with surface current velocity, a clear pattern of surface circulation is revealed (Figure \@ref(fig:fig3)). The features of prominent regional surface current are visible in the drifter-derived
+velocity fields like the East African Coastal Current and the South Equatorial Current, particularly where the currents are strong. Drifter also shows the split of the south equatorial current into the north flowing East African Coastal Current and south flowing into the Mozambique Channel at about 11 ${^\circ}$S (Figure \@ref(fig:fig3)). The surface velocity of EACC reaches a maximum of 1.5ms^-1^, which is the highest when compared to the SEC and the Mozambique Channel (Figure \@ref(fig:fig3)). Although not clear, a southern gyres is also apparent from drifters.
 
-Drifter reveal the existance of prominent features like the East African Coastal Current and the South Equatorial Current, particularly where the currents are strong. Drifter also shows the split of the south equatorial current into the north flowing East African Coastal Current and south flowing into the Mozambique Channel at about 11 ${^\circ}$S (Figure \@ref(fig:fig3)). The surface velocity of EACC reaches a maximum of 1.5ms^-1^, which is the highest when compared to the SEC and the Mozambique Channel (Figure \@ref(fig:fig3)). Although not clear, a southern gyres is also apparent from drifters. 
+Figure \@ref(fig:fig2) and \@ref(fig:fig3) further reveal the strength of EACC that increase in median velocity northward from 7.5 ${^\circ}$S off the Mafia Island and path off Ungjua island, but in Pemba Island it path in both side of the island and reaches its full speed of about1.5 ms^-1^ along the coastal water of Kenya. The westward flow feeding into the EACC appears to be mainly, but not entirely, concentrated between latitudes 9 ${^\circ}$S and 11${^\circ}$S (Figure \@ref(fig:fig3)).
+
 
 ```{r fig3, fig.cap="Climatological median of near-surface currents vector overlaid on surface current velocity", warning=FALSE, message=FALSE, comment=""}
 

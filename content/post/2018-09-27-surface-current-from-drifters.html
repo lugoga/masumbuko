@@ -17,9 +17,10 @@ tags:
   - IIOE-2
   - Depth
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
 
 
 <div id="introduction" class="section level3">
@@ -39,7 +40,7 @@ require(sf)</code></pre>
 <p>I obtained drifter observations as rectangular data. This means a dataset organized in such way that column are associated with variables and rows are associated with observations. Wickham term this type of data arrangement as tidy. I used used the dplyr’s function <em>read_table2()</em> to import the data into R’s workspace. <em>read_table2()</em> is designed to read the type of textual data where each column is separated by one (or more) columns of space.</p>
 <pre class="r"><code>## load the dataset
 drifter = read_table2(&quot;./drifters.txt&quot;, comment = &quot;#&quot;, 
-                      col_names = FALSE)</code></pre>
+                     col_names = FALSE)</code></pre>
 <p>Once the data was in the workspace, I found the data comes without column names and it also contains columns with empty cells. In this case, the first process I did is to rename the variables with appropriate names using the <em>dpyr’s function rename()</em>.</p>
 <pre class="r"><code>drifter = drifter%&gt;%select(id = X1, lon = X2, lat = X3, 
                            drogue = X4, u = X5, v = X6, 
@@ -74,7 +75,7 @@ Figure 1: The Tropical Indian Ocean Area has been sliced into equal spaced grids
 </div>
 <div id="filling-the-grids-with-values" class="section level3">
 <h3>Filling the grids with values</h3>
-<p>Once the gridding process was complete, the total number of drifter in each grid was calculated. The total number of observations within a grid were calculate using equation <a href="#eq:obs">(2)</a>. Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation <a href="#eq:u">(3)</a>, the median meridional component in equation <a href="#eq:v">(4)</a> and the median median velocity in equation <a href="#eq:velocity">(5)</a> for each grid.</p>
+<p>Once the gridding process was complete, the total number of drifter in each grid was calculated. This approach has been used previously and successfully with sparsely sampled, inhomogenous oceanographic data sets<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a>. The total number of observations within a grid were calculate using equation <a href="#eq:obs">(2)</a>. Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation <a href="#eq:u">(3)</a>, the median meridional component in equation <a href="#eq:v">(4)</a> and the median median velocity in equation <a href="#eq:velocity">(5)</a> for each grid.</p>
 <p><span class="math display" id="eq:obs">\[
 \begin{equation}
 \tau_i \:=\:\sum_{i=n}^{n} x_{i} \tag{2}
@@ -124,22 +125,309 @@ drifter.mut.vector = coordinates%&gt;%bind_cols(drifter.mut.vector)</code></pre>
 </div>
 <div id="results" class="section level3">
 <h3>Results</h3>
-mapping the surface current reveals the spatial distribution of drifter observations vary across the tropical Indian Ocean region (Figure <a href="#fig:fig1">2</a>). A large proportion of the area has less than 100 drifter observation except the west side of Madagascar and Comoros Islands that receive more than 150 observations (Figure <a href="#fig:fig1">2</a>)
+The information of binned drifter are shown in table <a href="#tab:tab1">1</a>. The centroid are the longitude and latitude position extracted from the center of each grid. These information include number of observations, zonal, meridional meridional values and computed velocity for each grid. The number of drifter in a grid (Table <a href="#tab:tab1">1</a>) was used to map the distribution of drifters observations within the region. The distribution of surface current was also mapped using the velocity variable (Table <a href="#tab:tab1">1</a>)
+<table class="table table-hover table-striped" style="margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:tab1">Table 1: </span>Number of drifter observation and current velocity in sampled grids
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Grid Centroid
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="1">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Number of Drifter
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="3">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Surface Current (m/s)
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+Longitude
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+<th style="text-align:center;">
+In a Grid
+</th>
+<th style="text-align:center;">
+Zonal
+</th>
+<th style="text-align:center;">
+Meridional
+</th>
+<th style="text-align:center;">
+Velocity
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;color: black;">
+50.55
+</td>
+<td style="text-align:center;color: black;">
+-7.4
+</td>
+<td style="text-align:center;color: black;">
+37
+</td>
+<td style="text-align:center;color: black;">
+-0.23
+</td>
+<td style="text-align:center;color: black;">
+0.07
+</td>
+<td style="text-align:center;color: black;">
+0.30
+</td>
+</tr>
+<tr>
+<td style="text-align:center;color: black;">
+47.66
+</td>
+<td style="text-align:center;color: black;">
+-7.8
+</td>
+<td style="text-align:center;color: black;">
+32
+</td>
+<td style="text-align:center;color: black;">
+-0.02
+</td>
+<td style="text-align:center;color: black;">
+-0.04
+</td>
+<td style="text-align:center;color: black;">
+0.19
+</td>
+</tr>
+<tr>
+<td style="text-align:center;color: black;">
+40.59
+</td>
+<td style="text-align:center;color: black;">
+-13.4
+</td>
+<td style="text-align:center;color: black;">
+71
+</td>
+<td style="text-align:center;color: black;">
+0.01
+</td>
+<td style="text-align:center;color: black;">
+-0.07
+</td>
+<td style="text-align:center;color: black;">
+0.25
+</td>
+</tr>
+<tr>
+<td style="text-align:center;color: black;">
+44.77
+</td>
+<td style="text-align:center;color: black;">
+-13.8
+</td>
+<td style="text-align:center;color: black;">
+91
+</td>
+<td style="text-align:center;color: black;">
+0.12
+</td>
+<td style="text-align:center;color: black;">
+-0.18
+</td>
+<td style="text-align:center;color: black;">
+0.44
+</td>
+</tr>
+<tr>
+<td style="text-align:center;color: black;">
+41.24
+</td>
+<td style="text-align:center;color: black;">
+-7.0
+</td>
+<td style="text-align:center;color: black;">
+43
+</td>
+<td style="text-align:center;color: black;">
+-0.21
+</td>
+<td style="text-align:center;color: black;">
+0.27
+</td>
+<td style="text-align:center;color: black;">
+0.33
+</td>
+</tr>
+<tr>
+<td style="text-align:center;color: black;">
+41.88
+</td>
+<td style="text-align:center;color: black;">
+-8.6
+</td>
+<td style="text-align:center;color: black;">
+126
+</td>
+<td style="text-align:center;color: black;">
+-0.07
+</td>
+<td style="text-align:center;color: black;">
+-0.01
+</td>
+<td style="text-align:center;color: black;">
+0.18
+</td>
+</tr>
+<tr>
+<td style="text-align:center;color: black;">
+40.59
+</td>
+<td style="text-align:center;color: black;">
+-3.8
+</td>
+<td style="text-align:center;color: black;">
+79
+</td>
+<td style="text-align:center;color: black;">
+0.44
+</td>
+<td style="text-align:center;color: black;">
+0.77
+</td>
+<td style="text-align:center;color: black;">
+0.96
+</td>
+</tr>
+<tr>
+<td style="text-align:center;color: black;">
+45.41
+</td>
+<td style="text-align:center;color: black;">
+-1.8
+</td>
+<td style="text-align:center;color: black;">
+7
+</td>
+<td style="text-align:center;color: black;">
+-0.30
+</td>
+<td style="text-align:center;color: black;">
+0.25
+</td>
+<td style="text-align:center;color: black;">
+0.52
+</td>
+</tr>
+<tr>
+<td style="text-align:center;color: black;">
+48.63
+</td>
+<td style="text-align:center;color: black;">
+-15.8
+</td>
+<td style="text-align:center;color: black;">
+NA
+</td>
+<td style="text-align:center;color: black;">
+NA
+</td>
+<td style="text-align:center;color: black;">
+NA
+</td>
+<td style="text-align:center;color: black;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;color: black;">
+42.52
+</td>
+<td style="text-align:center;color: black;">
+-5.0
+</td>
+<td style="text-align:center;color: black;">
+58
+</td>
+<td style="text-align:center;color: black;">
+-0.01
+</td>
+<td style="text-align:center;color: black;">
+-0.18
+</td>
+<td style="text-align:center;color: black;">
+0.41
+</td>
+</tr>
+<tr>
+<td style="text-align:center;color: black;">
+46.38
+</td>
+<td style="text-align:center;color: black;">
+-3.4
+</td>
+<td style="text-align:center;color: black;">
+35
+</td>
+<td style="text-align:center;color: black;">
+0.04
+</td>
+<td style="text-align:center;color: black;">
+-0.03
+</td>
+<td style="text-align:center;color: black;">
+0.19
+</td>
+</tr>
+<tr>
+<td style="text-align:center;color: black;">
+40.27
+</td>
+<td style="text-align:center;color: black;">
+-5.4
+</td>
+<td style="text-align:center;color: black;">
+117
+</td>
+<td style="text-align:center;color: black;">
+0.00
+</td>
+<td style="text-align:center;color: black;">
+0.47
+</td>
+<td style="text-align:center;color: black;">
+0.47
+</td>
+</tr>
+</tbody>
+</table>
+<p>Figure <a href="#fig:fig1">2</a> reveals the spatial distribution of drifter observations vary across the tropical Indian Ocean region. A large proportion of the area has less than 100 drifter observation except the west side of Madagascar and Comoros Islands that receive more than 150 observations (Figure <a href="#fig:fig1">2</a>)</p>
 <div class="figure"><span id="fig:fig1"></span>
 <img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/fig1-1.png" alt="Cumulative drifter observations (Number of drifter per grid) in the Tropical Indian Ocean Region" width="672" />
 <p class="caption">
 Figure 2: Cumulative drifter observations (Number of drifter per grid) in the Tropical Indian Ocean Region
 </p>
 </div>
-<p>The surface current vectors in Figure <a href="#fig:fig2">3</a> was compiled from climatological drifter observations from the Global Drifter Program. In this figure the surface circulation agrees quite well with results found by Swallow <em>et al</em>,, (1991)<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a>.</p>
+<p>The surface current vectors in Figure <a href="#fig:fig2">3</a> was compiled from climatological drifter observations from the Global Drifter Program. In this figure the surface circulation agrees quite well with results found by Swallow <em>et al</em>,, (1991)<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a>.</p>
 <div class="figure"><span id="fig:fig2"></span>
 <img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/fig2-1.png" alt="Climatological mean of near-surface currents derived from satellite-tracked drifter trajectories" width="672" />
 <p class="caption">
 Figure 3: Climatological mean of near-surface currents derived from satellite-tracked drifter trajectories
 </p>
 </div>
-<p>When these vectors are superimposed with surface current velocity, a clear pattern of surface circulation is revealed (Figure <a href="#fig:fig3">4</a>). Figure <a href="#fig:fig2">3</a> and <a href="#fig:fig3">4</a> suggest that there is an increase in median current velocity northward from 7.5 <span class="math inline">\({^\circ}\)</span>S toward the equator, though in detail it is evidently complicated by the presence of the islands Mafia, Zanzibar, and Pemba, in the path of the EACC. The westward flow feeding into the EACC appears to be mainly, but not entirely, concentrated between latitudes 9 <span class="math inline">\({^\circ}\)</span>S øS and 11<span class="math inline">\({^\circ}\)</span>S. It appears to be more concentrated in northern summer (Figure <a href="#fig:fig3">4</a>).</p>
-<p>Drifter reveal the existance of prominent features like the East African Coastal Current and the South Equatorial Current, particularly where the currents are strong. Drifter also shows the split of the south equatorial current into the north flowing East African Coastal Current and south flowing into the Mozambique Channel at about 11 <span class="math inline">\({^\circ}\)</span>S (Figure <a href="#fig:fig3">4</a>). The surface velocity of EACC reaches a maximum of 1.5ms<sup>-1</sup>, which is the highest when compared to the SEC and the Mozambique Channel (Figure <a href="#fig:fig3">4</a>). Although not clear, a southern gyres is also apparent from drifters.</p>
+<p>When these vectors are superimposed with surface current velocity, a clear pattern of surface circulation is revealed (Figure <a href="#fig:fig3">4</a>). The features of prominent regional surface current are visible in the drifter-derived velocity fields like the East African Coastal Current and the South Equatorial Current, particularly where the currents are strong. Drifter also shows the split of the south equatorial current into the north flowing East African Coastal Current and south flowing into the Mozambique Channel at about 11 <span class="math inline">\({^\circ}\)</span>S (Figure <a href="#fig:fig3">4</a>). The surface velocity of EACC reaches a maximum of 1.5ms<sup>-1</sup>, which is the highest when compared to the SEC and the Mozambique Channel (Figure <a href="#fig:fig3">4</a>). Although not clear, a southern gyres is also apparent from drifters.</p>
+<p>Figure <a href="#fig:fig2">3</a> and <a href="#fig:fig3">4</a> further reveal the strength of EACC that increase in median velocity northward from 7.5 <span class="math inline">\({^\circ}\)</span>S off the Mafia Island and path off Ungjua island, but in Pemba Island it path in both side of the island and reaches its full speed of about1.5 ms<sup>-1</sup> along the coastal water of Kenya. The westward flow feeding into the EACC appears to be mainly, but not entirely, concentrated between latitudes 9 <span class="math inline">\({^\circ}\)</span>S and 11<span class="math inline">\({^\circ}\)</span>S (Figure <a href="#fig:fig3">4</a>).</p>
 <div class="figure"><span id="fig:fig3"></span>
 <img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/fig3-1.png" alt="Climatological median of near-surface currents vector overlaid on surface current velocity" width="672" />
 <p class="caption">
@@ -160,6 +448,7 @@ Figure 4: Climatological median of near-surface currents vector overlaid on surf
 <li id="fn1"><p>Edzer Pebesma (2018). sf: Simple Features for R. R package version 0.6-3. <a href="https://CRAN.R-project.org/package=sf" class="uri">https://CRAN.R-project.org/package=sf</a><a href="#fnref1">↩</a></p></li>
 <li id="fn2"><p>Garrett Grolemund, Hadley Wickham (2011). Dates and Times Made Easy with lubridate. Journal of Statistical Software, 40(3), 1-25. URL <a href="http://www.jstatsoft.org/v40/i03/" class="uri">http://www.jstatsoft.org/v40/i03/</a>.<a href="#fnref2">↩</a></p></li>
 <li id="fn3"><p>Hao Zhu (2018). kableExtra: Construct Complex Table with ‘kable’ and Pipe Syntax. R package version 0.9.0. <a href="https://CRAN.R-project.org/package=kableExtra" class="uri">https://CRAN.R-project.org/package=kableExtra</a><a href="#fnref3">↩</a></p></li>
-<li id="fn4"><p>Swallow, J. C., Schott, F., &amp; Fieux, M. (1991). Structure and transport of the East African Coastal Current. Journal of Geophysical Research: Oceans, 96(C12), 22245-22257. <a href="doi:doi:10.1029/91JC01942" class="uri">doi:doi:10.1029/91JC01942</a><a href="#fnref4">↩</a></p></li>
+<li id="fn4"><p>Lumpkin, R., &amp; Johnson, G. C. (2013). Global ocean surface velocities from drifters: Mean, variance, El Niño–Southern Oscillation response, and seasonal cycle. Journal of Geophysical Research: Oceans, 118(6), 2992-3006.<a href="#fnref4">↩</a></p></li>
+<li id="fn5"><p>Swallow, J. C., Schott, F., &amp; Fieux, M. (1991). Structure and transport of the East African Coastal Current. Journal of Geophysical Research: Oceans, 96(C12), 22245-22257. <a href="doi:doi:10.1029/91JC01942" class="uri">doi:doi:10.1029/91JC01942</a><a href="#fnref5">↩</a></p></li>
 </ol>
 </div>
