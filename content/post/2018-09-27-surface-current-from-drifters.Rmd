@@ -185,10 +185,10 @@ drifter.mut.vector = coordinates%>%bind_cols(drifter.mut.vector)
 The information of binned drifter are shown in table \@ref(tab:tab1). The centroid are the longitude and latitude position extracted from the center of each grid. These information include number of observations, zonal, meridional meridional values and computed velocity for each grid. The number of drifter in a grid (Table \@ref(tab:tab1)) was used to map the distribution of drifters observations within the region. The distribution of surface current was also mapped using the velocity variable (Table \@ref(tab:tab1))
 ```{r tab1}
 drifter.mut.vector%>%sample_n(12)%>%
-  kable("html",digits = 2, align = "c", caption = "Number of drifter observation and current velocity in sampled grids", col.names = c("Longitude", "Latitude", "In a Grid", "Zonal", "Meridional", "Velocity"))%>%
+  kable("html",digits = 2, align = "c", caption = "Number of drifter observation and current velocity in sampled grids", col.names = c("Longitude", "Latitude", "in a Grid", "Zonal", "Meridional", "Velocity"))%>%
   kable_styling(bootstrap_options =  c("hover", "striped"), full_width = TRUE)%>%
-  add_header_above(c("Grid Centroid" = 2, "Number of Drifter" = 1,"Surface Current  (m/s)" = 3))%>%
-  column_spec(1:6,  color = "black", bold = F)
+  add_header_above(c("Grid Centroid" = 2, "Drifters" = 1,"Surface Current  (m/s)" = 3))%>%
+  column_spec(1:6,  color = "black", bold = F, width = "8cm")
  
 
 ```
