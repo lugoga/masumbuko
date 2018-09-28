@@ -17,7 +17,7 @@
       <pubDate>Fri, 28 Sep 2018 00:00:00 +0000</pubDate>
       
       <guid>/09/28/2018/surface-current-from-drifters/</guid>
-      <description>IntroductionIn the previous post I showed how to track the East African Coastal Current using trajectories od drifters. In this post, we dive deeper, focusing on creating grids and fill them with number of drifter the median surface current and present them in form of maps. The aim of this routine is to illustrate how to process drifter data in R using tidyverse and other packages.
+      <description>IntroductionIn the previous post I showed how to track the East African Coastal Current using trajectories od drifters. In this post, we dive deeper, focusing on creating grids and fill them with number of drifter the median surface current and present them in form of maps. The goal of this routine is to illustrate how to process drifter data in R using tidyverse and other packages.
 Needed PackagesWe need to load some packages into R that are used to process the data.</description>
     </item>
     

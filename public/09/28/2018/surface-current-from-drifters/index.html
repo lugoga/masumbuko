@@ -77,11 +77,11 @@
     <div class="article-content">
       <div id="introduction" class="section level3">
 <h3>Introduction</h3>
-<p><a href="https://semba-blog.netlify.com/09/26/2018/chase-the-east-african-coastal-current-with-satellite-tracked-drifter-observations/">In the previous post</a> I showed how to track the East African Coastal Current using trajectories od drifters. In this post, we dive deeper, focusing on creating grids and fill them with number of drifter the median surface current and present them in form of maps. The aim of this routine is to illustrate how to process drifter data in R using tidyverse and other packages.</p>
+<p><a href="https://semba-blog.netlify.com/09/26/2018/chase-the-east-african-coastal-current-with-satellite-tracked-drifter-observations/">In the previous post</a> I showed how to track the East African Coastal Current using trajectories od drifters. In this post, we dive deeper, focusing on creating grids and fill them with number of drifter the median surface current and present them in form of maps. The goal of this routine is to illustrate how to process drifter data in R using tidyverse and other packages.</p>
 </div>
 <div id="needed-packages" class="section level3">
 <h3>Needed Packages</h3>
-<p>We need to load some packages into R that are used to process the data. The chunk below show the list of packages I selected that I will use to import the data, manipulate, transform and last presented the results in form of maps. One of the package is the tidyverse, which loads five other packages — ggplot2, tibble, tidyr, readr, purrr, and dplyr packages. These are considered to be the core of the tidyverse because are mostly used in almost every analysis. In addition to tidyverse, I used Other packages like<em>sf</em><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> package to handles well spatial data, <em>lubridate</em><a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> for date and time manipulation and <em>kableExtra</em><a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> for stylish reporting od data in tabular forms.</p>
+<p>We need to load some packages into R that are used to process the data. The chunk below show the list of packages I selected that I will use to import the data, manipulate, transform and last presented the results in form of maps. One of the package is the tidyverse, which loads five other packages — ggplot2, tibble, tidyr, readr, purrr, and dplyr packages. These are considered to be the core of the tidyverse because are mostly used in almost every analysis. In addition to tidyverse, I used Other packages like<em>sf</em><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> package to handles well spatial data, <em>lubridate</em><a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> for date and time manipulation and <em>kableExtra</em><a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> for stylish reporting of data in tabular forms.</p>
 <pre class="r"><code>require(tidyverse)
 require(lubridate)
 require(kableExtra)
@@ -127,7 +127,7 @@ Figure 1: The Tropical Indian Ocean Area has been sliced into equal spaced grids
 </div>
 <div id="filling-the-grids-with-values" class="section level3">
 <h3>Filling the grids with values</h3>
-<p>Once the gridding process was complete, the total number of drifter in each grid was calculated. The total number of observations within a grid were calculate using equation <a href="#eq:obs">(2)</a>. Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation <a href="#eq:u">(3)</a>, the median meridional component inequation <a href="#eq:v">(4)</a> and the median median velocity in equation <a href="#eq:velocity">(5)</a> for each grid.</p>
+<p>Once the gridding process was complete, the total number of drifter in each grid was calculated. The total number of observations within a grid were calculate using equation <a href="#eq:obs">(2)</a>. Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation <a href="#eq:u">(3)</a>, the median meridional component in equation <a href="#eq:v">(4)</a> and the median median velocity in equation <a href="#eq:velocity">(5)</a> for each grid.</p>
 <p><span class="math display" id="eq:obs">\[
 \begin{equation}
 \tau_i \:=\:\sum_{i=n}^{n} x_{i} \tag{2}
@@ -192,7 +192,7 @@ Figure 3: Climatological mean of near-surface currents derived from satellite-tr
 </p>
 </div>
 <p>When these vectors are superimposed with surface current velocity, a clear pattern of surface circulation is revealed (Figure <a href="#fig:fig3">4</a>). Figure <a href="#fig:fig2">3</a> and <a href="#fig:fig3">4</a> suggest that there is an increase in median current velocity northward from 7.5 <span class="math inline">\({^\circ}\)</span>S toward the equator, though in detail it is evidently complicated by the presence of the islands Mafia, Zanzibar, and Pemba, in the path of the EACC. The westward flow feeding into the EACC appears to be mainly, but not entirely, concentrated between latitudes 9 <span class="math inline">\({^\circ}\)</span>S øS and 11<span class="math inline">\({^\circ}\)</span>S. It appears to be more concentrated in northern summer (Figure <a href="#fig:fig3">4</a>).</p>
-<p>Drifter reveal the existance of prominent features like the East African Coastal Current and the South Equatorial Current, particulary where the currents are strong. Drifter also shows the split of the south equatorial current into the north flowing East African Coastal Current and south flowing into the Mozambique Channel at about 11 <span class="math inline">\({^\circ}\)</span>S (Figure <a href="#fig:fig3">4</a>). The surface velocity of EACC reaches a maximum of 1.5ms<sup>-1</sup>, which is the highest when compared to the SEC and the Maozambique Channel (Figure <a href="#fig:fig3">4</a>). Although not clear, a southern gyres is also apparent from drifters.</p>
+<p>Drifter reveal the existance of prominent features like the East African Coastal Current and the South Equatorial Current, particularly where the currents are strong. Drifter also shows the split of the south equatorial current into the north flowing East African Coastal Current and south flowing into the Mozambique Channel at about 11 <span class="math inline">\({^\circ}\)</span>S (Figure <a href="#fig:fig3">4</a>). The surface velocity of EACC reaches a maximum of 1.5ms<sup>-1</sup>, which is the highest when compared to the SEC and the Mozambique Channel (Figure <a href="#fig:fig3">4</a>). Although not clear, a southern gyres is also apparent from drifters.</p>
 <div class="figure"><span id="fig:fig3"></span>
 <img src="/post/2018-09-27-surface-current-from-drifters_files/figure-html/fig3-1.png" alt="Climatological median of near-surface currents vector overlaid on surface current velocity" width="672" />
 <p class="caption">
@@ -202,7 +202,10 @@ Figure 4: Climatological median of near-surface currents vector overlaid on surf
 </div>
 <div id="conclusion" class="section level3">
 <h3>Conclusion</h3>
-<p>At the surface, it is clear from Figures <a href="#fig:fig2">3</a> and <a href="#fig:fig3">4</a> that in the climatological median of surface current from drifters show the southern end of the EACC is close to 11 <span class="math inline">\(^{\circ}\)</span>S. ### Cited References</p>
+<p>Drifters from Global Drifter Program captured well the surface circulation in the tropical Indian Ocean Region. They revealed well the surface circulation in Figures <a href="#fig:fig2">3</a> and <a href="#fig:fig3">4</a>. Furthermore, drifters clearly show the climatological median of surface current in southern end of the EACC is close to 11 <span class="math inline">\(^{\circ}\)</span>S.</p>
+</div>
+<div id="cited-references" class="section level3">
+<h3>Cited References</h3>
 </div>
 <div class="footnotes">
 <hr />

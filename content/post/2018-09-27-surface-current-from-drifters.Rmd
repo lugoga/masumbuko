@@ -20,7 +20,7 @@ editor_options:
   chunk_output_type: console
 ---
 ### Introduction 
-[In the previous post](https://semba-blog.netlify.com/09/26/2018/chase-the-east-african-coastal-current-with-satellite-tracked-drifter-observations/) I showed how to track the East African Coastal Current using trajectories od drifters. In this post, we dive deeper, focusing on creating grids and fill them with number of drifter the median surface current and present them in form of maps. The aim of this routine is to illustrate how to process drifter data in R using tidyverse and other packages.
+[In the previous post](https://semba-blog.netlify.com/09/26/2018/chase-the-east-african-coastal-current-with-satellite-tracked-drifter-observations/) I showed how to track the East African Coastal Current using trajectories od drifters. In this post, we dive deeper, focusing on creating grids and fill them with number of drifter the median surface current and present them in form of maps. The goal of this routine is to illustrate how to process drifter data in R using tidyverse and other packages.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -30,7 +30,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ### Needed Packages
 We need to load some packages into R that are used to process the data. The  chunk below show the list of packages I selected that I will use to import the data, manipulate, transform and last presented the results in form of maps. One of the package is the tidyverse, which loads five other packages --- ggplot2, tibble, tidyr, readr, purrr, and dplyr packages. These are considered to be the core of the tidyverse because are mostly used in almost every analysis. In addition to tidyverse, I used Other packages like*sf*^[Edzer Pebesma (2018). sf: Simple Features for R. R package version 0.6-3. https://CRAN.R-project.org/package=sf] package to handles well spatial data, *lubridate*^[Garrett Grolemund, Hadley Wickham (2011). Dates and Times Made Easy with lubridate. Journal of
   Statistical Software, 40(3), 1-25. URL http://www.jstatsoft.org/v40/i03/.] for date and time manipulation and *kableExtra*^[Hao Zhu (2018). kableExtra: Construct Complex Table with 'kable' and Pipe Syntax. R package version
-  0.9.0. https://CRAN.R-project.org/package=kableExtra] for stylish reporting od data in tabular forms.
+  0.9.0. https://CRAN.R-project.org/package=kableExtra] for stylish reporting of data in tabular forms.
 
 ```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
 require(tidyverse)
@@ -113,7 +113,7 @@ ggplot()+
 
 
 ### Filling the grids with values
-Once the gridding process was complete, the total number of drifter in each grid was calculated. The total number of observations within a grid were calculate using equation \@ref(eq:obs). Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation \@ref(eq:u), the median meridional component inequation \@ref(eq:v) and the median median velocity in equation \@ref(eq:velocity) for each grid.
+Once the gridding process was complete, the total number of drifter in each grid was calculated. The total number of observations within a grid were calculate using equation \@ref(eq:obs). Once the number of observations were determined, only grids with more than four observation of drifters were selected to calculate the median zonal component in equation \@ref(eq:u), the median meridional component in equation \@ref(eq:v) and the median median velocity in equation \@ref(eq:velocity) for each grid.
 
 $$
 \begin{equation}
@@ -223,7 +223,7 @@ ggplot()+
 
 When these vectors are superimposed with surface current velocity, a clear pattern of surface circulation is revealed (Figure \@ref(fig:fig3)). Figure \@ref(fig:fig2) and \@ref(fig:fig3) suggest that there is an increase in median current velocity northward from 7.5 ${^\circ}$S toward the equator, though in detail it is evidently complicated by the presence of the islands Mafia, Zanzibar, and Pemba, in the path of the EACC. The westward flow feeding into the EACC appears to be mainly, but not entirely, concentrated between latitudes 9 ${^\circ}$S øS and 11${^\circ}$S. It appears to be more concentrated in northern summer (Figure \@ref(fig:fig3)).
 
-Drifter reveal the existance of prominent features like the East African Coastal Current and the South Equatorial Current, particulary where the currents are strong. Drifter also shows the split of the south equatorial current into the north flowing East African Coastal Current and south flowing into the Mozambique Channel at about 11 ${^\circ}$S (Figure \@ref(fig:fig3)). The surface velocity of EACC reaches a maximum of 1.5ms^-1^, which is the highest when compared to the SEC and the Maozambique Channel (Figure \@ref(fig:fig3)). Although not clear, a southern gyres is also apparent from drifters. 
+Drifter reveal the existance of prominent features like the East African Coastal Current and the South Equatorial Current, particularly where the currents are strong. Drifter also shows the split of the south equatorial current into the north flowing East African Coastal Current and south flowing into the Mozambique Channel at about 11 ${^\circ}$S (Figure \@ref(fig:fig3)). The surface velocity of EACC reaches a maximum of 1.5ms^-1^, which is the highest when compared to the SEC and the Mozambique Channel (Figure \@ref(fig:fig3)). Although not clear, a southern gyres is also apparent from drifters. 
 
 ```{r fig3, fig.cap="Climatological median of near-surface currents vector overlaid on surface current velocity", warning=FALSE, message=FALSE, comment=""}
 
@@ -251,6 +251,6 @@ ggplot()+
 ```
 
 ### Conclusion
-At the surface, it is clear from Figures \@ref(fig:fig2) and \@ref(fig:fig3) that in the
-climatological median of surface current from drifters show the southern end of the EACC is close to 11 $^{\circ}$S. 
+Drifters from Global Drifter Program captured well the surface circulation in the tropical Indian Ocean Region. They revealed well the surface circulation in Figures \@ref(fig:fig2) and \@ref(fig:fig3). Furthermore, drifters clearly show the climatological median of surface current in southern end of the EACC is close to 11 $^{\circ}$S.
+
 ### Cited References
