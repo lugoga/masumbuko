@@ -145,7 +145,7 @@ $$
   \end{equation}
 $$
 
-```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
+```{r, warning=FALSE, message=FALSE, comment=""}
 
 drifter.mut = drifter.grid%>%
           # make a variable od ID for each grid rect
@@ -168,7 +168,7 @@ drifter.mut = drifter.mut%>%select(n.drifter, median.u, median.v, median.velocit
 ```
 
 
-```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
+```{r, warning=FALSE, message=FALSE, comment=""}
 coordinates = drifter.mut%>%
   st_centroid()%>%st_coordinates()%>%
   as.tibble()%>%

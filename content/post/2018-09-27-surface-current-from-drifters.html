@@ -96,32 +96,6 @@ Figure 1: The Tropical Indian Ocean Area has been sliced into equal spaced grids
   \upsilon = \frac{\sum(\upsilon_i + \upsilon_{i+1} + \upsilon_{i+3} + \upsilon_{i+ \cdots n})}{\sum_{i = n}N} \tag{5}
   \end{equation}
 \]</span></p>
-<pre class="r"><code>drifter.mut = drifter.grid%&gt;%
-          # make a variable od ID for each grid rect
-  mutate(id = 1:n(), 
-         # calculate index of drfter contained in grid rect
-         drifter.contained = lapply(st_contains(st_sf(geometry), drifter.sf), identity),
-        # calculate number of drifters contained in grid rect
-         n.drifter = sapply(drifter.contained,length), 
-        # calculate median of U component in grid rect
-         median.u = sapply(drifter.contained, function(x) {median(drifter.sf[x,]$u, na.rm = TRUE)}),
-        # calculate median of V component in grid rect
-         median.v= sapply(drifter.contained, function(x) {median(drifter.sf[x,]$v, na.rm = TRUE)}),
-        # calculate median of surface current velocity in grid rect
-         median.velocity = sapply(drifter.contained, function(x) {median(drifter.sf[x,]$velocity, na.rm = TRUE)}))%&gt;%
-  # make n_drifter NA if 0
-  mutate(n.drifter = replace(n.drifter,n.drifter==0, NA))
-
-
-drifter.mut = drifter.mut%&gt;%select(n.drifter, median.u, median.v, median.velocity)</code></pre>
-<pre class="r"><code>coordinates = drifter.mut%&gt;%
-  st_centroid()%&gt;%st_coordinates()%&gt;%
-  as.tibble()%&gt;%
-  rename(lon = X, lat = Y)
-
-drifter.mut.vector = drifter.mut
-st_geometry(drifter.mut.vector) = NULL
-drifter.mut.vector = coordinates%&gt;%bind_cols(drifter.mut.vector)</code></pre>
 </div>
 <div id="results" class="section level3">
 <h3>Results</h3>
@@ -172,39 +146,19 @@ Velocity
 <tbody>
 <tr>
 <td style="text-align:center;width: 8cm; color: black;">
-49.27
+47.34
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
--6.6
+-13.4
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-53
+102
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-0.00
+0.05
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-0.01
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
-0.17
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: black;">
-41.56
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
--12.6
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
-76
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
--0.14
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
--0.27
+-0.05
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
 0.39
@@ -212,42 +166,62 @@ Velocity
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; color: black;">
-48.31
+44.45
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
--12.6
+-11.0
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-43
+119
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-0.08
+-0.63
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-0.28
+-0.04
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-0.31
+0.73
 </td>
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; color: black;">
-49.59
+51.52
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
--4.6
+-4.2
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-82
+44
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-0.22
+0.16
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
--0.01
+0.29
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-0.28
+0.46
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+42.84
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-7.0
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+73
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.11
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.07
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.25
 </td>
 </tr>
 <tr>
@@ -255,39 +229,79 @@ Velocity
 39.63
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
--13.0
+-5.4
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-NA
+35
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-NA
+-0.32
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-NA
+0.85
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-NA
+0.93
 </td>
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; color: black;">
-50.55
+40.27
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
--9.4
+-4.2
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-51
+80
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
--0.08
+0.29
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-0.04
+0.88
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-0.18
+0.96
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+43.49
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-12.2
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+36
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.16
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.29
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.58
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+41.56
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-9.8
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+62
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.35
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.06
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.38
 </td>
 </tr>
 <tr>
@@ -295,47 +309,7 @@ NA
 41.88
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
--15.4
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
-46
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
-0.24
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
--0.27
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
-0.60
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: black;">
-42.20
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
--13.8
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
-64
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
--0.06
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
-0.19
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
-0.54
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: black;">
-39.95
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
--12.6
+-0.2
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
 NA
@@ -352,62 +326,62 @@ NA
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; color: black;">
-40.92
+43.81
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
--11.4
+-1.0
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-77
+26
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
--0.14
+-0.09
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
--0.51
+0.00
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-0.57
+0.14
 </td>
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; color: black;">
-39.95
+49.59
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
 -1.8
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-NA
+29
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-NA
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
-NA
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; color: black;">
-44.45
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
--11.8
-</td>
-<td style="text-align:center;width: 8cm; color: black;">
-88
+-0.26
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
 -0.20
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
--0.15
+0.46
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+44.13
 </td>
 <td style="text-align:center;width: 8cm; color: black;">
-0.56
+-9.0
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+103
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.17
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.03
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.27
 </td>
 </tr>
 </tbody>
