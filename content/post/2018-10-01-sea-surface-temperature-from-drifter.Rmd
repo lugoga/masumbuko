@@ -14,6 +14,10 @@ tags:
   - Salinity
   - Satellite
   - Pemba Channel
+  
+bibliography: [references.bib]
+csl: apa.csl
+link-citations: yes
 ---
 
 
@@ -22,17 +26,11 @@ tags:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-The study of sea surface temperature (SST) is one of the cornerstone of oceanography. It has applications not only in physics, chemistry and the earth's sciences, but in subjects as diverse as biology and economics. SST plays an important role in our quantitative understanding of coastal habitats and species distribution in our global oceans. 
+The study of sea surface temperature (SST) is one of the cornerstone of oceanography. It has applications not only in physics [@bader], chemistry [@corr] and the earth's sciences, but in subjects as diverse as biology and economics. SST plays an important role in our quantitative understanding of coastal habitats and species distribution in our global oceans [@muller; @gremillet]. 
 
-It was until the launch of The Moderate Resolution Imaging Spectroradiometer (MODIS) early 2000s, oceanographers were unable to obtain information of SST at fairly resolution. Since July 2002, MODIS provides SST for all global ocean at 4 km spatial resolution every 3 days. MODIS products enable scientists to address some issues that were impossible without the satellite derived products.
+@minnet clearly state that until the launch of The Moderate Resolution Imaging Spectroradiometer (MODIS) early 2000s, oceanographers were unable to obtain information of SST at fairly resolution . Since July 2002, MODIS provides SST for all global ocean at 4 km spatial resolution every 3 days [@chen]. MODIS products enable scientists to address some issues that were impossible without the satellite derived products.
 
-We know much about the satellite derived SST products from MODIS, but little attention has been placed on the SST gathered in-stu with drifters. Therefore, this post goal is to introduce some fundamentals techniques on how to process SST data from Global Drifter Program. But important, I will trail the processes in this post using R^[R Core Team (2018). R: A language and environment for statistical computing. R Foundation for
-  Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.]---a free and open source programming language. I loaded four packages---tidyverse^[Hadley Wickham (2017). tidyverse: Easily Install and Load the 'Tidyverse'. R package version
-  1.2.1. https://CRAN.R-project.org/package=tidyverse], lubridate^[Garrett Grolemund, Hadley Wickham (2011). Dates and Times Made Easy with lubridate. Journal of
-  Statistical Software, 40(3), 1-25. URL http://www.jstatsoft.org/v40/i03/.], kableExra^[Hao Zhu (2018). kableExtra: Construct Complex Table with 'kable' and Pipe Syntax. R package
-  version 0.9.0. https://CRAN.R-project.org/package=kableExtra] and sf^[Edzer Pebesma (2018). sf: Simple Features for R. R package version 0.6-3.
-  https://CRAN.R-project.org/package=sf] but I also used cowplot^[Claus O. Wilke (2018). cowplot: Streamlined Plot Theme and Plot Annotations for 'ggplot2'. R
-  package version 0.9.3. https://CRAN.R-project.org/package=cowplot] package for combining figures.
+We know much about the satellite derived SST products from MODIS, but little attention has been placed on the SST gathered in-stu with drifters. Therefore, this post goal is to introduce some fundamentals techniques on how to process SST data from Global Drifter Program. But important, I will trail the processes in this post using R---a free and open source programming language @r]. I loaded four packages---tidyverse developed [@tidyverse], lubridate [@lubridate], kableExra [@kableextra] and sf [@sf] but I also used cowplot package for combining figures [@cowplot].
 
 
 ```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
@@ -44,7 +42,7 @@ require(kableExtra)
 ```
 
 ### Drifter processing
-Figure \@ref(fig:pic1) summarise the main analytical step used in this post. First, the dataset was downloade from NOAA as ascii file. Second, the dataset was imported in R using the dplyr's *read_table()* function. Third, once the dataset was in the workspace, it was manipulated and transformed. These dataset has twelve variables,  I cleaned the dataset by removing some variables not needed for this post. I kept the common id, longitude, latitude, year, month, day and sst variables. Fourth, the observations were later grouped based on monsoon seasons. All drifter observations recorded between April and September fell into southeast monsoon season (SE). And those between October and March fell in the northeast (NE) monsoon season. Table \@ref(tab:tab1) show drifter observation after being procesed. 
+Figure \@ref(fig:pic1) summarise the main analytical step used in this post. This data model is modified from @r4d. Thre model consists of mainly three steps. The  first, the dataset was downloade from NOAA as ascii file. Second, the dataset was imported in R using the dplyr's *read_table()* function. Third, once the dataset was in the workspace, it was manipulated and transformed. These dataset has twelve variables,  I cleaned the dataset by removing some variables not needed for this post. I kept the common id, longitude, latitude, year, month, day and sst variables. Fourth, the observations were later grouped based on monsoon seasons. All drifter observations recorded between April and September fell into southeast monsoon season (SE). And those between October and March fell in the northeast (NE) monsoon season. Table \@ref(tab:tab1) show drifter observation after being procesed. 
 
 
 ```{r pic1, fig.cap="The data analysis model"}
@@ -339,5 +337,7 @@ ggplot()+
   theme_bw()+
   theme(panel.background = element_rect(colour = 1, fill = NA))
 ```
+
+
 
 ### References
