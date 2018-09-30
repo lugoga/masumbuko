@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 The study of sea surface temperature (SST) is one of the cornerstone of oceanography. It has applications not only in physics, chemistry and the earth's sciences, but in subjects as diverse as biology and economics. SST plays an important role in our quantitative understanding of coastal habitats and species distribution in our global oceans. 
 
-It was until the launch of The Moderate Resolution Imaging Spectroradiometer (MODIS) early 1990, oceanographers were unable to obtain information of SST at fairly resolution. Since early 2003, MODIS provides SST for all global ocean at 4 km spatial resolution every 3 days. MODIS products enable scientists to address some issues that were impossible without the satellite derived products.
+It was until the launch of The Moderate Resolution Imaging Spectroradiometer (MODIS) early 2000s, oceanographers were unable to obtain information of SST at fairly resolution. Since July 2002, MODIS provides SST for all global ocean at 4 km spatial resolution every 3 days. MODIS products enable scientists to address some issues that were impossible without the satellite derived products.
 
 We know much about the satellite derived SST products from MODIS, but little attention has been placed on the SST gathered in-stu with drifters. Therefore, this post goal is to introduce some fundamentals techniques on how to process SST data from Global Drifter Program. But important, I will trail the processes in this post using R^[R Core Team (2018). R: A language and environment for statistical computing. R Foundation for
   Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.]---a free and open source programming language. I loaded four packages---tidyverse^[Hadley Wickham (2017). tidyverse: Easily Install and Load the 'Tidyverse'. R package version
@@ -271,7 +271,7 @@ cowplot::plot_grid(fig5,fig6, nrow = 1, labels = c("a)", "b)"), label_x = 0.12, 
 
 ```
 
-## Coclusion
+## Conclusion
 As we have seen there are more drifters during the southeast monsoon (Figure \@ref(fig:fig3)a) than the northeast monsoon (Figure \@ref(fig:fig4)a). Drifter reveals the presence of warm temperature southern gyre (Figure \@ref(fig:fig1)a). Threfore, drifter observation from Global Drifter Program provides reliable in-situ data that can be used to validate and calibrate satellite-derived sea surface temperatue in the tropical Indian Ocean Region.
 
 
