@@ -1,0 +1,324 @@
+---
+title: Drifter-derived seasonal climatology of Sea surface temperature in the Tropical Indian Ocean
+author: Masumbuko semba
+date: '2018-09-30'
+slug: sea-surface-temperature-from-drifter
+categories:
+  - Oceanography
+  - 
+tags:
+  - Drifter
+  - Indian Ocean
+  - Masumbuko Semba
+  - surface current
+  - Salinity
+  - Satellite
+  - Pemba Channel
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+The study of sea surface temperature (SST) is one of the cornestone of oceanography. It has applications not only in physics, chemistry and the earth's sciences, but in subjects as diverse as biology and economics. SST plays an important role in our quantitative understanding of coastal habitats and species distribution in our global oceans. 
+
+It was until the launch of The Moderate Resolution Imaging Spectroradiometer (MODIS) early 1990, oceanographers were unable to obtain information of SST at fairly resolution. Since early 2003, MODIS provides SST for all global ocean at 4 km spatial resolution every 3 days. MODIS products enable scientists to address some issues that were impossible without the satellite derived products.
+
+We know much about the satellite derived SST products from MODIS, but very little attention has been placed on the SST gathered in-stu with drifters. Therefore, this post goal is to introduce some fundamentals techniques on how to process SST data from Global Drifter Program. But important, I will trail the processes in this post using R^[R Core Team (2018). R: A language and environment for statistical computing. R Foundation for
+  Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.]---a free and open source programming language. I loaded four packages---tidyverse^[Hadley Wickham (2017). tidyverse: Easily Install and Load the 'Tidyverse'. R package version
+  1.2.1. https://CRAN.R-project.org/package=tidyverse], lubridate^[Garrett Grolemund, Hadley Wickham (2011). Dates and Times Made Easy with lubridate. Journal of
+  Statistical Software, 40(3), 1-25. URL http://www.jstatsoft.org/v40/i03/.], kableExra^[Hao Zhu (2018). kableExtra: Construct Complex Table with 'kable' and Pipe Syntax. R package
+  version 0.9.0. https://CRAN.R-project.org/package=kableExtra] and sf^[Edzer Pebesma (2018). sf: Simple Features for R. R package version 0.6-3.
+  https://CRAN.R-project.org/package=sf] but I also used cowplot^[Claus O. Wilke (2018). cowplot: Streamlined Plot Theme and Plot Annotations for 'ggplot2'. R
+  package version 0.9.3. https://CRAN.R-project.org/package=cowplot] package for combining figures.
+
+
+```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
+require(tidyverse)
+require(lubridate)
+require(sf)
+
+```
+
+### Drifter processing
+Drifter observations were downloaded from NOAA website as ascii files. The dataset was imported in R using the dplyr's *read_table()* function. Once the dataset was imported, it was manipulated and transformed. The dataset has twelve variables, I eliminated variable that I do not need for this post and kepy five variable---id, longitude, latitude, year, month, day and sst. The observation was later grouped into monsoon seasons. Drifter observation from April-September fell into southeast monsoon season (SE) and those between October-March were placed in the northeast monsoon season. Figure \@ref(fig:pic1) summarizee the main analytical processes envolved in this post.
+
+
+```{r pic1, fig.cap="The data analysis model"}
+knitr::include_graphics('/post/2018-10-01-sea-surface-temperature-from-drifter_files/data_science_model.png', dpi = 300, auto_pdf = TRUE)
+```
+
+
+```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
+# read the file from the local drive
+drifter = read_table2("./drifters.txt",
+                      col_names = FALSE, comment = "#")%>%
+  select(id = 1, lon = 2, lat = 3, drogue =4, u = 5, v = 6, 
+         sst = 7, year = 8, month = 9, day = 10, hour = 11)
+
+drifter = drifter%>%
+  mutate(date = make_date(year, month, day),
+         velocity = sqrt(u^2 + v^2),
+    # make season variable
+         season = month,
+    # convert months into seasons
+         season = replace(season,season %in% c(10,11,12,1,2,3), "NE"),
+         season = replace(season, season %in% c(4:9), "SE"))%>%
+    # select variables of interest and drop others
+  select(date, season,id,lon,lat, u,v,velocity,sst)
+
+
+
+```
+
+### Create Simple Feature
+Because this post deals with spatial analysis, I converted the drifter dataset from data frame to simple feature and assign the dataset with WGS84 as the coordinate sysem. 
+```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
+
+drifter.sst = drifter%>%select(-c(u,v,velocity))
+
+drifter.sst.sf = drifter.sst%>%
+  st_as_sf(coords = c("lon", "lat"))%>%
+  st_set_crs(4326)
+
+```
+
+### Divide the Area into Grids
+Because drifter observations are inhomogenous distributed within the Tropical Indian Ocean region, to obtain homogenous distribution, I divided the region into 900 grids covering the entire area. 
+```{r, warning=FALSE, message=FALSE, comment="", echo=TRUE}
+
+# creat a grids of the area
+grid = drifter.sst.sf%>%st_make_grid(n = 30)
+
+```
+
+### Populate Grids with Drifter Observations and Median SST 
+Once the grids were created, I computed the statistics in each grids. The first statistic metric computed was the number of observations in grids . Then the second metric was the calculation of median SST in a grid. 
+
+```{r, warning=FALSE, message=FALSE, comment=""}
+sst.mut = grid%>%
+  # convert sfc to sf
+  st_sf()%>%
+  # creat an id for each grid
+  mutate(id = 1:n(),
+  # calculate the index of drifter contained in a grid rectangle       
+         sst.contained = lapply(st_contains(st_sf(geometry), 
+                                            drifter.sst.sf), identity),
+  # calculate the number of drifter observations in each grid
+         sst.obs = sapply(sst.contained, length),
+  # calculate the median sst in each grid
+         sst.median = sapply(sst.contained, function(x) {median(drifter.sst.sf[x,]$sst, na.rm = TRUE)}))
+
+# select some variable of interest
+sst.grid = sst.mut%>%select(sst.obs,sst.median)
+# summary(sst.grid$sst.median)
+```
+
+### Visualization
+
+The Western Indian Ocean Region is fairly crossed with Lagrangian drifter observations (Figure \@ref(fig:fig1)a). Grids with drifters above 300 are found North the Madascar Island and extend to the west of the Island toward the East African coast. The largest part of the area has grids with less than 100 drifter per grid. The climatology sea surface temperature from drifters range between 25 ^o^C and 30^o^C with mean tempeature of  27.80 ^o^C. The warmest water lies between latitude 4 to 10 ^o^S (Figure \@ref(fig:fig1)b). This warmest region  lies in the southern gyres as shown in the [previous post](https://semba-blog.netlify.com/09/28/2018/surface-current-from-drifters/).
+
+```{r fig1,  warning=FALSE, message=FALSE, comment="", fig.cap="Climatology a)Total number of drifters and b) the median SST in the Tropical Indian Ocean region"}
+
+fig1 = ggplot()+
+  geom_sf(data = sst.grid, aes(fill = sst.obs))+
+  geom_sf(data = spData::world, fill = "ivory", col = 1)+
+  coord_sf(xlim = c(38,51), ylim = c(-15,-1))+
+  scale_fill_gradientn(name = "Obs", colours = oce::oceColors9A(120))+
+  theme(panel.border = element_rect(colour = 1, fill = NA),
+        axis.text = element_text(colour = 1, size = 10),
+        legend.position = c(0.87,0.75),
+        legend.background = element_rect(colour = 1))
+
+fig2 = ggplot()+
+  geom_sf(data = sst.grid, aes(fill = sst.median))+
+  geom_sf(data = spData::world, fill = "ivory", col = 1)+
+  coord_sf(xlim = c(38,51), ylim = c(-15,-1))+
+  scale_fill_gradientn(name = "Obs", colours = oce::oceColors9A(120))+
+  theme(panel.border = element_rect(colour = 1, fill = NA),
+        axis.text = element_text(colour = 1, size = 10),
+        legend.position = c(0.88,0.75),
+        legend.background = element_rect(colour = 1))
+
+cowplot::plot_grid(fig1,fig2, nrow = 1, labels = c("a)", "b)"), label_x = 0.12, label_y = .80)
+
+
+```
+
+##  Seasonal Variation
+Figure \@ref(fig:fig2) show the seasonal median sea surface current within the tropical Indian ocean region. Like other studies, drifter observations reveals the northeast season has fairly higher sea surface temperature compared to the southeast monsoon season (Figure \@ref(fig:fig2)). 
+
+```{r fig2, fig.cap="The sea surface current during the northeast (NE) and southeast (SE) monsoon season", warning=FALSE, message=FALSE, comment=""}
+
+box = ggplot(data = drifter, aes(x = season, y = sst))+
+  geom_boxplot(fill = c(2,3), outlier.colour = 2, 
+               outlier.fill = 2, outlier.shape = 8, 
+               outlier.size = 2, alpha = 0.5)+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = NA, colour = 1),
+        axis.text = element_text(size = 10, colour = 1),
+        axis.title = element_text(size = 12, colour = 1),
+        panel.grid = element_blank(),
+        aspect.ratio = 0.5)+
+  coord_flip()+
+  scale_y_continuous(breaks = seq(24,32,1.5))+
+  labs(x = "Monsoon Season", y = expression(~Sea ~Surface~Temperature~(~degree*C)))
+  
+  # cowplot::plot_grid(box, NULL)
+  
+cowplot::ggdraw() + cowplot::draw_plot(box,.25,0.25,.6,.6)
+```
+
+### Southeast Monsoon Period
+All drifters crossed the region between April and September were combined to form the southeast monsoon. The pattern of drifters distribution during the climatology southeast monsoon period (Figure \@ref(fig:fig3)) matches closely to those in figure \@ref(fig:fig1)a, though the number is less. However, the climatology sea surface temperature during the southeast monsoon period does not show clear patter, even the dongue of warm water is not visibl (figure \@ref(fig:fig3)b)e. This is because both the East African Coastal Current and Somali CUrrent both flow northward during the southease monsoon and weaken cyclonic flow around the equator leading to disappearing of southern gyre. 
+
+```{r, warning=FALSE, message=FALSE, comment=""}
+sst.se = grid%>%
+  # convert sfc to sf
+  st_sf()%>%
+  # creat an id for each grid
+  mutate(id = 1:n(),
+  # calculate the index of drifter contained in a grid rectangle       
+         sst.contained = lapply(st_contains(st_sf(geometry), 
+                                            drifter.sst.sf%>%filter(season == "SE")), identity),
+  # calculate the number of drifter observations in each grid
+         sst.obs = sapply(sst.contained, length),
+  # calculate the median sst in each grid
+         sst.median = sapply(sst.contained, function(x) {median(drifter.sst.sf[x,]$sst, na.rm = TRUE)}))
+
+# select some variable of interest
+sst.grid.se = sst.se%>%select(sst.obs,sst.median)
+
+```
+
+
+```{r fig3, warning=FALSE, message=FALSE, comment="", fig.cap="Climatology drifter observation during the southeast monsoon season. a)Total number of drifters and b) the median SST in a grid", echo=FALSE}
+
+fig3 = ggplot()+
+  geom_sf(data = sst.grid.se, aes(fill = sst.obs))+
+  geom_sf(data = spData::world, fill = "ivory", col = 1)+
+  coord_sf(xlim = c(38,51), ylim = c(-15,-1))+
+  scale_fill_gradientn(name = "Obs", colours = oce::oceColors9A(120), breaks = seq(0,300,75))+
+  theme(panel.border = element_rect(colour = 1, fill = NA),
+        axis.text = element_text(colour = 1, size = 10),
+        legend.position = c(0.87,0.75),
+        legend.background = element_rect(colour = 1))
+
+fig4 = ggplot()+
+  geom_sf(data = sst.grid.se, aes(fill = sst.median))+
+  geom_sf(data = spData::world, fill = "ivory", col = 1)+
+  coord_sf(xlim = c(38,51), ylim = c(-15,-1))+
+  scale_fill_gradientn(name = "SST", colours = oce::oceColors9A(120), breaks = seq(24.5,31,1.5))+
+  theme(panel.border = element_rect(colour = 1, fill = NA),
+        axis.text = element_text(colour = 1, size = 10),
+        legend.position = c(0.88,0.75),
+        legend.background = element_rect(colour = 1))
+
+cowplot::plot_grid(fig3,fig4, nrow = 1, labels = c("a)", "b)"), label_x = 0.12, label_y = .80)
+
+
+```
+
+
+###Northeast monsoon Period
+Unlike the southeast, the climatology northeast period had few drifters throughout the region. Most of the area had drifters below 75 except some few grids west of north Madagascar Island (Figure \@ref(fig:fig4)a). Yet although northeast season has few drifter but the pattern of areas with large number of drifter is similar to those in figure \@ref(fig:fig1)a and \@ref(fig:fig3). We also notice that the the pattern of sea surface temperature during the northeast (Figure \@ref(fig:fig4)b) differs with the southeast season (Figure \@ref(fig:fig3)b). The northeast monsoon is associated with warmest water above 30 ^o^C along the coastal areas. 
+
+```{r, warning=FALSE, message=FALSE, comment=""}
+sst.ne = grid%>%
+  # convert sfc to sf
+  st_sf()%>%
+  # creat an id for each grid
+  mutate(id = 1:n(),
+  # calculate the index of drifter contained in a grid rectangle       
+         sst.contained = lapply(st_contains(st_sf(geometry), 
+                                            drifter.sst.sf%>%filter(season == "NE")), identity),
+  # calculate the number of drifter observations in each grid
+         sst.obs = sapply(sst.contained, length),
+  # calculate the median sst in each grid
+         sst.median = sapply(sst.contained, function(x) {median(drifter.sst.sf[x,]$sst, na.rm = TRUE)}))
+
+# select some variable of interest
+sst.grid.ne = sst.ne%>%select(sst.obs,sst.median)
+
+```
+
+
+```{r fig4, warning=FALSE, message=FALSE, comment="", fig.cap="Climatology drifter observation during the northeast monsoon season. a)Total number of drifters and b) the median SST in a grid", echo=FALSE}
+
+fig5 = ggplot()+
+  geom_sf(data = sst.grid.ne, aes(fill = sst.obs))+
+  geom_sf(data = spData::world, fill = "ivory", col = 1)+
+  coord_sf(xlim = c(38,51), ylim = c(-15,-1))+
+  scale_fill_gradientn(name = "Obs", colours = oce::oceColors9A(120), breaks = seq(0,300,75))+
+  theme(panel.border = element_rect(colour = 1, fill = NA),
+        axis.text = element_text(colour = 1, size = 10),
+        legend.position = c(0.87,0.75),
+        legend.background = element_rect(colour = 1))
+
+fig6 = ggplot()+
+  geom_sf(data = sst.grid.ne, aes(fill = sst.median))+
+  geom_sf(data = spData::world, fill = "ivory", col = 1)+
+  coord_sf(xlim = c(38,51), ylim = c(-15,-1))+
+  scale_fill_gradientn(name = "SST", colours = oce::oceColors9A(120),breaks = seq(24.5,31,1.5))+
+  theme(panel.border = element_rect(colour = 1, fill = NA),
+        axis.text = element_text(colour = 1, size = 10),
+        legend.position = c(0.88,0.75),
+        legend.background = element_rect(colour = 1))
+
+cowplot::plot_grid(fig5,fig6, nrow = 1, labels = c("a)", "b)"), label_x = 0.12, label_y = .80)
+
+```
+
+## Coclusion
+As we have seen there are more drifters during the southeast monsoon (Figure \@ref(fig:fig3)a) than the northeast monsoon (Figure \@ref(fig:fig4)a). Drifter reveals the presence of warm temperature southern gyre (Figure \@ref(fig:fig1)a). Threfore, drifter observation from Global Drifter Program provides reliable in-situ data that can be used to validate and calibrate satellite-derived sea surface temperatue in the tropical Indian Ocean Region.
+
+
+```{r, eval=FALSE, echo=FALSE}
+coords = sst.grid.ne%>%st_centroid()%>%st_coordinates()%>%as_tibble()%>%rename(lon = X, lat = Y)
+se = data.frame(coords, sst.grid.se$sst.obs, sst.grid.se$sst.median)%>%rename(obs = 3, sst = 4)
+
+ggplot(data = se%>%select(-obs)%>%filter(!is.na(sst)), aes(x = lon, y = lat, col = sst))+geom_point()
+
+ggplot(data = se%>%filter(!is.na(sst)), aes(x = lon, y = lat))+geom_raster(aes(fill = sst))
+
+```
+
+```{r, eval=FALSE, echo = FALSE}
+glimpse(se)
+se = se%>%filter(!is.na(sst))
+
+se.inter = akima::interp(x = se$lon, y = se$lat, z = se$sst, duplicate = "median", linear = FALSE)%>%akima::interp2xyz()%>%as_tibble()%>%rename(lon = x, lat = y, sst = z)
+
+ggplot()+
+  geom_raster(data =se.inter, aes(x = lon, y = lat, fill = sst), interpolate = FALSE)+
+  geom_contour(data =se.inter, aes(x = lon, y = lat, z = sst))+
+  geom_sf(data = spData::world, fill = "grey85", col = 1)+
+  coord_sf(xlim = c(38,51), ylim = c(-14,-1))+
+  scale_fill_gradientn(colours = oce::oceColors9A(120))+
+  theme_bw()+
+  theme(panel.background = element_rect(colour = 1, fill = NA))
+```
+
+```{r, eval=FALSE, echo=FALSE}
+se.inter.barnes = oce::interpBarnes(se$lon, se$lat, se$sst)
+
+lon = se.inter.barnes[[1]]
+lat = se.inter.barnes[[2]]
+data = se.inter.barnes[[3]]%>%as.data.frame()
+
+se.inter.barnes.tb = data.frame(lon, data)%>%gather(key = "variable", value = "sst", 2:34)%>%mutate(lat = rep(lat, each = 64))%>%select(lon,lat, sst)
+
+
+ggplot()+
+  geom_raster(data =se.inter.barnes.tb, aes(x = lon, y = lat, fill = sst), interpolate = FALSE)+
+  # geom_contour(data =se.inter.barnes.tb, aes(x = lon, y = lat, z = sst), col = 1)+
+  geom_sf(data = spData::world, fill = "grey85", col = 1)+
+  coord_sf(xlim = c(38,51), ylim = c(-14,-1))+
+  scale_fill_gradientn(colours = oce::oceColors9A(120))+
+  theme_bw()+
+  theme(panel.background = element_rect(colour = 1, fill = NA))
+```
+
+### References

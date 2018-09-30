@@ -6,10 +6,31 @@
     <description>Recent content on Masumbuko Semba</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 28 Sep 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 02 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/masumbuko-semba/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Linear Model with R</title>
+      <link>/10/02/2018/modelling-with-r/</link>
+      <pubDate>Tue, 02 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/10/02/2018/modelling-with-r/</guid>
+      <description>IntroductionIn this post I’am going to illustrate how to model data in R. As Wickham &amp;amp; Grolemund1 put it
+The prime goal of modeling is to provide simple low-dimension summary of a dataset.
+I am not going to bring a novel science in this post but rather to help you learn the most important tools in R2 that will allow you to model your data.</description>
+    </item>
+    
+    <item>
+      <title>Drifter-derived seasonal climatology of Sea surface temperature in the Tropical Indian Ocean</title>
+      <link>/09/30/2018/sea-surface-temperature-from-drifter/</link>
+      <pubDate>Sun, 30 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/09/30/2018/sea-surface-temperature-from-drifter/</guid>
+      <description>The study of sea surface temperature (SST) is one of the cornestone of oceanography. It has applications not only in physics, chemistry and the earth’s sciences, but in subjects as diverse as biology and economics. SST plays an important role in our quantitative understanding of coastal habitats and species distribution in our global oceans.
+It was until the launch of The Moderate Resolution Imaging Spectroradiometer (MODIS) early 1990, oceanographers were unable to obtain information of SST at fairly resolution.</description>
+    </item>
     
     <item>
       <title>Surface current in the Tropical Indian Ocean Region from Drifter Observations</title>

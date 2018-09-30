@@ -1,0 +1,187 @@
+---
+title: Linear Model with R
+author: Masumbuko
+date: '2018-10-02'
+slug: modelling-with-r
+categories:
+  - Technical
+tags:
+  - Masumbuko Semba
+---
+
+# Introduction
+In this post I'am going to illustrate how to model data in R. As Wickham & Grolemund^[Wickham, H., & Grolemund, G. (2016). R for data science: import, tidy, transform, visualize, and model data. " O'Reilly Media, Inc.".] put it
+
+>*The prime goal of modeling is to provide simple low-dimension summary of a dataset.* 
+
+I am not going to bring a novel science in this post but rather to  help you learn the most important tools in R^[R Core Team (2018). R: A language and environment for statistical computing. R Foundation for Statistical  Computing, Vienna, Austria. URL https://www.R-project.org/.] that will allow you to model your data.
+
+## Needed tools
+In this routine, we will mainly use **modelr**^[Hadley Wickham (2018). modelr: Modelling Functions that Work with the Pipe. R package version 0.1.2.
+  https://CRAN.R-project.org/package=modelr] and **tidyverse**^[Hadley Wickham (2017). tidyverse: Easily Install and Load the 'Tidyverse'. R package version 1.2.1.
+  https://CRAN.R-project.org/package=tidyverse] packages. **modelr** package which wraps around base R’s modelling functions to make them work naturally in a pipe
+
+```{r packages, warning=FALSE, message=FALSE, comment=""}
+require(tidyverse)
+require(modelr)
+require(kableExtra)
+require(plotly)
+```
+
+We will use the iris dataset, which comes with R when you install in your machine. You can call the iris dataset with the code in the chunk below. Table \@ref(tab:tab1) summarize the variables contained in the iris dataset, which contain one categorical variables (Species) and four continuos variables---sepal and peltal measurement of length and width.
+```{r}
+iris = iris
+```
+
+
+```{r tab1, echo=FALSE}
+
+iris%>%
+  select(5,1:4)%>%
+  as.tibble()%>%
+  sample_n(10)%>%
+  kable("html",align = "c", col.names = c("Species", "Length", "Width","Length", "Width"), 
+        caption = "An extract of ten measurements of flower from three species of iris")%>%
+  kable_styling(bootstrap_options = c("striped", "hover"))%>%
+  add_header_above(c("", "Sepal" = 2, "Petal" = 2))%>%
+  add_header_above(c("", "Flower Measurement (cm)" = 4))%>%
+  column_spec(1:5, width = "8cm", color = "black", bold = FALSE)%>%
+  add_footnote("Data obtained from Anderson & Edgar (1935).", notation = "number")
+```
+
+## Linear regression model
+The standard linear model is ubiquitous in statistical training and application, anf for good reason. It is simple to do and easy to understand. Let us explore the iris dataset. Let us first plot the variables to see how they are related. While the association between sepal length and sepal width (Figure \@ref(fig:fig1)) does not show clearly the relation, Figure \@ref(fig:fig2) show a clear position relatioship, though is based on species
+```{r fig1, fig.cap="The association between Sepal length and Sepal width of three species of Iris flower"}
+
+
+fig1 = ggplot(data = iris, aes(x = Sepal.Length ,
+                        y = Sepal.Width, 
+                        col = Species))+
+  geom_point()+
+  cowplot::theme_cowplot()+
+  scale_x_continuous(breaks = seq(0,7,1.5))+
+  labs(x = "Sepal length (cm)",
+       y = "Sepal width (cm)")
+
+
+  plotly::ggplotly(fig1) #%>%style()%>%layout(legend = list(x = 0.8, y = 0.95))
+```
+
+```{r fig2, fig.cap="The association between Sepal length and Sepal width of three species of Iris flower"}
+
+
+fig2 = ggplot(data = iris, aes(x = Petal.Length ,
+                        y = Petal.Width, 
+                        col = Species))+
+  geom_point(size = 2)+
+  cowplot::theme_cowplot()+
+  scale_x_continuous(breaks = seq(0,7,1.5))+
+  labs(x = "Petal length (cm)",
+       y = "Petal width (cm)")
+
+
+  plotly::ggplotly(fig2) #%>%style()%>%layout(legend = list(x = 0.1, y = 0.95))
+```
+Linear model has a general form as in equation \@ref(eq:mbili)
+
+$$
+  \begin{equation}
+  y = a_1 + a_{2x} + a_{3x}+\cdots + a_n \times x_{n-1}  (\#eq:mbili)
+  \end{equation}
+$$
+
+R has tools specifically designed for fitting linear model called *lm()*. *lm()*has a special way to specify the model family: formulaas. Formulas look like *y~x*, which *lm()* translate to a function in equation \@ref(eq:moja)
+
+$$
+  \begin{equation}
+    y = a_1 + a_2 \times X (\#eq:moja)
+  \end{equation}
+$$
+
+We can use the petal length and petal width variables in the iris data set to fit the model with the base function and look at the output
+```{r}
+petal.mod = lm(Petal.Width~Petal.Length, data = iris)
+## check coefficients
+coef(petal.mod)
+```
+
+ Let us look on the summary of the fitted model. Everything is nice and tidy. We have straightforward information, positive effect of Petal length to petal width. The strength of coefficient (adjusted R^2^) is 0.92, which tell us that the fitte model account for more than 92 percent. We also note that a small *p*-value (*p* < 0.05), prove that the strong association between Petal length and Petal width is significant
+```{r, comment="", echo=FALSE}
+summary(petal.mod)
+```
+
+## Visualizing the model
+For simple model like the *petal.mod* i created above, you can figure out what pattern the model capture by carefully studying the model family and the coeffients. However, in this post, we focus on understanding a model by lookin at its predictions. This approach has the advantage because every predictive model makes predictions. So we can use the sam set of technique to understand any type of predictive model. 
+
+It is also useful to look what the model does not capture---the residuals. The residual are obtained after substracting the predictions from the origin data. Residuals are powerful because they allow us to use models to remove strange patterns so we can study subtler trends that remains. 
+
+### Predictions
+To visualize the predictions from a model, we begin by generating evenly-spaced grid of values that covers the region where our data lies. The easiest way to do that is to use **modelr**'s package function *data_grid()*. It's first argument is a data frame and for each subsequent arguments it finds the unique variable and then generates all combinations
+
+```{r}
+grid = iris %>%
+  data_grid(Petal.Length)
+```
+
+Next we add prediction, we will use modelr's function *add_predictions()*, which take a data frame and model. Then it adds the predictions from the model to a new column in the data frame. 
+```{r}
+grid  = grid%>%
+  add_predictions(petal.mod)
+```
+
+Next we plot the predictions (Figure \@ref(fig:fig3)). You may wonder about all these procedures compared to using *geom_abline()* function. But the advantage of this approach is that it will work with any model in R, from simple models to complex ones.
+```{r fig3, fig.cap="Model fitting"}
+fig3 = ggplot(data = iris, aes(x = Petal.Length))+
+  geom_point(aes(y = Petal.Width))+
+  geom_line(data = grid, aes(y = pred), col = 2, size = 1)+
+  cowplot::theme_cowplot()+
+  scale_x_continuous(breaks = seq(0,7,1.5))+
+  labs(x = "Petal length (cm)",
+       y = "Petal width (cm)")
+
+plotly::ggplotly(fig3)
+  
+```
+
+
+### Residuals
+The flip-side of predictions are residuals. The predictions tells about the patterns that themodel has captured and the residuals tells about what the model missed out. The residual are just the distance between the observed and predicted values. similar to predictions, we add the residuals to the data with the modelr's *add_residuals()* function. Note, however, that we use the original dataset, no a generated grid. this is simply because to compute residual (Figure \@ref(tab:tab21)), we need raw *y* values. 
+
+```{r tab21}
+iris = iris%>%
+  add_residuals(petal.mod)
+
+
+iris%>%as.tibble()%>%select(5,1:4,6)%>%sample_n(12)%>%kable("html", digits = 2, align = "c", caption = "The residual values in the dataset", col.names = c("Species", "Length", "Width", "Length", "Width", "Residual"))%>%
+  add_header_above(c("","Sepal" = 2, "Petal" = 2, ""))%>%
+  add_header_above(c("", "Flower Measurement (cm)" = 4, ""))%>%
+  column_spec(1:6, width = "8cm", color = "black", bold = FALSE)
+
+```
+
+There are two ways to visualize what residuals tell us about the model. One way si to simply plot a frequency polygon (Figure \@ref(fig:fig4)). The frequency polygon help calibrate the quality of teh mdoel---how far away are predictions from observed values. *Note that the average of the residual will always be zero.*
+
+```{r fig4, fig.cap="The frequency of residual obtained from model"}
+fig4 = ggplot(data = iris, aes(x = resid))+
+  geom_freqpoly(binwidth = 0.5)+
+  cowplot::theme_cowplot() +
+  labs(x = "Model residuals",y = "Frequencies")
+
+plotly::ggplotly(fig4)
+```
+
+The other way to look at the residual graphically is by looking plot with the residual (Figure \@ref(fig:fig5)). This looks like a random noise, suggesting that the model has done a good job of capturing the pattern. However, we see clusters of residual, contributed by grouping the three species togher, which have different petal width (Figure \@ref(fig:fig2))
+
+```{r fig5, fig.cap="Residuals of the model"}
+ggplot(data = iris)+
+  # geom_ref_line(h = 0, colour = 2) +
+  geom_point(aes(x = Petal.Length, y = resid))+
+  geom_hline(yintercept = 0, linetype = 2)+
+  scale_x_continuous(breaks = seq(0,7,1.5))+
+  cowplot::theme_cowplot() +
+  labs(x = "Petal length (cm)",
+       y = "Residuals")
+```
+
+
+## Cited Literature

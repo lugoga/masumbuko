@@ -1,0 +1,129 @@
+---
+title: Drifter-derived seasonal climatology of Sea surface temperature in the Tropical Indian Ocean
+author: Masumbuko semba
+date: '2018-09-30'
+slug: sea-surface-temperature-from-drifter
+categories:
+  - Oceanography
+  - 
+tags:
+  - Drifter
+  - Indian Ocean
+  - Masumbuko Semba
+  - surface current
+  - Salinity
+  - Satellite
+  - Pemba Channel
+---
+
+
+
+<p>The study of sea surface temperature (SST) is one of the cornestone of oceanography. It has applications not only in physics, chemistry and the earth’s sciences, but in subjects as diverse as biology and economics. SST plays an important role in our quantitative understanding of coastal habitats and species distribution in our global oceans.</p>
+<p>It was until the launch of The Moderate Resolution Imaging Spectroradiometer (MODIS) early 1990, oceanographers were unable to obtain information of SST at fairly resolution. Since early 2003, MODIS provides SST for all global ocean at 4 km spatial resolution every 3 days. MODIS products enable scientists to address some issues that were impossible without the satellite derived products.</p>
+<p>We know much about the satellite derived SST products from MODIS, but very little attention has been placed on the SST gathered in-stu with drifters. Therefore, this post goal is to introduce some fundamentals techniques on how to process SST data from Global Drifter Program. But important, I will trail the processes in this post using R<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>—a free and open source programming language. I loaded four packages—tidyverse<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>, lubridate<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>, kableExra<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> and sf<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a> but I also used cowplot<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a> package for combining figures.</p>
+<pre class="r"><code>require(tidyverse)
+require(lubridate)
+require(sf)</code></pre>
+<div id="drifter-processing" class="section level3">
+<h3>Drifter processing</h3>
+<p>Drifter observations were downloaded from NOAA website as ascii files. The dataset was imported in R using the dplyr’s <em>read_table()</em> function. Once the dataset was imported, it was manipulated and transformed. The dataset has twelve variables, I eliminated variable that I do not need for this post and kepy five variable—id, longitude, latitude, year, month, day and sst. The observation was later grouped into monsoon seasons. Drifter observation from April-September fell into southeast monsoon season (SE) and those between October-March were placed in the northeast monsoon season. Figure <a href="#fig:pic1">1</a> summarizee the main analytical processes envolved in this post.</p>
+<div class="figure"><span id="fig:pic1"></span>
+<img src="/post/2018-10-01-sea-surface-temperature-from-drifter_files/data_science_model.png" alt="The data analysis model"  />
+<p class="caption">
+Figure 1: The data analysis model
+</p>
+</div>
+<pre class="r"><code># read the file from the local drive
+drifter = read_table2(&quot;./drifters.txt&quot;,
+                      col_names = FALSE, comment = &quot;#&quot;)%&gt;%
+  select(id = 1, lon = 2, lat = 3, drogue =4, u = 5, v = 6, 
+         sst = 7, year = 8, month = 9, day = 10, hour = 11)
+
+drifter = drifter%&gt;%
+  mutate(date = make_date(year, month, day),
+         velocity = sqrt(u^2 + v^2),
+    # make season variable
+         season = month,
+    # convert months into seasons
+         season = replace(season,season %in% c(10,11,12,1,2,3), &quot;NE&quot;),
+         season = replace(season, season %in% c(4:9), &quot;SE&quot;))%&gt;%
+    # select variables of interest and drop others
+  select(date, season,id,lon,lat, u,v,velocity,sst)</code></pre>
+</div>
+<div id="create-simple-feature" class="section level3">
+<h3>Create Simple Feature</h3>
+<p>Because this post deals with spatial analysis, I converted the drifter dataset from data frame to simple feature and assign the dataset with WGS84 as the coordinate sysem.</p>
+<pre class="r"><code>drifter.sst = drifter%&gt;%select(-c(u,v,velocity))
+
+drifter.sst.sf = drifter.sst%&gt;%
+  st_as_sf(coords = c(&quot;lon&quot;, &quot;lat&quot;))%&gt;%
+  st_set_crs(4326)</code></pre>
+</div>
+<div id="divide-the-area-into-grids" class="section level3">
+<h3>Divide the Area into Grids</h3>
+<p>Because drifter observations are inhomogenous distributed within the Tropical Indian Ocean region, to obtain homogenous distribution, I divided the region into 900 grids covering the entire area.</p>
+<pre class="r"><code># creat a grids of the area
+grid = drifter.sst.sf%&gt;%st_make_grid(n = 30)</code></pre>
+</div>
+<div id="populate-grids-with-drifter-observations-and-median-sst" class="section level3">
+<h3>Populate Grids with Drifter Observations and Median SST</h3>
+<p>Once the grids were created, I computed the statistics in each grids. The first statistic metric computed was the number of observations in grids . Then the second metric was the calculation of median SST in a grid.</p>
+</div>
+<div id="visualization" class="section level3">
+<h3>Visualization</h3>
+<p>The Western Indian Ocean Region is fairly crossed with Lagrangian drifter observations (Figure <a href="#fig:fig1">2</a>a). Grids with drifters above 300 are found North the Madascar Island and extend to the west of the Island toward the East African coast. The largest part of the area has grids with less than 100 drifter per grid. The climatology sea surface temperature from drifters range between 25 <sup>o</sup>C and 30<sup>o</sup>C with mean tempeature of 27.80 <sup>o</sup>C. The warmest water lies between latitude 4 to 10 <sup>o</sup>S (Figure <a href="#fig:fig1">2</a>b). This warmest region lies in the southern gyres as shown in the <a href="https://semba-blog.netlify.com/09/28/2018/surface-current-from-drifters/">previous post</a>.</p>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2018-10-01-sea-surface-temperature-from-drifter_files/figure-html/fig1-1.png" alt="Climatology a)Total number of drifters and b) the median SST in the Tropical Indian Ocean region" width="672" />
+<p class="caption">
+Figure 2: Climatology a)Total number of drifters and b) the median SST in the Tropical Indian Ocean region
+</p>
+</div>
+</div>
+<div id="seasonal-variation" class="section level2">
+<h2>Seasonal Variation</h2>
+<p>Figure <a href="#fig:fig2">3</a> show the seasonal median sea surface current within the tropical Indian ocean region. Like other studies, drifter observations reveals the northeast season has fairly higher sea surface temperature compared to the southeast monsoon season (Figure <a href="#fig:fig2">3</a>).</p>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2018-10-01-sea-surface-temperature-from-drifter_files/figure-html/fig2-1.png" alt="The sea surface current during the northeast (NE) and southeast (SE) monsoon season" width="672" />
+<p class="caption">
+Figure 3: The sea surface current during the northeast (NE) and southeast (SE) monsoon season
+</p>
+</div>
+<div id="southeast-monsoon-period" class="section level3">
+<h3>Southeast Monsoon Period</h3>
+<p>All drifters crossed the region between April and September were combined to form the southeast monsoon. The pattern of drifters distribution during the climatology southeast monsoon period (Figure <a href="#fig:fig3">4</a>) matches closely to those in figure <a href="#fig:fig1">2</a>a, though the number is less. However, the climatology sea surface temperature during the southeast monsoon period does not show clear patter, even the dongue of warm water is not visibl (figure <a href="#fig:fig3">4</a>b)e. This is because both the East African Coastal Current and Somali CUrrent both flow northward during the southease monsoon and weaken cyclonic flow around the equator leading to disappearing of southern gyre.</p>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2018-10-01-sea-surface-temperature-from-drifter_files/figure-html/fig3-1.png" alt="Climatology drifter observation during the southeast monsoon season. a)Total number of drifters and b) the median SST in a grid" width="672" />
+<p class="caption">
+Figure 4: Climatology drifter observation during the southeast monsoon season. a)Total number of drifters and b) the median SST in a grid
+</p>
+</div>
+</div>
+<div id="northeast-monsoon-period" class="section level3">
+<h3>Northeast monsoon Period</h3>
+<p>Unlike the southeast, the climatology northeast period had few drifters throughout the region. Most of the area had drifters below 75 except some few grids west of north Madagascar Island (Figure <a href="#fig:fig4">5</a>a). Yet although northeast season has few drifter but the pattern of areas with large number of drifter is similar to those in figure <a href="#fig:fig1">2</a>a and <a href="#fig:fig3">4</a>. We also notice that the the pattern of sea surface temperature during the northeast (Figure <a href="#fig:fig4">5</a>b) differs with the southeast season (Figure <a href="#fig:fig3">4</a>b). The northeast monsoon is associated with warmest water above 30 <sup>o</sup>C along the coastal areas.</p>
+<div class="figure"><span id="fig:fig4"></span>
+<img src="/post/2018-10-01-sea-surface-temperature-from-drifter_files/figure-html/fig4-1.png" alt="Climatology drifter observation during the northeast monsoon season. a)Total number of drifters and b) the median SST in a grid" width="672" />
+<p class="caption">
+Figure 5: Climatology drifter observation during the northeast monsoon season. a)Total number of drifters and b) the median SST in a grid
+</p>
+</div>
+</div>
+</div>
+<div id="coclusion" class="section level2">
+<h2>Coclusion</h2>
+<p>As we have seen there are more drifters during the southeast monsoon (Figure <a href="#fig:fig3">4</a>a) than the northeast monsoon (Figure <a href="#fig:fig4">5</a>a). Drifter reveals the presence of warm temperature southern gyre (Figure <a href="#fig:fig1">2</a>a). Threfore, drifter observation from Global Drifter Program provides reliable in-situ data that can be used to validate and calibrate satellite-derived sea surface temperatue in the tropical Indian Ocean Region.</p>
+<div id="references" class="section level3">
+<h3>References</h3>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>R Core Team (2018). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a>.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Hadley Wickham (2017). tidyverse: Easily Install and Load the ‘Tidyverse’. R package version 1.2.1. <a href="https://CRAN.R-project.org/package=tidyverse" class="uri">https://CRAN.R-project.org/package=tidyverse</a><a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>Garrett Grolemund, Hadley Wickham (2011). Dates and Times Made Easy with lubridate. Journal of Statistical Software, 40(3), 1-25. URL <a href="http://www.jstatsoft.org/v40/i03/" class="uri">http://www.jstatsoft.org/v40/i03/</a>.<a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>Hao Zhu (2018). kableExtra: Construct Complex Table with ‘kable’ and Pipe Syntax. R package version 0.9.0. <a href="https://CRAN.R-project.org/package=kableExtra" class="uri">https://CRAN.R-project.org/package=kableExtra</a><a href="#fnref4">↩</a></p></li>
+<li id="fn5"><p>Edzer Pebesma (2018). sf: Simple Features for R. R package version 0.6-3. <a href="https://CRAN.R-project.org/package=sf" class="uri">https://CRAN.R-project.org/package=sf</a><a href="#fnref5">↩</a></p></li>
+<li id="fn6"><p>Claus O. Wilke (2018). cowplot: Streamlined Plot Theme and Plot Annotations for ‘ggplot2’. R package version 0.9.3. <a href="https://CRAN.R-project.org/package=cowplot" class="uri">https://CRAN.R-project.org/package=cowplot</a><a href="#fnref6">↩</a></p></li>
+</ol>
+</div>

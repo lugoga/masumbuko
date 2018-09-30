@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.48" />
+
+
+<title>Modelling with R - Masumbuko Semba</title>
+<meta property="og:title" content="Modelling with R - Masumbuko Semba">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">23 min read</span>
+    
+
+    <h1 class="article-title">Modelling with R</h1>
+
+    
+    <span class="article-date">2018/09/29</span>
+    
+
+    <div class="article-content">
+      <script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/plotly-binding/plotly.js"></script>
+<script src="/rmarkdown-libs/typedarray/typedarray.min.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link href="/rmarkdown-libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/plotly-main/plotly-latest.min.js"></script>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>In this post I’am going to illustrate how to model data in R. As Wickham &amp; Grolemund<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> put it</p>
+<blockquote>
+<p><em>The prime goal of modeling is to provide simple low-dimension summary of a dataset.</em></p>
+</blockquote>
+<p>I am not going to bring a novel science in this post but rather to help you learn the most important tools in R<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> that will allow you to model your data.</p>
+<div id="needed-tools" class="section level2">
+<h2>Needed tools</h2>
+<p>In this routine, we will mainly use <strong>modelr</strong><a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> and <strong>tidyverse</strong><a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> packages. <strong>modelr</strong> package which wraps around base R’s modelling functions to make them work naturally in a pipe</p>
+<pre class="r"><code>require(tidyverse)
+require(modelr)
+require(kableExtra)
+require(plotly)</code></pre>
+<p>We will use the iris dataset, which comes with R when you install in your machine. You can call the iris dataset with the code in the chunk below. Table <a href="#tab:tab1">1</a> summarize the variables contained in the iris dataset, which contain one categorical variables (Species) and four continuos variables—sepal and peltal measurement of length and width.</p>
+<pre class="r"><code>iris = iris</code></pre>
+<table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:tab1">Table 1: </span>An extract of ten measurements of flower from three species of iris
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Flower Measurement (cm)
+</div>
+</th>
+</tr>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Sepal
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Petal
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+Species
+</th>
+<th style="text-align:center;">
+Length
+</th>
+<th style="text-align:center;">
+Width
+</th>
+<th style="text-align:center;">
+Length
+</th>
+<th style="text-align:center;">
+Width
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+versicolor
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+6.2
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+2.2
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+4.5
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.5
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+virginica
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+6.3
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+3.3
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+6.0
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+2.5
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+versicolor
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+6.0
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+3.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+4.5
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.6
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+setosa
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+4.5
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+2.3
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.3
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+setosa
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+5.1
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+3.5
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.2
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+versicolor
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+6.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+2.9
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+4.3
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.3
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+setosa
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+5.1
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+3.3
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.7
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.5
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+virginica
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+6.5
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+3.0
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+5.2
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+2.0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+versicolor
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+6.7
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+3.1
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+4.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.4
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+setosa
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+5.0
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+3.2
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.2
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.2
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border:0;" colspan="100%">
+<sup>1</sup> Data obtained from Anderson &amp; Edgar (1935).
+</td>
+</tr>
+</tfoot>
+</table>
+</div>
+<div id="linear-regression-model" class="section level2">
+<h2>Linear regression model</h2>
+<p>The standard linear model is ubiquitous in statistical training and application, anf for good reason. It is simple to do and easy to understand. Let us explore the iris dataset. Let us first plot the variables to see how they are related. While the association between sepal length and sepal width (Figure <a href="#fig:fig1">1</a>) does not show clearly the relation, Figure <a href="#fig:fig2">2</a> show a clear position relatioship, though is based on species</p>
+<pre class="r"><code>fig1 = ggplot(data = iris, aes(x = Sepal.Length ,
+                        y = Sepal.Width, 
+                        col = Species))+
+  geom_point()+
+  cowplot::theme_cowplot()+
+  scale_x_continuous(breaks = seq(0,7,1.5))+
+  labs(x = &quot;Sepal length (cm)&quot;,
+       y = &quot;Sepal width (cm)&quot;)
+
+
+  plotly::ggplotly(fig1) #%&gt;%style()%&gt;%layout(legend = list(x = 0.8, y = 0.95))</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"data":[{"x":[5.1,4.9,4.7,4.6,5,5.4,4.6,5,4.4,4.9,5.4,4.8,4.8,4.3,5.8,5.7,5.4,5.1,5.7,5.1,5.4,5.1,4.6,5.1,4.8,5,5,5.2,5.2,4.7,4.8,5.4,5.2,5.5,4.9,5,5.5,4.9,4.4,5.1,5,4.5,4.4,5,5.1,4.8,5.1,4.6,5.3,5],"y":[3.5,3,3.2,3.1,3.6,3.9,3.4,3.4,2.9,3.1,3.7,3.4,3,3,4,4.4,3.9,3.5,3.8,3.8,3.4,3.7,3.6,3.3,3.4,3,3.4,3.5,3.4,3.2,3.1,3.4,4.1,4.2,3.1,3.2,3.5,3.6,3,3.4,3.5,2.3,3.2,3.5,3.8,3,3.8,3.2,3.7,3.3],"text":["Sepal.Length: 5.1<br />Sepal.Width: 3.5<br />Species: setosa","Sepal.Length: 4.9<br />Sepal.Width: 3.0<br />Species: setosa","Sepal.Length: 4.7<br />Sepal.Width: 3.2<br />Species: setosa","Sepal.Length: 4.6<br />Sepal.Width: 3.1<br />Species: setosa","Sepal.Length: 5.0<br />Sepal.Width: 3.6<br />Species: setosa","Sepal.Length: 5.4<br />Sepal.Width: 3.9<br />Species: setosa","Sepal.Length: 4.6<br />Sepal.Width: 3.4<br />Species: setosa","Sepal.Length: 5.0<br />Sepal.Width: 3.4<br />Species: setosa","Sepal.Length: 4.4<br />Sepal.Width: 2.9<br />Species: setosa","Sepal.Length: 4.9<br />Sepal.Width: 3.1<br />Species: setosa","Sepal.Length: 5.4<br />Sepal.Width: 3.7<br />Species: setosa","Sepal.Length: 4.8<br />Sepal.Width: 3.4<br />Species: setosa","Sepal.Length: 4.8<br />Sepal.Width: 3.0<br />Species: setosa","Sepal.Length: 4.3<br />Sepal.Width: 3.0<br />Species: setosa","Sepal.Length: 5.8<br />Sepal.Width: 4.0<br />Species: setosa","Sepal.Length: 5.7<br />Sepal.Width: 4.4<br />Species: setosa","Sepal.Length: 5.4<br />Sepal.Width: 3.9<br />Species: setosa","Sepal.Length: 5.1<br />Sepal.Width: 3.5<br />Species: setosa","Sepal.Length: 5.7<br />Sepal.Width: 3.8<br />Species: setosa","Sepal.Length: 5.1<br />Sepal.Width: 3.8<br />Species: setosa","Sepal.Length: 5.4<br />Sepal.Width: 3.4<br />Species: setosa","Sepal.Length: 5.1<br />Sepal.Width: 3.7<br />Species: setosa","Sepal.Length: 4.6<br />Sepal.Width: 3.6<br />Species: setosa","Sepal.Length: 5.1<br />Sepal.Width: 3.3<br />Species: setosa","Sepal.Length: 4.8<br />Sepal.Width: 3.4<br />Species: setosa","Sepal.Length: 5.0<br />Sepal.Width: 3.0<br />Species: setosa","Sepal.Length: 5.0<br />Sepal.Width: 3.4<br />Species: setosa","Sepal.Length: 5.2<br />Sepal.Width: 3.5<br />Species: setosa","Sepal.Length: 5.2<br />Sepal.Width: 3.4<br />Species: setosa","Sepal.Length: 4.7<br />Sepal.Width: 3.2<br />Species: setosa","Sepal.Length: 4.8<br />Sepal.Width: 3.1<br />Species: setosa","Sepal.Length: 5.4<br />Sepal.Width: 3.4<br />Species: setosa","Sepal.Length: 5.2<br />Sepal.Width: 4.1<br />Species: setosa","Sepal.Length: 5.5<br />Sepal.Width: 4.2<br />Species: setosa","Sepal.Length: 4.9<br />Sepal.Width: 3.1<br />Species: setosa","Sepal.Length: 5.0<br />Sepal.Width: 3.2<br />Species: setosa","Sepal.Length: 5.5<br />Sepal.Width: 3.5<br />Species: setosa","Sepal.Length: 4.9<br />Sepal.Width: 3.6<br />Species: setosa","Sepal.Length: 4.4<br />Sepal.Width: 3.0<br />Species: setosa","Sepal.Length: 5.1<br />Sepal.Width: 3.4<br />Species: setosa","Sepal.Length: 5.0<br />Sepal.Width: 3.5<br />Species: setosa","Sepal.Length: 4.5<br />Sepal.Width: 2.3<br />Species: setosa","Sepal.Length: 4.4<br />Sepal.Width: 3.2<br />Species: setosa","Sepal.Length: 5.0<br />Sepal.Width: 3.5<br />Species: setosa","Sepal.Length: 5.1<br />Sepal.Width: 3.8<br />Species: setosa","Sepal.Length: 4.8<br />Sepal.Width: 3.0<br />Species: setosa","Sepal.Length: 5.1<br />Sepal.Width: 3.8<br />Species: setosa","Sepal.Length: 4.6<br />Sepal.Width: 3.2<br />Species: setosa","Sepal.Length: 5.3<br />Sepal.Width: 3.7<br />Species: setosa","Sepal.Length: 5.0<br />Sepal.Width: 3.3<br />Species: setosa"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(248,118,109,1)","opacity":1,"size":5.66929133858268,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(248,118,109,1)"}},"hoveron":"points","name":"setosa","legendgroup":"setosa","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[7,6.4,6.9,5.5,6.5,5.7,6.3,4.9,6.6,5.2,5,5.9,6,6.1,5.6,6.7,5.6,5.8,6.2,5.6,5.9,6.1,6.3,6.1,6.4,6.6,6.8,6.7,6,5.7,5.5,5.5,5.8,6,5.4,6,6.7,6.3,5.6,5.5,5.5,6.1,5.8,5,5.6,5.7,5.7,6.2,5.1,5.7],"y":[3.2,3.2,3.1,2.3,2.8,2.8,3.3,2.4,2.9,2.7,2,3,2.2,2.9,2.9,3.1,3,2.7,2.2,2.5,3.2,2.8,2.5,2.8,2.9,3,2.8,3,2.9,2.6,2.4,2.4,2.7,2.7,3,3.4,3.1,2.3,3,2.5,2.6,3,2.6,2.3,2.7,3,2.9,2.9,2.5,2.8],"text":["Sepal.Length: 7.0<br />Sepal.Width: 3.2<br />Species: versicolor","Sepal.Length: 6.4<br />Sepal.Width: 3.2<br />Species: versicolor","Sepal.Length: 6.9<br />Sepal.Width: 3.1<br />Species: versicolor","Sepal.Length: 5.5<br />Sepal.Width: 2.3<br />Species: versicolor","Sepal.Length: 6.5<br />Sepal.Width: 2.8<br />Species: versicolor","Sepal.Length: 5.7<br />Sepal.Width: 2.8<br />Species: versicolor","Sepal.Length: 6.3<br />Sepal.Width: 3.3<br />Species: versicolor","Sepal.Length: 4.9<br />Sepal.Width: 2.4<br />Species: versicolor","Sepal.Length: 6.6<br />Sepal.Width: 2.9<br />Species: versicolor","Sepal.Length: 5.2<br />Sepal.Width: 2.7<br />Species: versicolor","Sepal.Length: 5.0<br />Sepal.Width: 2.0<br />Species: versicolor","Sepal.Length: 5.9<br />Sepal.Width: 3.0<br />Species: versicolor","Sepal.Length: 6.0<br />Sepal.Width: 2.2<br />Species: versicolor","Sepal.Length: 6.1<br />Sepal.Width: 2.9<br />Species: versicolor","Sepal.Length: 5.6<br />Sepal.Width: 2.9<br />Species: versicolor","Sepal.Length: 6.7<br />Sepal.Width: 3.1<br />Species: versicolor","Sepal.Length: 5.6<br />Sepal.Width: 3.0<br />Species: versicolor","Sepal.Length: 5.8<br />Sepal.Width: 2.7<br />Species: versicolor","Sepal.Length: 6.2<br />Sepal.Width: 2.2<br />Species: versicolor","Sepal.Length: 5.6<br />Sepal.Width: 2.5<br />Species: versicolor","Sepal.Length: 5.9<br />Sepal.Width: 3.2<br />Species: versicolor","Sepal.Length: 6.1<br />Sepal.Width: 2.8<br />Species: versicolor","Sepal.Length: 6.3<br />Sepal.Width: 2.5<br />Species: versicolor","Sepal.Length: 6.1<br />Sepal.Width: 2.8<br />Species: versicolor","Sepal.Length: 6.4<br />Sepal.Width: 2.9<br />Species: versicolor","Sepal.Length: 6.6<br />Sepal.Width: 3.0<br />Species: versicolor","Sepal.Length: 6.8<br />Sepal.Width: 2.8<br />Species: versicolor","Sepal.Length: 6.7<br />Sepal.Width: 3.0<br />Species: versicolor","Sepal.Length: 6.0<br />Sepal.Width: 2.9<br />Species: versicolor","Sepal.Length: 5.7<br />Sepal.Width: 2.6<br />Species: versicolor","Sepal.Length: 5.5<br />Sepal.Width: 2.4<br />Species: versicolor","Sepal.Length: 5.5<br />Sepal.Width: 2.4<br />Species: versicolor","Sepal.Length: 5.8<br />Sepal.Width: 2.7<br />Species: versicolor","Sepal.Length: 6.0<br />Sepal.Width: 2.7<br />Species: versicolor","Sepal.Length: 5.4<br />Sepal.Width: 3.0<br />Species: versicolor","Sepal.Length: 6.0<br />Sepal.Width: 3.4<br />Species: versicolor","Sepal.Length: 6.7<br />Sepal.Width: 3.1<br />Species: versicolor","Sepal.Length: 6.3<br />Sepal.Width: 2.3<br />Species: versicolor","Sepal.Length: 5.6<br />Sepal.Width: 3.0<br />Species: versicolor","Sepal.Length: 5.5<br />Sepal.Width: 2.5<br />Species: versicolor","Sepal.Length: 5.5<br />Sepal.Width: 2.6<br />Species: versicolor","Sepal.Length: 6.1<br />Sepal.Width: 3.0<br />Species: versicolor","Sepal.Length: 5.8<br />Sepal.Width: 2.6<br />Species: versicolor","Sepal.Length: 5.0<br />Sepal.Width: 2.3<br />Species: versicolor","Sepal.Length: 5.6<br />Sepal.Width: 2.7<br />Species: versicolor","Sepal.Length: 5.7<br />Sepal.Width: 3.0<br />Species: versicolor","Sepal.Length: 5.7<br />Sepal.Width: 2.9<br />Species: versicolor","Sepal.Length: 6.2<br />Sepal.Width: 2.9<br />Species: versicolor","Sepal.Length: 5.1<br />Sepal.Width: 2.5<br />Species: versicolor","Sepal.Length: 5.7<br />Sepal.Width: 2.8<br />Species: versicolor"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,186,56,1)","opacity":1,"size":5.66929133858268,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(0,186,56,1)"}},"hoveron":"points","name":"versicolor","legendgroup":"versicolor","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[6.3,5.8,7.1,6.3,6.5,7.6,4.9,7.3,6.7,7.2,6.5,6.4,6.8,5.7,5.8,6.4,6.5,7.7,7.7,6,6.9,5.6,7.7,6.3,6.7,7.2,6.2,6.1,6.4,7.2,7.4,7.9,6.4,6.3,6.1,7.7,6.3,6.4,6,6.9,6.7,6.9,5.8,6.8,6.7,6.7,6.3,6.5,6.2,5.9],"y":[3.3,2.7,3,2.9,3,3,2.5,2.9,2.5,3.6,3.2,2.7,3,2.5,2.8,3.2,3,3.8,2.6,2.2,3.2,2.8,2.8,2.7,3.3,3.2,2.8,3,2.8,3,2.8,3.8,2.8,2.8,2.6,3,3.4,3.1,3,3.1,3.1,3.1,2.7,3.2,3.3,3,2.5,3,3.4,3],"text":["Sepal.Length: 6.3<br />Sepal.Width: 3.3<br />Species: virginica","Sepal.Length: 5.8<br />Sepal.Width: 2.7<br />Species: virginica","Sepal.Length: 7.1<br />Sepal.Width: 3.0<br />Species: virginica","Sepal.Length: 6.3<br />Sepal.Width: 2.9<br />Species: virginica","Sepal.Length: 6.5<br />Sepal.Width: 3.0<br />Species: virginica","Sepal.Length: 7.6<br />Sepal.Width: 3.0<br />Species: virginica","Sepal.Length: 4.9<br />Sepal.Width: 2.5<br />Species: virginica","Sepal.Length: 7.3<br />Sepal.Width: 2.9<br />Species: virginica","Sepal.Length: 6.7<br />Sepal.Width: 2.5<br />Species: virginica","Sepal.Length: 7.2<br />Sepal.Width: 3.6<br />Species: virginica","Sepal.Length: 6.5<br />Sepal.Width: 3.2<br />Species: virginica","Sepal.Length: 6.4<br />Sepal.Width: 2.7<br />Species: virginica","Sepal.Length: 6.8<br />Sepal.Width: 3.0<br />Species: virginica","Sepal.Length: 5.7<br />Sepal.Width: 2.5<br />Species: virginica","Sepal.Length: 5.8<br />Sepal.Width: 2.8<br />Species: virginica","Sepal.Length: 6.4<br />Sepal.Width: 3.2<br />Species: virginica","Sepal.Length: 6.5<br />Sepal.Width: 3.0<br />Species: virginica","Sepal.Length: 7.7<br />Sepal.Width: 3.8<br />Species: virginica","Sepal.Length: 7.7<br />Sepal.Width: 2.6<br />Species: virginica","Sepal.Length: 6.0<br />Sepal.Width: 2.2<br />Species: virginica","Sepal.Length: 6.9<br />Sepal.Width: 3.2<br />Species: virginica","Sepal.Length: 5.6<br />Sepal.Width: 2.8<br />Species: virginica","Sepal.Length: 7.7<br />Sepal.Width: 2.8<br />Species: virginica","Sepal.Length: 6.3<br />Sepal.Width: 2.7<br />Species: virginica","Sepal.Length: 6.7<br />Sepal.Width: 3.3<br />Species: virginica","Sepal.Length: 7.2<br />Sepal.Width: 3.2<br />Species: virginica","Sepal.Length: 6.2<br />Sepal.Width: 2.8<br />Species: virginica","Sepal.Length: 6.1<br />Sepal.Width: 3.0<br />Species: virginica","Sepal.Length: 6.4<br />Sepal.Width: 2.8<br />Species: virginica","Sepal.Length: 7.2<br />Sepal.Width: 3.0<br />Species: virginica","Sepal.Length: 7.4<br />Sepal.Width: 2.8<br />Species: virginica","Sepal.Length: 7.9<br />Sepal.Width: 3.8<br />Species: virginica","Sepal.Length: 6.4<br />Sepal.Width: 2.8<br />Species: virginica","Sepal.Length: 6.3<br />Sepal.Width: 2.8<br />Species: virginica","Sepal.Length: 6.1<br />Sepal.Width: 2.6<br />Species: virginica","Sepal.Length: 7.7<br />Sepal.Width: 3.0<br />Species: virginica","Sepal.Length: 6.3<br />Sepal.Width: 3.4<br />Species: virginica","Sepal.Length: 6.4<br />Sepal.Width: 3.1<br />Species: virginica","Sepal.Length: 6.0<br />Sepal.Width: 3.0<br />Species: virginica","Sepal.Length: 6.9<br />Sepal.Width: 3.1<br />Species: virginica","Sepal.Length: 6.7<br />Sepal.Width: 3.1<br />Species: virginica","Sepal.Length: 6.9<br />Sepal.Width: 3.1<br />Species: virginica","Sepal.Length: 5.8<br />Sepal.Width: 2.7<br />Species: virginica","Sepal.Length: 6.8<br />Sepal.Width: 3.2<br />Species: virginica","Sepal.Length: 6.7<br />Sepal.Width: 3.3<br />Species: virginica","Sepal.Length: 6.7<br />Sepal.Width: 3.0<br />Species: virginica","Sepal.Length: 6.3<br />Sepal.Width: 2.5<br />Species: virginica","Sepal.Length: 6.5<br />Sepal.Width: 3.0<br />Species: virginica","Sepal.Length: 6.2<br />Sepal.Width: 3.4<br />Species: virginica","Sepal.Length: 5.9<br />Sepal.Width: 3.0<br />Species: virginica"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(97,156,255,1)","opacity":1,"size":5.66929133858268,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(97,156,255,1)"}},"hoveron":"points","name":"virginica","legendgroup":"virginica","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":29.0178497301785,"r":9.29846409298464,"b":52.2015774180158,"l":56.4509755085098},"font":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[4.12,8.08],"tickmode":"array","ticktext":["4.5","6.0"],"tickvals":[4.5,6],"categoryorder":"array","categoryarray":["4.5","6.0"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":4.64923204649232,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":15.9375674553757},"tickangle":-0,"showline":true,"linecolor":"rgba(0,0,0,1)","linewidth":0.66417600664176,"showgrid":false,"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y","title":"Sepal length (cm)","titlefont":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[1.88,4.52],"tickmode":"array","ticktext":["2.0","2.5","3.0","3.5","4.0","4.5"],"tickvals":[2,2.5,3,3.5,4,4.5],"categoryorder":"array","categoryarray":["2.0","2.5","3.0","3.5","4.0","4.5"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":4.64923204649232,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":15.9375674553757},"tickangle":-0,"showline":true,"linecolor":"rgba(0,0,0,1)","linewidth":0.66417600664176,"showgrid":false,"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x","title":"Sepal width (cm)","titlefont":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":15.9375674553757},"y":0.958661417322835},"annotations":[{"text":"Species","x":1.02,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"left","yanchor":"bottom","legendTitle":true}],"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":[{"name":"Collaborate","icon":{"width":1000,"ascent":500,"descent":-50,"path":"M487 375c7-10 9-23 5-36l-79-259c-3-12-11-23-22-31-11-8-22-12-35-12l-263 0c-15 0-29 5-43 15-13 10-23 23-28 37-5 13-5 25-1 37 0 0 0 3 1 7 1 5 1 8 1 11 0 2 0 4-1 6 0 3-1 5-1 6 1 2 2 4 3 6 1 2 2 4 4 6 2 3 4 5 5 7 5 7 9 16 13 26 4 10 7 19 9 26 0 2 0 5 0 9-1 4-1 6 0 8 0 2 2 5 4 8 3 3 5 5 5 7 4 6 8 15 12 26 4 11 7 19 7 26 1 1 0 4 0 9-1 4-1 7 0 8 1 2 3 5 6 8 4 4 6 6 6 7 4 5 8 13 13 24 4 11 7 20 7 28 1 1 0 4 0 7-1 3-1 6-1 7 0 2 1 4 3 6 1 1 3 4 5 6 2 3 3 5 5 6 1 2 3 5 4 9 2 3 3 7 5 10 1 3 2 6 4 10 2 4 4 7 6 9 2 3 4 5 7 7 3 2 7 3 11 3 3 0 8 0 13-1l0-1c7 2 12 2 14 2l218 0c14 0 25-5 32-16 8-10 10-23 6-37l-79-259c-7-22-13-37-20-43-7-7-19-10-37-10l-248 0c-5 0-9-2-11-5-2-3-2-7 0-12 4-13 18-20 41-20l264 0c5 0 10 2 16 5 5 3 8 6 10 11l85 282c2 5 2 10 2 17 7-3 13-7 17-13z m-304 0c-1-3-1-5 0-7 1-1 3-2 6-2l174 0c2 0 4 1 7 2 2 2 4 4 5 7l6 18c0 3 0 5-1 7-1 1-3 2-6 2l-173 0c-3 0-5-1-8-2-2-2-4-4-4-7z m-24-73c-1-3-1-5 0-7 2-2 3-2 6-2l174 0c2 0 5 0 7 2 3 2 4 4 5 7l6 18c1 2 0 5-1 6-1 2-3 3-5 3l-174 0c-3 0-5-1-7-3-3-1-4-4-5-6z"},"click":"function(gd) { \n        // is this being viewed in RStudio?\n        if (location.search == '?viewer_pane=1') {\n          alert('To learn about plotly for collaboration, visit:\\n https://cpsievert.github.io/plotly_book/plot-ly-for-collaboration.html');\n        } else {\n          window.open('https://cpsievert.github.io/plotly_book/plot-ly-for-collaboration.html', '_blank');\n        }\n      }"}],"cloud":false},"source":"A","attrs":{"33bf8341f2a6a":{"x":{},"y":{},"colour":{},"type":"scatter"}},"cur_data":"33bf8341f2a6a","visdat":{"33bf8341f2a6a":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"base_url":"https://plot.ly"},"evals":["config.modeBarButtonsToAdd.0.click"],"jsHooks":[]}</script>
+<p class="caption">
+Figure 1: The association between Sepal length and Sepal width of three species of Iris flower
+</p>
+</div>
+<pre class="r"><code>fig2 = ggplot(data = iris, aes(x = Petal.Length ,
+                        y = Petal.Width, 
+                        col = Species))+
+  geom_point(size = 2)+
+  cowplot::theme_cowplot()+
+  scale_x_continuous(breaks = seq(0,7,1.5))+
+  labs(x = &quot;Petal length (cm)&quot;,
+       y = &quot;Petal width (cm)&quot;)
+
+
+  plotly::ggplotly(fig2) #%&gt;%style()%&gt;%layout(legend = list(x = 0.1, y = 0.95))</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<div id="htmlwidget-2" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"data":[{"x":[1.4,1.4,1.3,1.5,1.4,1.7,1.4,1.5,1.4,1.5,1.5,1.6,1.4,1.1,1.2,1.5,1.3,1.4,1.7,1.5,1.7,1.5,1,1.7,1.9,1.6,1.6,1.5,1.4,1.6,1.6,1.5,1.5,1.4,1.5,1.2,1.3,1.4,1.3,1.5,1.3,1.3,1.3,1.6,1.9,1.4,1.6,1.4,1.5,1.4],"y":[0.2,0.2,0.2,0.2,0.2,0.4,0.3,0.2,0.2,0.1,0.2,0.2,0.1,0.1,0.2,0.4,0.4,0.3,0.3,0.3,0.2,0.4,0.2,0.5,0.2,0.2,0.4,0.2,0.2,0.2,0.2,0.4,0.1,0.2,0.2,0.2,0.2,0.1,0.2,0.2,0.3,0.3,0.2,0.6,0.4,0.3,0.2,0.2,0.2,0.2],"text":["Petal.Length: 1.4<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.4<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.3<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.5<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.4<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.7<br />Petal.Width: 0.4<br />Species: setosa","Petal.Length: 1.4<br />Petal.Width: 0.3<br />Species: setosa","Petal.Length: 1.5<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.4<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.5<br />Petal.Width: 0.1<br />Species: setosa","Petal.Length: 1.5<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.6<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.4<br />Petal.Width: 0.1<br />Species: setosa","Petal.Length: 1.1<br />Petal.Width: 0.1<br />Species: setosa","Petal.Length: 1.2<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.5<br />Petal.Width: 0.4<br />Species: setosa","Petal.Length: 1.3<br />Petal.Width: 0.4<br />Species: setosa","Petal.Length: 1.4<br />Petal.Width: 0.3<br />Species: setosa","Petal.Length: 1.7<br />Petal.Width: 0.3<br />Species: setosa","Petal.Length: 1.5<br />Petal.Width: 0.3<br />Species: setosa","Petal.Length: 1.7<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.5<br />Petal.Width: 0.4<br />Species: setosa","Petal.Length: 1.0<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.7<br />Petal.Width: 0.5<br />Species: setosa","Petal.Length: 1.9<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.6<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.6<br />Petal.Width: 0.4<br />Species: setosa","Petal.Length: 1.5<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.4<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.6<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.6<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.5<br />Petal.Width: 0.4<br />Species: setosa","Petal.Length: 1.5<br />Petal.Width: 0.1<br />Species: setosa","Petal.Length: 1.4<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.5<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.2<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.3<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.4<br />Petal.Width: 0.1<br />Species: setosa","Petal.Length: 1.3<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.5<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.3<br />Petal.Width: 0.3<br />Species: setosa","Petal.Length: 1.3<br />Petal.Width: 0.3<br />Species: setosa","Petal.Length: 1.3<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.6<br />Petal.Width: 0.6<br />Species: setosa","Petal.Length: 1.9<br />Petal.Width: 0.4<br />Species: setosa","Petal.Length: 1.4<br />Petal.Width: 0.3<br />Species: setosa","Petal.Length: 1.6<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.4<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.5<br />Petal.Width: 0.2<br />Species: setosa","Petal.Length: 1.4<br />Petal.Width: 0.2<br />Species: setosa"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(248,118,109,1)","opacity":1,"size":7.55905511811024,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(248,118,109,1)"}},"hoveron":"points","name":"setosa","legendgroup":"setosa","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[4.7,4.5,4.9,4,4.6,4.5,4.7,3.3,4.6,3.9,3.5,4.2,4,4.7,3.6,4.4,4.5,4.1,4.5,3.9,4.8,4,4.9,4.7,4.3,4.4,4.8,5,4.5,3.5,3.8,3.7,3.9,5.1,4.5,4.5,4.7,4.4,4.1,4,4.4,4.6,4,3.3,4.2,4.2,4.2,4.3,3,4.1],"y":[1.4,1.5,1.5,1.3,1.5,1.3,1.6,1,1.3,1.4,1,1.5,1,1.4,1.3,1.4,1.5,1,1.5,1.1,1.8,1.3,1.5,1.2,1.3,1.4,1.4,1.7,1.5,1,1.1,1,1.2,1.6,1.5,1.6,1.5,1.3,1.3,1.3,1.2,1.4,1.2,1,1.3,1.2,1.3,1.3,1.1,1.3],"text":["Petal.Length: 4.7<br />Petal.Width: 1.4<br />Species: versicolor","Petal.Length: 4.5<br />Petal.Width: 1.5<br />Species: versicolor","Petal.Length: 4.9<br />Petal.Width: 1.5<br />Species: versicolor","Petal.Length: 4.0<br />Petal.Width: 1.3<br />Species: versicolor","Petal.Length: 4.6<br />Petal.Width: 1.5<br />Species: versicolor","Petal.Length: 4.5<br />Petal.Width: 1.3<br />Species: versicolor","Petal.Length: 4.7<br />Petal.Width: 1.6<br />Species: versicolor","Petal.Length: 3.3<br />Petal.Width: 1.0<br />Species: versicolor","Petal.Length: 4.6<br />Petal.Width: 1.3<br />Species: versicolor","Petal.Length: 3.9<br />Petal.Width: 1.4<br />Species: versicolor","Petal.Length: 3.5<br />Petal.Width: 1.0<br />Species: versicolor","Petal.Length: 4.2<br />Petal.Width: 1.5<br />Species: versicolor","Petal.Length: 4.0<br />Petal.Width: 1.0<br />Species: versicolor","Petal.Length: 4.7<br />Petal.Width: 1.4<br />Species: versicolor","Petal.Length: 3.6<br />Petal.Width: 1.3<br />Species: versicolor","Petal.Length: 4.4<br />Petal.Width: 1.4<br />Species: versicolor","Petal.Length: 4.5<br />Petal.Width: 1.5<br />Species: versicolor","Petal.Length: 4.1<br />Petal.Width: 1.0<br />Species: versicolor","Petal.Length: 4.5<br />Petal.Width: 1.5<br />Species: versicolor","Petal.Length: 3.9<br />Petal.Width: 1.1<br />Species: versicolor","Petal.Length: 4.8<br />Petal.Width: 1.8<br />Species: versicolor","Petal.Length: 4.0<br />Petal.Width: 1.3<br />Species: versicolor","Petal.Length: 4.9<br />Petal.Width: 1.5<br />Species: versicolor","Petal.Length: 4.7<br />Petal.Width: 1.2<br />Species: versicolor","Petal.Length: 4.3<br />Petal.Width: 1.3<br />Species: versicolor","Petal.Length: 4.4<br />Petal.Width: 1.4<br />Species: versicolor","Petal.Length: 4.8<br />Petal.Width: 1.4<br />Species: versicolor","Petal.Length: 5.0<br />Petal.Width: 1.7<br />Species: versicolor","Petal.Length: 4.5<br />Petal.Width: 1.5<br />Species: versicolor","Petal.Length: 3.5<br />Petal.Width: 1.0<br />Species: versicolor","Petal.Length: 3.8<br />Petal.Width: 1.1<br />Species: versicolor","Petal.Length: 3.7<br />Petal.Width: 1.0<br />Species: versicolor","Petal.Length: 3.9<br />Petal.Width: 1.2<br />Species: versicolor","Petal.Length: 5.1<br />Petal.Width: 1.6<br />Species: versicolor","Petal.Length: 4.5<br />Petal.Width: 1.5<br />Species: versicolor","Petal.Length: 4.5<br />Petal.Width: 1.6<br />Species: versicolor","Petal.Length: 4.7<br />Petal.Width: 1.5<br />Species: versicolor","Petal.Length: 4.4<br />Petal.Width: 1.3<br />Species: versicolor","Petal.Length: 4.1<br />Petal.Width: 1.3<br />Species: versicolor","Petal.Length: 4.0<br />Petal.Width: 1.3<br />Species: versicolor","Petal.Length: 4.4<br />Petal.Width: 1.2<br />Species: versicolor","Petal.Length: 4.6<br />Petal.Width: 1.4<br />Species: versicolor","Petal.Length: 4.0<br />Petal.Width: 1.2<br />Species: versicolor","Petal.Length: 3.3<br />Petal.Width: 1.0<br />Species: versicolor","Petal.Length: 4.2<br />Petal.Width: 1.3<br />Species: versicolor","Petal.Length: 4.2<br />Petal.Width: 1.2<br />Species: versicolor","Petal.Length: 4.2<br />Petal.Width: 1.3<br />Species: versicolor","Petal.Length: 4.3<br />Petal.Width: 1.3<br />Species: versicolor","Petal.Length: 3.0<br />Petal.Width: 1.1<br />Species: versicolor","Petal.Length: 4.1<br />Petal.Width: 1.3<br />Species: versicolor"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,186,56,1)","opacity":1,"size":7.55905511811024,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(0,186,56,1)"}},"hoveron":"points","name":"versicolor","legendgroup":"versicolor","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[6,5.1,5.9,5.6,5.8,6.6,4.5,6.3,5.8,6.1,5.1,5.3,5.5,5,5.1,5.3,5.5,6.7,6.9,5,5.7,4.9,6.7,4.9,5.7,6,4.8,4.9,5.6,5.8,6.1,6.4,5.6,5.1,5.6,6.1,5.6,5.5,4.8,5.4,5.6,5.1,5.1,5.9,5.7,5.2,5,5.2,5.4,5.1],"y":[2.5,1.9,2.1,1.8,2.2,2.1,1.7,1.8,1.8,2.5,2,1.9,2.1,2,2.4,2.3,1.8,2.2,2.3,1.5,2.3,2,2,1.8,2.1,1.8,1.8,1.8,2.1,1.6,1.9,2,2.2,1.5,1.4,2.3,2.4,1.8,1.8,2.1,2.4,2.3,1.9,2.3,2.5,2.3,1.9,2,2.3,1.8],"text":["Petal.Length: 6.0<br />Petal.Width: 2.5<br />Species: virginica","Petal.Length: 5.1<br />Petal.Width: 1.9<br />Species: virginica","Petal.Length: 5.9<br />Petal.Width: 2.1<br />Species: virginica","Petal.Length: 5.6<br />Petal.Width: 1.8<br />Species: virginica","Petal.Length: 5.8<br />Petal.Width: 2.2<br />Species: virginica","Petal.Length: 6.6<br />Petal.Width: 2.1<br />Species: virginica","Petal.Length: 4.5<br />Petal.Width: 1.7<br />Species: virginica","Petal.Length: 6.3<br />Petal.Width: 1.8<br />Species: virginica","Petal.Length: 5.8<br />Petal.Width: 1.8<br />Species: virginica","Petal.Length: 6.1<br />Petal.Width: 2.5<br />Species: virginica","Petal.Length: 5.1<br />Petal.Width: 2.0<br />Species: virginica","Petal.Length: 5.3<br />Petal.Width: 1.9<br />Species: virginica","Petal.Length: 5.5<br />Petal.Width: 2.1<br />Species: virginica","Petal.Length: 5.0<br />Petal.Width: 2.0<br />Species: virginica","Petal.Length: 5.1<br />Petal.Width: 2.4<br />Species: virginica","Petal.Length: 5.3<br />Petal.Width: 2.3<br />Species: virginica","Petal.Length: 5.5<br />Petal.Width: 1.8<br />Species: virginica","Petal.Length: 6.7<br />Petal.Width: 2.2<br />Species: virginica","Petal.Length: 6.9<br />Petal.Width: 2.3<br />Species: virginica","Petal.Length: 5.0<br />Petal.Width: 1.5<br />Species: virginica","Petal.Length: 5.7<br />Petal.Width: 2.3<br />Species: virginica","Petal.Length: 4.9<br />Petal.Width: 2.0<br />Species: virginica","Petal.Length: 6.7<br />Petal.Width: 2.0<br />Species: virginica","Petal.Length: 4.9<br />Petal.Width: 1.8<br />Species: virginica","Petal.Length: 5.7<br />Petal.Width: 2.1<br />Species: virginica","Petal.Length: 6.0<br />Petal.Width: 1.8<br />Species: virginica","Petal.Length: 4.8<br />Petal.Width: 1.8<br />Species: virginica","Petal.Length: 4.9<br />Petal.Width: 1.8<br />Species: virginica","Petal.Length: 5.6<br />Petal.Width: 2.1<br />Species: virginica","Petal.Length: 5.8<br />Petal.Width: 1.6<br />Species: virginica","Petal.Length: 6.1<br />Petal.Width: 1.9<br />Species: virginica","Petal.Length: 6.4<br />Petal.Width: 2.0<br />Species: virginica","Petal.Length: 5.6<br />Petal.Width: 2.2<br />Species: virginica","Petal.Length: 5.1<br />Petal.Width: 1.5<br />Species: virginica","Petal.Length: 5.6<br />Petal.Width: 1.4<br />Species: virginica","Petal.Length: 6.1<br />Petal.Width: 2.3<br />Species: virginica","Petal.Length: 5.6<br />Petal.Width: 2.4<br />Species: virginica","Petal.Length: 5.5<br />Petal.Width: 1.8<br />Species: virginica","Petal.Length: 4.8<br />Petal.Width: 1.8<br />Species: virginica","Petal.Length: 5.4<br />Petal.Width: 2.1<br />Species: virginica","Petal.Length: 5.6<br />Petal.Width: 2.4<br />Species: virginica","Petal.Length: 5.1<br />Petal.Width: 2.3<br />Species: virginica","Petal.Length: 5.1<br />Petal.Width: 1.9<br />Species: virginica","Petal.Length: 5.9<br />Petal.Width: 2.3<br />Species: virginica","Petal.Length: 5.7<br />Petal.Width: 2.5<br />Species: virginica","Petal.Length: 5.2<br />Petal.Width: 2.3<br />Species: virginica","Petal.Length: 5.0<br />Petal.Width: 1.9<br />Species: virginica","Petal.Length: 5.2<br />Petal.Width: 2.0<br />Species: virginica","Petal.Length: 5.4<br />Petal.Width: 2.3<br />Species: virginica","Petal.Length: 5.1<br />Petal.Width: 1.8<br />Species: virginica"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(97,156,255,1)","opacity":1,"size":7.55905511811024,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(97,156,255,1)"}},"hoveron":"points","name":"virginica","legendgroup":"virginica","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":29.0178497301785,"r":9.29846409298464,"b":52.2015774180158,"l":56.4509755085098},"font":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.705,7.195],"tickmode":"array","ticktext":["1.5","3.0","4.5","6.0"],"tickvals":[1.5,3,4.5,6],"categoryorder":"array","categoryarray":["1.5","3.0","4.5","6.0"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":4.64923204649232,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":15.9375674553757},"tickangle":-0,"showline":true,"linecolor":"rgba(0,0,0,1)","linewidth":0.66417600664176,"showgrid":false,"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y","title":"Petal length (cm)","titlefont":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.02,2.62],"tickmode":"array","ticktext":["0.0","0.5","1.0","1.5","2.0","2.5"],"tickvals":[0,0.5,1,1.5,2,2.5],"categoryorder":"array","categoryarray":["0.0","0.5","1.0","1.5","2.0","2.5"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":4.64923204649232,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":15.9375674553757},"tickangle":-0,"showline":true,"linecolor":"rgba(0,0,0,1)","linewidth":0.66417600664176,"showgrid":false,"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x","title":"Petal width (cm)","titlefont":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":15.9375674553757},"y":0.958661417322835},"annotations":[{"text":"Species","x":1.02,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"left","yanchor":"bottom","legendTitle":true}],"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":[{"name":"Collaborate","icon":{"width":1000,"ascent":500,"descent":-50,"path":"M487 375c7-10 9-23 5-36l-79-259c-3-12-11-23-22-31-11-8-22-12-35-12l-263 0c-15 0-29 5-43 15-13 10-23 23-28 37-5 13-5 25-1 37 0 0 0 3 1 7 1 5 1 8 1 11 0 2 0 4-1 6 0 3-1 5-1 6 1 2 2 4 3 6 1 2 2 4 4 6 2 3 4 5 5 7 5 7 9 16 13 26 4 10 7 19 9 26 0 2 0 5 0 9-1 4-1 6 0 8 0 2 2 5 4 8 3 3 5 5 5 7 4 6 8 15 12 26 4 11 7 19 7 26 1 1 0 4 0 9-1 4-1 7 0 8 1 2 3 5 6 8 4 4 6 6 6 7 4 5 8 13 13 24 4 11 7 20 7 28 1 1 0 4 0 7-1 3-1 6-1 7 0 2 1 4 3 6 1 1 3 4 5 6 2 3 3 5 5 6 1 2 3 5 4 9 2 3 3 7 5 10 1 3 2 6 4 10 2 4 4 7 6 9 2 3 4 5 7 7 3 2 7 3 11 3 3 0 8 0 13-1l0-1c7 2 12 2 14 2l218 0c14 0 25-5 32-16 8-10 10-23 6-37l-79-259c-7-22-13-37-20-43-7-7-19-10-37-10l-248 0c-5 0-9-2-11-5-2-3-2-7 0-12 4-13 18-20 41-20l264 0c5 0 10 2 16 5 5 3 8 6 10 11l85 282c2 5 2 10 2 17 7-3 13-7 17-13z m-304 0c-1-3-1-5 0-7 1-1 3-2 6-2l174 0c2 0 4 1 7 2 2 2 4 4 5 7l6 18c0 3 0 5-1 7-1 1-3 2-6 2l-173 0c-3 0-5-1-8-2-2-2-4-4-4-7z m-24-73c-1-3-1-5 0-7 2-2 3-2 6-2l174 0c2 0 5 0 7 2 3 2 4 4 5 7l6 18c1 2 0 5-1 6-1 2-3 3-5 3l-174 0c-3 0-5-1-7-3-3-1-4-4-5-6z"},"click":"function(gd) { \n        // is this being viewed in RStudio?\n        if (location.search == '?viewer_pane=1') {\n          alert('To learn about plotly for collaboration, visit:\\n https://cpsievert.github.io/plotly_book/plot-ly-for-collaboration.html');\n        } else {\n          window.open('https://cpsievert.github.io/plotly_book/plot-ly-for-collaboration.html', '_blank');\n        }\n      }"}],"cloud":false},"source":"A","attrs":{"33bf820ca588f":{"x":{},"y":{},"colour":{},"type":"scatter"}},"cur_data":"33bf820ca588f","visdat":{"33bf820ca588f":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"base_url":"https://plot.ly"},"evals":["config.modeBarButtonsToAdd.0.click"],"jsHooks":[]}</script>
+<p class="caption">
+Figure 2: The association between Sepal length and Sepal width of three species of Iris flower
+</p>
+</div>
+<p>Linear model has a general form as in equation <a href="#eq:mbili">(1)</a></p>
+<p><span class="math display" id="eq:mbili">\[
+  \begin{equation}
+  y = a_1 + a_{2x} + a_{3x}+\cdots + a_n \times x_{n-1}  \tag{1}
+  \end{equation}
+\]</span></p>
+<p>R has tools specifically designed for fitting linear model called <em>lm()</em>. <em>lm()</em>has a special way to specify the model family: formulaas. Formulas look like <em>y~x</em>, which <em>lm()</em> translate to a function in equation <a href="#eq:moja">(2)</a></p>
+<p><span class="math display" id="eq:moja">\[
+  \begin{equation}
+    y = a_1 + a_2 \times X \tag{2}
+  \end{equation}
+\]</span></p>
+<p>We can use the petal length and petal width variables in the iris data set to fit the model with the base function and look at the output</p>
+<pre class="r"><code>petal.mod = lm(Petal.Width~Petal.Length, data = iris)
+## check coefficients
+coef(petal.mod)</code></pre>
+<pre><code>##  (Intercept) Petal.Length 
+##   -0.3630755    0.4157554</code></pre>
+<p>Let us look on the summary of the fitted model. Everything is nice and tidy. We have straightforward information, positive effect of Petal length to petal width. The strength of coefficient (adjusted R<sup>2</sup>) is 0.92, which tell us that the fitte model account for more than 92 percent. We also note that a small <em>p</em>-value (<em>p</em> &lt; 0.05), prove that the strong association between Petal length and Petal width is significant</p>
+<pre><code>
+Call:
+lm(formula = Petal.Width ~ Petal.Length, data = iris)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.56515 -0.12358 -0.01898  0.13288  0.64272 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  -0.363076   0.039762  -9.131  4.7e-16 ***
+Petal.Length  0.415755   0.009582  43.387  &lt; 2e-16 ***
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.2065 on 148 degrees of freedom
+Multiple R-squared:  0.9271,    Adjusted R-squared:  0.9266 
+F-statistic:  1882 on 1 and 148 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div id="visualizing-the-model" class="section level2">
+<h2>Visualizing the model</h2>
+<p>For simple model like the <em>petal.mod</em> i created above, you can figure out what pattern the model capture by carefully studying the model family and the coeffients. However, in this post, we focus on understanding a model by lookin at its predictions. This approach has the advantage because every predictive model makes predictions. So we can use the sam set of technique to understand any type of predictive model.</p>
+<p>It is also useful to look what the model does not capture—the residuals. The residual are obtained after substracting the predictions from the origin data. Residuals are powerful because they allow us to use models to remove strange patterns so we can study subtler trends that remains.</p>
+<div id="predictions" class="section level3">
+<h3>Predictions</h3>
+<p>To visualize the predictions from a model, we begin by generating evenly-spaced grid of values that covers the region where our data lies. The easiest way to do that is to use <strong>modelr</strong>’s package function <em>data_grid()</em>. It’s first argument is a data frame and for each subsequent arguments it finds the unique variable and then generates all combinations</p>
+<pre class="r"><code>grid = iris %&gt;%
+  data_grid(Petal.Length)</code></pre>
+<p>Next we add prediction, we will use modelr’s function <em>add_predictions()</em>, which take a data frame and model. Then it adds the predictions from the model to a new column in the data frame.</p>
+<pre class="r"><code>grid  = grid%&gt;%
+  add_predictions(petal.mod)</code></pre>
+<p>Next we plot the predictions (Figure <a href="#fig:fig3">3</a>). You may wonder about all these procedures compared to using <em>geom_abline()</em> function. But the advantage of this approach is that it will work with any model in R, from simple models to complex ones.</p>
+<pre class="r"><code>fig3 = ggplot(data = iris, aes(x = Petal.Length))+
+  geom_point(aes(y = Petal.Width))+
+  geom_line(data = grid, aes(y = pred), col = 2, size = 1)+
+  cowplot::theme_cowplot()+
+  scale_x_continuous(breaks = seq(0,7,1.5))+
+  labs(x = &quot;Petal length (cm)&quot;,
+       y = &quot;Petal width (cm)&quot;)
+
+plotly::ggplotly(fig3)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<div id="htmlwidget-3" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3">{"x":{"data":[{"x":[1.4,1.4,1.3,1.5,1.4,1.7,1.4,1.5,1.4,1.5,1.5,1.6,1.4,1.1,1.2,1.5,1.3,1.4,1.7,1.5,1.7,1.5,1,1.7,1.9,1.6,1.6,1.5,1.4,1.6,1.6,1.5,1.5,1.4,1.5,1.2,1.3,1.4,1.3,1.5,1.3,1.3,1.3,1.6,1.9,1.4,1.6,1.4,1.5,1.4,4.7,4.5,4.9,4,4.6,4.5,4.7,3.3,4.6,3.9,3.5,4.2,4,4.7,3.6,4.4,4.5,4.1,4.5,3.9,4.8,4,4.9,4.7,4.3,4.4,4.8,5,4.5,3.5,3.8,3.7,3.9,5.1,4.5,4.5,4.7,4.4,4.1,4,4.4,4.6,4,3.3,4.2,4.2,4.2,4.3,3,4.1,6,5.1,5.9,5.6,5.8,6.6,4.5,6.3,5.8,6.1,5.1,5.3,5.5,5,5.1,5.3,5.5,6.7,6.9,5,5.7,4.9,6.7,4.9,5.7,6,4.8,4.9,5.6,5.8,6.1,6.4,5.6,5.1,5.6,6.1,5.6,5.5,4.8,5.4,5.6,5.1,5.1,5.9,5.7,5.2,5,5.2,5.4,5.1],"y":[0.2,0.2,0.2,0.2,0.2,0.4,0.3,0.2,0.2,0.1,0.2,0.2,0.1,0.1,0.2,0.4,0.4,0.3,0.3,0.3,0.2,0.4,0.2,0.5,0.2,0.2,0.4,0.2,0.2,0.2,0.2,0.4,0.1,0.2,0.2,0.2,0.2,0.1,0.2,0.2,0.3,0.3,0.2,0.6,0.4,0.3,0.2,0.2,0.2,0.2,1.4,1.5,1.5,1.3,1.5,1.3,1.6,1,1.3,1.4,1,1.5,1,1.4,1.3,1.4,1.5,1,1.5,1.1,1.8,1.3,1.5,1.2,1.3,1.4,1.4,1.7,1.5,1,1.1,1,1.2,1.6,1.5,1.6,1.5,1.3,1.3,1.3,1.2,1.4,1.2,1,1.3,1.2,1.3,1.3,1.1,1.3,2.5,1.9,2.1,1.8,2.2,2.1,1.7,1.8,1.8,2.5,2,1.9,2.1,2,2.4,2.3,1.8,2.2,2.3,1.5,2.3,2,2,1.8,2.1,1.8,1.8,1.8,2.1,1.6,1.9,2,2.2,1.5,1.4,2.3,2.4,1.8,1.8,2.1,2.4,2.3,1.9,2.3,2.5,2.3,1.9,2,2.3,1.8],"text":["Petal.Width: 0.2<br />Petal.Length: 1.4","Petal.Width: 0.2<br />Petal.Length: 1.4","Petal.Width: 0.2<br />Petal.Length: 1.3","Petal.Width: 0.2<br />Petal.Length: 1.5","Petal.Width: 0.2<br />Petal.Length: 1.4","Petal.Width: 0.4<br />Petal.Length: 1.7","Petal.Width: 0.3<br />Petal.Length: 1.4","Petal.Width: 0.2<br />Petal.Length: 1.5","Petal.Width: 0.2<br />Petal.Length: 1.4","Petal.Width: 0.1<br />Petal.Length: 1.5","Petal.Width: 0.2<br />Petal.Length: 1.5","Petal.Width: 0.2<br />Petal.Length: 1.6","Petal.Width: 0.1<br />Petal.Length: 1.4","Petal.Width: 0.1<br />Petal.Length: 1.1","Petal.Width: 0.2<br />Petal.Length: 1.2","Petal.Width: 0.4<br />Petal.Length: 1.5","Petal.Width: 0.4<br />Petal.Length: 1.3","Petal.Width: 0.3<br />Petal.Length: 1.4","Petal.Width: 0.3<br />Petal.Length: 1.7","Petal.Width: 0.3<br />Petal.Length: 1.5","Petal.Width: 0.2<br />Petal.Length: 1.7","Petal.Width: 0.4<br />Petal.Length: 1.5","Petal.Width: 0.2<br />Petal.Length: 1.0","Petal.Width: 0.5<br />Petal.Length: 1.7","Petal.Width: 0.2<br />Petal.Length: 1.9","Petal.Width: 0.2<br />Petal.Length: 1.6","Petal.Width: 0.4<br />Petal.Length: 1.6","Petal.Width: 0.2<br />Petal.Length: 1.5","Petal.Width: 0.2<br />Petal.Length: 1.4","Petal.Width: 0.2<br />Petal.Length: 1.6","Petal.Width: 0.2<br />Petal.Length: 1.6","Petal.Width: 0.4<br />Petal.Length: 1.5","Petal.Width: 0.1<br />Petal.Length: 1.5","Petal.Width: 0.2<br />Petal.Length: 1.4","Petal.Width: 0.2<br />Petal.Length: 1.5","Petal.Width: 0.2<br />Petal.Length: 1.2","Petal.Width: 0.2<br />Petal.Length: 1.3","Petal.Width: 0.1<br />Petal.Length: 1.4","Petal.Width: 0.2<br />Petal.Length: 1.3","Petal.Width: 0.2<br />Petal.Length: 1.5","Petal.Width: 0.3<br />Petal.Length: 1.3","Petal.Width: 0.3<br />Petal.Length: 1.3","Petal.Width: 0.2<br />Petal.Length: 1.3","Petal.Width: 0.6<br />Petal.Length: 1.6","Petal.Width: 0.4<br />Petal.Length: 1.9","Petal.Width: 0.3<br />Petal.Length: 1.4","Petal.Width: 0.2<br />Petal.Length: 1.6","Petal.Width: 0.2<br />Petal.Length: 1.4","Petal.Width: 0.2<br />Petal.Length: 1.5","Petal.Width: 0.2<br />Petal.Length: 1.4","Petal.Width: 1.4<br />Petal.Length: 4.7","Petal.Width: 1.5<br />Petal.Length: 4.5","Petal.Width: 1.5<br />Petal.Length: 4.9","Petal.Width: 1.3<br />Petal.Length: 4.0","Petal.Width: 1.5<br />Petal.Length: 4.6","Petal.Width: 1.3<br />Petal.Length: 4.5","Petal.Width: 1.6<br />Petal.Length: 4.7","Petal.Width: 1.0<br />Petal.Length: 3.3","Petal.Width: 1.3<br />Petal.Length: 4.6","Petal.Width: 1.4<br />Petal.Length: 3.9","Petal.Width: 1.0<br />Petal.Length: 3.5","Petal.Width: 1.5<br />Petal.Length: 4.2","Petal.Width: 1.0<br />Petal.Length: 4.0","Petal.Width: 1.4<br />Petal.Length: 4.7","Petal.Width: 1.3<br />Petal.Length: 3.6","Petal.Width: 1.4<br />Petal.Length: 4.4","Petal.Width: 1.5<br />Petal.Length: 4.5","Petal.Width: 1.0<br />Petal.Length: 4.1","Petal.Width: 1.5<br />Petal.Length: 4.5","Petal.Width: 1.1<br />Petal.Length: 3.9","Petal.Width: 1.8<br />Petal.Length: 4.8","Petal.Width: 1.3<br />Petal.Length: 4.0","Petal.Width: 1.5<br />Petal.Length: 4.9","Petal.Width: 1.2<br />Petal.Length: 4.7","Petal.Width: 1.3<br />Petal.Length: 4.3","Petal.Width: 1.4<br />Petal.Length: 4.4","Petal.Width: 1.4<br />Petal.Length: 4.8","Petal.Width: 1.7<br />Petal.Length: 5.0","Petal.Width: 1.5<br />Petal.Length: 4.5","Petal.Width: 1.0<br />Petal.Length: 3.5","Petal.Width: 1.1<br />Petal.Length: 3.8","Petal.Width: 1.0<br />Petal.Length: 3.7","Petal.Width: 1.2<br />Petal.Length: 3.9","Petal.Width: 1.6<br />Petal.Length: 5.1","Petal.Width: 1.5<br />Petal.Length: 4.5","Petal.Width: 1.6<br />Petal.Length: 4.5","Petal.Width: 1.5<br />Petal.Length: 4.7","Petal.Width: 1.3<br />Petal.Length: 4.4","Petal.Width: 1.3<br />Petal.Length: 4.1","Petal.Width: 1.3<br />Petal.Length: 4.0","Petal.Width: 1.2<br />Petal.Length: 4.4","Petal.Width: 1.4<br />Petal.Length: 4.6","Petal.Width: 1.2<br />Petal.Length: 4.0","Petal.Width: 1.0<br />Petal.Length: 3.3","Petal.Width: 1.3<br />Petal.Length: 4.2","Petal.Width: 1.2<br />Petal.Length: 4.2","Petal.Width: 1.3<br />Petal.Length: 4.2","Petal.Width: 1.3<br />Petal.Length: 4.3","Petal.Width: 1.1<br />Petal.Length: 3.0","Petal.Width: 1.3<br />Petal.Length: 4.1","Petal.Width: 2.5<br />Petal.Length: 6.0","Petal.Width: 1.9<br />Petal.Length: 5.1","Petal.Width: 2.1<br />Petal.Length: 5.9","Petal.Width: 1.8<br />Petal.Length: 5.6","Petal.Width: 2.2<br />Petal.Length: 5.8","Petal.Width: 2.1<br />Petal.Length: 6.6","Petal.Width: 1.7<br />Petal.Length: 4.5","Petal.Width: 1.8<br />Petal.Length: 6.3","Petal.Width: 1.8<br />Petal.Length: 5.8","Petal.Width: 2.5<br />Petal.Length: 6.1","Petal.Width: 2.0<br />Petal.Length: 5.1","Petal.Width: 1.9<br />Petal.Length: 5.3","Petal.Width: 2.1<br />Petal.Length: 5.5","Petal.Width: 2.0<br />Petal.Length: 5.0","Petal.Width: 2.4<br />Petal.Length: 5.1","Petal.Width: 2.3<br />Petal.Length: 5.3","Petal.Width: 1.8<br />Petal.Length: 5.5","Petal.Width: 2.2<br />Petal.Length: 6.7","Petal.Width: 2.3<br />Petal.Length: 6.9","Petal.Width: 1.5<br />Petal.Length: 5.0","Petal.Width: 2.3<br />Petal.Length: 5.7","Petal.Width: 2.0<br />Petal.Length: 4.9","Petal.Width: 2.0<br />Petal.Length: 6.7","Petal.Width: 1.8<br />Petal.Length: 4.9","Petal.Width: 2.1<br />Petal.Length: 5.7","Petal.Width: 1.8<br />Petal.Length: 6.0","Petal.Width: 1.8<br />Petal.Length: 4.8","Petal.Width: 1.8<br />Petal.Length: 4.9","Petal.Width: 2.1<br />Petal.Length: 5.6","Petal.Width: 1.6<br />Petal.Length: 5.8","Petal.Width: 1.9<br />Petal.Length: 6.1","Petal.Width: 2.0<br />Petal.Length: 6.4","Petal.Width: 2.2<br />Petal.Length: 5.6","Petal.Width: 1.5<br />Petal.Length: 5.1","Petal.Width: 1.4<br />Petal.Length: 5.6","Petal.Width: 2.3<br />Petal.Length: 6.1","Petal.Width: 2.4<br />Petal.Length: 5.6","Petal.Width: 1.8<br />Petal.Length: 5.5","Petal.Width: 1.8<br />Petal.Length: 4.8","Petal.Width: 2.1<br />Petal.Length: 5.4","Petal.Width: 2.4<br />Petal.Length: 5.6","Petal.Width: 2.3<br />Petal.Length: 5.1","Petal.Width: 1.9<br />Petal.Length: 5.1","Petal.Width: 2.3<br />Petal.Length: 5.9","Petal.Width: 2.5<br />Petal.Length: 5.7","Petal.Width: 2.3<br />Petal.Length: 5.2","Petal.Width: 1.9<br />Petal.Length: 5.0","Petal.Width: 2.0<br />Petal.Length: 5.2","Petal.Width: 2.3<br />Petal.Length: 5.4","Petal.Width: 1.8<br />Petal.Length: 5.1"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,0,0,1)","opacity":1,"size":5.66929133858268,"symbol":"circle","line":{"width":1.88976377952756,"color":"rgba(0,0,0,1)"}},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.9,3,3.3,3.5,3.6,3.7,3.8,3.9,4,4.1,4.2,4.3,4.4,4.5,4.6,4.7,4.8,4.9,5,5.1,5.2,5.3,5.4,5.5,5.6,5.7,5.8,5.9,6,6.1,6.3,6.4,6.6,6.7,6.9],"y":[0.0526798950333812,0.0942554366686224,0.135830978303864,0.177406519939105,0.218982061574346,0.260557603209587,0.302133144844828,0.343708686480069,0.426859769750552,0.884190727738205,1.00891735264393,1.09206843591441,1.13364397754965,1.17521951918489,1.21679506082013,1.25837060245538,1.29994614409062,1.34152168572586,1.3830972273611,1.42467276899634,1.46624831063158,1.50782385226682,1.54939939390206,1.59097493553731,1.63255047717255,1.67412601880779,1.71570156044303,1.75727710207827,1.79885264371351,1.84042818534875,1.88200372698399,1.92357926861923,1.96515481025448,2.00673035188972,2.04830589352496,2.0898814351602,2.13145697679544,2.17303251843068,2.25618360170116,2.29775914333641,2.38091022660689,2.42248576824213,2.50563685151261],"text":["pred: 0.05267990<br />Petal.Length: 1.0","pred: 0.09425544<br />Petal.Length: 1.1","pred: 0.13583098<br />Petal.Length: 1.2","pred: 0.17740652<br />Petal.Length: 1.3","pred: 0.21898206<br />Petal.Length: 1.4","pred: 0.26055760<br />Petal.Length: 1.5","pred: 0.30213314<br />Petal.Length: 1.6","pred: 0.34370869<br />Petal.Length: 1.7","pred: 0.42685977<br />Petal.Length: 1.9","pred: 0.88419073<br />Petal.Length: 3.0","pred: 1.00891735<br />Petal.Length: 3.3","pred: 1.09206844<br />Petal.Length: 3.5","pred: 1.13364398<br />Petal.Length: 3.6","pred: 1.17521952<br />Petal.Length: 3.7","pred: 1.21679506<br />Petal.Length: 3.8","pred: 1.25837060<br />Petal.Length: 3.9","pred: 1.29994614<br />Petal.Length: 4.0","pred: 1.34152169<br />Petal.Length: 4.1","pred: 1.38309723<br />Petal.Length: 4.2","pred: 1.42467277<br />Petal.Length: 4.3","pred: 1.46624831<br />Petal.Length: 4.4","pred: 1.50782385<br />Petal.Length: 4.5","pred: 1.54939939<br />Petal.Length: 4.6","pred: 1.59097494<br />Petal.Length: 4.7","pred: 1.63255048<br />Petal.Length: 4.8","pred: 1.67412602<br />Petal.Length: 4.9","pred: 1.71570156<br />Petal.Length: 5.0","pred: 1.75727710<br />Petal.Length: 5.1","pred: 1.79885264<br />Petal.Length: 5.2","pred: 1.84042819<br />Petal.Length: 5.3","pred: 1.88200373<br />Petal.Length: 5.4","pred: 1.92357927<br />Petal.Length: 5.5","pred: 1.96515481<br />Petal.Length: 5.6","pred: 2.00673035<br />Petal.Length: 5.7","pred: 2.04830589<br />Petal.Length: 5.8","pred: 2.08988144<br />Petal.Length: 5.9","pred: 2.13145698<br />Petal.Length: 6.0","pred: 2.17303252<br />Petal.Length: 6.1","pred: 2.25618360<br />Petal.Length: 6.3","pred: 2.29775914<br />Petal.Length: 6.4","pred: 2.38091023<br />Petal.Length: 6.6","pred: 2.42248577<br />Petal.Length: 6.7","pred: 2.50563685<br />Petal.Length: 6.9"],"type":"scatter","mode":"lines","line":{"width":3.77952755905512,"color":"rgba(255,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":29.0178497301785,"r":9.29846409298464,"b":52.2015774180158,"l":56.4509755085098},"font":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.705,7.195],"tickmode":"array","ticktext":["1.5","3.0","4.5","6.0"],"tickvals":[1.5,3,4.5,6],"categoryorder":"array","categoryarray":["1.5","3.0","4.5","6.0"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":4.64923204649232,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":15.9375674553757},"tickangle":-0,"showline":true,"linecolor":"rgba(0,0,0,1)","linewidth":0.66417600664176,"showgrid":false,"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y","title":"Petal length (cm)","titlefont":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.0699679527905804,2.62828469933657],"tickmode":"array","ticktext":["0.0","0.5","1.0","1.5","2.0","2.5"],"tickvals":[0,0.5,1,1.5,2,2.5],"categoryorder":"array","categoryarray":["0.0","0.5","1.0","1.5","2.0","2.5"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":4.64923204649232,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":15.9375674553757},"tickangle":-0,"showline":true,"linecolor":"rgba(0,0,0,1)","linewidth":0.66417600664176,"showgrid":false,"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x","title":"Petal width (cm)","titlefont":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":15.9375674553757}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":[{"name":"Collaborate","icon":{"width":1000,"ascent":500,"descent":-50,"path":"M487 375c7-10 9-23 5-36l-79-259c-3-12-11-23-22-31-11-8-22-12-35-12l-263 0c-15 0-29 5-43 15-13 10-23 23-28 37-5 13-5 25-1 37 0 0 0 3 1 7 1 5 1 8 1 11 0 2 0 4-1 6 0 3-1 5-1 6 1 2 2 4 3 6 1 2 2 4 4 6 2 3 4 5 5 7 5 7 9 16 13 26 4 10 7 19 9 26 0 2 0 5 0 9-1 4-1 6 0 8 0 2 2 5 4 8 3 3 5 5 5 7 4 6 8 15 12 26 4 11 7 19 7 26 1 1 0 4 0 9-1 4-1 7 0 8 1 2 3 5 6 8 4 4 6 6 6 7 4 5 8 13 13 24 4 11 7 20 7 28 1 1 0 4 0 7-1 3-1 6-1 7 0 2 1 4 3 6 1 1 3 4 5 6 2 3 3 5 5 6 1 2 3 5 4 9 2 3 3 7 5 10 1 3 2 6 4 10 2 4 4 7 6 9 2 3 4 5 7 7 3 2 7 3 11 3 3 0 8 0 13-1l0-1c7 2 12 2 14 2l218 0c14 0 25-5 32-16 8-10 10-23 6-37l-79-259c-7-22-13-37-20-43-7-7-19-10-37-10l-248 0c-5 0-9-2-11-5-2-3-2-7 0-12 4-13 18-20 41-20l264 0c5 0 10 2 16 5 5 3 8 6 10 11l85 282c2 5 2 10 2 17 7-3 13-7 17-13z m-304 0c-1-3-1-5 0-7 1-1 3-2 6-2l174 0c2 0 4 1 7 2 2 2 4 4 5 7l6 18c0 3 0 5-1 7-1 1-3 2-6 2l-173 0c-3 0-5-1-8-2-2-2-4-4-4-7z m-24-73c-1-3-1-5 0-7 2-2 3-2 6-2l174 0c2 0 5 0 7 2 3 2 4 4 5 7l6 18c1 2 0 5-1 6-1 2-3 3-5 3l-174 0c-3 0-5-1-7-3-3-1-4-4-5-6z"},"click":"function(gd) { \n        // is this being viewed in RStudio?\n        if (location.search == '?viewer_pane=1') {\n          alert('To learn about plotly for collaboration, visit:\\n https://cpsievert.github.io/plotly_book/plot-ly-for-collaboration.html');\n        } else {\n          window.open('https://cpsievert.github.io/plotly_book/plot-ly-for-collaboration.html', '_blank');\n        }\n      }"}],"cloud":false},"source":"A","attrs":{"33bf8709561da":{"y":{},"x":{},"type":"scatter"},"33bf824ca5e36":{"y":{},"x":{}}},"cur_data":"33bf8709561da","visdat":{"33bf8709561da":["function (y) ","x"],"33bf824ca5e36":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"base_url":"https://plot.ly"},"evals":["config.modeBarButtonsToAdd.0.click"],"jsHooks":[]}</script>
+<p class="caption">
+Figure 3: Model fitting
+</p>
+</div>
+</div>
+<div id="residuals" class="section level3">
+<h3>Residuals</h3>
+<p>The flip-side of predictions are residuals. The predictions tells about the patterns that themodel has captured and the residuals tells about what the model missed out. The residual are just the distance between the observed and predicted values. similar to predictions, we add the residuals to the data with the modelr’s <em>add_residuals()</em> function. Note, however, that we use the original dataset, no a generated grid. this is simply because to compute residual (Figure <a href="#tab:tab21">2</a>), we need raw <em>y</em> values.</p>
+<pre class="r"><code>iris = iris%&gt;%
+  add_residuals(petal.mod)
+
+
+iris%&gt;%as.tibble()%&gt;%select(5,1:4,6)%&gt;%sample_n(12)%&gt;%kable(&quot;html&quot;, digits = 2, align = &quot;c&quot;, caption = &quot;The residual values in the dataset&quot;, col.names = c(&quot;Species&quot;, &quot;Length&quot;, &quot;Width&quot;, &quot;Length&quot;, &quot;Width&quot;, &quot;Residual&quot;))%&gt;%
+  add_header_above(c(&quot;&quot;,&quot;Sepal&quot; = 2, &quot;Petal&quot; = 2, &quot;&quot;))%&gt;%
+  add_header_above(c(&quot;&quot;, &quot;Flower Measurement (cm)&quot; = 4, &quot;&quot;))%&gt;%
+  column_spec(1:6, width = &quot;8cm&quot;, color = &quot;black&quot;, bold = FALSE)</code></pre>
+<table>
+<caption>
+<span id="tab:tab21">Table 2: </span>The residual values in the dataset
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Flower Measurement (cm)
+</div>
+</th>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+</tr>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Sepal
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Petal
+</div>
+</th>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+Species
+</th>
+<th style="text-align:center;">
+Length
+</th>
+<th style="text-align:center;">
+Width
+</th>
+<th style="text-align:center;">
+Length
+</th>
+<th style="text-align:center;">
+Width
+</th>
+<th style="text-align:center;">
+Residual
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+versicolor
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+5.0
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+2.3
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+3.3
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.0
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.01
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+virginica
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+5.8
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+2.7
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+5.1
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.9
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.14
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+setosa
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+5.0
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+3.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.5
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.2
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.06
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+versicolor
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+6.8
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+2.8
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+4.8
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.23
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+setosa
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+5.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+3.9
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.3
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.22
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+setosa
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+5.5
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+4.2
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.2
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.02
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+virginica
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+6.9
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+3.1
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+5.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+2.1
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.22
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+versicolor
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+6.0
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+2.2
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+4.0
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.0
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.30
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+setosa
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+5.1
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+3.8
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.9
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.03
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+setosa
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+5.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+3.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.7
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+0.2
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.14
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+virginica
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+7.7
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+2.6
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+6.9
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+2.3
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.21
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; color: black;">
+versicolor
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+6.4
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+2.9
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+4.3
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+1.3
+</td>
+<td style="text-align:center;width: 8cm; color: black;">
+-0.12
+</td>
+</tr>
+</tbody>
+</table>
+<p>There are two ways to visualize what residuals tell us about the model. One way si to simply plot a frequency polygon (Figure <a href="#fig:fig4">4</a>). The frequency polygon help calibrate the quality of teh mdoel—how far away are predictions from observed values. <em>Note that the average of the residual will always be zero.</em></p>
+<pre class="r"><code>fig4 = ggplot(data = iris, aes(x = resid))+
+  geom_freqpoly(binwidth = 0.5)+
+  cowplot::theme_cowplot() +
+  labs(x = &quot;Model residuals&quot;,y = &quot;Frequencies&quot;)
+
+plotly::ggplotly(fig4)</code></pre>
+<div class="figure"><span id="fig:fig4"></span>
+<div id="htmlwidget-4" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4">{"x":{"data":[{"x":[-1,-0.5,0,0.5,1],"y":[0,13,123,14,0],"text":["count:   0<br />resid: -1.0","count:  13<br />resid: -0.5","count: 123<br />resid:  0.0","count:  14<br />resid:  0.5","count:   0<br />resid:  1.0"],"type":"scatter","mode":"lines","line":{"width":1.88976377952756,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":29.0178497301785,"r":9.29846409298464,"b":52.2015774180158,"l":56.4509755085098},"font":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-1.375,1.375],"tickmode":"array","ticktext":["-1.0","-0.5","0.0","0.5","1.0"],"tickvals":[-1,-0.5,0,0.5,1],"categoryorder":"array","categoryarray":["-1.0","-0.5","0.0","0.5","1.0"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":4.64923204649232,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":15.9375674553757},"tickangle":-0,"showline":true,"linecolor":"rgba(0,0,0,1)","linewidth":0.66417600664176,"showgrid":false,"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y","title":"Model residuals","titlefont":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-6.15,129.15],"tickmode":"array","ticktext":["0","25","50","75","100","125"],"tickvals":[0,25,50,75,100,125],"categoryorder":"array","categoryarray":["0","25","50","75","100","125"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":4.64923204649232,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":15.9375674553757},"tickangle":-0,"showline":true,"linecolor":"rgba(0,0,0,1)","linewidth":0.66417600664176,"showgrid":false,"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x","title":"Frequencies","titlefont":{"color":"rgba(0,0,0,1)","family":"","size":18.5969281859693},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":15.9375674553757}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":[{"name":"Collaborate","icon":{"width":1000,"ascent":500,"descent":-50,"path":"M487 375c7-10 9-23 5-36l-79-259c-3-12-11-23-22-31-11-8-22-12-35-12l-263 0c-15 0-29 5-43 15-13 10-23 23-28 37-5 13-5 25-1 37 0 0 0 3 1 7 1 5 1 8 1 11 0 2 0 4-1 6 0 3-1 5-1 6 1 2 2 4 3 6 1 2 2 4 4 6 2 3 4 5 5 7 5 7 9 16 13 26 4 10 7 19 9 26 0 2 0 5 0 9-1 4-1 6 0 8 0 2 2 5 4 8 3 3 5 5 5 7 4 6 8 15 12 26 4 11 7 19 7 26 1 1 0 4 0 9-1 4-1 7 0 8 1 2 3 5 6 8 4 4 6 6 6 7 4 5 8 13 13 24 4 11 7 20 7 28 1 1 0 4 0 7-1 3-1 6-1 7 0 2 1 4 3 6 1 1 3 4 5 6 2 3 3 5 5 6 1 2 3 5 4 9 2 3 3 7 5 10 1 3 2 6 4 10 2 4 4 7 6 9 2 3 4 5 7 7 3 2 7 3 11 3 3 0 8 0 13-1l0-1c7 2 12 2 14 2l218 0c14 0 25-5 32-16 8-10 10-23 6-37l-79-259c-7-22-13-37-20-43-7-7-19-10-37-10l-248 0c-5 0-9-2-11-5-2-3-2-7 0-12 4-13 18-20 41-20l264 0c5 0 10 2 16 5 5 3 8 6 10 11l85 282c2 5 2 10 2 17 7-3 13-7 17-13z m-304 0c-1-3-1-5 0-7 1-1 3-2 6-2l174 0c2 0 4 1 7 2 2 2 4 4 5 7l6 18c0 3 0 5-1 7-1 1-3 2-6 2l-173 0c-3 0-5-1-8-2-2-2-4-4-4-7z m-24-73c-1-3-1-5 0-7 2-2 3-2 6-2l174 0c2 0 5 0 7 2 3 2 4 4 5 7l6 18c1 2 0 5-1 6-1 2-3 3-5 3l-174 0c-3 0-5-1-7-3-3-1-4-4-5-6z"},"click":"function(gd) { \n        // is this being viewed in RStudio?\n        if (location.search == '?viewer_pane=1') {\n          alert('To learn about plotly for collaboration, visit:\\n https://cpsievert.github.io/plotly_book/plot-ly-for-collaboration.html');\n        } else {\n          window.open('https://cpsievert.github.io/plotly_book/plot-ly-for-collaboration.html', '_blank');\n        }\n      }"}],"cloud":false},"source":"A","attrs":{"33bf8319320fc":{"x":{},"type":"scatter"}},"cur_data":"33bf8319320fc","visdat":{"33bf8319320fc":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"base_url":"https://plot.ly"},"evals":["config.modeBarButtonsToAdd.0.click"],"jsHooks":[]}</script>
+<p class="caption">
+Figure 4: The frequency of residual obtained from model
+</p>
+</div>
+<p>The other way to look at the residual graphically is by looking plot with the residual (Figure <a href="#fig:fig5">5</a>). This looks like a random noise, suggesting that the model has done a good job of capturing the pattern. However, we see clusters of residual, contributed by grouping the three species togher, which have different petal width (Figure <a href="#fig:fig2">2</a>)</p>
+<pre class="r"><code>ggplot(data = iris)+
+  # geom_ref_line(h = 0, colour = 2) +
+  geom_point(aes(x = Petal.Length, y = resid))+
+  geom_hline(yintercept = 0, linetype = 2)+
+  scale_x_continuous(breaks = seq(0,7,1.5))+
+  cowplot::theme_cowplot() +
+  labs(x = &quot;Petal length (cm)&quot;,
+       y = &quot;Residuals&quot;)</code></pre>
+<div class="figure"><span id="fig:fig5"></span>
+<img src="/post/2018-09-28-modelling-with-r_files/figure-html/fig5-1.png" alt="Residuals of the model" width="672" />
+<p class="caption">
+Figure 5: Residuals of the model
+</p>
+</div>
+</div>
+</div>
+<div id="polynomial-regression-model" class="section level2">
+<h2>Polynomial regression model</h2>
+</div>
+<div id="cited-literature" class="section level2">
+<h2>Cited Literature</h2>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Wickham, H., &amp; Grolemund, G. (2016). R for data science: import, tidy, transform, visualize, and model data. &quot; O’Reilly Media, Inc.“.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>R Core Team (2018). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a>.<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>Hadley Wickham (2018). modelr: Modelling Functions that Work with the Pipe. R package version 0.1.2. <a href="https://CRAN.R-project.org/package=modelr" class="uri">https://CRAN.R-project.org/package=modelr</a><a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>Hadley Wickham (2017). tidyverse: Easily Install and Load the ‘Tidyverse’. R package version 1.2.1. <a href="https://CRAN.R-project.org/package=tidyverse" class="uri">https://CRAN.R-project.org/package=tidyverse</a><a href="#fnref4">↩</a></p></li>
+</ol>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//Semba.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

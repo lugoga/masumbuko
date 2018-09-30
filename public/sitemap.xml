@@ -28,6 +28,16 @@
   </url>
   
   <url>
+    <loc>/10/02/2018/modelling-with-r/</loc>
+    <lastmod>2018-10-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/09/30/2018/sea-surface-temperature-from-drifter/</loc>
+    <lastmod>2018-09-30T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/09/28/2018/surface-current-from-drifters/</loc>
     <lastmod>2018-09-28T00:00:00+00:00</lastmod>
   </url>
@@ -63,6 +73,12 @@
   </url>
   
   <url>
+    <loc>/categories/</loc>
+    <lastmod>2018-09-30T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/argo/</loc>
     <lastmod>2018-09-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -70,6 +86,7 @@
   
   <url>
     <loc>/categories/</loc>
+    <lastmod>2018-09-30T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -87,7 +104,7 @@
   
   <url>
     <loc>/tags/drifter/</loc>
-    <lastmod>2018-09-28T00:00:00+00:00</lastmod>
+    <lastmod>2018-09-30T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -105,7 +122,7 @@
   
   <url>
     <loc>/tags/indian-ocean/</loc>
-    <lastmod>2018-09-28T00:00:00+00:00</lastmod>
+    <lastmod>2018-09-30T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -117,7 +134,7 @@
   
   <url>
     <loc>/tags/masumbuko-semba/</loc>
-    <lastmod>2018-09-28T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -129,19 +146,19 @@
   
   <url>
     <loc>/categories/oceanography/</loc>
-    <lastmod>2018-09-28T00:00:00+00:00</lastmod>
+    <lastmod>2018-09-30T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/pemba-channel/</loc>
-    <lastmod>2018-09-28T00:00:00+00:00</lastmod>
+    <lastmod>2018-09-30T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2018-09-28T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -163,19 +180,19 @@
   
   <url>
     <loc>/tags/salinity/</loc>
-    <lastmod>2018-09-26T00:00:00+00:00</lastmod>
+    <lastmod>2018-09-30T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/satellite/</loc>
-    <lastmod>2018-09-28T00:00:00+00:00</lastmod>
+    <lastmod>2018-09-30T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/surface-current/</loc>
-    <lastmod>2018-09-28T00:00:00+00:00</lastmod>
+    <lastmod>2018-09-30T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -193,7 +210,7 @@
   
   <url>
     <loc>/categories/technical/</loc>
-    <lastmod>2018-09-22T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
