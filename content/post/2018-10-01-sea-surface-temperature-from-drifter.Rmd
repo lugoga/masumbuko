@@ -22,11 +22,11 @@ tags:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-The study of sea surface temperature (SST) is one of the cornestone of oceanography. It has applications not only in physics, chemistry and the earth's sciences, but in subjects as diverse as biology and economics. SST plays an important role in our quantitative understanding of coastal habitats and species distribution in our global oceans. 
+The study of sea surface temperature (SST) is one of the cornerstone of oceanography. It has applications not only in physics, chemistry and the earth's sciences, but in subjects as diverse as biology and economics. SST plays an important role in our quantitative understanding of coastal habitats and species distribution in our global oceans. 
 
 It was until the launch of The Moderate Resolution Imaging Spectroradiometer (MODIS) early 1990, oceanographers were unable to obtain information of SST at fairly resolution. Since early 2003, MODIS provides SST for all global ocean at 4 km spatial resolution every 3 days. MODIS products enable scientists to address some issues that were impossible without the satellite derived products.
 
-We know much about the satellite derived SST products from MODIS, but very little attention has been placed on the SST gathered in-stu with drifters. Therefore, this post goal is to introduce some fundamentals techniques on how to process SST data from Global Drifter Program. But important, I will trail the processes in this post using R^[R Core Team (2018). R: A language and environment for statistical computing. R Foundation for
+We know much about the satellite derived SST products from MODIS, but little attention has been placed on the SST gathered in-stu with drifters. Therefore, this post goal is to introduce some fundamentals techniques on how to process SST data from Global Drifter Program. But important, I will trail the processes in this post using R^[R Core Team (2018). R: A language and environment for statistical computing. R Foundation for
   Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.]---a free and open source programming language. I loaded four packages---tidyverse^[Hadley Wickham (2017). tidyverse: Easily Install and Load the 'Tidyverse'. R package version
   1.2.1. https://CRAN.R-project.org/package=tidyverse], lubridate^[Garrett Grolemund, Hadley Wickham (2011). Dates and Times Made Easy with lubridate. Journal of
   Statistical Software, 40(3), 1-25. URL http://www.jstatsoft.org/v40/i03/.], kableExra^[Hao Zhu (2018). kableExtra: Construct Complex Table with 'kable' and Pipe Syntax. R package
@@ -43,7 +43,7 @@ require(sf)
 ```
 
 ### Drifter processing
-Drifter observations were downloaded from NOAA website as ascii files. The dataset was imported in R using the dplyr's *read_table()* function. Once the dataset was imported, it was manipulated and transformed. The dataset has twelve variables, I eliminated variable that I do not need for this post and kepy five variable---id, longitude, latitude, year, month, day and sst. The observation was later grouped into monsoon seasons. Drifter observation from April-September fell into southeast monsoon season (SE) and those between October-March were placed in the northeast monsoon season. Figure \@ref(fig:pic1) summarizee the main analytical processes envolved in this post.
+Figure \@ref(fig:pic1) summarise the main analytical step used in this post. First, the dataset was downloade from NOAA as ascii file. Second, the dataset was imported in R using the dplyr's *read_table()* function. Third, once the dataset was in the workspace, it was manipulated and transformed. These dataset has twelve variables,  I cleaned the dataset by removing some variables not needed for this post. I kept the common id, longitude, latitude, year, month, day and sst variables. Fourth, the observations were later grouped based on monsoon seasons. All drifter observations recorded between April and September fell into southeast monsoon season (SE). And those between October and March fell in the northeast (NE) monsoon season. 
 
 
 ```{r pic1, fig.cap="The data analysis model"}
