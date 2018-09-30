@@ -16,6 +16,7 @@ tags:
   - Pemba Channel
 ---
 
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
 
 
 <p>The study of sea surface temperature (SST) is one of the cornerstone of oceanography. It has applications not only in physics, chemistry and the earth’s sciences, but in subjects as diverse as biology and economics. SST plays an important role in our quantitative understanding of coastal habitats and species distribution in our global oceans.</p>
@@ -23,10 +24,11 @@ tags:
 <p>We know much about the satellite derived SST products from MODIS, but little attention has been placed on the SST gathered in-stu with drifters. Therefore, this post goal is to introduce some fundamentals techniques on how to process SST data from Global Drifter Program. But important, I will trail the processes in this post using R<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>—a free and open source programming language. I loaded four packages—tidyverse<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>, lubridate<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>, kableExra<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> and sf<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a> but I also used cowplot<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a> package for combining figures.</p>
 <pre class="r"><code>require(tidyverse)
 require(lubridate)
-require(sf)</code></pre>
+require(sf)
+require(kableExtra)</code></pre>
 <div id="drifter-processing" class="section level3">
 <h3>Drifter processing</h3>
-<p>Figure <a href="#fig:pic1">1</a> summarise the main analytical step used in this post. First, the dataset was downloade from NOAA as ascii file. Second, the dataset was imported in R using the dplyr’s <em>read_table()</em> function. Third, once the dataset was in the workspace, it was manipulated and transformed. These dataset has twelve variables, I cleaned the dataset by removing some variables not needed for this post. I kept the common id, longitude, latitude, year, month, day and sst variables. Fourth, the observations were later grouped based on monsoon seasons. All drifter observations recorded between April and September fell into southeast monsoon season (SE). And those between October and March fell in the northeast (NE) monsoon season.</p>
+<p>Figure <a href="#fig:pic1">1</a> summarise the main analytical step used in this post. First, the dataset was downloade from NOAA as ascii file. Second, the dataset was imported in R using the dplyr’s <em>read_table()</em> function. Third, once the dataset was in the workspace, it was manipulated and transformed. These dataset has twelve variables, I cleaned the dataset by removing some variables not needed for this post. I kept the common id, longitude, latitude, year, month, day and sst variables. Fourth, the observations were later grouped based on monsoon seasons. All drifter observations recorded between April and September fell into southeast monsoon season (SE). And those between October and March fell in the northeast (NE) monsoon season. Table <a href="#tab:tab1">1</a> show drifter observation after being procesed.</p>
 <div class="figure"><span id="fig:pic1"></span>
 <img src="/post/2018-10-01-sea-surface-temperature-from-drifter_files/data_science_model.png" alt="The data analysis model"  />
 <p class="caption">
@@ -49,6 +51,447 @@ drifter = drifter%&gt;%
          season = replace(season, season %in% c(4:9), &quot;SE&quot;))%&gt;%
     # select variables of interest and drop others
   select(date, season,id,lon,lat, u,v,velocity,sst)</code></pre>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Observations randomly selected twenty drifters
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Date &amp; Season
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Geographical location &amp; drifter Information
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+Date
+</th>
+<th style="text-align:center;">
+Season
+</th>
+<th style="text-align:center;">
+Longitude
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+<th style="text-align:center;">
+Drifter ID
+</th>
+<th style="text-align:center;">
+SST
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2008-01-29
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+42.41
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-10.14
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+40553
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+27.87
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2017-01-28
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+42.78
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-0.17
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+63254170
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+26.54
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2012-01-14
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+46.19
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-14.20
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+81851
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+28.74
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2014-07-22
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+SE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+49.73
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-7.45
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+109535
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+25.77
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2014-11-10
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+45.38
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-6.18
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+109535
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+28.02
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+1998-06-20
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+SE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+50.37
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-15.98
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+9618972
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+25.90
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2009-11-18
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+50.98
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-13.62
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+71002
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+27.31
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2003-01-14
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+46.45
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-8.89
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+13536
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+28.73
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2007-01-16
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+50.26
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-10.42
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+63032
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+29.01
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2013-06-19
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+SE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+41.59
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-9.00
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+114811
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+26.36
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2011-12-27
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+40.84
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-7.09
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+53639
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+NaN
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2015-07-21
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+SE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+42.52
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-12.74
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+60751420
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+26.14
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2001-04-16
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+SE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+44.16
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-14.50
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+28943
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+28.68
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+1998-01-08
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+40.41
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-7.96
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+9619176
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+NaN
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2013-06-26
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+SE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+41.77
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-1.47
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+114579
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+26.21
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2007-06-22
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+SE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+44.89
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-2.45
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+62198
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+25.98
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2005-06-10
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+SE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+40.62
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-12.10
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+45979
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+27.51
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2008-10-07
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+49.37
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-10.24
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+53417
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+25.68
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+2010-03-09
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+NE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+48.62
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-9.14
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+83519
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+29.72
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+1999-07-20
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightpink;">
+SE
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+47.48
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightseagreen;">
+-11.02
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+9730553
+</td>
+<td style="text-align:center;width: 10cm; color: 1;color: 1;background-color: lightgreen;">
+25.83
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="create-simple-feature" class="section level3">
 <h3>Create Simple Feature</h3>

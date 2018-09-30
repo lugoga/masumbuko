@@ -39,11 +39,12 @@ We know much about the satellite derived SST products from MODIS, but little att
 require(tidyverse)
 require(lubridate)
 require(sf)
+require(kableExtra)
 
 ```
 
 ### Drifter processing
-Figure \@ref(fig:pic1) summarise the main analytical step used in this post. First, the dataset was downloade from NOAA as ascii file. Second, the dataset was imported in R using the dplyr's *read_table()* function. Third, once the dataset was in the workspace, it was manipulated and transformed. These dataset has twelve variables,  I cleaned the dataset by removing some variables not needed for this post. I kept the common id, longitude, latitude, year, month, day and sst variables. Fourth, the observations were later grouped based on monsoon seasons. All drifter observations recorded between April and September fell into southeast monsoon season (SE). And those between October and March fell in the northeast (NE) monsoon season. 
+Figure \@ref(fig:pic1) summarise the main analytical step used in this post. First, the dataset was downloade from NOAA as ascii file. Second, the dataset was imported in R using the dplyr's *read_table()* function. Third, once the dataset was in the workspace, it was manipulated and transformed. These dataset has twelve variables,  I cleaned the dataset by removing some variables not needed for this post. I kept the common id, longitude, latitude, year, month, day and sst variables. Fourth, the observations were later grouped based on monsoon seasons. All drifter observations recorded between April and September fell into southeast monsoon season (SE). And those between October and March fell in the northeast (NE) monsoon season. Table \@ref(tab:tab1) show drifter observation after being procesed. 
 
 
 ```{r pic1, fig.cap="The data analysis model"}
@@ -72,6 +73,24 @@ drifter = drifter%>%
 
 
 ```
+
+
+```{r tab1}
+drifter%>%
+  select(date, season,lon, lat,id, sst)%>%
+  sample_n(20)%>%
+  kable(digits = 2, caption = "Observations randomly selected twenty drifters",
+        col.names = c("Date", "Season", "Longitude", 
+                      "Latitude", "Drifter ID","SST"), 
+        align = "c")%>%
+  column_spec(1:6, width = "10cm", color = 1)%>%
+  column_spec(1:2, background = "lightpink", bold = FALSE, color = 1)%>%
+  column_spec(3:4, background = "lightseagreen", bold = FALSE, color = 1)%>%
+  column_spec(5:6, background = "lightgreen", bold = FALSE, color = 1)%>%
+  add_header_above(c("Date & Season" = 2, "Geographical location & drifter Information" = 4))
+  
+```
+
 
 ### Create Simple Feature
 Because this post deals with spatial analysis, I converted the drifter dataset from data frame to simple feature and assign the dataset with WGS84 as the coordinate sysem. 
