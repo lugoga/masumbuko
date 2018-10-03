@@ -133,6 +133,7 @@ rm(list = setdiff(ls(), "argo.ctd"))
 ```
 
 ### Transform
+
 #### Seasonal Variable
 I then added a seasonal column in the existing data frame with a *mutate()* function. I divided the seaons into northeast (October to March) and southeast monsoon season (April to September). 
 
@@ -255,6 +256,7 @@ argo.grid = argo.grid%>%select(obs, temperature,salinity)
 # summary(sst.grid$sst.median)
 ```
 
+Figure \@ref(fig:fig2)
 ```{r fig2,echo=FALSE, fig.cap="Argo floats in the tropical Indian Ocean a) Number of Argo floats in a grid, b) Temperature and c) Salinity"}
 obs = ggplot()+
   geom_sf(data = argo.grid%>%filter(obs>=1), aes(fill = obs), 
@@ -331,6 +333,7 @@ surface.sf.se = argo.grid%>%select(obs, temperature,salinity)
 # summary(sst.grid$sst.median)
 ```
 
+Figure \@ref(fig:fig3)
 ```{r fig3,echo=FALSE, fig.cap="Argo floats in the tropical Indian Ocean during the southeast monsoon season a) Number of Argo floats in a grid, b) Temperature and c) Salinity"}
 obs = ggplot()+
   geom_sf(data = surface.sf.se%>%filter(obs>=1), aes(fill = obs), 
@@ -409,6 +412,7 @@ surface.sf.ne = argo.grid%>%select(obs, temperature,salinity)
 # summary(sst.grid$sst.median)
 ```
 
+Figure \@ref(fig:fig4)
 ```{r fig4,echo=FALSE, fig.cap="Argo floats in the tropical Indian Ocean during the northeast monsoon season a) Number of Argo floats in a grid, b) Temperature and c) Salinity"}
 obs = ggplot()+
   geom_sf(data = surface.sf.ne%>%filter(obs>=1), aes(fill = obs), 
