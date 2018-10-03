@@ -2,7 +2,7 @@
 title: 'Seasonal Climatology of temperature and salinity in the WIO region from Argo
   floats '
 author: Masumbuko Semba
-date: '2018-10-02'
+date: '2018-10-03'
 slug: seasonal-climatology-of-temperature-and-salinity-in-the-wio-region-from-argo-floats
 categories:
   - Oceanography
