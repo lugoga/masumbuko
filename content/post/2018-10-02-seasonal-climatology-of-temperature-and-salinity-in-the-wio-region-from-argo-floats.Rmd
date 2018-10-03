@@ -15,10 +15,11 @@ tags:
   - Salinity
   - Satellite
   - Temperature
-  
 bibliography: [argo.bib]
 csl: apa.csl
 link-citations: yes
+editor_options: 
+  chunk_output_type: console
 ---
 
 
@@ -28,16 +29,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-For years oceanographers have measured temperature salinity from the surface to the ocean bottom [@foster]. However, our ability to obtain reliable temperature and salinity profiles at fairly resolution both in location and time has been improved through the use of profiling floats from the Argo program [@roemmich;@RN116; @vili]. 
+For years oceanographers have measured temperature and salinity from the surface to the ocean bottom [@foster]. However, our ability to obtain reliable temperature and salinity profiles at fairly resolution both in location and time has been improved through the use of profiling floats from the Argo program [@roemmich;@RN116; @vili]. The Argo program started in the early 2000s with the prime objective of monitoring the upper layer of the world oceans [@RN116]. According to @liu, the progam has more than 4000 profiling floats distributed in all world ocean that measure the temperature and salinity of the upper 2000 m,  at a fairly resolution of one float at three degrees of latitude and longitude [@RN188]. Over the past decade, the floats has greatly help us understand how temperature and salinity structures of the upper layer of the world oceans vary both in time and space [@lauro; @thad]. 
 
-The Argo program started in the early 2000s with the prime objective of monitoring the upper layer of the world oceans [@RN116]. The progam has more than 4000 profiling floats distributed in all world ocean that measure the temperature and salinity of the upper 2000 m [@liu],  at spatial resolution of one float at three degrees of latitude and longitude [@RN188]. 
-
-The distribution of argo floats providing a new profile of temperatue and salinity as a function of depth once every ten days [@carton]. Over the past decade, the floats has greatly help us understand how temperature and salinity structures of the upper layer of the world oceans vary both in time and space [@lauro; @thad]. 
-
-The goal of this post is to provide solid foundation in the most important tools of processing Argo flotas data with R. Wickham and Grolemund in the book R for data science clearly state five important steps---import, tidy, transform, visualize, model and communicate [-@r4d]. I will illustrate the necessary tool in each step following the steps of the analytical model in the [Drifter-derived seasonal climatology of Sea surface temperature in the Tropical Indian Ocean](https://semba-blog.netlify.com/09/30/2018/sea-surface-temperature-from-drifter/). post, except the modeling step. 
+The way the floatas are distributed over world oceans ensure a new profile of temperatue and salinity as a function of depth once every ten days [@carton]. The goal of this post is to provide solid foundation in the most important tools of processing Argo flotas data with R. Wickham and Grolemund in the book R for data science clearly state five important steps---import, tidy, transform, visualize, model and communicate [-@r4d]. I will illustrate the necessary tools in each step based on the analytical model in the [surface temperature from drifter](https://semba-blog.netlify.com/09/30/2018/sea-surface-temperature-from-drifter/) post. 
 
 ### Import Data
-I downloaded the delayed mode that Argo program recomments for scientific purpose. This is because the profiles in deyed mode version have been checked for quality ship-based in-situ measurements. The  dataset contains adjusted temperature, salinity and pressure variables. I loaded the netcdf files in the workspace with *read.oce()*, a function from **oce** package [@oce]. In addition to oce, other package were loaded into the R for data manipulation [@tidyverse; @dplyr] and visualization [@ocedata; @ggplot;@dt]
+I used delayed mode Argo float data for this post because its profiles  have been checked for quality and validated with ship-based in-situ measurements. Some of the variables in the dataset include adjusted temperature, salinity and pressure. Once the dataset was downloaded as netcdf, it was imported into R's workspace with `read.oce()`, a function from `oce` package [@oce]. In addition to oce, other packages were loaded into the R to help processing and manipulation of data  [@tidyverse; @dplyr] and for visualize the ouput and mapping [@ocedata; @ggplot;@dt]
 
 ```{r package, warning=FALSE, message=FALSE, comment=""}
 
@@ -45,10 +42,11 @@ require(tidyverse)
 require(oce)
 require(ocedata)
 require(sf)
+require(lubridate)
         
 ```
         
-Because Argo floats have been deployed in the Indian ocean since 2000 and each Argo made several profiles, manual processing the data becomes a daunting task. I use the power of R to iterate the process. The advantge of iteration duplication by automating repeated operations, hence reduce the human error of introducing a bug in the process. I@r4d stated that iteration help to do the same thing to multiple inputs: repeating the same operation on different datasets. Before we iterate the process, the netcidfiles were identified with a *dir()* function of base R.
+Because Argo floats have been deployed in the Indian ocean since 2000 and each Argo made several profiles, manual processing the data becomes a daunting task. I use the power of R to iterate the process. The advantge of iteration duplication by automating repeated operations, hence reduce the human error of introducing a bug in the process. @r4d stated that iteration help to do the same thing to multiple inputs: repeating the same operation on different datasets. Before we iterate the process, the netcidfiles were identified with a `ir()` function of base R.
 
 ```{r directory, eval=FALSE}
 
@@ -62,19 +60,20 @@ argo.file = dir("./argo_profile/",  #relative path of the directory
 ```
 
 ### Tidy the data
-Once the files were known, the **for()** function was used to loop over the argo files. To read the file in the directory and process the profiles in the files, a nested loop was needed. A outer loop (i) read the netcdfiles from working directory, remove flags and align to the standard depth. Then the inner (j) loop manipulate the profile of each file. The components of outer loop used to chain the processs in this post are summarized below. 
+Once the list of file names was created, the `for()` function was used to loop over the netcdf argo files in a sequence order---from the first file to the last one in the working folder. Because the loop has to read the file first and then process the individual profiles in the that particular file, I nested the loop into the outer used latter `i` and the inner one used latter `j`. The outer loop `(i)` read the netcdfiles from working directory, remove bad data in the profiles and align them to the standard depth of five meter interval from the surface to 2000 meters. Then the inner `(j)` loop manipulate and transformed the profile of each file from oce format to data frame that can easily be handled for further analysis. The main components of loops used to chain the processes in this post are summarized below. 
 
-1. The **output**:*argo.ctd = NULL*before the looping, I preallocate an empty file to store the iteration output. Allocating files before a loop is very important for efficiency. 
+1. The **output**: `argo.ctd = NULL` before the looping, I preallocate an empty file to store the iteration output. 
 
-2. The **sequence** *i in 1:length(argo.file)* determine what to loop over. Each run of the for loop will assign *i* to a differrent value from *1:length(argo.file)*
+2. The **sequence**: `i in 1:length(argo.file)` determine what to loop over. Each run of the for loop will assign `i` to a differrent value from `1:length(argo.file)`
 
-3. The **body**: *argo = read.argo(argo.file[i])%>%handleFlags()%>%argoGrid(p = seq(0,2000,5))*. This is the code that does the work. It is run repeately, each time with a different value for *i*.  
+3. The **body**: `argo = read.argo(argo.file[i])%>%handleFlags()%>%argoGrid(p = seq(0,2000,5))`. This is the code that does the work. It is run repeately, each time with a different value for `i`.  
 
-The outer loop reads the netcdf file with *read.argo()*, then remove all bad profile data with *handleFlags()* and then align the profile to standard pressure of five meter interval from the surface to 2000 m deep with *argoGrid(p = seq(0,2000,5))*. The first iteration will run *argo = read.argo(argo.file[1])%>%handleFlags()%>%argoGrid(p = seq(0,2000,5))*, the second will run *argo = read.argo(argo.file[2])%>%handleFlags()%>%argoGrid(p = seq(0,2000,5))* and so on until to the last file in the *argo.file[i]*
+The outer loop reads the netcdf file with `read.argo()`, then remove all bad profile data with `handleFlags()` and then align the profile to standard pressure of five meter interval from the surface to 2000 m deep with `argoGrid(p = seq(0,2000,5))`. The first iteration will run `argo = read.argo(argo.file[1])%>%handleFlags()%>%argoGrid(p = seq(0,2000,5))`, the second will run `argo = read.argo(argo.file[2])%>%handleFlags()%>%argoGrid(p = seq(0,2000,5))` and so on until to the last file in the `argo.file[i]`
 
-The inner loops transformed each profile in the argo file into data frame *profile = argo.list[[j]]*. It then added variables  like station name *argo = argo.file[i], station = argo.list[[j]][["station"]]* , time the of upload the data *time = argo.list[[j]][["startTime"]]%>%as.Date()* , longitude *longitude = argo.list[[j]][["longitude"]]*, latitude *latitude = argo.list[[j]][["latitude"]]* , and computed the density *density = argo.list[[j]]%>%swRho(eos = "gsw") * of each measurement in the profile.
+The inner loops transformed each profile in the argo file into data frame `profile = argo.list[[j]]`. It then added variables  like station name `argo = argo.file[i], station = argo.list[[j]][[“station”]]`; time the of upload the data `time = argo.list[[j]][[“startTime”]]%>%as.Date()`;longitude `longitude longitude = argo.list[[j]][[“longitude”]]`; latitude `latitude latitude = argo.list[[j]][[“latitude”]]`; and computed the density of each measurement in the profile `density = argo.list[[j]]%>%swRho(eos = “gsw”)`. That is lot of talking and may sound difficult and hard to grasp, the code for the procedures above is in the chunk below. It can help you understand better if I might missed something or not explained well. I tried to comment in each step what each code does in the chunk.
 
-```{r loop, eval=FALSE}
+
+```{r loop, eval=FALSE, include=TRUE}
 # preallocate a file to store processed ctd data
 argo.ctd = NULL
 
@@ -132,10 +131,35 @@ rm(list = setdiff(ls(), "argo.ctd"))
 
 ```
 
+### Data Frames
+You noticed that the process above involved converting netcdf files into tabular data---where a set of values is arranged into columns and rows. In data frame, the rows are observations and columns are variables. In base R, data frame are awesome because most functions for inference, modelling and graphing work well in data frame. Even the set of packages called tidyverse [@tidyverse] works in data frame, but prioritized in a modern data frame called tibble. Data frame makes data manipulation and visualization much easier with popular package like ggplot2 [@ggplot] and dplyr [@dplyr].
+
+Data frame are unique compared to matrices in R because can hold variables of different flavors like character (Float ID), quantitative data (pressure, salinity, temperature) and qualitative data (monsoon season). Table 1 summarize the number of Argo floats in the area. There are 52 different argo floats that has measured temperature and salinity profiles. This is an interactive table, which allows you to explore in detail the table from your browser by clicking the up and down arrows just after the variable name. You can use this table to understand more about the argo floats in the area. For instance, you can explore which float has the longest measurement period or explore the relationship between the number of profiles and and period for each float. 
+```{r}
+
+duration = argo.ctd%>%
+  filter(pressure == 10)%>%
+  group_by(wmoid)%>%
+  summarise(begin = first(time), 
+            end = last(time), 
+            duration = interval(begin, end)%>%
+              as.duration()%>%
+              as.numeric("years")%>%
+              round(digits = 0), 
+            profiles = n())%>%
+  arrange(begin)
+
+duration%>% DT::datatable(rownames = FALSE, 
+                          colnames = c("Float ID", "Begin Date", "End Date", "Period", "Number of Profiles"),
+                          caption = "Table 1: Argo floats in the tropical Indian Ocean region")
+```
+
 ### Transform
+The data from Argo comes as individual netcdf files contain several profiles. Its is not the right format that I needed. I need to transform them into the format that make manipulation and analysis of profile measurement of temperature and salinity across the area much easier. I have already transformed the data in the for loop from the netcdf to data.frame. I will need to create some variable that are needed. the transformation of these dataset include creation of seasonal variable, creation of simple features, creation of grids.
+
 
 #### Seasonal Variable
-I then added a seasonal column in the existing data frame with a *mutate()* function. I divided the seaons into northeast (October to March) and southeast monsoon season (April to September). 
+I then added a seasonal column in the existing data frame with a `mutate()` function. I divided the seaons into northeast (October to March) and southeast monsoon season (April to September). 
 
 ```{r}
 argo.ctd = argo.ctd%>%
@@ -144,34 +168,26 @@ argo.ctd = argo.ctd%>%
          season = replace(season, season %in% c(4:9), "SE"))
 ```
 
-Table \@ref(tab:tab1) highlight the temperature and salinity and pressure of different profiles gathered with Argo floats in the Indian Ocean grouped by monsoon season.
+Table interctive table 2 highlight the temperature and salinity and pressure profiles in the Indian Ocean measured with Argo floats number 6902623. This float made it first profile on April, 12, 2015 at longitude 50.17 ^o^E ana latitude 0.52 ^o^S and made `r argo.ctd%>% filter(wmoid %in% c(6902623))%>%distinct(latitude)%>%nrow() ` profile until latest prifile records of June 05, 2018. You may notice that there are eight variables---Id, date, longitude, latitude, pressure, temperature, salinity and season. Except the season variable that was tranformed from the date variable, the other seven variable you fetch them from Argo data. 
 
-```{r tab1, warning=FALSE, message=FALSE, comment="", echo=FALSE}
+You can interact with this table by searching a specific variable or sort any variable in either ascending or descending order. @dt developed **DT** package used to create this interactive table (the chunk below). In short, the chunk speaks like this. In the argo data frame `argo.ctd` pick observations from argo float with id 6902623; then remove all observations without values; then drop station and scan variables from the data frame; then print all observations from the data frame that met the conditions above as an interactive table. Note that the whole process has been chained with the pipe operator `%>%` widely referred as `then` or `next`
 
-# options(digits = 2)
-# 
-# argo.ctd%>%
-#   sample_n(20, replace = FALSE)%>%
-#   kable(align = "c",col.names = c("WMOID","Station","Date","Longitude",
-#                       "Latitude","Scan","Pressure","Salinity","Temperature"))%>%
-#   column_spec(column = 1:9, width = "8cm", color = "black")%>%
-#   # column_spec(column = 1:3, background = "lightgreen")%>%
-#   # column_spec(column = 4:5, background = "lightblue")%>%
-#   # column_spec(column = 6:9, background = "cyan")%>%
-#   add_header_above(c("" ,"Station Information" = 4, "Profile Information" = 4), align = "c")
+```{r tab1, warning=FALSE, message=FALSE, comment="", echo=TRUE}
 
 argo.ctd%>%
+  filter(wmoid %in% c(6902623))%>%
   na.omit()%>%
-  sample_n(1000)%>%
   select(-c(station, scan))%>%
   DT::datatable(rownames = FALSE, 
                 colnames = c("WMOID","Date","Longitude",
-                      "Latitude","Pressure","Salinity","Temperature", "Season"), caption = "Argo float information in the tropical Indian Ocean Region") %>%
+                      "Latitude","Pressure","Salinity","Temperature", "Season"), 
+                caption = "Table 2: Argo float information in the tropical Indian Ocean Region") %>%
     DT::formatRound(columns=c("longitude","latitude","salinity", "temperature"), digits=2)
+
 
 ```
 
-Figure \@ref(fig:map) shows the distribution of Argo floats in the tropical Indian Ocean region. Argo seems to sample the region well during the northeast (Figure \@ref(fig:map)a) and southeast monsoon season (Figure \@ref(fig:map)b).
+Within the area, Argo floats have measured about `r argo.ctd%>%filter(pressure == 10)%>%distinct(lon)%>%nrow()` profiles distributed between monsoon seasons. The southeast monsoon has a total of `r argo.ctd%>%filter(pressure == 10 & season == "SE")%>%distinct(lon)%>%nrow()` compared to `r argo.ctd%>%filter(pressure == 10 & season == "NE")%>%distinct(lon)%>%nrow()` profiles during the northeast monsoon season. The distribution of Argo floats within the area is fairly well (Figure \@ref(fig:map)) during the northeast (Figure \@ref(fig:map)a) and southeast monsoon season (Figure \@ref(fig:map)b).
 
 ```{r map, fig.cap="The distribution Argo floats within the tropical Indian Ocean Region during a) northeast and b) southeast monsoon sesons", echo=FALSE}
 
@@ -215,7 +231,7 @@ cowplot::plot_grid(ne,se, nrow = 1,
 
 
 ### Create Simple Feature
-The tibble Argo data table contain longitude and latitude information that was used to create a simple featues and define the projection to World Geodetic System (WGS84) as the coordinate sysem. 
+`st_as_sf()` function was used to transform a data frame using  `longitude` and `latitude` information that was used to create a simple featues and define the projection to World Geodetic System (WGS84) as the coordinate sysem. 
 
 ```{r}
 surface.sf = surface %>% 
@@ -235,7 +251,7 @@ grid = surface.sf%>%
 
 
 ### Populate Grids with Drifter Observations and Median SST 
-Once the grids were created, I computed the statistics in each grids. The first statistic metric computed was the number of observations in grids . Then the second metric was the calculation of median SST in a grid. 
+Once the grids were created, I computed the statistics in each grids. The first statistic metric computed was the number of profiles measurements in grids. The second metric was the calculation of median temperature and salinity in each grid. Figure \@ref(fig:fig2)a shows the total number of argo floast observations in a grid (Figure \@ref(fig:fig2)a) and temperature (Figure \@ref(fig:fig2)b) and salinity (Figure \@ref(fig:fig2)c) measured near the surface (~10 meter deep)
 
 ```{r, warning=FALSE, message=FALSE, comment=""}
 argo.grid = grid%>%
@@ -256,7 +272,6 @@ argo.grid = argo.grid%>%select(obs, temperature,salinity)
 # summary(sst.grid$sst.median)
 ```
 
-Figure \@ref(fig:fig2)
 ```{r fig2,echo=FALSE, fig.cap="Argo floats in the tropical Indian Ocean a) Number of Argo floats in a grid, b) Temperature and c) Salinity"}
 obs = ggplot()+
   geom_sf(data = argo.grid%>%filter(obs>=1), aes(fill = obs), 
@@ -265,7 +280,7 @@ obs = ggplot()+
   coord_sf(xlim = c(37,58), ylim = c(-18,3))+
   scale_fill_gradientn(breaks = seq(0,30,6),
                        colours = oceColors9A(120), 
-                       name = "obs")+
+                       name = "")+
   theme_bw()+
   theme(legend.position = "top", 
         legend.key.height = unit(0.75, "lines"),
@@ -278,9 +293,10 @@ temp = ggplot()+
           col = "grey75")+
   geom_sf(data = spData::world, fill = "grey70", col = "black")+
   coord_sf(xlim = c(37,58), ylim = c(-18,3))+
-  scale_fill_gradientn(breaks = seq(25,32,2),
+  scale_fill_gradientn(limits = c(24,31),
+                       breaks = seq(25,32,2),
                        colours = oceColors9A(120), 
-                       name = "temp")+
+                       name = "")+
   theme_bw()+
   theme(legend.position = "top", 
         legend.key.height = unit(0.75, "lines"),
@@ -292,9 +308,10 @@ sal = ggplot()+
           col = "grey75")+
   geom_sf(data = spData::world, fill = "grey70", col = "black")+
   coord_sf(xlim = c(37,58), ylim = c(-18,3))+
-  scale_fill_gradientn(breaks = seq(34.3,36.4,.4),
+  scale_fill_gradientn(limits = c(34,36),
+                       breaks = seq(34.3,36.4,.6),
                        colours = oceColors9A(120), 
-                       name = "sal", guide = "colorbar")+
+                       name = "", guide = "colorbar")+
   theme_bw()+
   theme(legend.position = "top", 
         legend.key.height = unit(0.75, "lines"),
@@ -310,8 +327,9 @@ cowplot::plot_grid(obs, temp,sal, nrow = 1,
 
 ```
 
-#### Southeast season
-```{r, warning=FALSE, message=FALSE, comment=""}
+In order to compare the seasonal climatology distribution of temperature and salinity in the tropical Indian ocean region, the arego floats observation were aligned with the southeast and northeast monsoon season.  The regrided spatial distribution of number of argo floats, temperature and salinity are shown for southeast monsoon (Figure \@ref(fig:fig3)) and northeast monsoon season (Figure \@ref(fig:fig4)).
+
+```{r, warning=FALSE, message=FALSE, comment="", echo=FALSE}
 
 surface.sf.se = surface.sf%>%filter(season == "SE")
 
@@ -333,7 +351,7 @@ surface.sf.se = argo.grid%>%select(obs, temperature,salinity)
 # summary(sst.grid$sst.median)
 ```
 
-Figure \@ref(fig:fig3)
+
 ```{r fig3,echo=FALSE, fig.cap="Argo floats in the tropical Indian Ocean during the southeast monsoon season a) Number of Argo floats in a grid, b) Temperature and c) Salinity"}
 obs = ggplot()+
   geom_sf(data = surface.sf.se%>%filter(obs>=1), aes(fill = obs), 
@@ -342,7 +360,7 @@ obs = ggplot()+
   coord_sf(xlim = c(37,58), ylim = c(-18,3))+
   scale_fill_gradientn(breaks = seq(0,30,6),
                        colours = oceColors9A(120), 
-                       name = "obs")+
+                       name = "")+
   theme_bw()+
   theme(legend.position = "top", 
         legend.key.height = unit(0.75, "lines"),
@@ -355,9 +373,10 @@ temp = ggplot()+
           col = "grey75")+
   geom_sf(data = spData::world, fill = "grey70", col = "black")+
   coord_sf(xlim = c(37,58), ylim = c(-18,3))+
-  scale_fill_gradientn(breaks = seq(25,32,2),
+  scale_fill_gradientn(limits = c(24,31),
+                       breaks = seq(25,32,2),
                        colours = oceColors9A(120), 
-                       name = "temp")+
+                       name = "")+
   theme_bw()+
   theme(legend.position = "top", 
         legend.key.height = unit(0.75, "lines"),
@@ -369,9 +388,10 @@ sal = ggplot()+
           col = "grey75")+
   geom_sf(data = spData::world, fill = "grey70", col = "black")+
   coord_sf(xlim = c(37,58), ylim = c(-18,3))+
-  scale_fill_gradientn(breaks = seq(34.3,36.4,.4),
+  scale_fill_gradientn(limits = c(34,36),
+                       breaks = seq(34.3,36.4,.6),
                        colours = oceColors9A(120), 
-                       name = "sal", guide = "colorbar")+
+                       name = "", guide = "colorbar")+
   theme_bw()+
   theme(legend.position = "top", 
         legend.key.height = unit(0.75, "lines"),
@@ -388,9 +408,7 @@ cowplot::plot_grid(obs, temp,sal, nrow = 1,
 ```
 
 
-
-#### Northeast season
-```{r, warning=FALSE, message=FALSE, comment=""}
+```{r, warning=FALSE, message=FALSE, comment="", echo=FALSE}
 
 surface.sf.ne = surface.sf%>%filter(season == "NE")
 
@@ -412,7 +430,6 @@ surface.sf.ne = argo.grid%>%select(obs, temperature,salinity)
 # summary(sst.grid$sst.median)
 ```
 
-Figure \@ref(fig:fig4)
 ```{r fig4,echo=FALSE, fig.cap="Argo floats in the tropical Indian Ocean during the northeast monsoon season a) Number of Argo floats in a grid, b) Temperature and c) Salinity"}
 obs = ggplot()+
   geom_sf(data = surface.sf.ne%>%filter(obs>=1), aes(fill = obs), 
@@ -421,7 +438,7 @@ obs = ggplot()+
   coord_sf(xlim = c(37,58), ylim = c(-18,3))+
   scale_fill_gradientn(breaks = seq(0,30,6),
                        colours = oceColors9A(120), 
-                       name = "obs")+
+                       name = "")+
   theme_bw()+
   theme(legend.position = "top", 
         legend.key.height = unit(0.75, "lines"),
@@ -434,9 +451,10 @@ temp = ggplot()+
           col = "grey75")+
   geom_sf(data = spData::world, fill = "grey70", col = "black")+
   coord_sf(xlim = c(37,58), ylim = c(-18,3))+
-  scale_fill_gradientn(breaks = seq(25,32,2),
+  scale_fill_gradientn(limits = c(24,31),
+                       breaks = seq(25,32,2),
                        colours = oceColors9A(120), 
-                       name = "temp")+
+                       name = "")+
   theme_bw()+
   theme(legend.position = "top", 
         legend.key.height = unit(0.75, "lines"),
@@ -448,9 +466,10 @@ sal = ggplot()+
           col = "grey75")+
   geom_sf(data = spData::world, fill = "grey70", col = "black")+
   coord_sf(xlim = c(37,58), ylim = c(-18,3))+
-  scale_fill_gradientn(breaks = seq(34.3,36.4,.4),
+  scale_fill_gradientn(limits = c(34,36),
+                       breaks = seq(34.3,36.4,.6),
                        colours = oceColors9A(120), 
-                       name = "sal", guide = "colorbar")+
+                       name = "", guide = "colorbar")+
   theme_bw()+
   theme(legend.position = "top", 
         legend.key.height = unit(0.75, "lines"),
