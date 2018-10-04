@@ -1,0 +1,163 @@
+---
+title: Processing  CTD data with OCE package in R
+author: Masumbuko Semba
+date: '2018-10-04'
+slug: processing-ctd-data-with-oce-package-in-r
+categories:
+  - Oceanography
+tags:
+  - CTD
+  - Rufiji River
+  - Mafia Channel
+  - Depth
+  - Salinity
+  - R
+  - Temperature
+  - Tanzania
+  
+bibliography: [argo.bib]
+csl: apa.csl
+link-citations: yes
+---
+Oceanographers love MATLAB$^\circledR$ for processing oceanographic data. I have no explanation as to why they love Matlab. I suppose it’s been the *de facto* standard within the field for a long time, and legacy is a big deal. I have used Matlab for data processing and plotting for several years. With MatLab I implemented a vast amount of tools and rather completed numerical models. Being a self sponsored graduate student at an institution that doesn’t have a subscription, sticking to Matlab not only is expensive, but also unsustainable. A chunk of my scripts just sleeping in my drive because I can no longer run the software in my machine. 
+
+The Matlab was the core software for my PhD until recent, when I switched to R because of the license issue. The other reason is R as some cool packages that are far easier to use for exploratory and producing publication-quality graphics. Though, I found myself frustrated when learning R because I was doing Matlab syntax in R---which lacked the flexibility of MATLAB. When I learned to unlearn Matlab and learn R syntax, it just took me some weeks to stand up and walk.
+
+In this article, I'm going to illustrate how to process oceanographic data with `oce` package in R. `oce` package has some cool features for reading, processing and plotting oceanographic data. It is written by Dan Kelley and Clark Richards [-@oce]. `oce` support many oceanographic data but for this post I will only focus on the CTD measurements. I need oce and ocedata [@ocedata] package to process the CTD data in R [@r].
+
+```{r package, warning=FALSE, message=FALSE, comment=""}
+require(oce)
+require(ocedata)
+```
+
+On February, 2018, The Tanzania Fisheries Research Institute (TAFIRI) had a field campaign to collect CTD data using a `Sea-Bird SBE19plus` equipment in Rufiji River. I voluntered for the field campaign and got some CTD profile data that I use to show you how to process and manipulate CTD data and plotting the profiles and section with oce package in R.  
+
+### Importing CTD Data
+SBE comes with SBE Data Processing Graphic User Interface to help converting the data from binary to engineering unit. I use this software to convert `.hex` raw data from CTD  and store them in `.cnv` file format. Once the file was ready, I imported it from local folder into R workspace with `read.ctd()` function. according to @oce
+
+>`read.ctd()` is a base function that read different format of CTD data including `read.ctd.odf` for the ODF data used in Fisheries and Oceans (Canada), `read.ctd.woce` for data in World Ocean Circulation Experiment format, `read.ctd.woce.other` for a variant of WOCE data, `read.ctd.itp` for ice-tethered-profiler data, or `read.ctd.sbe` for Seabird data.
+
+
+```{r}
+#read profile of station1
+stn1 = read.ctd("./ctd_rufiji/SBE19plus_01906740_2018_02_13_0885.cnv")
+```
+
+
+oce organize the CTD object into three slots---metadata, data and processing log.
+
++ `metadata`: a list with information about the data like units, quality, sampling location, sampling time, ...etc
++ `data`: a list of raw profile data like pressure, temperature, salinity.
++ `processinglog`: a document track all the processing information
+
+```{r}
+str(stn1,2)
+```
+
+Depending on configuration, the content in CTD file differs . But the data slots often remain fairly constant with the content. For instance, here we see the data slots with thirteen variables and six hundreds and sixteen observations for profiles in station_1. 
+```{r, comment=""}
+stn1@data%>%as.data.frame()%>%dplyr::glimpse()
+```
+
+### Visualising Profiles
+Looking on those number seems boring, let us take a quick gander at those number by making profile plots. Figure \@ref(fig:fig1) shows the profiles of CTD measurements at station one. At top left and right we have some waer column profiles of temperature, salinity and density. At the bottom left is the temperature-salinity plot with contours of density. 
+
+```{r fig1, fig.cap="Unprocessed CTD measurement"}
+#plot
+stn1%>%plot()
+```
+
+Unfortunately CTD data for station one does not have a location data. This is because GPS information was not integrated into the SBE equipment. However, the location information were collected separately using a handheld GPS unit. I added this information manually for the station one. 
+
+```{r }
+cast.locations = read.csv("./ctd_rufiji/Rufiji_cast.csv")
+
+stn1[["longitude"]] = cast.locations$Lon[1]
+stn1[["latitude"]] = cast.locations$Lat[1]
+
+```
+
+Plotting the CTD data that contain location information, often times plot a map showing the location of the CTD cast. Figure \@ref(fig:fig2) is similar to to \@ref(fig:fig1), except the bottom right has been added in this plot, which show where and when the cast was done. 
+
+```{r fig2, fig.cap="CTD data with location information"}
+
+stn1%>%plot()
+```
+
+
+When we glimpse the salinity and temperature profile (Figure \@ref(fig:fig3)), we can see that there are profile measurements from downcast and upcast. Often in CTD profiling, the goal is to retain the downcast and drop all measurement from the upcast. The other thing you notice for figure \@ref(fig:fig3) is the downcast and upcast profile of temperature and salinity are not smooth and sharp. This is because the rate of towing CTD instrument differs with because it was done manually. 
+
+```{r fig3, fig.cap="Salinity and temperature profiles showing downcast and upcast measurments"}
+
+par(mfrow = c(1,2))
+stn1%>%plot(which = "salinity")
+stn1%>%plot(which = "temperature")
+```
+
+I removed the upcast CTD profiling with the `ctdTrim()` function and retained the downcast profiles. Once the upcast was dropped, I removed the artifacts introduced by towing rate. This was done by aligning the CTD measurements into the standard depth of 20 cm from the surface to the maximum depth of the cast with `ctdDecimate()` function. This produced elegant looking salinity and temperature profiles (Figure \@ref(fig:fig4))
+```{r}
+stn1.downcast = stn1%>%
+  ctdTrim(method = "downcast")%>%
+  ctdDecimate(p = 0.2)
+
+```
+
+
+```{r fig4, fig.cap="Profile o Salinity and temperature from downcast measurments and aligned to standard depth"}
+
+par(mfrow = c(1,2))
+stn1.downcast%>%plot(which = c("salinity"))
+stn1.downcast%>%plot(which = c("temperature"))
+```
+
+
+### plotting hydrographic section
+The procedures above was just for one station, but hydrographic section involves multiple profiles. Therefore, we will loop through all the stations with a `for()` loop to read the `.cnv' file, add the latitude and longitude for each cast
+```{r}
+# create a list of cnv files
+files = dir("./ctd_rufiji/", full.names = TRUE, pattern = ".cnv")
+
+```
+
+Before looping, I preallocated a list files that will store each processed CTD cast in a list. The chunk below show the processed of looping CTD data. In a nutshell, it first read the file, then remove the upcast profile and align the profile measurement to a standard pressure of 20 centimeters. Then add the longitude and latitude information for each cast.
+```{r}
+# loop through the files
+ctd = list()
+
+for (i in 1:18){
+
+ctd[[i]] = read.ctd(files[i])%>%
+  ctdTrim(method = "downcast")%>%
+  ctdDecimate(p = 0.2)
+
+ctd[[i]][["longitude"]] = cast.locations$Lon[i]
+ctd[[i]][["latitude"]] = cast.locations$Lat[i]
+ctd[[i]][["stations"]] = cast.locations$Name[i]
+
+
+}
+```
+
+
+Once we have a list of all the files, we can create a section along the river that only use the center positions of each cast. We notice that the CTD  measurements was done at the middle of the within the channel with depth ranged from 3 to 9 meters. 
+```{r}
+                        
+section = list(ctd[[2]],ctd[[5]],ctd[[8]],
+                         ctd[[12]],ctd[[14]],ctd[[18]])%>%
+  as.section()
+
+section
+```
+
+Figure \@ref(fig:fig5) show the hydrographic section of temperature, salinity and oxygen within a distance of 10km from the mouth landward in the Rufiji River. Its pretty neat that we can see that the salinity decrease from the river mouth landward. This is because we did CTD casts during the high tide---when saline water was coming inland pushing freshwater further upland. We also see that the river has very low oxygen at just 2 meter from the surface that extend from the mouth to 10 km distance. The temperature shows uniform from the surface to the bottom along the section. 
+```{r fig5, fig.cap="Hydrographic section of Rufiji River"}
+# par(mfrow = c(1,2))
+section%>%plot(which = c("map", "temperature", "salinity", "oxygen"),
+               ztype = "image", showStations = TRUE)
+
+```
+
+
+
+
+### Literature Cited 

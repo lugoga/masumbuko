@@ -6,10 +6,19 @@
     <description>Recent content in R on Masumbuko Semba</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 26 Sep 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 04 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Processing  CTD data with OCE package in R</title>
+      <link>/10/04/2018/processing-ctd-data-with-oce-package-in-r/</link>
+      <pubDate>Thu, 04 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/10/04/2018/processing-ctd-data-with-oce-package-in-r/</guid>
+      <description>Oceanographers love MATLAB\(^\circledR\) for processing oceanographic data. I have no explanation as to why they love Matlab. I suppose it’s been the de facto standard within the field for a long time, and legacy is a big deal. I have used Matlab for data processing and plotting for several years. With MatLab I implemented a vast amount of tools and rather completed numerical models. Being a self sponsored graduate student at an institution that doesn’t have a subscription, sticking to Matlab not only is expensive, but also unsustainable.</description>
+    </item>
     
     <item>
       <title>The East African Coastal Current captured with satellite-tracked drifter observations</title>

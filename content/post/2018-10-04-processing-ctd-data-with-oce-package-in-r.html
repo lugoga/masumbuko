@@ -1,0 +1,176 @@
+---
+title: Processing  CTD data with OCE package in R
+author: Masumbuko Semba
+date: '2018-10-04'
+slug: processing-ctd-data-with-oce-package-in-r
+categories:
+  - Oceanography
+tags:
+  - CTD
+  - Rufiji River
+  - Mafia Channel
+  - Depth
+  - Salinity
+  - R
+  - Temperature
+  - Tanzania
+  
+bibliography: [argo.bib]
+csl: apa.csl
+link-citations: yes
+---
+
+
+
+<p>Oceanographers love MATLAB<span class="math inline">\(^\circledR\)</span> for processing oceanographic data. I have no explanation as to why they love Matlab. I suppose it’s been the <em>de facto</em> standard within the field for a long time, and legacy is a big deal. I have used Matlab for data processing and plotting for several years. With MatLab I implemented a vast amount of tools and rather completed numerical models. Being a self sponsored graduate student at an institution that doesn’t have a subscription, sticking to Matlab not only is expensive, but also unsustainable. A chunk of my scripts just sleeping in my drive because I can no longer run the software in my machine.</p>
+<p>The Matlab was the core software for my PhD until recent, when I switched to R because of the license issue. The other reason is R as some cool packages that are far easier to use for exploratory and producing publication-quality graphics. Though, I found myself frustrated when learning R because I was doing Matlab syntax in R—which lacked the flexibility of MATLAB. When I learned to unlearn Matlab and learn R syntax, it just took me some weeks to stand up and walk.</p>
+<p>In this article, I’m going to illustrate how to process oceanographic data with <code>oce</code> package in R. <code>oce</code> package has some cool features for reading, processing and plotting oceanographic data. It is written by Dan Kelley and Clark Richards <span class="citation">(<a href="#ref-oce">2018</a>)</span>. <code>oce</code> support many oceanographic data but for this post I will only focus on the CTD measurements. I need oce and ocedata <span class="citation">(Kelley, <a href="#ref-ocedata">2015</a>)</span> package to process the CTD data in R <span class="citation">(R Core Team, <a href="#ref-r">2018</a>)</span>.</p>
+<pre class="r"><code>require(oce)
+require(ocedata)</code></pre>
+<p>On February, 2018, The Tanzania Fisheries Research Institute (TAFIRI) had a field campaign to collect CTD data using a <code>Sea-Bird SBE19plus</code> equipment in Rufiji River. I voluntered for the field campaign and got some CTD profile data that I use to show you how to process and manipulate CTD data and plotting the profiles and section with oce package in R.</p>
+<div id="importing-ctd-data" class="section level3">
+<h3>Importing CTD Data</h3>
+<p>SBE comes with SBE Data Processing Graphic User Interface to help converting the data from binary to engineering unit. I use this software to convert <code>.hex</code> raw data from CTD and store them in <code>.cnv</code> file format. Once the file was ready, I imported it from local folder into R workspace with <code>read.ctd()</code> function. according to <span class="citation">Kelley &amp; Richards (<a href="#ref-oce">2018</a>)</span></p>
+<blockquote>
+<p><code>read.ctd()</code> is a base function that read different format of CTD data including <code>read.ctd.odf</code> for the ODF data used in Fisheries and Oceans (Canada), <code>read.ctd.woce</code> for data in World Ocean Circulation Experiment format, <code>read.ctd.woce.other</code> for a variant of WOCE data, <code>read.ctd.itp</code> for ice-tethered-profiler data, or <code>read.ctd.sbe</code> for Seabird data.</p>
+</blockquote>
+<pre class="r"><code>#read profile of station1
+stn1 = read.ctd(&quot;./ctd_rufiji/SBE19plus_01906740_2018_02_13_0885.cnv&quot;)</code></pre>
+<p>oce organize the CTD object into three slots—metadata, data and processing log.</p>
+<ul>
+<li><code>metadata</code>: a list with information about the data like units, quality, sampling location, sampling time, …etc</li>
+<li><code>data</code>: a list of raw profile data like pressure, temperature, salinity.</li>
+<li><code>processinglog</code>: a document track all the processing information</li>
+</ul>
+<pre class="r"><code>str(stn1,2)</code></pre>
+<pre><code>## Formal class &#39;ctd&#39; [package &quot;oce&quot;] with 3 slots
+##   ..@ metadata     :List of 27
+##   ..@ data         :List of 13
+##   ..@ processingLog:List of 2</code></pre>
+<p>Depending on configuration, the content in CTD file differs . But the data slots often remain fairly constant with the content. For instance, here we see the data slots with thirteen variables and six hundreds and sixteen observations for profiles in station_1.</p>
+<pre class="r"><code>stn1@data%&gt;%as.data.frame()%&gt;%dplyr::glimpse()</code></pre>
+<pre><code>Observations: 616
+Variables: 13
+$ pressure     &lt;dbl&gt; 0.074, 0.074, 0.063, 0.074, 0.074, 0.074, 0.064, ...
+$ temperature  &lt;dbl&gt; 29.6868, 29.6889, 29.6911, 29.6922, 29.6925, 29.6...
+$ conductivity &lt;dbl&gt; 0.008290, 0.008492, 0.008459, 0.008810, 0.008703,...
+$ salinity     &lt;dbl&gt; 0.0419, 0.0427, 0.0426, 0.0440, 0.0435, 0.0444, 0...
+$ oxygen       &lt;dbl&gt; 3.6746, 3.5385, 3.9256, 3.5252, 3.4002, 3.3936, 3...
+$ fluorescence &lt;dbl&gt; 0.5136, 0.5091, 0.5068, 0.5144, -0.0227, -0.0166,...
+$ bottlesFired &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+$ time         &lt;dbl&gt; 0.00, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2...
+$ time2        &lt;dbl&gt; 33.72039, 33.72040, 33.72040, 33.72040, 33.72040,...
+$ density      &lt;dbl&gt; 995.7750, 995.7749, 995.7741, 995.7749, 995.7745,...
+$ depth        &lt;dbl&gt; 0.074, 0.074, 0.063, 0.074, 0.074, 0.074, 0.063, ...
+$ descentRate  &lt;dbl&gt; -2.632e-17, 0.000e+00, -3.000e-03, -2.000e-03, -1...
+$ flag         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...</code></pre>
+</div>
+<div id="visualising-profiles" class="section level3">
+<h3>Visualising Profiles</h3>
+<p>Looking on those number seems boring, let us take a quick gander at those number by making profile plots. Figure <a href="#fig:fig1">1</a> shows the profiles of CTD measurements at station one. At top left and right we have some waer column profiles of temperature, salinity and density. At the bottom left is the temperature-salinity plot with contours of density.</p>
+<pre class="r"><code>#plot
+stn1%&gt;%plot()</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2018-10-04-processing-ctd-data-with-oce-package-in-r_files/figure-html/fig1-1.png" alt="Unprocessed CTD measurement" width="672" />
+<p class="caption">
+Figure 1: Unprocessed CTD measurement
+</p>
+</div>
+<p>Unfortunately CTD data for station one does not have a location data. This is because GPS information was not integrated into the SBE equipment. However, the location information were collected separately using a handheld GPS unit. I added this information manually for the station one.</p>
+<pre class="r"><code>cast.locations = read.csv(&quot;./ctd_rufiji/Rufiji_cast.csv&quot;)
+
+stn1[[&quot;longitude&quot;]] = cast.locations$Lon[1]
+stn1[[&quot;latitude&quot;]] = cast.locations$Lat[1]</code></pre>
+<p>Plotting the CTD data that contain location information, often times plot a map showing the location of the CTD cast. Figure <a href="#fig:fig2">2</a> is similar to to <a href="#fig:fig1">1</a>, except the bottom right has been added in this plot, which show where and when the cast was done.</p>
+<pre class="r"><code>stn1%&gt;%plot()</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2018-10-04-processing-ctd-data-with-oce-package-in-r_files/figure-html/fig2-1.png" alt="CTD data with location information" width="672" />
+<p class="caption">
+Figure 2: CTD data with location information
+</p>
+</div>
+<p>When we glimpse the salinity and temperature profile (Figure <a href="#fig:fig3">3</a>), we can see that there are profile measurements from downcast and upcast. Often in CTD profiling, the goal is to retain the downcast and drop all measurement from the upcast. The other thing you notice for figure <a href="#fig:fig3">3</a> is the downcast and upcast profile of temperature and salinity are not smooth and sharp. This is because the rate of towing CTD instrument differs with because it was done manually.</p>
+<pre class="r"><code>par(mfrow = c(1,2))
+stn1%&gt;%plot(which = &quot;salinity&quot;)
+stn1%&gt;%plot(which = &quot;temperature&quot;)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2018-10-04-processing-ctd-data-with-oce-package-in-r_files/figure-html/fig3-1.png" alt="Salinity and temperature profiles showing downcast and upcast measurments" width="672" />
+<p class="caption">
+Figure 3: Salinity and temperature profiles showing downcast and upcast measurments
+</p>
+</div>
+<p>I removed the upcast CTD profiling with the <code>ctdTrim()</code> function and retained the downcast profiles. Once the upcast was dropped, I removed the artifacts introduced by towing rate. This was done by aligning the CTD measurements into the standard depth of 20 cm from the surface to the maximum depth of the cast with <code>ctdDecimate()</code> function. This produced elegant looking salinity and temperature profiles (Figure <a href="#fig:fig4">4</a>)</p>
+<pre class="r"><code>stn1.downcast = stn1%&gt;%
+  ctdTrim(method = &quot;downcast&quot;)%&gt;%
+  ctdDecimate(p = 0.2)</code></pre>
+<pre class="r"><code>par(mfrow = c(1,2))
+stn1.downcast%&gt;%plot(which = c(&quot;salinity&quot;))
+stn1.downcast%&gt;%plot(which = c(&quot;temperature&quot;))</code></pre>
+<div class="figure"><span id="fig:fig4"></span>
+<img src="/post/2018-10-04-processing-ctd-data-with-oce-package-in-r_files/figure-html/fig4-1.png" alt="Profile o Salinity and temperature from downcast measurments and aligned to standard depth" width="672" />
+<p class="caption">
+Figure 4: Profile o Salinity and temperature from downcast measurments and aligned to standard depth
+</p>
+</div>
+</div>
+<div id="plotting-hydrographic-section" class="section level3">
+<h3>plotting hydrographic section</h3>
+<p>The procedures above was just for one station, but hydrographic section involves multiple profiles. Therefore, we will loop through all the stations with a <code>for()</code> loop to read the `.cnv’ file, add the latitude and longitude for each cast</p>
+<pre class="r"><code># create a list of cnv files
+files = dir(&quot;./ctd_rufiji/&quot;, full.names = TRUE, pattern = &quot;.cnv&quot;)</code></pre>
+<p>Before looping, I preallocated a list files that will store each processed CTD cast in a list. The chunk below show the processed of looping CTD data. In a nutshell, it first read the file, then remove the upcast profile and align the profile measurement to a standard pressure of 20 centimeters. Then add the longitude and latitude information for each cast.</p>
+<pre class="r"><code># loop through the files
+ctd = list()
+
+for (i in 1:18){
+
+ctd[[i]] = read.ctd(files[i])%&gt;%
+  ctdTrim(method = &quot;downcast&quot;)%&gt;%
+  ctdDecimate(p = 0.2)
+
+ctd[[i]][[&quot;longitude&quot;]] = cast.locations$Lon[i]
+ctd[[i]][[&quot;latitude&quot;]] = cast.locations$Lat[i]
+ctd[[i]][[&quot;stations&quot;]] = cast.locations$Name[i]
+
+
+}</code></pre>
+<p>Once we have a list of all the files, we can create a section along the river that only use the center positions of each cast. We notice that the CTD measurements was done at the middle of the within the channel with depth ranged from 3 to 9 meters.</p>
+<pre class="r"><code>section = list(ctd[[2]],ctd[[5]],ctd[[8]],
+                         ctd[[12]],ctd[[14]],ctd[[18]])%&gt;%
+  as.section()</code></pre>
+<pre><code>## Warning in as.section(.): estimated waterDepth as max(pressure) for CTDs
+## numbered 1:6</code></pre>
+<pre class="r"><code>section</code></pre>
+<pre><code>## Unnamed section has 6 stations:
+## Index    ID      Lon      Lat  Levels Depth
+##     1         39.316   -7.735      44     9
+##     2         39.313   -7.757      43     8
+##     3         39.305   -7.768      37     7
+##     4         39.296   -7.781      32     6
+##     5         39.287   -7.795      16     3
+##     6         39.274   -7.809      20     4</code></pre>
+<p>Figure <a href="#fig:fig5">5</a> show the hydrographic section of temperature, salinity and oxygen within a distance of 10km from the mouth landward in the Rufiji River. Its pretty neat that we can see that the salinity decrease from the river mouth landward. This is because we did CTD casts during the high tide—when saline water was coming inland pushing freshwater further upland. We also see that the river has very low oxygen at just 2 meter from the surface that extend from the mouth to 10 km distance. The temperature shows uniform from the surface to the bottom along the section.</p>
+<pre class="r"><code># par(mfrow = c(1,2))
+section%&gt;%plot(which = c(&quot;map&quot;, &quot;temperature&quot;, &quot;salinity&quot;, &quot;oxygen&quot;),
+               ztype = &quot;image&quot;, showStations = TRUE)</code></pre>
+<div class="figure"><span id="fig:fig5"></span>
+<img src="/post/2018-10-04-processing-ctd-data-with-oce-package-in-r_files/figure-html/fig5-1.png" alt="Hydrographic section of Rufiji River" width="672" />
+<p class="caption">
+Figure 5: Hydrographic section of Rufiji River
+</p>
+</div>
+</div>
+<div id="literature-cited" class="section level3 unnumbered">
+<h3>Literature Cited</h3>
+<div id="refs" class="references">
+<div id="ref-ocedata">
+<p>Kelley, D. (2015). <em>Ocedata: Oceanographic datasets for oce</em>. Retrieved from <a href="https://CRAN.R-project.org/package=ocedata" class="uri">https://CRAN.R-project.org/package=ocedata</a></p>
+</div>
+<div id="ref-oce">
+<p>Kelley, D., &amp; Richards, C. (2018). <em>Oce: Analysis of oceanographic data</em>. Retrieved from <a href="https://CRAN.R-project.org/package=oce" class="uri">https://CRAN.R-project.org/package=oce</a></p>
+</div>
+<div id="ref-r">
+<p>R Core Team. (2018). <em>R: A language and environment for statistical computing</em>. Vienna, Austria: R Foundation for Statistical Computing. Retrieved from <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a></p>
+</div>
+</div>
+</div>
