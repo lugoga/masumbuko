@@ -75,7 +75,7 @@
     
 
     <div class="article-content">
-      <p>Oceanographers love MATLAB<span class="math inline">\(^\circledR\)</span> for processing oceanographic data. I have no explanation as to why they love Matlab. I suppose it’s been the <em>de facto</em> standard within the field for a long time, and legacy is a big deal. I have used Matlab for data processing and plotting for several years. With MatLab I implemented a vast amount of tools and rather completed numerical models. Being a self sponsored graduate student at an institution that doesn’t have a subscription, sticking to Matlab not only is expensive, but also unsustainable. A chunk of my scripts just sleeping in my drive because I can no longer run the software in my machine.</p>
+      <p>Oceanographers love MATLAB<span class="math inline">\(^\circledR\)</span> for processing oceanographic data. I have no explanation as to why they love Matlab. I suppose it’s been the <em>de facto</em> standard within the field for a long time, and legacy is a big deal. I have used Matlab for data processing and plotting for several years. With MatLab I implemented a vast amount of tools and rather completed numerical models. Being a self sponsored graduate student at an institution that doesn’t have a subscription, I found sticking to Matlab not only is expensive, but also unsustainable. A chunk of my scripts just sleeping in my drive because I can no longer run the software in my machine.</p>
 <p>The Matlab was the core software for my PhD until recent, when I switched to R because of the license issue. The other reason is R as some cool packages that are far easier to use for exploratory and producing publication-quality graphics. Though, I found myself frustrated when learning R because I was doing Matlab syntax in R—which lacked the flexibility of MATLAB. When I learned to unlearn Matlab and learn R syntax, it just took me some weeks to stand up and walk.</p>
 <p>In this article, I’m going to illustrate how to process oceanographic data with <code>oce</code> package in R. <code>oce</code> package has some cool features for reading, processing and plotting oceanographic data. It is written by Dan Kelley and Clark Richards <span class="citation">(<a href="#ref-oce">2018</a>)</span>. <code>oce</code> support many oceanographic data but for this post I will only focus on the CTD measurements. I need oce and ocedata <span class="citation">(Kelley, <a href="#ref-ocedata">2015</a>)</span> package to process the CTD data in R <span class="citation">(R Core Team, <a href="#ref-r">2018</a>)</span>.</p>
 <pre class="r"><code>require(oce)
@@ -190,18 +190,17 @@ ctd[[i]][[&quot;stations&quot;]] = cast.locations$Name[i]
 <p>Once we have a list of all the files, we can create a section along the river that only use the center positions of each cast. We notice that the CTD measurements was done at the middle of the within the channel with depth ranged from 3 to 9 meters.</p>
 <pre class="r"><code>section = list(ctd[[2]],ctd[[5]],ctd[[8]],
                          ctd[[12]],ctd[[14]],ctd[[18]])%&gt;%
-  as.section()</code></pre>
-<pre><code>## Warning in as.section(.): estimated waterDepth as max(pressure) for CTDs
-## numbered 1:6</code></pre>
-<pre class="r"><code>section</code></pre>
-<pre><code>## Unnamed section has 6 stations:
-## Index    ID      Lon      Lat  Levels Depth
-##     1         39.316   -7.735      44     9
-##     2         39.313   -7.757      43     8
-##     3         39.305   -7.768      37     7
-##     4         39.296   -7.781      32     6
-##     5         39.287   -7.795      16     3
-##     6         39.274   -7.809      20     4</code></pre>
+  as.section()
+
+section</code></pre>
+<pre><code>Unnamed section has 6 stations:
+Index    ID      Lon      Lat  Levels Depth
+    1         39.316   -7.735      44     9
+    2         39.313   -7.757      43     8
+    3         39.305   -7.768      37     7
+    4         39.296   -7.781      32     6
+    5         39.287   -7.795      16     3
+    6         39.274   -7.809      20     4</code></pre>
 <p>Figure <a href="#fig:fig5">5</a> show the hydrographic section of temperature, salinity and oxygen within a distance of 10km from the mouth landward in the Rufiji River. Its pretty neat that we can see that the salinity decrease from the river mouth landward. This is because we did CTD casts during the high tide—when saline water was coming inland pushing freshwater further upland. We also see that the river has very low oxygen at just 2 meter from the surface that extend from the mouth to 10 km distance. The temperature shows uniform from the surface to the bottom along the section.</p>
 <pre class="r"><code># par(mfrow = c(1,2))
 section%&gt;%plot(which = c(&quot;map&quot;, &quot;temperature&quot;, &quot;salinity&quot;, &quot;oxygen&quot;),

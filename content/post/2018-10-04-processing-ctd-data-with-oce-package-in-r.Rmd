@@ -19,7 +19,7 @@ bibliography: [argo.bib]
 csl: apa.csl
 link-citations: yes
 ---
-Oceanographers love MATLAB$^\circledR$ for processing oceanographic data. I have no explanation as to why they love Matlab. I suppose it’s been the *de facto* standard within the field for a long time, and legacy is a big deal. I have used Matlab for data processing and plotting for several years. With MatLab I implemented a vast amount of tools and rather completed numerical models. Being a self sponsored graduate student at an institution that doesn’t have a subscription, sticking to Matlab not only is expensive, but also unsustainable. A chunk of my scripts just sleeping in my drive because I can no longer run the software in my machine. 
+Oceanographers love MATLAB$^\circledR$ for processing oceanographic data. I have no explanation as to why they love Matlab. I suppose it’s been the *de facto* standard within the field for a long time, and legacy is a big deal. I have used Matlab for data processing and plotting for several years. With MatLab I implemented a vast amount of tools and rather completed numerical models. Being a self sponsored graduate student at an institution that doesn’t have a subscription, I found sticking to Matlab not only is expensive, but also unsustainable. A chunk of my scripts just sleeping in my drive because I can no longer run the software in my machine. 
 
 The Matlab was the core software for my PhD until recent, when I switched to R because of the license issue. The other reason is R as some cool packages that are far easier to use for exploratory and producing publication-quality graphics. Though, I found myself frustrated when learning R because I was doing Matlab syntax in R---which lacked the flexibility of MATLAB. When I learned to unlearn Matlab and learn R syntax, it just took me some weeks to stand up and walk.
 
@@ -140,7 +140,7 @@ ctd[[i]][["stations"]] = cast.locations$Name[i]
 
 
 Once we have a list of all the files, we can create a section along the river that only use the center positions of each cast. We notice that the CTD  measurements was done at the middle of the within the channel with depth ranged from 3 to 9 meters. 
-```{r}
+```{r, warning=FALSE, message=FALSE, comment=""}
                         
 section = list(ctd[[2]],ctd[[5]],ctd[[8]],
                          ctd[[12]],ctd[[14]],ctd[[18]])%>%
