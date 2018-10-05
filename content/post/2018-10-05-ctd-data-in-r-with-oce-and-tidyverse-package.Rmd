@@ -1,0 +1,190 @@
+---
+title: CTD Data in R with oce and tidyverse package
+author: Masumbuko Semba
+date: '2018-10-05'
+slug: ctd-data-in-r-with-oce-and-tidyverse-package
+categories:
+  - Oceanography
+tags:
+  - CTD
+  - Fluorescence
+  - Indian Ocean
+  - Masumbuko Semba
+  - Salinity
+  - Temperature
+  - pressure
+  - Depth
+bibliography: [argo.bib]
+csl: apa.csl
+link-citations: yes
+---
+### Introduction
+in the [previous post](https://semba-blog.netlify.com/10/04/2018/processing-ctd-data-with-oce-package-in-r/), we looked at CTD processing and visualization of profile and section with oce package. We saw the necessary tools needed to import, transform and even plotting oceanographic standard graphics. This post introduce to an ecosystem of packages called tidyverse. The three packages in tidyverse that people use in everyday data analyses include the grammer for graphic `ggplot` develop by @ggplot for data visualization. The second package is tidyr [@tidyr] for tidying data in consistent ways for analysis and the third package is dplyr [@dplyr] for data wringling. we load these packages in R first if not installed, please install it first from CRAN.
+
+```{r packages, warning=FALSE, message=FALSE, comment=""}
+require(tidyverse)
+require(oce)
+require(leaflet)
+require(sf)
+
+```
+
+Now that we have loaded the packages, its time to import the CTD data. we load the ctd files with `oce::read.ctd()` function. CTD files don't have the longitude and latitude information of the casts, these geographical information were collected separately using a GPS device.  We also load the locations data with `readr::read_csv()` function
+
+```{r, warning=FALSE, comment="", message=FALSE}
+ctd = read.ctd("./ctd_rufiji/SBE19plus_01906740_2018_02_13_0885.cnv")
+cast.locations = read_csv("./ctd_rufiji/Rufiji_cast.csv")
+```
+
+Table \@ref(tab:tab1) give a summary of the geographical information of each CTD cast. It contains five variable that inform whether the cast was done during the morning or evening and whether is during the low or high tide; the assigned station code together with longitude and latitude.
+
+```{r tab1}
+cast.locations%>%select(Time, Tide, Name, Lon, Lat)%>%sample_n(10)%>%
+  knitr::kable("html",caption = "Location information of CTD casts done during the low and high Tide in Rufiji River",
+               digits = 4, align = "c")%>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))%>%
+  kableExtra::column_spec(1:5,width = "8cm", color = 1)%>%
+  kableExtra::add_header_above(c("Station Information" = 3, 
+                                 "Location information" = 2))
+  
+```
+
+We add the location information into the oce object. Before we add this information we need to remove the upcast profile with `ctdTrim()` and also align the downcast profile at 10 cm interval from the surface the maximum depth of the cast with `ctdDecimate()`. Figure \@ref(fig:fig1) give us a glimpse of temperature and salinity profile measured at station 1. A much detail of the station CTD information is provided in the summary below.
+
+
+```{r}
+ctd = ctd%>%ctdTrim(method = "downcast")%>%ctdDecimate(p = 0.1)
+ctd[["latitude"]] = cast.locations$Lat[1]
+ctd[["longitude"]] = cast.locations$Lon[1]
+
+```
+
+
+```{r fig1, fig.cap="Profiles of temperature and salinity at station 1"}
+par(mfrow = c(1,2))
+ctd%>%plot(which = 1)
+ctd%>%plot(which = "map")
+```
+
+```{r}
+summary(ctd)
+```
+
+### Oce object tibble
+Thoroughout the post we have been working with oce object, which implement the object-oriented programming (OOP). Unfortunate tidyverse cant work with oce object directly but rather work with `data frame`, and prefer a tabular data converted to `tibble`. @r4d defined a tibble as a modern data frame. of the three slots in oce object---metadata, data and processinglog, the profile information are contained in the data slot. Therefore, this is the slot that was transformedto tibble with `as_data_frame()` function. Note the use of pipe `%>%`, the handiest operator in the tidyverse.
+
+```{r}
+ctd.tb = ctd@data%>%
+  as_data_frame()
+
+```
+
+### Wrangle the data
+The tibble obtained through transformation of oce object contains only numerical data. Other ancillary information can be added into the tibble from the `metadata` slot. I added a column of time for which the CTD measurement was done using dplyr's function `mutate()` . Because the CTD records time and date as one entity, I separate the date and time as individual variables with the tidyr's function `separate()'. Then only variable of interest were retained (Table \@ref(tab:tab2)), the rest were removed form the dataset. 
+
+```{r }
+ctd.tb = ctd.tb %>% 
+  mutate(datetime = ctd@metadata$time, 
+         lon = ctd@metadata$longitude,
+         lat = ctd@metadata$latitude) %>% 
+  separate(datetime, c("date", "time"), sep = " ")%>%
+  select(date, time, lon,lat,pressure,temperature, salinity, oxygen, fluorescence)
+
+```
+
+```{r tab2, echo=FALSE}
+ctd.tb%>%select(-fluorescence)%>%slice(c(1, seq(4,70,3)))%>%
+  knitr::kable(digits = 2, align = "c",
+               col.names = c("Date", "Time", "Longitude", "latitude",
+                             "Pressure", "Temperature",
+                             "Salinity", "Oxygen"),
+               caption = "Tabular data of CTD profile extracted from Oce object")%>%
+  kableExtra::column_spec(1:8, width = "8cm", color = 1)%>%
+  kableExtra::add_header_above(c("Acquisation" = 2, "Location" = 2,
+                                 "Profile Information" = 4))
+```
+### Plotting the Profiles
+The `ggplot2` package which is part of the tidyverse use a grammer of graphic to make elegant graphic that meet oceanographic standard. For instance,  figure \@ref(fig:fig2) present profiles of temperature, salinity and oxygen plotted with ggplot2. Wilke [-@cowplot] developed a `cowplot` package that I used it's function `plot_grid()` to combine the three profile plots. 
+
+```{r fig2, fig.cap="Profiles of temperature, salinity and oxygen plotted with ggplot2 package"}
+temp = ggplot(data = ctd.tb%>%na.omit(), 
+       aes(x = temperature, y = pressure))+
+  geom_path( col = "red")+
+  scale_y_reverse(breaks = seq(0,7,1.5))+
+  scale_x_continuous(breaks = seq(28.5,33,1.25), position = "top")+
+  theme_bw()+
+  theme(axis.text = element_text(size = 12, colour = 1),
+        axis.title = element_text(size = 14, colour = 1))+
+  labs(x = expression(~Temperature~(degree~C)), y = "Pressure[dbar]")
+
+
+salinity = ggplot(data = ctd.tb%>%na.omit(), 
+       aes(x = salinity, y = pressure))+
+  geom_path( col = "darkgreen")+
+  scale_y_reverse(breaks = seq(0,7,1.5))+
+  scale_x_continuous(breaks = seq(4,25,8), position = "top")+
+  theme_bw()+
+  theme(axis.text = element_text(size = 12, colour = 1),
+        axis.title = element_text(size = 14, colour = 1))+
+  labs(x = expression(~Practical~salinity),
+       y = expression(~Pressure~(dbar)))
+
+oxygen = ggplot(data = ctd.tb%>%na.omit(), 
+       aes(x = oxygen, y = pressure))+
+  geom_path( col = "blue")+
+  scale_y_reverse(breaks = seq(0,7,1.5))+
+  scale_x_continuous(breaks = seq(0,8,1.5), position = "top")+
+  theme_bw()+
+  theme(axis.text = element_text(size = 12, colour = 1),
+        axis.title = element_text(size = 14, colour = 1))+
+  labs(x = expression(~DO~(mgL^{-3})),
+       y = expression(~Pressure~(dbar)))
+
+cowplot::plot_grid(temp,salinity, oxygen, nrow = 1)
+```
+
+### Conclusion
+We have seen in this post on how to process CTD data with oce and tidyverse package of a station in the mouth of Rufiji River shown in static map in Figure \@ref(fig:fig3) and its interactive one in figure \@ref(fig:fig4). The post illustrate that there many ways to plot the profile, so what matters depend on the package that makes you comfort while coding. A si 
+
+
+```{r include=FALSE}
+tz = st_read("E:/Data Manipulation/nyamisi/regional/africa.shp")
+
+```
+
+
+```{r fig3, fig.cap="Location of Station 1"}
+
+# tz = st_read("./africa.shp")
+
+ggplot()+
+  geom_sf(data = tz, fill = "ivory", col = 1)+
+  coord_sf(xlim = c(39.28, 39.4) , ylim = c(-7.77,-7.70))+
+  geom_point(data = cast.locations%>%slice(1), aes(x = Lon, y = Lat), size = 6 )+
+  geom_label(data = cast.locations%>%slice(1), 
+             aes(x = Lon-0.006, y = Lat+0.006, label = Name))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 12, colour = 1),
+        panel.background = element_rect(fill = "lightblue"))+
+  scale_x_continuous(breaks = c(39.3,39.39))+
+  scale_y_continuous(breaks = c(-7.76,-7.71))+
+  geom_text(aes(x = 39.35, y = -7.72, label = "Rufiji River Estuary"), col = "white", size = 5)+
+  labs(x = "", y = "")+
+  ggsn::scalebar(location = "bottomright", x.min = 39.3, x.max = 39.4, y.min = -7.765, y.max = -7.71, dist = 1.5, dd2km = TRUE, model = "WGS84", st.dist = 0.04, st.size = 4, height = 0.04)
+
+  #ggsn::north2(x = 0.65,y = .95, scale = .1, symbol = 8)
+```
+
+
+
+```{r fig4, fig.cap="Location of Station 1"}
+leaflet(data = cast.locations%>%slice(1))%>%
+  setView(lng = 39.3, lat = -7.73, zoom = 10)%>%
+  addTiles() %>%
+  # addProviderTiles("Stamen.Watercolor") %>%
+  addMarkers(lng = ~Lon, lat = ~Lat, popup = ~Name)
+
+```
+
+### References
+

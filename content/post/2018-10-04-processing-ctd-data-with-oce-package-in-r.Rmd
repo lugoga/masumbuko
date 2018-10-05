@@ -157,7 +157,8 @@ section%>%plot(which = c("map", "temperature", "salinity", "oxygen"),
 
 ```
 
-
+### Conclusion
+In this post, we have seen the basics of processing CTD data in R with oce package. You have learnt how to import the data, manipulate and proting profiles and section.
 
 
 ### Literature Cited 

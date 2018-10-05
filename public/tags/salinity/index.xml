@@ -6,10 +6,19 @@
     <description>Recent content in Salinity on Masumbuko Semba</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 04 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 05 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/salinity/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>CTD Data in R with oce and tidyverse package</title>
+      <link>/10/05/2018/ctd-data-in-r-with-oce-and-tidyverse-package/</link>
+      <pubDate>Fri, 05 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/10/05/2018/ctd-data-in-r-with-oce-and-tidyverse-package/</guid>
+      <description>Introductionin the previous post, we looked at CTD processing and visualization of profile and section with oce package. We saw the necessary tools needed to import, transform and even plotting oceanographic standard graphics. This post introduce to an ecosystem of packages called tidyverse. The three packages in tidyverse that people use in everyday data analyses include the grammer for graphic ggplot develop by Wickham (2016) for data visualization.</description>
+    </item>
     
     <item>
       <title>Processing  CTD data with OCE package in R</title>
