@@ -55,7 +55,7 @@ plot(adp, which = c(1:2),
 ```
 
 ### Ensemble adp objects 
-The grey-colored in figure \@ref(fig:fig1) are bad data. @oce suggested ensembling profile to overcome bad data. Ensemble here refers as a process to average ping profiles from ADCP data. This approach is important because it remove the uncertainty in velocity estimates from single pings, it also reduce the size of the file, hence speed up processing of the data. With `oce` we can average the profiles with `adpEnsembleAverage()` function. The ADCP object profiles were reduced by a factor of 10 and since they were average, the command `na.rm = TRUE` was parsed to ensure that profiles without values are also computed.
+The grey-colored in figure \@ref(fig:fig1) are bad data mostly comes from single-ping velocity. Therefore, data are averaged to reducem the measurement uncertainity to acceptable levels [@oce]. Ensemble refers as a process of averaging ping profiles from ADCP data. This approach is important because it remove the uncertainty in velocity estimates from single pings, it also reduce the size of high frequency data, which reduce processing time. I used  `adpEnsembleAverage()` function from `oce` package to ensemble (average) the profiles as shown in the chunk below. 
 
 
 ```{r, echo=TRUE}
@@ -65,6 +65,7 @@ ensembled = adp%>%adpEnsembleAverage(n = 10, leftover = TRUE, na.rm = TRUE)
 
 ```
 
+The ADCP object profiles were reduced by a factor of 10 and since they were average, the command `na.rm = TRUE` was parsed to ensure that profiles without values are also computed.
 The origin adcp file had a total of `r adp@metadata$numberOfSamples` profiles, which were reduced to `r ensembled@metadata$numberOfSamples` with the `adpEnsembleAverage`. Figure \@ref(fig:fig2) show the velocity of zonal (north) and meridional (east) components of ensembled (average ping profiles) recorded by the ADCP instrument. 
 
 
@@ -80,8 +81,8 @@ plot(ensembled, which = c(1:2),
      col = oceColorsViridis(125),
      marginsAsImage = TRUE, decimate = FALSE)
 ```
-
-The averaged profile (figure \@ref(fig:fig2)) were then aligned to the uniform depth (figure \@ref(fig:fig3)). This process is important because it compansate the pitch and roll of the instrument during ship cruising. This only works for adcp data that are in beam coordinates. 
+### Depth cell mapping
+The averaged profile (figure \@ref(fig:fig2)) were then aligned to the uniform depth---a process referred as `depth cell mapping`. Figure \@ref(fig:fig3) show the cells that aligned to the standard depth. This process is important because it ensure horizontal homogeneity of cells that are at the same depth, which compansate the pitch and roll of the instrument during ship cruising.  This only works for adcp data that are in beam coordinates. 
 
 ```{r, echo=TRUE}
 ensembled.bin = binmapAdp(ensembled)
@@ -184,5 +185,60 @@ imagep(lat,distance, vel-6, filledContour = TRUE,
 
 ```
 
+
+```{r}
+# create profiles
+kilwa.profile = vel %>% 
+   # transpose
+  t() %>% 
+  # convert to data frame
+  as.data.frame() %>%
+  # make it tibble
+  as.tibble()
+
+## change variable names
+colnames(kilwa.profile) =  paste("profile", 1:12, sep = "")
+
+## bind the disance to the profile
+kilwa.profile = data.frame(distance, kilwa.profile)
+
+```
+
+
+```{r}
+## make it long form from wide form
+kilwa.profile.long = kilwa.profile %>%
+  gather(key = "profile", value = "velocity", 2:13)
+
+```
+
+### Spurous measurements
+We notice that the current measurements deviate from what has been reported previously. Figure \@ref(fig:fig7) show most profile along the transect from Lindi to Mafia have current speed above normal except profile measured at location with latitude `r lat[1]` and longitude `r lon[1]` (figure \@ref(fig:fig8)).  
+```{r fig7, fig.cap="Current profiles at each ping"}
+ggplot(data = kilwa.profile.long, aes(y = distance, x = velocity, col = profile))+
+  geom_path()+
+  scale_y_reverse()+
+  scale_x_continuous(position = "top")+
+  theme_bw()+
+  theme(axis.text = element_text(colour = "black", size = 11),
+        legend.position = "none")+
+  labs(y = expression(~Distance~(m)),
+       x = expression(~current~Velocity~({ms^-1})))+
+  facet_wrap(~profile, scales = "free_x")
+
+```
+
+
+```{r fig8, fig.cap="profile at station 1"}
+ggplot(data = kilwa.profile.long %>%filter(profile %in% c("profile1")), aes(y = distance, x = velocity, col = profile))+
+  geom_path()+
+  scale_y_reverse()+
+  scale_x_continuous(position = "top")+
+  theme_bw()+
+  theme(axis.text = element_text(colour = "black", size = 11),
+        legend.position = "none")+
+  labs(y = expression(~Distance~(m)),
+       x = expression(~current~Velocity~({ms^-1})))
+```
 
 ### Cited Literature

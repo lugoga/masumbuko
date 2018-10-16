@@ -58,11 +58,11 @@ Figure 1: Meridional and Zonal components velocity before averaging the profiles
 </div>
 <div id="ensemble-adp-objects" class="section level3">
 <h3>Ensemble adp objects</h3>
-<p>The grey-colored in figure <a href="#fig:fig1">1</a> are bad data. <span class="citation">Kelley &amp; Richards (<a href="#ref-oce">2018</a>)</span> suggested ensembling profile to overcome bad data. Ensemble here refers as a process to average ping profiles from ADCP data. This approach is important because it remove the uncertainty in velocity estimates from single pings, it also reduce the size of the file, hence speed up processing of the data. With <code>oce</code> we can average the profiles with <code>adpEnsembleAverage()</code> function. The ADCP object profiles were reduced by a factor of 10 and since they were average, the command <code>na.rm = TRUE</code> was parsed to ensure that profiles without values are also computed.</p>
+<p>The grey-colored in figure <a href="#fig:fig1">1</a> are bad data mostly comes from single-ping velocity. Therefore, data are averaged to reducem the measurement uncertainity to acceptable levels <span class="citation">(Kelley &amp; Richards, <a href="#ref-oce">2018</a>)</span>. Ensemble refers as a process of averaging ping profiles from ADCP data. This approach is important because it remove the uncertainty in velocity estimates from single pings, it also reduce the size of high frequency data, which reduce processing time. I used <code>adpEnsembleAverage()</code> function from <code>oce</code> package to ensemble (average) the profiles as shown in the chunk below.</p>
 <pre class="r"><code>ensembled = adp%&gt;%adpEnsembleAverage(n = 10, leftover = TRUE, na.rm = TRUE)
 
 # summary(ensembled)</code></pre>
-<p>The origin adcp file had a total of 1257 profiles, which were reduced to 126 with the <code>adpEnsembleAverage</code>. Figure <a href="#fig:fig2">2</a> show the velocity of zonal (north) and meridional (east) components of ensembled (average ping profiles) recorded by the ADCP instrument.</p>
+<p>The ADCP object profiles were reduced by a factor of 10 and since they were average, the command <code>na.rm = TRUE</code> was parsed to ensure that profiles without values are also computed. The origin adcp file had a total of 1257 profiles, which were reduced to 126 with the <code>adpEnsembleAverage</code>. Figure <a href="#fig:fig2">2</a> show the velocity of zonal (north) and meridional (east) components of ensembled (average ping profiles) recorded by the ADCP instrument.</p>
 <pre class="r"><code>plot(ensembled, which = c(1:2), 
      tformat = &quot;%B %d, %Y:%H:%M&quot;, 
      missingColor = &quot;grey&quot;, 
@@ -79,7 +79,10 @@ Figure 1: Meridional and Zonal components velocity before averaging the profiles
 Figure 2: Meridional and Zonal components velocity after averaging the profiles
 </p>
 </div>
-<p>The averaged profile (figure <a href="#fig:fig2">2</a>) were then aligned to the uniform depth (figure <a href="#fig:fig3">3</a>). This process is important because it compansate the pitch and roll of the instrument during ship cruising. This only works for adcp data that are in beam coordinates.</p>
+</div>
+<div id="depth-cell-mapping" class="section level3">
+<h3>Depth cell mapping</h3>
+<p>The averaged profile (figure <a href="#fig:fig2">2</a>) were then aligned to the uniform depth—a process referred as <code>depth cell mapping</code>. Figure <a href="#fig:fig3">3</a> show the cells that aligned to the standard depth. This process is important because it ensure horizontal homogeneity of cells that are at the same depth, which compansate the pitch and roll of the instrument during ship cruising. This only works for adcp data that are in beam coordinates.</p>
 <pre class="r"><code>ensembled.bin = binmapAdp(ensembled)</code></pre>
 <pre class="r"><code>## plot the ensembled
 plot(ensembled.bin, which = c(1:2), 
@@ -158,6 +161,23 @@ imagep(lat,distance, vel-6, filledContour = TRUE,
 <img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig6-1.png" alt="Current Profile " width="672" />
 <p class="caption">
 Figure 6: Current Profile
+</p>
+</div>
+</div>
+<div id="spurous-measurements" class="section level3">
+<h3>Spurous measurements</h3>
+We notice that the current measurements deviate from what has been reported previously. Figure <a href="#fig:fig7">7</a> show most profile along the transect from Lindi to Mafia have current speed above normal except profile measured at location with latitude -8.0251617 and longitude 40.0961233 (figure <a href="#fig:fig8">8</a>).<br />
+
+<div class="figure"><span id="fig:fig7"></span>
+<img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig7-1.png" alt="Current profiles at each ping" width="672" />
+<p class="caption">
+Figure 7: Current profiles at each ping
+</p>
+</div>
+<div class="figure"><span id="fig:fig8"></span>
+<img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig8-1.png" alt="profile at station 1" width="672" />
+<p class="caption">
+Figure 8: profile at station 1
 </p>
 </div>
 </div>
