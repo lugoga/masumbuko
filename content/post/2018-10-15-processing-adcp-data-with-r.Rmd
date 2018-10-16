@@ -1,0 +1,192 @@
+---
+title: Processing ADCP Data with R
+author: Masumbuko Semba
+date: '2018-10-15'
+slug: processing-adcp-data-with-r
+categories:
+  - Oceanography
+tags:
+  - ADCP
+  - IIOE-2
+  - Indian Ocean
+  - Mafia Channel
+bibliography: [argo.bib]
+csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+### Introduction
+The Second International Indian Ocean Expedition (IIOE-2) collected variaous oceanographic data within the coastal water of Tanzania. Among the oceanographic data collected using Agulhas II, is the Acoustic Doppler Current Profiles (ADCP). The measurement was carried out from 4^th^ to 9^th^ November 2017. 
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE, comment=""}
+require(oce)
+require(ocedata)
+require(tidyverse)
+require(lubridate)
+require(leaflet)
+require(sf)
+```
+
+```{r, echo=TRUE}
+adp = read.adp("C:/Users/Semba/Documents/IIOE2/adcp/IIEO2/AGU028002_000000.LTA")
+# summary(adp)
+time = adp[["time"]]
+```
+
+An ADCP (RD Instruments WH-Sentinel 300 kHz) was deployed ~25 km off the coast of Hokkaido (142°39.9′ E, 45°15.5′ N), where the water depth is ~90m (solid circle in Fig. 1). The ADCP was housed in a trawl-resistant bottom mount (Flotation Technologies AL200) to avoid damage from fishing activities. This measurement site was chosen to capture the SWC axis and avoid the border issue around the Soya Strait. 
+
+
+The ADCP obtained valid data in nineteen 4-m bins from ~81–85 m to ~9–13 m. To remove the tidal constituents, a 25-hr running-mean filter is applied to the data, after which daily- and monthlyaveraged values are calculated. Along with the vertical structure of velocity obtained by the bottom-mounted ADCP, the horizontal structure obtained by the ocean radars (Codar Ocean Sensors
+
+
+Figure \@ref(fig:fig1) show the velocity of zonal (north) and meridional (east) components from the raw data as captured by the ADCP instrument. These velocities were measured along the coastal of Tanzania water from `r time[1]` off Unguja Island close to Chwaka Bay and finish on`r time[length(time)]` in Mtwara.  
+
+```{r fig1, fig.cap="Meridional and Zonal components velocity before averaging the profiles", , echo=TRUE}
+
+plot(adp, which = c(1:2), 
+     tformat = "%B %d, %Y:%H:%M", 
+     missingColor = "grey", 
+     ylim = c(25,1000),
+     zlim = c(-4,6),
+     useSmoothScatter = TRUE,
+     ytype = "profile",
+     titles = c("Northing Profiles","Northing Profiles" ),
+     col = oceColorsViridis(125),
+     marginsAsImage = TRUE, decimate = FALSE)
+```
+
+### Ensemble adp objects 
+The grey-colored in figure \@ref(fig:fig1) are bad data. @oce suggested ensembling profile to overcome bad data. Ensemble here refers as a process to average ping profiles from ADCP data. This approach is important because it remove the uncertainty in velocity estimates from single pings, it also reduce the size of the file, hence speed up processing of the data. With `oce` we can average the profiles with `adpEnsembleAverage()` function. The ADCP object profiles were reduced by a factor of 10 and since they were average, the command `na.rm = TRUE` was parsed to ensure that profiles without values are also computed.
+
+
+```{r, echo=TRUE}
+ensembled = adp%>%adpEnsembleAverage(n = 10, leftover = TRUE, na.rm = TRUE)
+
+# summary(ensembled)
+
+```
+
+The origin adcp file had a total of `r adp@metadata$numberOfSamples` profiles, which were reduced to `r ensembled@metadata$numberOfSamples` with the `adpEnsembleAverage`. Figure \@ref(fig:fig2) show the velocity of zonal (north) and meridional (east) components of ensembled (average ping profiles) recorded by the ADCP instrument. 
+
+
+```{r fig2, fig.cap="Meridional and Zonal components velocity after averaging the profiles", , echo=TRUE}
+plot(ensembled, which = c(1:2), 
+     tformat = "%B %d, %Y:%H:%M", 
+     missingColor = "grey", 
+     ylim = c(25,1000),
+     zlim = c(-4,6),
+     useSmoothScatter = TRUE,
+     ytype = "profile",
+     titles = c("Northing Profiles","Northing Profiles" ),
+     col = oceColorsViridis(125),
+     marginsAsImage = TRUE, decimate = FALSE)
+```
+
+The averaged profile (figure \@ref(fig:fig2)) were then aligned to the uniform depth (figure \@ref(fig:fig3)). This process is important because it compansate the pitch and roll of the instrument during ship cruising. This only works for adcp data that are in beam coordinates. 
+
+```{r, echo=TRUE}
+ensembled.bin = binmapAdp(ensembled)
+
+```
+
+
+```{r fig3, fig.cap="Meridional and Zonal components velocity after averaging the profiles and align to standard depth", echo=TRUE}
+plot(ensembled.bin, which = c(1:2), 
+     tformat = "%B %d, %Y:%H:%M", 
+     missingColor = "grey", 
+     ylim = c(25,1000),
+     zlim = c(-4,6),
+     useSmoothScatter = TRUE,
+     ytype = "profile",
+     titles = c("Northing Profiles","Northing Profiles" ),
+     col = oceColorsViridis(125),
+     marginsAsImage = TRUE, decimate = FALSE)
+```
+
+
+
+
+
+```{r, echo=FALSE, eval=FALSE}
+#Get names of the Acoustic Doppler Beams
+ensembled.bin%>%beamName()
+```
+
+### Extract the variables
+Figure \@ref(fig:fig4) show the sampled location of ADCP profile pings.
+
+```{r}
+
+time = ensembled.bin[["time"]]
+distance = ensembled.bin[["distance"]]
+lon = ensembled.bin[["firstLongitude"]]
+lat = ensembled.bin[["firstLatitude"]]
+
+```
+
+```{r, fig4, fig.cap="ADCP measurement along the coastal of Tanzania"}
+position = data.frame(lon,lat, time)
+
+leaflet(data = position) %>%
+  addTiles() %>%
+  addMarkers(lng = ~lon, lat = ~lat, popup = ~time)
+```
+
+
+### Subset ADCP
+Since I am interested on the current between Lindi and Mafia Island (Figure \@ref(fig:fig5)), I ought to chop the pings that fall within the area. Unfortunately the function `subset()`, which I used, only capable of chopping adcp data using either time or distance. Based on figure \@ref(fig:fig4), only the pings profiles within the areas were selected by visual inspection of the points on the map and then use the date file to filter those pings with `subset()` function. Once the pings were selected, then `distance, longitude, latitude, v, u` were extracted. Using the `u` and `v` component, the `velocity` was computed with the equation \ref(eq:eqn1)
+
+$$
+  \begin{equation}
+  Velocity (ms^{-1})\:=\: \sqrt{(U^2+V^2)} (\#eq:eqn1)
+  
+  \end{equation}
+$$
+
+```{r}
+date = c("2017-11-07 13:14:52", "2017-11-07 23:14:51")%>%as_datetime()
+
+kilwa.adcp = ensembled.bin%>%subset(time >= date[1] & time <= date[2])%>%subset(distance < 700)
+
+
+
+time = kilwa.adcp[["time"]]
+distance = kilwa.adcp[["distance"]]
+lon = kilwa.adcp[["firstLongitude"]]
+lat = kilwa.adcp[["firstLatitude"]]
+v = kilwa.adcp[["v"]][,,1]
+u = kilwa.adcp[["v"]][,,2]
+
+vel = sqrt(v^2 + u^2)
+
+```
+
+```{r fig5, fig.cap="A transect of ADCP between Lindi and Mafia Island"}
+
+kilwa.sf = data.frame(lon,lat,time)%>%st_as_sf(coords = c("lon", "lat"))%>%st_set_crs(4326)
+
+leaflet(data = kilwa.sf)%>%
+  addTiles()%>%
+  addMarkers(popup = ~time)
+```
+Figure \@ref(fig:fig6) show ocean current betwen Lindi and Mafia Island (figure \#ref(fig:fig5)) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current [@mcclanahan].
+
+
+```{r fig6, fig.cap="Current Profile "}
+
+
+imagep(lat,distance, vel-6, filledContour = TRUE, 
+       ylim = c(700, 30), zlim = c(0,1.0), zclip = TRUE, 
+       col = oceColors9A(120), xlim = c(-9.5, -8.3), 
+       xlab = "Latitude", ylab = "Depth (meters)", 
+       zlab = "Current Velocity [m/s]", zlabPosition = "side")
+
+```
+
+
+### Cited Literature

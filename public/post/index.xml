@@ -6,10 +6,20 @@
     <description>Recent content in Posts on Masumbuko Semba</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 05 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 15 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Processing ADCP Data with R</title>
+      <link>/10/15/2018/processing-adcp-data-with-r/</link>
+      <pubDate>Mon, 15 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/10/15/2018/processing-adcp-data-with-r/</guid>
+      <description>IntroductionThe Second International Indian Ocean Expedition (IIOE-2) collected variaous oceanographic data within the coastal water of Tanzania. Among the oceanographic data collected using Agulhas II, is the Acoustic Doppler Current Profiles (ADCP). The measurement was carried out from 4th to 9th November 2017.
+require(oce)require(ocedata)require(tidyverse)require(lubridate)require(leaflet)require(sf)adp = read.adp(&amp;quot;C:/Users/Semba/Documents/IIOE2/adcp/IIEO2/AGU028002_000000.LTA&amp;quot;)# summary(adp)time = adp[[&amp;quot;time&amp;quot;]]An ADCP (RD Instruments WH-Sentinel 300 kHz) was deployed ~25 km off the coast of Hokkaido (142°39.</description>
+    </item>
     
     <item>
       <title>CTD Data in R with oce and tidyverse package</title>

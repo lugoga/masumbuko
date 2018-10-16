@@ -1,0 +1,148 @@
+---
+title: Processing ADCP Data with R
+author: Masumbuko Semba
+date: '2018-10-15'
+slug: processing-adcp-data-with-r
+categories:
+  - Oceanography
+tags:
+  - ADCP
+  - IIOE-2
+  - Indian Ocean
+  - Mafia Channel
+bibliography: [argo.bib]
+csl: apa.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/leaflet/leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet/leaflet.js"></script>
+<link href="/rmarkdown-libs/leafletfix/leafletfix.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4-compressed.js"></script>
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4leaflet.js"></script>
+<link href="/rmarkdown-libs/rstudio_leaflet/rstudio_leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet-binding/leaflet.js"></script>
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>The Second International Indian Ocean Expedition (IIOE-2) collected variaous oceanographic data within the coastal water of Tanzania. Among the oceanographic data collected using Agulhas II, is the Acoustic Doppler Current Profiles (ADCP). The measurement was carried out from 4<sup>th</sup> to 9<sup>th</sup> November 2017.</p>
+<pre class="r"><code>require(oce)
+require(ocedata)
+require(tidyverse)
+require(lubridate)
+require(leaflet)
+require(sf)</code></pre>
+<pre class="r"><code>adp = read.adp(&quot;C:/Users/Semba/Documents/IIOE2/adcp/IIEO2/AGU028002_000000.LTA&quot;)
+# summary(adp)
+time = adp[[&quot;time&quot;]]</code></pre>
+<p>An ADCP (RD Instruments WH-Sentinel 300 kHz) was deployed ~25 km off the coast of Hokkaido (142°39.9′ E, 45°15.5′ N), where the water depth is ~90m (solid circle in Fig. 1). The ADCP was housed in a trawl-resistant bottom mount (Flotation Technologies AL200) to avoid damage from fishing activities. This measurement site was chosen to capture the SWC axis and avoid the border issue around the Soya Strait.</p>
+<p>The ADCP obtained valid data in nineteen 4-m bins from ~81–85 m to ~9–13 m. To remove the tidal constituents, a 25-hr running-mean filter is applied to the data, after which daily- and monthlyaveraged values are calculated. Along with the vertical structure of velocity obtained by the bottom-mounted ADCP, the horizontal structure obtained by the ocean radars (Codar Ocean Sensors</p>
+<p>Figure <a href="#fig:fig1">1</a> show the velocity of zonal (north) and meridional (east) components from the raw data as captured by the ADCP instrument. These velocities were measured along the coastal of Tanzania water from 2017-11-04 17:22:17 off Unguja Island close to Chwaka Bay and finish on2017-11-09 02:02:23 in Mtwara.</p>
+<pre class="r"><code>plot(adp, which = c(1:2), 
+     tformat = &quot;%B %d, %Y:%H:%M&quot;, 
+     missingColor = &quot;grey&quot;, 
+     ylim = c(25,1000),
+     zlim = c(-4,6),
+     useSmoothScatter = TRUE,
+     ytype = &quot;profile&quot;,
+     titles = c(&quot;Northing Profiles&quot;,&quot;Northing Profiles&quot; ),
+     col = oceColorsViridis(125),
+     marginsAsImage = TRUE, decimate = FALSE)</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig1-1.png" alt="Meridional and Zonal components velocity before averaging the profiles" width="672" />
+<p class="caption">
+Figure 1: Meridional and Zonal components velocity before averaging the profiles
+</p>
+</div>
+</div>
+<div id="ensemble-adp-objects" class="section level3">
+<h3>Ensemble adp objects</h3>
+<p>The grey-colored in figure <a href="#fig:fig1">1</a> are bad data. <span class="citation">Kelley &amp; Richards (<a href="#ref-oce">2018</a>)</span> suggested ensembling profile to overcome bad data. Ensemble here refers as a process to average ping profiles from ADCP data. This approach is important because it remove the uncertainty in velocity estimates from single pings, it also reduce the size of the file, hence speed up processing of the data. With <code>oce</code> we can average the profiles with <code>adpEnsembleAverage()</code> function. The ADCP object profiles were reduced by a factor of 10 and since they were average, the command <code>na.rm = TRUE</code> was parsed to ensure that profiles without values are also computed.</p>
+<pre class="r"><code>ensembled = adp%&gt;%adpEnsembleAverage(n = 10, leftover = TRUE, na.rm = TRUE)
+
+# summary(ensembled)</code></pre>
+<p>The origin adcp file had a total of 1257 profiles, which were reduced to 126 with the <code>adpEnsembleAverage</code>. Figure <a href="#fig:fig2">2</a> show the velocity of zonal (north) and meridional (east) components of ensembled (average ping profiles) recorded by the ADCP instrument.</p>
+<pre class="r"><code>plot(ensembled, which = c(1:2), 
+     tformat = &quot;%B %d, %Y:%H:%M&quot;, 
+     missingColor = &quot;grey&quot;, 
+     ylim = c(25,1000),
+     zlim = c(-4,6),
+     useSmoothScatter = TRUE,
+     ytype = &quot;profile&quot;,
+     titles = c(&quot;Northing Profiles&quot;,&quot;Northing Profiles&quot; ),
+     col = oceColorsViridis(125),
+     marginsAsImage = TRUE, decimate = FALSE)</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig2-1.png" alt="Meridional and Zonal components velocity after averaging the profiles" width="672" />
+<p class="caption">
+Figure 2: Meridional and Zonal components velocity after averaging the profiles
+</p>
+</div>
+<p>The averaged profile (figure <a href="#fig:fig2">2</a>) were then aligned to the uniform depth (figure <a href="#fig:fig3">3</a>). This process is important because it compansate the pitch and roll of the instrument during ship cruising. This only works for adcp data that are in beam coordinates.</p>
+<pre class="r"><code>ensembled.bin = binmapAdp(ensembled)</code></pre>
+<pre class="r"><code>plot(ensembled.bin, which = c(1:2), 
+     tformat = &quot;%B %d, %Y:%H:%M&quot;, 
+     missingColor = &quot;grey&quot;, 
+     ylim = c(25,1000),
+     zlim = c(-4,6),
+     useSmoothScatter = TRUE,
+     ytype = &quot;profile&quot;,
+     titles = c(&quot;Northing Profiles&quot;,&quot;Northing Profiles&quot; ),
+     col = oceColorsViridis(125),
+     marginsAsImage = TRUE, decimate = FALSE)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig3-1.png" alt="Meridional and Zonal components velocity after averaging the profiles and align to standard depth" width="672" />
+<p class="caption">
+Figure 3: Meridional and Zonal components velocity after averaging the profiles and align to standard depth
+</p>
+</div>
+</div>
+<div id="extract-the-variables" class="section level3">
+<h3>Extract the variables</h3>
+<p>Figure <a href="#fig:fig4">4</a> show the sampled location of ADCP profile pings.</p>
+<div class="figure"><span id="fig:fig4"></span>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-6.13603168632835,-6.09788665082306,-6.0819199969992,-6.06835166551173,-6.06694500613958,-6.08571165986359,-6.09934331662953,-6.09940000344068,-6.09498668834567,-6.11055336613208,-6.12605500034988,-6.24215500429273,-6.38619833718985,-6.48929666820914,-6.5564299961552,-6.59180830791593,-6.59310334548354,-6.59485499560833,-6.5969150075689,-6.59355336148292,-6.58007832895964,-6.59024833515286,-6.58606167510152,-6.56933500058949,-6.56872833520174,-6.57228334341198,-6.5732150003314,-6.57546501327306,-6.57062167301774,-6.56314167100936,-6.56826833635569,-6.55813665222377,-6.63351000286639,-6.75738999713212,-6.87679334264249,-6.99995333142579,-7.04999499488622,-7.03873001039028,-7.03660833276808,-7.03803334850818,-7.04462832212448,-7.05344667099416,-7.04482333548367,-7.05563499312848,-7.04790834523737,-7.0502600139007,-7.05758666899055,-7.054303326644,-7.05855333711952,-7.05277833994478,-7.05903833918273,-7.05829499848187,-7.05299334414303,-7.04967167135328,-7.06070000957698,-7.0608866661787,-7.06957331020385,-7.06071834079921,-7.05516667105258,-7.07627667859197,-7.15184999629855,-7.29494332429022,-7.44492500089109,-7.58444499783218,-7.72894166596234,-7.87776665668935,-7.98172000050545,-8.03234833851457,-8.02718833833933,-8.03537666983902,-8.03987999819219,-8.04547666199505,-8.03179499879479,-8.01132333185524,-8.02696500252932,-8.0216099973768,-8.02364167850465,-8.01087667699903,-8.01366002205759,-8.02515334635973,-8.02516168635339,-8.02516168635339,-8.09116167202592,-8.25942334067076,-8.43030499108136,-8.59879832714796,-8.76799500547349,-8.94053499866277,-9.11475666146725,-9.28787999320775,-9.4605816565454,-9.63324000220746,-9.80575998779386,-9.95208500884473,-9.96701166126877,-9.95845832303166,-9.96381000895053,-9.96383333578706,-9.96371501684189,-9.96199333202094,-9.96041667088866,-9.96101498790085,-9.9603316700086,-9.95779502950609,-9.95596167258918,-9.95854665990919,-9.95445833634585,-9.9565066723153,-10.0367166744545,-10.1547600058839,-10.2731016827747,-10.381014989689,-10.4137699920684,-10.4187066731974,-10.4192749997601,-10.4216249920428,-10.4226149953902,-10.4226999962702,-10.4203866580501,-10.4209833405912,-10.4223183179274,-10.427744996734,-10.4293233426288,-10.4302683351561,-10.4303216608241,-10.4149547645024],[39.7127150092274,39.7074333289638,39.6989183295518,39.6937399981543,39.6929266769439,39.6320466594771,39.6236733393744,39.6244866773486,39.5589150069281,39.5435700137168,39.5556649994105,39.6070666769519,39.6623850082979,39.5981133291498,39.438628334552,39.3336066668853,39.3978899884969,39.4170866757631,39.4380866708234,39.5034799827263,39.5637099919841,39.5822899891064,39.5775250028819,39.5567749980837,39.6127299936488,39.663273322396,39.7270016781986,39.7627716846764,39.7478449903429,39.7522533182055,39.8265333333984,39.8271316671744,39.8805883275345,39.9715983364731,40.0699666673318,40.1689600115642,40.2099400162697,40.204936648719,40.2073750030249,40.1525949994102,40.1338816629723,40.1313216621056,40.1009983336553,40.0394850047305,39.9933466594666,39.9489066554233,39.9567499961704,39.9126683268696,39.8688133377582,39.8624533424154,39.8695133440197,39.869083344005,39.864251662977,39.7937483238056,39.7875099917874,39.7636199919507,39.7065049912781,39.629883332178,39.6236549997702,39.622663336806,39.6800200045109,39.7872649971396,39.8811966693029,39.963571658358,40.0074350042269,40.0358049971983,39.9227233333513,39.8455633297563,39.846998328343,39.8426450109109,39.8401333317161,39.8364599961787,39.8755983375013,39.9353966703638,39.9281733222306,39.9666433325037,40.0105150016025,40.0501433322206,40.0940716629848,40.0961116673425,40.0961166713387,40.0961233433336,40.0992283439264,40.1001800084487,40.0901633324102,40.0642466638237,40.0349066667259,40.0054116547108,39.9776366678998,39.9494649823755,39.9258266743273,39.8972083339468,39.8675483325496,39.8449983308092,39.8435000153258,39.9222316676751,40.0103633310646,40.0153433382511,40.0188766624779,40.0039166752249,40.0662333425134,40.0927716549486,40.1278083370999,40.1803199965507,40.2311416631564,40.3331983247772,40.3521949779242,40.3554016426206,40.4391116593033,40.5644899858162,40.6876416765153,40.8092700066045,40.8397133387625,40.8429950047284,40.8441183306277,40.848311654292,40.7805499937385,40.7570850066841,40.710039999336,40.6633983375505,40.6753816343844,40.6249483348802,40.5734833404422,40.5156600018963,40.5066600004211,40.509385724685],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["2017-11-04T17:44:51Z","2017-11-04T18:34:51Z","2017-11-04T19:24:51Z","2017-11-04T20:14:51Z","2017-11-04T21:04:51Z","2017-11-04T21:54:50Z","2017-11-04T22:44:51Z","2017-11-04T23:34:52Z","2017-11-05T00:24:50Z","2017-11-05T01:14:51Z","2017-11-05T02:04:51Z","2017-11-05T02:54:50Z","2017-11-05T03:44:52Z","2017-11-05T04:34:51Z","2017-11-05T05:24:50Z","2017-11-05T06:14:52Z","2017-11-05T07:04:50Z","2017-11-05T07:54:52Z","2017-11-05T08:44:50Z","2017-11-05T09:34:51Z","2017-11-05T10:24:52Z","2017-11-05T11:14:51Z","2017-11-05T12:04:50Z","2017-11-05T12:54:52Z","2017-11-05T13:44:51Z","2017-11-05T14:34:51Z","2017-11-05T15:24:51Z","2017-11-05T16:14:53Z","2017-11-05T17:04:52Z","2017-11-05T17:54:50Z","2017-11-05T18:44:52Z","2017-11-05T19:34:51Z","2017-11-05T20:24:51Z","2017-11-05T21:14:51Z","2017-11-05T22:04:51Z","2017-11-05T22:54:50Z","2017-11-05T23:44:51Z","2017-11-06T00:34:51Z","2017-11-06T01:24:50Z","2017-11-06T02:14:51Z","2017-11-06T03:04:52Z","2017-11-06T03:54:52Z","2017-11-06T04:44:52Z","2017-11-06T05:34:52Z","2017-11-06T06:24:52Z","2017-11-06T07:14:53Z","2017-11-06T08:04:52Z","2017-11-06T08:54:52Z","2017-11-06T09:44:52Z","2017-11-06T10:34:52Z","2017-11-06T11:24:51Z","2017-11-06T12:14:51Z","2017-11-06T13:04:52Z","2017-11-06T13:54:51Z","2017-11-06T14:44:52Z","2017-11-06T15:34:50Z","2017-11-06T16:24:51Z","2017-11-06T17:14:50Z","2017-11-06T18:04:51Z","2017-11-06T18:54:51Z","2017-11-06T19:44:51Z","2017-11-06T20:34:51Z","2017-11-06T21:24:52Z","2017-11-06T22:14:51Z","2017-11-06T23:04:51Z","2017-11-06T23:54:52Z","2017-11-07T00:44:52Z","2017-11-07T01:34:51Z","2017-11-07T02:24:49Z","2017-11-07T03:14:48Z","2017-11-07T04:04:54Z","2017-11-07T04:54:53Z","2017-11-07T05:44:52Z","2017-11-07T06:34:52Z","2017-11-07T07:24:51Z","2017-11-07T08:14:52Z","2017-11-07T09:04:51Z","2017-11-07T09:54:51Z","2017-11-07T10:44:51Z","2017-11-07T11:34:50Z","2017-11-07T12:24:51Z","2017-11-07T13:14:52Z","2017-11-07T14:04:51Z","2017-11-07T14:54:50Z","2017-11-07T15:44:51Z","2017-11-07T16:34:51Z","2017-11-07T17:24:51Z","2017-11-07T18:14:51Z","2017-11-07T19:04:50Z","2017-11-07T19:54:50Z","2017-11-07T20:44:51Z","2017-11-07T21:34:51Z","2017-11-07T22:24:51Z","2017-11-07T23:14:51Z","2017-11-08T00:04:51Z","2017-11-08T00:54:51Z","2017-11-08T01:44:51Z","2017-11-08T02:34:51Z","2017-11-08T03:24:52Z","2017-11-08T04:14:51Z","2017-11-08T05:04:52Z","2017-11-08T05:54:51Z","2017-11-08T06:44:51Z","2017-11-08T07:34:51Z","2017-11-08T08:24:52Z","2017-11-08T09:14:51Z","2017-11-08T10:04:50Z","2017-11-08T10:54:51Z","2017-11-08T11:44:49Z","2017-11-08T12:34:52Z","2017-11-08T13:24:51Z","2017-11-08T14:14:51Z","2017-11-08T15:04:51Z","2017-11-08T15:54:51Z","2017-11-08T16:44:50Z","2017-11-08T17:34:51Z","2017-11-08T18:24:51Z","2017-11-08T19:14:51Z","2017-11-08T20:04:51Z","2017-11-08T20:54:52Z","2017-11-08T21:44:51Z","2017-11-08T22:34:53Z","2017-11-08T23:24:51Z","2017-11-09T00:14:50Z","2017-11-09T01:04:50Z","2017-11-09T01:47:22Z"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-10.4303216608241,-6.06694500613958],"lng":[39.3336066668853,40.848311654292]}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 4: ADCP measurement along the coastal of Tanzania
+</p>
+</div>
+</div>
+<div id="subset-adcp" class="section level3">
+<h3>Subset ADCP</h3>
+<p>Since I am interested on the current between Lindi and Mafia Island (Figure <a href="#fig:fig5">5</a>), I ought to chop the pings that fall within the area. Unfortunately the function <code>subset()</code>, which I used, only capable of chopping adcp data using either time or distance. Based on figure <a href="#fig:fig4">4</a>, only the pings profiles within the areas were selected by visual inspection of the points on the map and then use the date file to filter those pings with <code>subset()</code> function. Once the pings were selected, then <code>distance, longitude, latitude, v, u</code> were extracted. Using the <code>u</code> and <code>v</code> component, the <code>velocity</code> was computed with the equation (eq:eqn1)</p>
+$$
+<span class="math display" id="eq:eqn1">\[\begin{equation}
+  Velocity (ms^{-1})\:=\: \sqrt{(U^2+V^2)} \tag{1}
+  
+  \end{equation}\]</span>
+<p>$$</p>
+<div class="figure"><span id="fig:fig5"></span>
+<div id="htmlwidget-2" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-8.02516168635339,-8.09116167202592,-8.25942334067076,-8.43030499108136,-8.59879832714796,-8.76799500547349,-8.94053499866277,-9.11475666146725,-9.28787999320775,-9.4605816565454,-9.63324000220746,-9.80575998779386],[40.0961233433336,40.0992283439264,40.1001800084487,40.0901633324102,40.0642466638237,40.0349066667259,40.0054116547108,39.9776366678998,39.9494649823755,39.9258266743273,39.8972083339468,39.8675483325496],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["2017-11-07T13:14:52Z","2017-11-07T14:04:51Z","2017-11-07T14:54:50Z","2017-11-07T15:44:51Z","2017-11-07T16:34:51Z","2017-11-07T17:24:51Z","2017-11-07T18:14:51Z","2017-11-07T19:04:50Z","2017-11-07T19:54:50Z","2017-11-07T20:44:51Z","2017-11-07T21:34:51Z","2017-11-07T22:24:51Z"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-9.80575998779386,-8.02516168635339],"lng":[39.8675483325496,40.1001800084487]}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 5: A transect of ADCP between Lindi and Mafia Island
+</p>
+</div>
+<p>Figure <a href="#fig:fig6">6</a> show ocean current betwen Lindi and Mafia Island (figure #ref(fig:fig5)) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current <span class="citation">(McClanahan, <a href="#ref-mcclanahan">1988</a>)</span>.</p>
+<div class="figure"><span id="fig:fig6"></span>
+<img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig6-1.png" alt="Current Profile " width="672" />
+<p class="caption">
+Figure 6: Current Profile
+</p>
+</div>
+</div>
+<div id="cited-literature" class="section level3 unnumbered">
+<h3>Cited Literature</h3>
+<div id="refs" class="references">
+<div id="ref-oce">
+<p>Kelley, D., &amp; Richards, C. (2018). <em>Oce: Analysis of oceanographic data</em>. Retrieved from <a href="https://CRAN.R-project.org/package=oce" class="uri">https://CRAN.R-project.org/package=oce</a></p>
+</div>
+<div id="ref-mcclanahan">
+<p>McClanahan, T. R. (1988). Seasonality in east africa’s coastal waters.</p>
+</div>
+</div>
+</div>
