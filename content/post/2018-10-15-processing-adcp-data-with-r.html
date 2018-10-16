@@ -35,7 +35,11 @@ require(tidyverse)
 require(lubridate)
 require(leaflet)
 require(sf)</code></pre>
-<pre class="r"><code>adp = read.adp(&quot;C:/Users/Semba/Documents/IIOE2/adcp/IIEO2/AGU028002_000000.LTA&quot;)
+</div>
+<div id="ingestion-of-the-data" class="section level3">
+<h3>Ingestion of the data</h3>
+<p>Once the package needed for this routine are loaded, we can start processing the data. However, we need to import this dataset into the workspace using the <code>read.adp()</code> function from <code>oce</code> package</p>
+<pre class="r"><code>adp = read.adp(&quot;./AGU028002_000000.LTA&quot;)
 # summary(adp)
 time = adp[[&quot;time&quot;]]</code></pre>
 <p>Figure <a href="#fig:fig1">1</a> show the velocity of zonal (north) and meridional (east) components from the raw data as captured by the ADCP instrument. These velocities were measured along the coastal of Tanzania water from 2017-11-04 17:22:17 off Unguja Island close to Chwaka Bay and finish on2017-11-09 02:02:23 in Mtwara.</p>

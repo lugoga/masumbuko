@@ -32,8 +32,18 @@ require(leaflet)
 require(sf)
 ```
 
-```{r, echo=TRUE}
+### Ingestion of the data
+Once the package needed for this routine are loaded, we can start processing the data. However, we need to import this dataset into the workspace using the `read.adp()` function from `oce` package
+```{r, echo=FALSE}
+## this chunk is the one loading the data, I muted it by pursing the argument echo = FALSE to prevent viewer to see the path of the file. the chunk below does not execute 
 adp = read.adp("C:/Users/Semba/Documents/IIOE2/adcp/IIEO2/AGU028002_000000.LTA")
+# summary(adp)
+time = adp[["time"]]
+```
+
+
+```{r, echo=TRUE, eval=FALSE}
+adp = read.adp("./AGU028002_000000.LTA")
 # summary(adp)
 time = adp[["time"]]
 ```
