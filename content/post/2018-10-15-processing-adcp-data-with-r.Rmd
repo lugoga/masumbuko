@@ -48,7 +48,7 @@ adp = read.adp("./AGU028002_000000.LTA")
 time = adp[["time"]]
 ```
 
-Figure \@ref(fig:fig1) show the velocity of zonal (north) and meridional (east) components from the raw data as captured by the ADCP instrument. These velocities were measured along the coastal of Tanzania water from `r time[1]` off Unguja Island close to Chwaka Bay and finish on`r time[length(time)]` in Mtwara.  
+Figure \@ref(fig:fig1) show the velocity of zonal (north) and meridional (east) components from the raw data as captured by the ADCP instrument. These velocities were measured along the coastal of Tanzania water from `r time[1]` off Unguja Island close to Chwaka Bay and finish on `r time[length(time)]` in Mtwara.  
 
 ```{r fig1, fig.cap="Meridional and Zonal components velocity before averaging the profiles", , echo=TRUE}
 
@@ -230,10 +230,11 @@ ggplot(data = kilwa.profile.long, aes(y = distance, x = velocity, col = profile)
   scale_y_reverse()+
   scale_x_continuous(position = "top")+
   theme_bw()+
-  theme(axis.text = element_text(colour = "black", size = 11),
+  theme(axis.text = element_text(colour = "black", size = 10),
+        axis.title = element_text(colour = "black", size = 12),
         legend.position = "none")+
   labs(y = expression(~Distance~(m)),
-       x = expression(~current~Velocity~({ms^-1})))+
+       x = expression(~Current~Velocity~({ms^-1})))+
   facet_wrap(~profile, scales = "free_x")
 
 ```
@@ -245,10 +246,11 @@ ggplot(data = kilwa.profile.long %>%filter(profile %in% c("profile1")), aes(y = 
   scale_y_reverse()+
   scale_x_continuous(position = "top")+
   theme_bw()+
-  theme(axis.text = element_text(colour = "black", size = 11),
+  theme(axis.text = element_text(colour = "black", size = 10),
+        axis.title = element_text(colour = "black", size = 12),
         legend.position = "none")+
   labs(y = expression(~Distance~(m)),
-       x = expression(~current~Velocity~({ms^-1})))
+       x = expression(~Current~Velocity~({ms^-1})))
 ```
 
 ### Cited Literature
