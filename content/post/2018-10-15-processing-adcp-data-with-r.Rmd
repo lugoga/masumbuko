@@ -38,12 +38,6 @@ adp = read.adp("C:/Users/Semba/Documents/IIOE2/adcp/IIEO2/AGU028002_000000.LTA")
 time = adp[["time"]]
 ```
 
-An ADCP (RD Instruments WH-Sentinel 300 kHz) was deployed ~25 km off the coast of Hokkaido (142°39.9′ E, 45°15.5′ N), where the water depth is ~90m (solid circle in Fig. 1). The ADCP was housed in a trawl-resistant bottom mount (Flotation Technologies AL200) to avoid damage from fishing activities. This measurement site was chosen to capture the SWC axis and avoid the border issue around the Soya Strait. 
-
-
-The ADCP obtained valid data in nineteen 4-m bins from ~81–85 m to ~9–13 m. To remove the tidal constituents, a 25-hr running-mean filter is applied to the data, after which daily- and monthlyaveraged values are calculated. Along with the vertical structure of velocity obtained by the bottom-mounted ADCP, the horizontal structure obtained by the ocean radars (Codar Ocean Sensors
-
-
 Figure \@ref(fig:fig1) show the velocity of zonal (north) and meridional (east) components from the raw data as captured by the ADCP instrument. These velocities were measured along the coastal of Tanzania water from `r time[1]` off Unguja Island close to Chwaka Bay and finish on`r time[length(time)]` in Mtwara.  
 
 ```{r fig1, fig.cap="Meridional and Zonal components velocity before averaging the profiles", , echo=TRUE}

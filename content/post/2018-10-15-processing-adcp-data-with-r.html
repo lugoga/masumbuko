@@ -38,8 +38,6 @@ require(sf)</code></pre>
 <pre class="r"><code>adp = read.adp(&quot;C:/Users/Semba/Documents/IIOE2/adcp/IIEO2/AGU028002_000000.LTA&quot;)
 # summary(adp)
 time = adp[[&quot;time&quot;]]</code></pre>
-<p>An ADCP (RD Instruments WH-Sentinel 300 kHz) was deployed ~25 km off the coast of Hokkaido (142°39.9′ E, 45°15.5′ N), where the water depth is ~90m (solid circle in Fig. 1). The ADCP was housed in a trawl-resistant bottom mount (Flotation Technologies AL200) to avoid damage from fishing activities. This measurement site was chosen to capture the SWC axis and avoid the border issue around the Soya Strait.</p>
-<p>The ADCP obtained valid data in nineteen 4-m bins from ~81–85 m to ~9–13 m. To remove the tidal constituents, a 25-hr running-mean filter is applied to the data, after which daily- and monthlyaveraged values are calculated. Along with the vertical structure of velocity obtained by the bottom-mounted ADCP, the horizontal structure obtained by the ocean radars (Codar Ocean Sensors</p>
 <p>Figure <a href="#fig:fig1">1</a> show the velocity of zonal (north) and meridional (east) components from the raw data as captured by the ADCP instrument. These velocities were measured along the coastal of Tanzania water from 2017-11-04 17:22:17 off Unguja Island close to Chwaka Bay and finish on2017-11-09 02:02:23 in Mtwara.</p>
 <pre class="r"><code>plot(adp, which = c(1:2), 
      tformat = &quot;%B %d, %Y:%H:%M&quot;, 
