@@ -125,6 +125,11 @@ Figure 5: A transect of ADCP between Lindi and Mafia Island
 </p>
 </div>
 <p>Figure <a href="#fig:fig6">6</a> show ocean current betwen Lindi and Mafia Island (figure <a href="#fig:fig5">5</a>) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current <span class="citation">(McClanahan, <a href="#ref-mcclanahan">1988</a>)</span>.</p>
+<pre class="r"><code>imagep(lat,distance, vel-6, filledContour = TRUE, 
+       ylim = c(700, 30), zlim = c(0,1.0), zclip = TRUE, 
+       col = oceColors9A(120), xlim = c(-9.5, -8.3), 
+       xlab = &quot;Latitude&quot;, ylab = &quot;Depth (meters)&quot;, 
+       zlab = &quot;Current Velocity [m/s]&quot;, zlabPosition = &quot;side&quot;)</code></pre>
 <div class="figure"><span id="fig:fig6"></span>
 <img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig6-1.png" alt="Current Profile " width="672" />
 <p class="caption">

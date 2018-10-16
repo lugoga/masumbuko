@@ -170,7 +170,7 @@ leaflet(data = kilwa.sf)%>%
 Figure \@ref(fig:fig6) show ocean current betwen Lindi and Mafia Island (figure \@ref(fig:fig5)) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current [@mcclanahan].
 
 
-```{r fig6, fig.cap="Current Profile "}
+```{r fig6, fig.cap="Current Profile ", echo=TRUE}
 
 
 imagep(lat,distance, vel-6, filledContour = TRUE, 
