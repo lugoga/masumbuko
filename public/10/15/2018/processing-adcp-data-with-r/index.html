@@ -171,13 +171,12 @@ Figure 4: ADCP measurement along the coastal of Tanzania
 </div>
 <div id="subset-adcp" class="section level3">
 <h3>Subset ADCP</h3>
-<p>Since I am interested on the current between Lindi and Mafia Island (Figure <a href="#fig:fig5">5</a>), I ought to chop the pings that fall within the area. Unfortunately the function <code>subset()</code>, which I used, only capable of chopping adcp data using either time or distance. Based on figure <a href="#fig:fig4">4</a>, only the pings profiles within the areas were selected by visual inspection of the points on the map and then use the date file to filter those pings with <code>subset()</code> function. Once the pings were selected, then <code>distance, longitude, latitude, v, u</code> were extracted. Using the <code>u</code> and <code>v</code> component, the <code>velocity</code> was computed with the equation (eq:eqn1)</p>
-$$
-<span class="math display" id="eq:eqn1">\[\begin{equation}
-  Velocity (ms^{-1})\:=\: \sqrt{(U^2+V^2)} \tag{1}
-  
-  \end{equation}\]</span>
-<p>$$</p>
+<p>Since I am interested on the current between Lindi and Mafia Island (Figure <a href="#fig:fig5">5</a>), I ought to chop the pings that fall within the area. Unfortunately the function <code>subset()</code>, which I used, only capable of chopping adcp data using either time or distance. Based on figure <a href="#fig:fig4">4</a>, only the pings profiles within the areas were selected by visual inspection of the points on the map and then use the date file to filter those pings with <code>subset()</code> function. Once the pings were selected, then <code>distance, longitude, latitude, v, u</code> were extracted. Using the <code>u</code> and <code>v</code> component, the <code>velocity</code> was computed with the equation <a href="#eq:eqn1">(1)</a></p>
+<p><span class="math display" id="eq:eqn1">\[
+\begin{equation}
+Velocity (ms^{-1})\:=\: \sqrt{(U^2+V^2)} \tag{1}
+\end{equation}
+\]</span></p>
 <div class="figure"><span id="fig:fig5"></span>
 <div id="htmlwidget-2" style="width:672px;height:480px;" class="leaflet html-widget"></div>
 <script type="application/json" data-for="htmlwidget-2">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-8.02516168635339,-8.09116167202592,-8.25942334067076,-8.43030499108136,-8.59879832714796,-8.76799500547349,-8.94053499866277,-9.11475666146725,-9.28787999320775,-9.4605816565454,-9.63324000220746,-9.80575998779386],[40.0961233433336,40.0992283439264,40.1001800084487,40.0901633324102,40.0642466638237,40.0349066667259,40.0054116547108,39.9776366678998,39.9494649823755,39.9258266743273,39.8972083339468,39.8675483325496],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["2017-11-07T13:14:52Z","2017-11-07T14:04:51Z","2017-11-07T14:54:50Z","2017-11-07T15:44:51Z","2017-11-07T16:34:51Z","2017-11-07T17:24:51Z","2017-11-07T18:14:51Z","2017-11-07T19:04:50Z","2017-11-07T19:54:50Z","2017-11-07T20:44:51Z","2017-11-07T21:34:51Z","2017-11-07T22:24:51Z"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-9.80575998779386,-8.02516168635339],"lng":[39.8675483325496,40.1001800084487]}},"evals":[],"jsHooks":[]}</script>
@@ -185,7 +184,7 @@ $$
 Figure 5: A transect of ADCP between Lindi and Mafia Island
 </p>
 </div>
-<p>Figure <a href="#fig:fig6">6</a> show ocean current betwen Lindi and Mafia Island (figure #ref(fig:fig5)) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current <span class="citation">(McClanahan, <a href="#ref-mcclanahan">1988</a>)</span>.</p>
+<p>Figure <a href="#fig:fig6">6</a> show ocean current betwen Lindi and Mafia Island (figure <a href="#fig:fig5">5</a>) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current <span class="citation">(McClanahan, <a href="#ref-mcclanahan">1988</a>)</span>.</p>
 <div class="figure"><span id="fig:fig6"></span>
 <img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig6-1.png" alt="Current Profile " width="672" />
 <p class="caption">

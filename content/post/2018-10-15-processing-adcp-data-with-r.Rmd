@@ -133,13 +133,12 @@ leaflet(data = position) %>%
 
 
 ### Subset ADCP
-Since I am interested on the current between Lindi and Mafia Island (Figure \@ref(fig:fig5)), I ought to chop the pings that fall within the area. Unfortunately the function `subset()`, which I used, only capable of chopping adcp data using either time or distance. Based on figure \@ref(fig:fig4), only the pings profiles within the areas were selected by visual inspection of the points on the map and then use the date file to filter those pings with `subset()` function. Once the pings were selected, then `distance, longitude, latitude, v, u` were extracted. Using the `u` and `v` component, the `velocity` was computed with the equation \ref(eq:eqn1)
+Since I am interested on the current between Lindi and Mafia Island (Figure \@ref(fig:fig5)), I ought to chop the pings that fall within the area. Unfortunately the function `subset()`, which I used, only capable of chopping adcp data using either time or distance. Based on figure \@ref(fig:fig4), only the pings profiles within the areas were selected by visual inspection of the points on the map and then use the date file to filter those pings with `subset()` function. Once the pings were selected, then `distance, longitude, latitude, v, u` were extracted. Using the `u` and `v` component, the `velocity` was computed with the equation \@ref(eq:eqn1)
 
 $$
-  \begin{equation}
-  Velocity (ms^{-1})\:=\: \sqrt{(U^2+V^2)} (\#eq:eqn1)
-  
-  \end{equation}
+\begin{equation}
+Velocity (ms^{-1})\:=\: \sqrt{(U^2+V^2)} (\#eq:eqn1)
+\end{equation}
 $$
 
 ```{r}
@@ -168,7 +167,7 @@ leaflet(data = kilwa.sf)%>%
   addTiles()%>%
   addMarkers(popup = ~time)
 ```
-Figure \@ref(fig:fig6) show ocean current betwen Lindi and Mafia Island (figure \#ref(fig:fig5)) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current [@mcclanahan].
+Figure \@ref(fig:fig6) show ocean current betwen Lindi and Mafia Island (figure \@ref(fig:fig5)) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current [@mcclanahan].
 
 
 ```{r fig6, fig.cap="Current Profile "}
