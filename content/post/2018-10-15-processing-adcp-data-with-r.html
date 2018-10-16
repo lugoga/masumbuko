@@ -28,7 +28,7 @@ link-citations: yes
 
 <div id="introduction" class="section level3">
 <h3>Introduction</h3>
-<p>The Second International Indian Ocean Expedition (IIOE-2) collected variaous oceanographic data within the coastal water of Tanzania. Among the oceanographic data collected using Agulhas II, is the Acoustic Doppler Current Profiles (ADCP). The measurement was carried out from 4<sup>th</sup> to 9<sup>th</sup> November 2017.</p>
+<p>The Second International Indian Ocean Expedition (IIOE-2) collected variaous oceanographic data within the coastal water of Tanzania. Among the oceanographic data collected using Agulhas II, is the Acoustic Doppler Current Profiles (ADCP). The measurement was carried out from 4<sup>th</sup> to 9<sup>th</sup> November 2017. In this post, I will illustrate how to process the ADCP data with R using <code>oce</code> package developed by <span class="citation">Kelley &amp; Richards (<a href="#ref-oce">2018</a>)</span>. First, we need to load other packages needed for this routine using <code>require()</code> function <span class="citation">(Cheng, Karambelkar, &amp; Xie, <a href="#ref-leaflet">2018</a>; Grolemund &amp; Wickham, <a href="#ref-lubridate">2011</a>; Kelley, <a href="#ref-ocedata">2015</a>; Pebesma, <a href="#ref-sf">2018</a>; Wickham, <a href="#ref-tidyverse">2017</a>)</span>.</p>
 <pre class="r"><code>require(oce)
 require(ocedata)
 require(tidyverse)
@@ -81,7 +81,8 @@ Figure 2: Meridional and Zonal components velocity after averaging the profiles
 </div>
 <p>The averaged profile (figure <a href="#fig:fig2">2</a>) were then aligned to the uniform depth (figure <a href="#fig:fig3">3</a>). This process is important because it compansate the pitch and roll of the instrument during ship cruising. This only works for adcp data that are in beam coordinates.</p>
 <pre class="r"><code>ensembled.bin = binmapAdp(ensembled)</code></pre>
-<pre class="r"><code>plot(ensembled.bin, which = c(1:2), 
+<pre class="r"><code>## plot the ensembled
+plot(ensembled.bin, which = c(1:2), 
      tformat = &quot;%B %d, %Y:%H:%M&quot;, 
      missingColor = &quot;grey&quot;, 
      ylim = c(25,1000),
@@ -117,6 +118,28 @@ Figure 4: ADCP measurement along the coastal of Tanzania
 Velocity (ms^{-1})\:=\: \sqrt{(U^2+V^2)} \tag{1}
 \end{equation}
 \]</span></p>
+<pre class="r"><code>## creae a date limit
+date = c(&quot;2017-11-07 13:14:52&quot;, &quot;2017-11-07 23:14:51&quot;)%&gt;%as_datetime()
+
+## subset to the area based on date limit,
+kilwa.adcp = ensembled.bin%&gt;%subset(time &gt;= date[1] &amp; time &lt;= date[2])%&gt;%subset(distance &lt; 700)
+
+## extract variables from the subset
+time = kilwa.adcp[[&quot;time&quot;]]
+distance = kilwa.adcp[[&quot;distance&quot;]]
+lon = kilwa.adcp[[&quot;firstLongitude&quot;]]
+lat = kilwa.adcp[[&quot;firstLatitude&quot;]]
+v = kilwa.adcp[[&quot;v&quot;]][,,1]
+u = kilwa.adcp[[&quot;v&quot;]][,,2]
+
+vel = sqrt(v^2 + u^2)</code></pre>
+<pre class="r"><code>## make sf feature
+kilwa.sf = data.frame(lon,lat,time)%&gt;%st_as_sf(coords = c(&quot;lon&quot;, &quot;lat&quot;))%&gt;%st_set_crs(4326)
+
+## plot the location of ADCP
+leaflet(data = kilwa.sf)%&gt;%
+  addTiles()%&gt;%
+  addMarkers(popup = ~time)</code></pre>
 <div class="figure"><span id="fig:fig5"></span>
 <div id="htmlwidget-2" style="width:672px;height:480px;" class="leaflet html-widget"></div>
 <script type="application/json" data-for="htmlwidget-2">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-8.02516168635339,-8.09116167202592,-8.25942334067076,-8.43030499108136,-8.59879832714796,-8.76799500547349,-8.94053499866277,-9.11475666146725,-9.28787999320775,-9.4605816565454,-9.63324000220746,-9.80575998779386],[40.0961233433336,40.0992283439264,40.1001800084487,40.0901633324102,40.0642466638237,40.0349066667259,40.0054116547108,39.9776366678998,39.9494649823755,39.9258266743273,39.8972083339468,39.8675483325496],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["2017-11-07T13:14:52Z","2017-11-07T14:04:51Z","2017-11-07T14:54:50Z","2017-11-07T15:44:51Z","2017-11-07T16:34:51Z","2017-11-07T17:24:51Z","2017-11-07T18:14:51Z","2017-11-07T19:04:50Z","2017-11-07T19:54:50Z","2017-11-07T20:44:51Z","2017-11-07T21:34:51Z","2017-11-07T22:24:51Z"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-9.80575998779386,-8.02516168635339],"lng":[39.8675483325496,40.1001800084487]}},"evals":[],"jsHooks":[]}</script>
@@ -125,7 +148,8 @@ Figure 5: A transect of ADCP between Lindi and Mafia Island
 </p>
 </div>
 <p>Figure <a href="#fig:fig6">6</a> show ocean current betwen Lindi and Mafia Island (figure <a href="#fig:fig5">5</a>) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current <span class="citation">(McClanahan, <a href="#ref-mcclanahan">1988</a>)</span>.</p>
-<pre class="r"><code>imagep(lat,distance, vel-6, filledContour = TRUE, 
+<pre class="r"><code>## plot the velocity profiles as section
+imagep(lat,distance, vel-6, filledContour = TRUE, 
        ylim = c(700, 30), zlim = c(0,1.0), zclip = TRUE, 
        col = oceColors9A(120), xlim = c(-9.5, -8.3), 
        xlab = &quot;Latitude&quot;, ylab = &quot;Depth (meters)&quot;, 
@@ -140,11 +164,26 @@ Figure 6: Current Profile
 <div id="cited-literature" class="section level3 unnumbered">
 <h3>Cited Literature</h3>
 <div id="refs" class="references">
+<div id="ref-leaflet">
+<p>Cheng, J., Karambelkar, B., &amp; Xie, Y. (2018). <em>Leaflet: Create interactive web maps with the javascript ’leaflet’ library</em>. Retrieved from <a href="https://CRAN.R-project.org/package=leaflet" class="uri">https://CRAN.R-project.org/package=leaflet</a></p>
+</div>
+<div id="ref-lubridate">
+<p>Grolemund, G., &amp; Wickham, H. (2011). Dates and times made easy with lubridate. <em>Journal of Statistical Software</em>, <em>40</em>(3), 1–25. Retrieved from <a href="http://www.jstatsoft.org/v40/i03/" class="uri">http://www.jstatsoft.org/v40/i03/</a></p>
+</div>
+<div id="ref-ocedata">
+<p>Kelley, D. (2015). <em>Ocedata: Oceanographic datasets for oce</em>. Retrieved from <a href="https://CRAN.R-project.org/package=ocedata" class="uri">https://CRAN.R-project.org/package=ocedata</a></p>
+</div>
 <div id="ref-oce">
 <p>Kelley, D., &amp; Richards, C. (2018). <em>Oce: Analysis of oceanographic data</em>. Retrieved from <a href="https://CRAN.R-project.org/package=oce" class="uri">https://CRAN.R-project.org/package=oce</a></p>
 </div>
 <div id="ref-mcclanahan">
 <p>McClanahan, T. R. (1988). Seasonality in east africa’s coastal waters.</p>
+</div>
+<div id="ref-sf">
+<p>Pebesma, E. (2018). <em>Sf: Simple features for r</em>. Retrieved from <a href="https://CRAN.R-project.org/package=sf" class="uri">https://CRAN.R-project.org/package=sf</a></p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, H. (2017). <em>Tidyverse: Easily install and load the ’tidyverse’</em>. Retrieved from <a href="https://CRAN.R-project.org/package=tidyverse" class="uri">https://CRAN.R-project.org/package=tidyverse</a></p>
 </div>
 </div>
 </div>
