@@ -18,6 +18,7 @@ link-citations: yes
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+options(digits = 4)
 ```
 
 ### Introduction
@@ -196,6 +197,7 @@ imagep(lat,distance, vel-6, filledContour = TRUE,
 ```
 
 
+
 ```{r}
 # create profiles
 kilwa.profile = vel %>% 
@@ -253,4 +255,27 @@ ggplot(data = kilwa.profile.long %>%filter(profile %in% c("profile1")), aes(y = 
        x = expression(~Current~Velocity~({ms^-1})))
 ```
 
+### Absolute velocity
+The ADCP measure a relative velocity to the earth, to obtain an absolute velocity, we need to substract the relative velocity with the ship velocity as illustrated in the chunk below
+
+```{r, echo=TRUE}
+vel.abs = abs(vel-kilwa.adcp[["avgSpeed"]])
+
+```
+After correction, the absolute currrent velocity ranged from `r min(vel.abs)`  to `r min(vel.abs)` with the median of `r median(vel.abs)`. We see current speed decrease with depth where the surface water has a relatively higher current speed than the deep water (figure \@ref(fig:fig9)). It also clear the surface current velocity increase from  Lindi to around latitude 9 ^o^S has relatively lower surface current and increases from 8 ^o^S toward Mafia (figure \@ref(fig:fig9)), which might be caused by East African Coastal Current.
+
+```{r fig9, fig.cap="ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed"}
+
+## plot the velocity profiles as section
+
+imagep(lat,distance, vel.abs, filledContour = TRUE, 
+       ylim = c(700, 30), zlim = c(0,.6), zclip = TRUE, 
+       col = oceColors9A(120), xlim = c(-9.5, -8.3), 
+       xlab = "Latitude", ylab = "Depth (meters)", 
+       zlab = "Current Velocity [m/s]", zlabPosition = "side")
+
+
+
+
+```
 ### Cited Literature
