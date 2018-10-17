@@ -216,8 +216,8 @@ Figure 5: A transect of ADCP between Lindi and Mafia Island
 </div>
 <p>Figure <a href="#fig:fig6">6</a> show ocean current betwen Lindi and Mafia Island (figure <a href="#fig:fig5">5</a>) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current <span class="citation">(McClanahan, <a href="#ref-mcclanahan">1988</a>)</span>.</p>
 <pre class="r"><code>## plot the velocity profiles as section
-imagep(lat,distance, vel-6, filledContour = TRUE, 
-       ylim = c(700, 30), zlim = c(0,1.0), zclip = TRUE, 
+imagep(lat,distance, vel, filledContour = TRUE, 
+       ylim = c(700, 30), zlim = c(6,7.0), zclip = TRUE, 
        col = oceColors9A(120), xlim = c(-9.5, -8.3), 
        xlab = &quot;Latitude&quot;, ylab = &quot;Depth (meters)&quot;, 
        zlab = &quot;Current Velocity [m/s]&quot;, zlabPosition = &quot;side&quot;)</code></pre>
@@ -230,8 +230,25 @@ Figure 6: Current Profile
 </div>
 <div id="spurous-measurements" class="section level3">
 <h3>Spurous measurements</h3>
-We notice that the current measurements deviate from what has been reported previously. Figure <a href="#fig:fig7">7</a> show most profile along the transect from Lindi to Mafia have current speed above normal except profile measured at location with latitude -8.0252 and longitude 40.0961 (figure <a href="#fig:fig8">8</a>).<br />
+<p>Looking on individual profiles, We noticed that the current velocity deviate from what has been reported previously. Figure <a href="#fig:fig7">7</a> show most profile along the transect from Lindi to Mafia have current speed above normal except profile measured at location with latitude -8.0252 and longitude 40.0961 (figure <a href="#fig:fig8">8</a>). Because I used relative velocity instead of absolute velocity.</p>
+<pre class="r"><code># create profiles
+kilwa.profile = vel %&gt;% 
+   # transpose
+  t() %&gt;% 
+  # convert to data frame
+  as.data.frame() %&gt;%
+  # make it tibble
+  as.tibble()
 
+## change variable names
+colnames(kilwa.profile) =  paste(&quot;profile&quot;, 1:12, sep = &quot;&quot;)
+
+## bind the disance to the profile
+kilwa.profile = data.frame(distance, kilwa.profile)
+
+## make it long form from wide form
+kilwa.profile.long = kilwa.profile %&gt;%
+  gather(key = &quot;profile&quot;, value = &quot;velocity&quot;, 2:13)</code></pre>
 <div class="figure"><span id="fig:fig7"></span>
 <img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig7-1.png" alt="Current profiles at each ping" width="672" />
 <p class="caption">

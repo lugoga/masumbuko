@@ -188,8 +188,8 @@ Figure \@ref(fig:fig6) show ocean current betwen Lindi and Mafia Island (figure 
 ```{r fig6, fig.cap="Current Profile ", echo=TRUE}
 
 ## plot the velocity profiles as section
-imagep(lat,distance, vel-6, filledContour = TRUE, 
-       ylim = c(700, 30), zlim = c(0,1.0), zclip = TRUE, 
+imagep(lat,distance, vel, filledContour = TRUE, 
+       ylim = c(700, 30), zlim = c(6,7.0), zclip = TRUE, 
        col = oceColors9A(120), xlim = c(-9.5, -8.3), 
        xlab = "Latitude", ylab = "Depth (meters)", 
        zlab = "Current Velocity [m/s]", zlabPosition = "side")
@@ -198,7 +198,10 @@ imagep(lat,distance, vel-6, filledContour = TRUE,
 
 
 
-```{r}
+### Spurous measurements
+Looking on individual profiles, We noticed that the current velocity deviate from what has been reported previously. Figure \@ref(fig:fig7) show most profile along the transect from Lindi to Mafia have current speed above normal except profile measured at location with latitude `r lat[1]` and longitude `r lon[1]` (figure \@ref(fig:fig8)). Because I used relative velocity instead of absolute velocity.
+
+```{r, echo=TRUE}
 # create profiles
 kilwa.profile = vel %>% 
    # transpose
@@ -214,18 +217,12 @@ colnames(kilwa.profile) =  paste("profile", 1:12, sep = "")
 ## bind the disance to the profile
 kilwa.profile = data.frame(distance, kilwa.profile)
 
-```
-
-
-```{r}
 ## make it long form from wide form
 kilwa.profile.long = kilwa.profile %>%
   gather(key = "profile", value = "velocity", 2:13)
 
 ```
 
-### Spurous measurements
-We notice that the current measurements deviate from what has been reported previously. Figure \@ref(fig:fig7) show most profile along the transect from Lindi to Mafia have current speed above normal except profile measured at location with latitude `r lat[1]` and longitude `r lon[1]` (figure \@ref(fig:fig8)).  
 ```{r fig7, fig.cap="Current profiles at each ping"}
 ggplot(data = kilwa.profile.long, aes(y = distance, x = velocity, col = profile))+
   geom_path()+
