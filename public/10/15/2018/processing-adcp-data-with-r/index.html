@@ -65,7 +65,7 @@
 
   <article class="article">
     
-    <span class="article-duration">7 min read</span>
+    <span class="article-duration">8 min read</span>
     
 
     <h1 class="article-title">Processing ADCP Data with R</h1>
@@ -88,7 +88,7 @@
 
 <div id="introduction" class="section level3">
 <h3>Introduction</h3>
-<p>The Second International Indian Ocean Expedition (IIOE-2) collected variaous oceanographic data within the coastal water of Tanzania. Among the oceanographic data collected using Agulhas II, is the Acoustic Doppler Current Profiles (ADCP). The measurement was carried out from 4<sup>th</sup> to 9<sup>th</sup> November 2017. In this post, I will illustrate how to process the ADCP data with R using <code>oce</code> package developed by <span class="citation">Kelley &amp; Richards (<a href="#ref-oce">2018</a>)</span>. First, we need to load other packages needed for this routine using <code>require()</code> function <span class="citation">(Cheng, Karambelkar, &amp; Xie, <a href="#ref-leaflet">2018</a>; Grolemund &amp; Wickham, <a href="#ref-lubridate">2011</a>; Kelley, <a href="#ref-ocedata">2015</a>; Pebesma, <a href="#ref-sf">2018</a>; Wickham, <a href="#ref-tidyverse">2017</a>)</span>.</p>
+<p>The Second International Indian Ocean Expedition (IIOE-2) collected various oceanographic data within the coastal water of Tanzania. Among the oceanographic data collected using Agulhas II, is the Acoustic Doppler Current Profiles (ADCP). The measurement was carried out from 4<sup>th</sup> to 9<sup>th</sup> November 2017. In this post, I will illustrate how to process the ADCP data with R using <code>oce</code> package developed by <span class="citation">Kelley &amp; Richards (<a href="#ref-oce">2018</a>)</span>. First, we need to load other packages needed for this routine using <code>require()</code> function <span class="citation">(Cheng, Karambelkar, &amp; Xie, <a href="#ref-leaflet">2018</a>; Grolemund &amp; Wickham, <a href="#ref-lubridate">2011</a>; Kelley, <a href="#ref-ocedata">2015</a>; Pebesma, <a href="#ref-sf">2018</a>; Wickham, <a href="#ref-tidyverse">2017</a>)</span>.</p>
 <pre class="r"><code>require(oce)
 require(ocedata)
 require(tidyverse)
@@ -122,7 +122,7 @@ Figure 1: Meridional and Zonal components velocity before averaging the profiles
 </div>
 <div id="ensemble-adp-objects" class="section level3">
 <h3>Ensemble adp objects</h3>
-<p>The grey-colored in figure <a href="#fig:fig1">1</a> are bad data mostly comes from single-ping velocity. Therefore, data are averaged to reducem the measurement uncertainity to acceptable levels <span class="citation">(Kelley &amp; Richards, <a href="#ref-oce">2018</a>)</span>. Ensemble refers as a process of averaging ping profiles from ADCP data. This approach is important because it remove the uncertainty in velocity estimates from single pings, it also reduce the size of high frequency data, which reduce processing time. I used <code>adpEnsembleAverage()</code> function from <code>oce</code> package to ensemble (average) the profiles as shown in the chunk below.</p>
+<p>The grey-colored in figure <a href="#fig:fig1">1</a> are bad data mostly comes from single-ping velocity. Therefore, data are averaged to reduce the measurement uncertainty to acceptable levels <span class="citation">(Kelley &amp; Richards, <a href="#ref-oce">2018</a>)</span>. Ensemble refers as a process of averaging ping profiles from ADCP data. This approach is important because it remove the uncertainty in velocity estimates from single pings, it also reduce the size of high frequency data, which reduce processing time. I used <code>adpEnsembleAverage()</code> function from <code>oce</code> package to ensemble (average) the profiles as shown in the chunk below.</p>
 <pre class="r"><code>ensembled = adp%&gt;%adpEnsembleAverage(n = 10, leftover = TRUE, na.rm = TRUE)
 
 # summary(ensembled)</code></pre>
@@ -146,7 +146,7 @@ Figure 2: Meridional and Zonal components velocity after averaging the profiles
 </div>
 <div id="depth-cell-mapping" class="section level3">
 <h3>Depth cell mapping</h3>
-<p>The averaged profile (figure <a href="#fig:fig2">2</a>) were then aligned to the uniform depth—a process referred as <code>depth cell mapping</code>. Figure <a href="#fig:fig3">3</a> show the cells that aligned to the standard depth. This process is important because it ensure horizontal homogeneity of cells that are at the same depth, which compansate the pitch and roll of the instrument during ship cruising. This only works for adcp data that are in beam coordinates.</p>
+<p>The averaged profile (figure <a href="#fig:fig2">2</a>) were then aligned to the uniform depth—a process referred as <code>depth cell mapping</code>. Figure <a href="#fig:fig3">3</a> show the cells that aligned to the standard depth. This process is important because it ensure horizontal homogeneity of cells that are at the same depth, which compensate the pitch and roll of the instrument during ship cruising. This only works for adcp data that are in beam coordinates.</p>
 <pre class="r"><code>ensembled.bin = binmapAdp(ensembled)</code></pre>
 <pre class="r"><code>## plot the ensembled
 plot(ensembled.bin, which = c(1:2), 
@@ -214,7 +214,7 @@ leaflet(data = kilwa.sf)%&gt;%
 Figure 5: A transect of ADCP between Lindi and Mafia Island
 </p>
 </div>
-<p>Figure <a href="#fig:fig6">6</a> show ocean current betwen Lindi and Mafia Island (figure <a href="#fig:fig5">5</a>) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current <span class="citation">(McClanahan, <a href="#ref-mcclanahan">1988</a>)</span>.</p>
+<p>Figure <a href="#fig:fig6">6</a> show ocean current between Lindi and Mafia Island (figure <a href="#fig:fig5">5</a>) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current <span class="citation">(McClanahan, <a href="#ref-mcclanahan">1988</a>)</span>.</p>
 <pre class="r"><code>## plot the velocity profiles as section
 imagep(lat,distance, vel, filledContour = TRUE, 
        ylim = c(700, 30), zlim = c(6,7.0), zclip = TRUE, 
@@ -228,8 +228,8 @@ Figure 6: Current Profile
 </p>
 </div>
 </div>
-<div id="spurous-measurements" class="section level3">
-<h3>Spurous measurements</h3>
+<div id="spurious-measurements" class="section level3">
+<h3>Spurious measurements</h3>
 <p>Looking on individual profiles, We noticed that the current velocity deviate from what has been reported previously. Figure <a href="#fig:fig7">7</a> show most profile along the transect from Lindi to Mafia have current speed above normal except profile measured at location with latitude -8.0252 and longitude 40.0961 (figure <a href="#fig:fig8">8</a>). Because I used relative velocity instead of absolute velocity.</p>
 <pre class="r"><code># create profiles
 kilwa.profile = vel %&gt;% 
@@ -262,8 +262,8 @@ Figure 8: profile at station 1
 </p>
 </div>
 </div>
-<div id="absolute-velocity" class="section level3">
-<h3>Absolute velocity</h3>
+<div id="compute-absolute-velocity" class="section level3">
+<h3>Compute Absolute velocity</h3>
 <p>The ADCP measure a relative velocity to the earth, to obtain an absolute velocity, we need to substract the relative velocity with the ship velocity using the mathematical equation <a href="#eq:eqn2">(2)</a></p>
 <p><span class="math display" id="eq:eqn2">\[
 \begin{equation}
@@ -275,7 +275,31 @@ Figure 8: profile at station 1
 ship.vel = kilwa.adcp[[&quot;avgSpeed&quot;]]
 ## obtain absolute velocity
 vel.abs = abs(vel-ship.vel)</code></pre>
-<p>After ship correction, the absolute currrent velocity ranged from 1.493310^{-4} ms<sup>-1</sup> to 4.647 ms<sup>-1</sup> with the median of 0.1234 ms<sup>-1</sup>. We notice a decline of current speed with increase in depth where the surface water has a relatively higher current speed than the deep water (figure <a href="#fig:fig9">9</a>). It also clear the surface current velocity increase from Lindi to around latitude 9 <sup>o</sup>S has relatively lower surface current and increases from 8 <sup>o</sup>S toward Mafia (figure <a href="#fig:fig9">9</a>), which might be caused by East African Coastal Current.</p>
+<p>After ship correction, the profiles of absolute current velocity ranged from 1.493310^{-4} ms<sup>-1</sup> to 4.647 ms<sup>-1</sup> with the median of 0.1234 ms<sup>-1</sup> (figure <a href="#fig:fig9">9</a>). Stitching the profile together and create a section, we noticed a decline of current speed with increase in depth where the surface water has a relatively higher current speed than the deep water (figure <a href="#fig:fig10">10</a>). It also clear the surface current velocity increase from Lindi to around latitude 9 <sup>o</sup>S has relatively lower surface current and increases from 8 <sup>o</sup>S toward Mafia (figure <a href="#fig:fig10">10</a>), which might be caused by East African Coastal Current.</p>
+<pre class="r"><code># create profiles
+abs.vel.profile = vel.abs %&gt;% 
+   # transpose
+  t() %&gt;% 
+  # convert to data frame
+  as.data.frame() %&gt;%
+  # make it tibble
+  as.tibble()
+
+## change variable names
+colnames(abs.vel.profile) =  paste(&quot;profile&quot;, 1:12, sep = &quot;&quot;)
+
+## bind the disance to the profile
+abs.vel.profile = data.frame(distance, abs.vel.profile)
+
+## make it long form from wide form
+abs.vel.profile.long = abs.vel.profile %&gt;%
+  gather(key = &quot;profile&quot;, value = &quot;velocity&quot;, 2:13)</code></pre>
+<div class="figure"><span id="fig:fig9"></span>
+<img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig9-1.png" alt="Current profiles at each ping" width="672" />
+<p class="caption">
+Figure 9: Current profiles at each ping
+</p>
+</div>
 <pre class="r"><code>## plot the velocity profiles as section
 
 imagep(lat,distance, vel.abs, filledContour = TRUE, 
@@ -285,12 +309,16 @@ imagep(lat,distance, vel.abs, filledContour = TRUE,
        zlab = &quot;Current Velocity [m/s]&quot;, zlabPosition = &quot;side&quot;,
        at = seq(0.04, 0.58, length.out = 6)%&gt;%round(digits = 2), 
        drawPalette = TRUE, drawTriangles = TRUE)</code></pre>
-<div class="figure"><span id="fig:fig9"></span>
-<img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig9-1.png" alt="ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed" width="672" />
+<div class="figure"><span id="fig:fig10"></span>
+<img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig10-1.png" alt="ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed" width="672" />
 <p class="caption">
-Figure 9: ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed
+Figure 10: ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed
 </p>
 </div>
+</div>
+<div id="conclusion" class="section level3">
+<h3>Conclusion</h3>
+<p>Unlike current meters, ADCP collect current velocity along the vertical and horizontal dimension, hence provide detailed water column circulation. Given the ongoing current measurement with the IIOE-2, we see <code>oce</code> package in R offers and alternative option of CODAS to ingest, process, manipulate and visualize ADCP data under one roof.</p>
 </div>
 <div id="cited-literature" class="section level3 unnumbered">
 <h3>Cited Literature</h3>

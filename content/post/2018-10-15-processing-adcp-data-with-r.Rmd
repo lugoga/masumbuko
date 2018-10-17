@@ -22,7 +22,7 @@ options(digits = 4)
 ```
 
 ### Introduction
-The Second International Indian Ocean Expedition (IIOE-2) collected variaous oceanographic data within the coastal water of Tanzania. Among the oceanographic data collected using Agulhas II, is the Acoustic Doppler Current Profiles (ADCP). The measurement was carried out from 4^th^ to 9^th^ November 2017. In this post, I will illustrate how to process the ADCP data with R using `oce` package developed by @oce. First, we need to load other packages needed for this routine using `require()` function [@tidyverse; @ocedata; @lubridate; @leaflet; @sf]. 
+The Second International Indian Ocean Expedition (IIOE-2) collected various oceanographic data within the coastal water of Tanzania. Among the oceanographic data collected using Agulhas II, is the Acoustic Doppler Current Profiles (ADCP). The measurement was carried out from 4^th^ to 9^th^ November 2017. In this post, I will illustrate how to process the ADCP data with R using `oce` package developed by @oce. First, we need to load other packages needed for this routine using `require()` function [@tidyverse; @ocedata; @lubridate; @leaflet; @sf]. 
 
 ```{r, echo=TRUE, warning=FALSE, message=FALSE, comment=""}
 require(oce)
@@ -66,7 +66,7 @@ plot(adp, which = c(1:2),
 ```
 
 ### Ensemble adp objects 
-The grey-colored in figure \@ref(fig:fig1) are bad data mostly comes from single-ping velocity. Therefore, data are averaged to reducem the measurement uncertainity to acceptable levels [@oce]. Ensemble refers as a process of averaging ping profiles from ADCP data. This approach is important because it remove the uncertainty in velocity estimates from single pings, it also reduce the size of high frequency data, which reduce processing time. I used  `adpEnsembleAverage()` function from `oce` package to ensemble (average) the profiles as shown in the chunk below. 
+The grey-colored in figure \@ref(fig:fig1) are bad data mostly comes from single-ping velocity. Therefore, data are averaged to reduce the measurement uncertainty to acceptable levels [@oce]. Ensemble refers as a process of averaging ping profiles from ADCP data. This approach is important because it remove the uncertainty in velocity estimates from single pings, it also reduce the size of high frequency data, which reduce processing time. I used  `adpEnsembleAverage()` function from `oce` package to ensemble (average) the profiles as shown in the chunk below. 
 
 
 ```{r, echo=TRUE}
@@ -93,7 +93,7 @@ plot(ensembled, which = c(1:2),
      marginsAsImage = TRUE, decimate = FALSE)
 ```
 ### Depth cell mapping
-The averaged profile (figure \@ref(fig:fig2)) were then aligned to the uniform depth---a process referred as `depth cell mapping`. Figure \@ref(fig:fig3) show the cells that aligned to the standard depth. This process is important because it ensure horizontal homogeneity of cells that are at the same depth, which compansate the pitch and roll of the instrument during ship cruising.  This only works for adcp data that are in beam coordinates. 
+The averaged profile (figure \@ref(fig:fig2)) were then aligned to the uniform depth---a process referred as `depth cell mapping`. Figure \@ref(fig:fig3) show the cells that aligned to the standard depth. This process is important because it ensure horizontal homogeneity of cells that are at the same depth, which compensate the pitch and roll of the instrument during ship cruising.  This only works for adcp data that are in beam coordinates. 
 
 ```{r, echo=TRUE}
 ensembled.bin = binmapAdp(ensembled)
@@ -182,7 +182,7 @@ leaflet(data = kilwa.sf)%>%
   addTiles()%>%
   addMarkers(popup = ~time)
 ```
-Figure \@ref(fig:fig6) show ocean current betwen Lindi and Mafia Island (figure \@ref(fig:fig5)) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current [@mcclanahan].
+Figure \@ref(fig:fig6) show ocean current between Lindi and Mafia Island (figure \@ref(fig:fig5)) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current [@mcclanahan].
 
 
 ```{r fig6, fig.cap="Current Profile ", echo=TRUE}
@@ -198,7 +198,7 @@ imagep(lat,distance, vel, filledContour = TRUE,
 
 
 
-### Spurous measurements
+### Spurious measurements
 Looking on individual profiles, We noticed that the current velocity deviate from what has been reported previously. Figure \@ref(fig:fig7) show most profile along the transect from Lindi to Mafia have current speed above normal except profile measured at location with latitude `r lat[1]` and longitude `r lon[1]` (figure \@ref(fig:fig8)). Because I used relative velocity instead of absolute velocity.
 
 ```{r, echo=TRUE}
@@ -225,7 +225,7 @@ kilwa.profile.long = kilwa.profile %>%
 
 ```{r fig7, fig.cap="Current profiles at each ping"}
 ggplot(data = kilwa.profile.long, aes(y = distance, x = velocity, col = profile))+
-  geom_path()+
+  geom_path(col = "black")+
   scale_y_reverse()+
   scale_x_continuous(position = "top")+
   theme_bw()+
@@ -241,7 +241,7 @@ ggplot(data = kilwa.profile.long, aes(y = distance, x = velocity, col = profile)
 
 ```{r fig8, fig.cap="profile at station 1"}
 ggplot(data = kilwa.profile.long %>%filter(profile %in% c("profile1")), aes(y = distance, x = velocity, col = profile))+
-  geom_path()+
+  geom_path(col = "black")+
   scale_y_reverse()+
   scale_x_continuous(position = "top")+
   theme_bw()+
@@ -252,7 +252,7 @@ ggplot(data = kilwa.profile.long %>%filter(profile %in% c("profile1")), aes(y = 
        x = expression(~Current~Velocity~({ms^-1})))
 ```
 
-### Absolute velocity
+### Compute Absolute velocity
 The ADCP measure a relative velocity to the earth, to obtain an absolute velocity, we need to substract the relative velocity with the ship velocity using the mathematical equation \@ref(eq:eqn2)
 
 $$
@@ -274,9 +274,47 @@ ship.vel = kilwa.adcp[["avgSpeed"]]
 vel.abs = abs(vel-ship.vel)
 
 ```
-After ship correction, the absolute currrent velocity ranged from `r min(vel.abs)` ms^-1^  to `r max(vel.abs)` ms^-1^ with the median of `r median(vel.abs)` ms^-1^. We notice a decline of current speed with increase in depth where the surface water has a relatively higher current speed than the deep water (figure \@ref(fig:fig9)). It also clear the surface current velocity increase from  Lindi to around latitude 9 ^o^S has relatively lower surface current and increases from 8 ^o^S toward Mafia (figure \@ref(fig:fig9)), which might be caused by East African Coastal Current.
+After ship correction, the profiles of absolute current velocity ranged from `r min(vel.abs)` ms^-1^  to `r max(vel.abs)` ms^-1^ with the median of `r median(vel.abs)` ms^-1^ (figure \@ref(fig:fig9)). Stitching the profile together and create a section, we noticed a decline of current speed with increase in depth where the surface water has a relatively higher current speed than the deep water (figure \@ref(fig:fig10)). It also clear the surface current velocity increase from  Lindi to around latitude 9 ^o^S has relatively lower surface current and increases from 8 ^o^S toward Mafia (figure \@ref(fig:fig10)), which might be caused by East African Coastal Current.
 
-```{r fig9, fig.cap="ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed", echo=TRUE}
+
+```{r, echo=TRUE}
+# create profiles
+abs.vel.profile = vel.abs %>% 
+   # transpose
+  t() %>% 
+  # convert to data frame
+  as.data.frame() %>%
+  # make it tibble
+  as.tibble()
+
+## change variable names
+colnames(abs.vel.profile) =  paste("profile", 1:12, sep = "")
+
+## bind the disance to the profile
+abs.vel.profile = data.frame(distance, abs.vel.profile)
+
+## make it long form from wide form
+abs.vel.profile.long = abs.vel.profile %>%
+  gather(key = "profile", value = "velocity", 2:13)
+
+```
+
+```{r fig9, fig.cap="Current profiles at each ping"}
+ggplot(data = abs.vel.profile.long, aes(y = distance, x = velocity, col = profile))+
+  geom_path(col = "black")+
+  scale_y_reverse()+
+  scale_x_continuous(position = "top")+
+  theme_bw()+
+  theme(axis.text = element_text(colour = "black", size = 10),
+        axis.title = element_text(colour = "black", size = 12),
+        legend.position = "none")+
+  labs(y = expression(~Distance~(m)),
+       x = expression(~Current~Velocity~({ms^-1})))+
+  facet_wrap(~profile, scales = "free_x")
+
+```
+
+```{r fig10, fig.cap="ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed", echo=TRUE}
 
 ## plot the velocity profiles as section
 
@@ -289,4 +327,8 @@ imagep(lat,distance, vel.abs, filledContour = TRUE,
        drawPalette = TRUE, drawTriangles = TRUE)
 
 ```
+
+### Conclusion
+Unlike current meters, ADCP collect current velocity along the vertical and horizontal dimension, hence provide detailed water column circulation. Given the ongoing current measurement with the IIOE-2, we see `oce` package in R offers and alternative option of CODAS to ingest, process, manipulate and visualize ADCP data under one roof. 
+
 ### Cited Literature

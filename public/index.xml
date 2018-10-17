@@ -64,7 +64,7 @@
       <pubDate>Mon, 15 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/10/15/2018/processing-adcp-data-with-r/</guid>
-      <description>IntroductionThe Second International Indian Ocean Expedition (IIOE-2) collected variaous oceanographic data within the coastal water of Tanzania. Among the oceanographic data collected using Agulhas II, is the Acoustic Doppler Current Profiles (ADCP). The measurement was carried out from 4th to 9th November 2017. In this post, I will illustrate how to process the ADCP data with R using oce package developed by Kelley &amp;amp; Richards (2018).</description>
+      <description>IntroductionThe Second International Indian Ocean Expedition (IIOE-2) collected various oceanographic data within the coastal water of Tanzania. Among the oceanographic data collected using Agulhas II, is the Acoustic Doppler Current Profiles (ADCP). The measurement was carried out from 4th to 9th November 2017. In this post, I will illustrate how to process the ADCP data with R using oce package developed by Kelley &amp;amp; Richards (2018).</description>
     </item>
     
     <item>
