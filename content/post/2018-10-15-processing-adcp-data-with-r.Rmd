@@ -267,18 +267,17 @@ vel.abs = abs(vel-ship.vel)
 ```
 After correction, the absolute currrent velocity ranged from `r min(vel.abs)` ms^-1^  to `r max(vel.abs)` ms^-1^ with the median of `r median(vel.abs)` ms^-1^. We see current speed decrease with depth where the surface water has a relatively higher current speed than the deep water (figure \@ref(fig:fig9)). It also clear the surface current velocity increase from  Lindi to around latitude 9 ^o^S has relatively lower surface current and increases from 8 ^o^S toward Mafia (figure \@ref(fig:fig9)), which might be caused by East African Coastal Current.
 
-```{r fig9, fig.cap="ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed"}
+```{r fig9, fig.cap="ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed", echo=TRUE}
 
 ## plot the velocity profiles as section
 
 imagep(lat,distance, vel.abs, filledContour = TRUE, 
-       ylim = c(700, 30), zlim = c(0,.6), zclip = TRUE, 
+       ylim = c(30, 700), zlim = c(0,.6), zclip = TRUE, flipy = TRUE,
        col = oceColors9A(120), xlim = c(-9.5, -8.3), 
        xlab = "Latitude", ylab = "Depth (meters)", 
-       zlab = "Current Velocity [m/s]", zlabPosition = "side")
-
-
-
+       zlab = "Current Velocity [m/s]", zlabPosition = "side",
+       at = seq(0.04, 0.58, length.out = 6)%>%round(digits = 2), 
+       drawPalette = TRUE, drawTriangles = TRUE)
 
 ```
 ### Cited Literature

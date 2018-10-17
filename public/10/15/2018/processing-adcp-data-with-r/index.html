@@ -65,7 +65,7 @@
 
   <article class="article">
     
-    <span class="article-duration">6 min read</span>
+    <span class="article-duration">7 min read</span>
     
 
     <h1 class="article-title">Processing ADCP Data with R</h1>
@@ -253,6 +253,15 @@ ship.vel = kilwa.adcp[[&quot;avgSpeed&quot;]]
 ## obtain absolute velocity
 vel.abs = abs(vel-ship.vel)</code></pre>
 <p>After correction, the absolute currrent velocity ranged from 1.493310^{-4} ms<sup>-1</sup> to 4.647 ms<sup>-1</sup> with the median of 0.1234 ms<sup>-1</sup>. We see current speed decrease with depth where the surface water has a relatively higher current speed than the deep water (figure <a href="#fig:fig9">9</a>). It also clear the surface current velocity increase from Lindi to around latitude 9 <sup>o</sup>S has relatively lower surface current and increases from 8 <sup>o</sup>S toward Mafia (figure <a href="#fig:fig9">9</a>), which might be caused by East African Coastal Current.</p>
+<pre class="r"><code>## plot the velocity profiles as section
+
+imagep(lat,distance, vel.abs, filledContour = TRUE, 
+       ylim = c(30, 700), zlim = c(0,.6), zclip = TRUE, flipy = TRUE,
+       col = oceColors9A(120), xlim = c(-9.5, -8.3), 
+       xlab = &quot;Latitude&quot;, ylab = &quot;Depth (meters)&quot;, 
+       zlab = &quot;Current Velocity [m/s]&quot;, zlabPosition = &quot;side&quot;,
+       at = seq(0.04, 0.58, length.out = 6)%&gt;%round(digits = 2), 
+       drawPalette = TRUE, drawTriangles = TRUE)</code></pre>
 <div class="figure"><span id="fig:fig9"></span>
 <img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig9-1.png" alt="ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed" width="672" />
 <p class="caption">
