@@ -248,8 +248,11 @@ Figure 8: profile at station 1
 <div id="absolute-velocity" class="section level3">
 <h3>Absolute velocity</h3>
 <p>The ADCP measure a relative velocity to the earth, to obtain an absolute velocity, we need to substract the relative velocity with the ship velocity as illustrated in the chunk below</p>
-<pre class="r"><code>vel.abs = abs(vel-kilwa.adcp[[&quot;avgSpeed&quot;]])</code></pre>
-<p>After correction, the absolute currrent velocity ranged from 1.493310^{-4} to 1.493310^{-4} with the median of 0.1234. We see current speed decrease with depth where the surface water has a relatively higher current speed than the deep water (figure <a href="#fig:fig9">9</a>). It also clear the surface current velocity increase from Lindi to around latitude 9 <sup>o</sup>S has relatively lower surface current and increases from 8 <sup>o</sup>S toward Mafia (figure <a href="#fig:fig9">9</a>), which might be caused by East African Coastal Current.</p>
+<pre class="r"><code>##  calculate ship velocity
+ship.vel = kilwa.adcp[[&quot;avgSpeed&quot;]]
+## obtain absolute velocity
+vel.abs = abs(vel-ship.vel)</code></pre>
+<p>After correction, the absolute currrent velocity ranged from 1.493310^{-4} to 4.647 with the median of 0.1234. We see current speed decrease with depth where the surface water has a relatively higher current speed than the deep water (figure <a href="#fig:fig9">9</a>). It also clear the surface current velocity increase from Lindi to around latitude 9 <sup>o</sup>S has relatively lower surface current and increases from 8 <sup>o</sup>S toward Mafia (figure <a href="#fig:fig9">9</a>), which might be caused by East African Coastal Current.</p>
 <div class="figure"><span id="fig:fig9"></span>
 <img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig9-1.png" alt="ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed" width="672" />
 <p class="caption">
