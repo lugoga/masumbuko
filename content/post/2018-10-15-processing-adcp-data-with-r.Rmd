@@ -256,16 +256,28 @@ ggplot(data = kilwa.profile.long %>%filter(profile %in% c("profile1")), aes(y = 
 ```
 
 ### Absolute velocity
-The ADCP measure a relative velocity to the earth, to obtain an absolute velocity, we need to substract the relative velocity with the ship velocity as illustrated in the chunk below
+The ADCP measure a relative velocity to the earth, to obtain an absolute velocity, we need to substract the relative velocity with the ship velocity using the mathematical equation \@ref(eq:eqn2)
+
+$$
+\begin{equation}
+  \beta \: = \gamma\: - \epsilon \: (\#eq:eqn2)
+\end{equation}
+$$
+where;
+  $\beta$ = *absolute velocity*;
+  $\gamma$ = *relative velocity*;
+  $\epsilon$ = *ship velocity*
+  
+The mathematical equation \@ref(eq:eqn2) was used to compute the absolute velocity in R involves two-steps as illustrated in the chunk below. First the ship velocity was determined at each profile ping. Second, the relative velocity was substracted with this ship velocity to obtain absolute velocity. 
 
 ```{r, echo=TRUE}
-##  calculate ship velocity
+##  calculate ship velocity 
 ship.vel = kilwa.adcp[["avgSpeed"]]
 ## obtain absolute velocity
 vel.abs = abs(vel-ship.vel)
 
 ```
-After correction, the absolute currrent velocity ranged from `r min(vel.abs)` ms^-1^  to `r max(vel.abs)` ms^-1^ with the median of `r median(vel.abs)` ms^-1^. We see current speed decrease with depth where the surface water has a relatively higher current speed than the deep water (figure \@ref(fig:fig9)). It also clear the surface current velocity increase from  Lindi to around latitude 9 ^o^S has relatively lower surface current and increases from 8 ^o^S toward Mafia (figure \@ref(fig:fig9)), which might be caused by East African Coastal Current.
+After ship correction, the absolute currrent velocity ranged from `r min(vel.abs)` ms^-1^  to `r max(vel.abs)` ms^-1^ with the median of `r median(vel.abs)` ms^-1^. We notice a decline of current speed with increase in depth where the surface water has a relatively higher current speed than the deep water (figure \@ref(fig:fig9)). It also clear the surface current velocity increase from  Lindi to around latitude 9 ^o^S has relatively lower surface current and increases from 8 ^o^S toward Mafia (figure \@ref(fig:fig9)), which might be caused by East African Coastal Current.
 
 ```{r fig9, fig.cap="ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed", echo=TRUE}
 
