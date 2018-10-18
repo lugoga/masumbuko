@@ -199,7 +199,8 @@ imagep(lat,distance, vel, filledContour = TRUE,
 
 
 ### Spurious measurements
-Looking on individual profiles, We noticed that the current velocity deviate from what has been reported previously. Figure \@ref(fig:fig7) show most profile along the transect from Lindi to Mafia have current speed above normal except profile measured at location with latitude `r lat[1]` and longitude `r lon[1]` (figure \@ref(fig:fig8)). Because I used relative velocity instead of absolute velocity.
+Looking on individual profiles, We noticed that the current velocity deviate from what has been reported previously. Setting cut point of equal or less than 1 ms^-1^, we found that only the first profile had TRUE value--- met the criterion,  other profile had FALSE implying the current of these profiles are above 1 ms^-1^ (Figure \@ref(fig:fig7a)).
+
 
 ```{r, echo=TRUE}
 # create profiles
@@ -222,6 +223,18 @@ kilwa.profile.long = kilwa.profile %>%
   gather(key = "profile", value = "velocity", 2:13)
 
 ```
+
+```{r fig7a, fig.cap="Profile with velocity above 1 m/s"}
+kilwa.profile%>%
+  select(-distance)%>%
+  # use visdat package to assess the quality of data
+  visdat::vis_expect(~.x <=1.0)+
+  theme(axis.text = element_text(colour = 1, size = 11), 
+        legend.position = "right", legend.key.height = unit(6, "line"))+
+  scale_fill_manual(values = c("maroon", "darkgreen"))
+```
+
+Similar to Figure \@ref(fig:fig7a), which showed the profile one as true value and assigned other profile as false because of current value above the criterion of 1 ms^-1^, figure \@ref(fig:fig7) show the actual current value of each profile along the transect from Lindi to Mafia. All profiles  except profile measured at location with latitude `r lat[1]` and longitude `r lon[1]` (figure \@ref(fig:fig8)) have current speed above 1 ms^-1^. This is a relative current velocity values, which is significantly higher than the actual speed in the area. Therefore, we ought to convert relative speed to absolute velocity to obtain the actual current velocity.
 
 ```{r fig7, fig.cap="Current profiles at each ping"}
 ggplot(data = kilwa.profile.long, aes(y = distance, x = velocity, col = profile))+
