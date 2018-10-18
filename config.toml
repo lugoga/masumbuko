@@ -1,14 +1,15 @@
 baseurl = "https://semba-blog.netlify.com/"
 languageCode = "en-us"
-title = "Masumbuko Semba"
+title = "Masumbuko Semba's Blog"
 theme = "hugo-lithium"
-googleAnalytics = ""
+googleAnalytics = "UA-127756435-1"
 disqusShortname = "https-semba-blog-netlify-com"
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
 [permalinks]
     post = "/:month/:day/:year/:slug/"
-
+    
+    
 [[menu.main]]
     name = "About"
     url = "/about/"
@@ -45,6 +46,8 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
 
 [params]
+    author = "Masumbuko Semba"
+    dateFormat = "2006/01/02"
     description = "A blog that deals with R scripting for Marine Environmental issues."
 
     # options for highlight.js (version, additional languages, and theme)
@@ -61,4 +64,9 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     width = 50
     height = 50
     alt = "Logo"
+    
+   
+    
+    
+    
 
