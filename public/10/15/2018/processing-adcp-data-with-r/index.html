@@ -249,8 +249,6 @@ kilwa.profile = data.frame(distance, kilwa.profile)
 ## make it long form from wide form
 kilwa.profile.long = kilwa.profile %&gt;%
   gather(key = &quot;profile&quot;, value = &quot;velocity&quot;, 2:13)</code></pre>
-<pre><code>## Scale for &#39;fill&#39; is already present. Adding another scale for &#39;fill&#39;,
-## which will replace the existing scale.</code></pre>
 <div class="figure"><span id="fig:fig7a"></span>
 <img src="/post/2018-10-15-processing-adcp-data-with-r_files/figure-html/fig7a-1.png" alt="Profile with velocity above 1 m/s" width="672" />
 <p class="caption">

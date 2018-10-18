@@ -51,7 +51,7 @@ time = adp[["time"]]
 
 Figure \@ref(fig:fig1) show the velocity of zonal (north) and meridional (east) components from the raw data as captured by the ADCP instrument. These velocities were measured along the coastal of Tanzania water from `r time[1]` off Unguja Island close to Chwaka Bay and finish on `r time[length(time)]` in Mtwara.  
 
-```{r fig1, fig.cap="Meridional and Zonal components velocity before averaging the profiles", , echo=TRUE}
+```{r fig1, fig.cap="Meridional and Zonal components velocity before averaging the profiles", echo=TRUE, fig.height= 4, fig.width=7}
 
 plot(adp, which = c(1:2), 
      tformat = "%B %d, %Y:%H:%M", 
@@ -80,7 +80,7 @@ The ADCP object profiles were reduced by a factor of 10 and since they were aver
 The origin adcp file had a total of `r adp@metadata$numberOfSamples` profiles, which were reduced to `r ensembled@metadata$numberOfSamples` with the `adpEnsembleAverage`. Figure \@ref(fig:fig2) show the velocity of zonal (north) and meridional (east) components of ensembled (average ping profiles) recorded by the ADCP instrument. 
 
 
-```{r fig2, fig.cap="Meridional and Zonal components velocity after averaging the profiles", , echo=TRUE}
+```{r fig2, fig.cap="Meridional and Zonal components velocity after averaging the profiles", echo=TRUE, fig.height= 4, fig.width=7}
 plot(ensembled, which = c(1:2), 
      tformat = "%B %d, %Y:%H:%M", 
      missingColor = "grey", 
@@ -101,7 +101,7 @@ ensembled.bin = binmapAdp(ensembled)
 ```
 
 
-```{r fig3, fig.cap="Meridional and Zonal components velocity after averaging the profiles and align to standard depth", echo=TRUE}
+```{r fig3, fig.cap="Meridional and Zonal components velocity after averaging the profiles and align to standard depth", echo=TRUE, fig.height= 4, fig.width=7}
 ## plot the ensembled
 plot(ensembled.bin, which = c(1:2), 
      tformat = "%B %d, %Y:%H:%M", 
@@ -185,7 +185,7 @@ leaflet(data = kilwa.sf)%>%
 Figure \@ref(fig:fig6) show ocean current between Lindi and Mafia Island (figure \@ref(fig:fig5)) decrease with depth. The current at the surface is strong and decrease gradually with increase in depth. We also notice the current becomes more strong from Lindi toward Mafia, this can be contributed by the East African Coastal Current [@mcclanahan].
 
 
-```{r fig6, fig.cap="Current Profile ", echo=TRUE}
+```{r fig6, fig.cap="Current Profile ", echo=TRUE, fig.height= 2.5, fig.width=7}
 
 ## plot the velocity profiles as section
 imagep(lat,distance, vel, filledContour = TRUE, 
@@ -224,13 +224,14 @@ kilwa.profile.long = kilwa.profile %>%
 
 ```
 
-```{r fig7a, fig.cap="Profile with velocity above 1 m/s"}
+```{r fig7a, fig.height= 2.5, fig.width=7, fig.cap="Profile with velocity above 1 m/s", warning=FALSE, comment="", message=FALSE}
+
 kilwa.profile%>%
   select(-distance)%>%
   # use visdat package to assess the quality of data
   visdat::vis_expect(~.x <=1.0)+
   theme(axis.text = element_text(colour = 1, size = 11), 
-        legend.position = "right", legend.key.height = unit(6, "line"))+
+        legend.position = "right", legend.key.height = unit(3.4, "line"))+
   scale_fill_manual(values = c("maroon", "darkgreen"))
 ```
 
@@ -252,7 +253,7 @@ ggplot(data = kilwa.profile.long, aes(y = distance, x = velocity, col = profile)
 ```
 
 
-```{r fig8, fig.cap="profile at station 1"}
+```{r fig8, fig.cap="profile at station 1", fig.height= 2.5, fig.width=7}
 ggplot(data = kilwa.profile.long %>%filter(profile %in% c("profile1")), aes(y = distance, x = velocity, col = profile))+
   geom_path(col = "black")+
   scale_y_reverse()+
@@ -327,7 +328,7 @@ ggplot(data = abs.vel.profile.long, aes(y = distance, x = velocity, col = profil
 
 ```
 
-```{r fig10, fig.cap="ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed", echo=TRUE}
+```{r fig10, fig.cap="ADCP profile current Velocity between Lindi and Mtwara after correction of the ship speed", echo=TRUE, fig.height= 2.5, fig.width=7}
 
 ## plot the velocity profiles as section
 
