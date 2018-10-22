@@ -1,0 +1,122 @@
+---
+title: Expore Current Velocity Measured with  ADCP in R
+author: Masumbuko Semba
+date: '2018-10-18'
+slug: expore-current-velocity-measured-with-adcp-in-r
+categories:
+  - Oceanography
+tags:
+  - ADCP
+  - CTD
+  - Indian Ocean
+  - Masumbuko Semba
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Packages
+We need some packages to process ADCP data. These packages includes
+```{r packages, warning=FALSE, message=FALSE, comment=""}
+require(oce)
+require(tidyverse)
+require(visdat)
+require(naniar)
+require(UpSetR)
+```
+
+## Ingest the ADCP
+The LTA dataset was imported into R with `read.adp()` function from `oce` package
+
+```{r eval=FALSE}
+pemba = read.adp("./adcp/ADCP_DATA/2007_05/M72-5_OS75011_000000.LTA")
+
+```
+
+```{r echo=FALSE}
+pemba = read.adp("C:/Users/Semba/Documents/IIOE2/adcp/ADCP_DATA/2007_05/M72-5_OS75011_000000.LTA")
+
+```
+
+### Extract variables contained
+The ADCP was collected using the broadband instrument with a frequency of 75KHz making a total of 100 cells spaced at an interval of 16 m making a profile of 1600 m deep. The instrument was configured with four beams, each beam measure the meridional-east (V), zonal-north (U) components, the the up and error.
+```{r}
+#summary(pemba)
+
+beamName(pemba)
+east = pemba[["v"]][,,1]
+north = pemba[["v"]][,,2]
+distance = pemba[["distance"]]
+time = pemba[["firstTime"]]
+ship.speed = pemba[["avgSpeed"]]
+lon = pemba[["firstLongitude"]]
+lat = pemba[["firstLatitude"]]
+
+```
+
+### Transforming
+calculate velocity from the northe and south components and then create a data frame from this components. 
+```{r}
+vel = sqrt(east^2 + north^2)
+
+dt = data.frame(distance, vel)
+
+```
+
+### Visualize
+Figure \@ref(fig:fig1)a show the vertical profile of current velocity measured at the station. Although the profile showed the full length from the surface to 1600 m, we noticed that the actual value reached a maximum depth of 250 m (Figure \@ref(fig:fig1)b). Beyond this depth there was no current data (Figure \@ref(fig:fig1)a).About 86 percent of cells have missing values compared to 14 percent of cell with current velocity (figure \@ref(fig:fig2)). 
+```{r echo=FALSE}
+
+fig1a = ggplot(data = dt, aes(x = vel, y = distance))+
+  geom_path(col = "red", size = .5)+
+  geom_miss_point(size = 1.2)+
+  theme_bw()+
+  theme(axis.text = element_text(size = 12, colour = 1),
+        axis.title = element_text(size = 12, colour = 1),
+        panel.grid = element_blank(),
+        legend.text = element_text(size = 10, colour = 1), 
+        legend.position = c(.65,.2),
+        legend.background = element_rect(colour = 1))+
+  scale_y_reverse()+
+  scale_x_continuous(position = "top")+
+  scale_colour_manual(name = "Points", values =  3:4)+
+  labs(y = "Distance (m)",x = expression(~Current~Velocity~(ms^{-1})))
+
+
+fig1b = ggplot(data = dt%>%na.omit(), aes(x = vel, y = distance))+
+  geom_path(col = "red", size = .5)+
+  geom_miss_point(size = 1.2)+
+  theme_bw()+
+  theme(axis.text = element_text(size = 12, colour = 1),
+        axis.title = element_text(size = 12, colour = 1),
+        panel.grid = element_blank(),
+        legend.text = element_text(size = 10, colour = 1), 
+        legend.position = "none",
+        legend.background = element_rect(colour = 1))+
+  scale_y_reverse()+
+  scale_x_continuous(position = "top")+
+  scale_colour_manual(name = "Points", values =  4)+
+  labs(y = "Distance (m)",x = expression(~Current~Velocity~(ms^{-1})))
+
+
+```
+
+```{r fig1, fig.cap="Current profiles a) ", warning=FALSE, message=FALSE}
+
+cowplot::plot_grid(fig1a,fig1b, nrow = 1, 
+                   labels = c("a)", "b)"), 
+                   label_size = 14, 
+                   label_fontface = "plain", 
+                   label_x = 0.2, label_y = .85)
+```
+
+
+```{r fig2, fig.width=7.2, fig.height=3, fig.cap="The Percentage of missing values in the profile"}
+vis_miss(dt%>%select(vel))+
+  theme(axis.text = element_text(colour = 1, size = 12),
+        legend.text = element_text(size = 11, colour = 1),
+        legend.position = c(.86,.25), 
+        legend.background = element_rect(colour = 1, fill = "white"))
+```

@@ -49,6 +49,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     author = "Masumbuko Semba"
     dateFormat = "2006/01/02"
     description = "A blog that deals with R scripting for Marine Environmental issues."
+    footer = "&copy; [Semba Masumbuko](https://semba-blog.netlify.com/) 2018"
 
     # options for highlight.js (version, additional languages, and theme)
     highlightjsVersion = "9.11.0"
@@ -64,6 +65,8 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     width = 50
     height = 50
     alt = "Logo"
+    
+
     
    
     

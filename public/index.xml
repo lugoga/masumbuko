@@ -17,7 +17,8 @@
       <pubDate>Thu, 19 Sep 2019 21:48:51 -0700</pubDate>
       
       <guid>/about/</guid>
-      <description>Masumbuko Semba is data scientist works at the Nelson Mandela African Institution of Science and Technology and doctoral student in physical oceanography at the University of Dar es Salaam. He specializes in Earth Observations and use open-source geo-spatial tools and satellite observations to address physical processes that brings changes in our environments. Among the project Semba is involved is Global Drifter Program. In this Project, he works with the Physical Oceanographic Division of the Atlantic Oceanographic and Meteorological Laboratory (AOML) of National Oceanic and Atmospheric Administration (NOAA) to understand the surface circulation dynamics in the Tropical Indian Ocean.</description>
+      <description>Masumbuko Semba works at the Nelson Mandela African Institution of Science and Technology as data scientist and a doctoral student in physical oceanography at the University of Dar es Salaam.
+Semba specializes in coding using various programming languages. Coding is nothing more than telling a computer what to do in a language the computer understands. Semba created this blog to offer some ground-breaking solutions using open source programming languages affordable worldwide even to third world’s countries.</description>
     </item>
     
     <item>
@@ -56,6 +57,27 @@
       <guid>/project---copy/</guid>
       <description>Sustainable Oceans, Livelihoods and food Security Through Increased Capacity in Ecosystem research in the Western Indian Ocean*   SOLSTICE-WIO is a four-year collaborative project funded by the UK Global Challenges Research Fund (GCRF). Launched in October 2017, it brings together local knowledge and international research expertise to address challenges facing the Western Indian Ocean (WIO) region in a cost-effective way.
   Estuarize-­WIO   A socio­‐ecological assessment of fisheries in three estuarine systems of the SW Indian Ocean – identifying essential links for improved governance.</description>
+    </item>
+    
+    <item>
+      <title>Genetic connectivity in Western Indian Ocean Region</title>
+      <link>/10/22/2018/genetic-connectivity-in-western-indian-ocean-region/</link>
+      <pubDate>Mon, 22 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/10/22/2018/genetic-connectivity-in-western-indian-ocean-region/</guid>
+      <description>IntroductionThe pemba channel
+</description>
+    </item>
+    
+    <item>
+      <title>Expore Current Velocity Measured with  ADCP in R</title>
+      <link>/10/18/2018/expore-current-velocity-measured-with-adcp-in-r/</link>
+      <pubDate>Thu, 18 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/10/18/2018/expore-current-velocity-measured-with-adcp-in-r/</guid>
+      <description>PackagesWe need some packages to process ADCP data. These packages includes
+require(oce)require(tidyverse)require(visdat)require(naniar)require(UpSetR)Ingest the ADCPThe LTA dataset was imported into R with read.adp() function from oce package
+pemba = read.adp(&amp;quot;./adcp/ADCP_DATA/2007_05/M72-5_OS75011_000000.LTA&amp;quot;)Extract variables containedThe ADCP was collected using the broadband instrument with a frequency of 75KHz making a total of 100 cells spaced at an interval of 16 m making a profile of 1600 m deep.</description>
     </item>
     
     <item>

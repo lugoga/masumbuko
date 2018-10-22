@@ -6,10 +6,21 @@
     <description>Recent content in Oceanography on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 15 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 18 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/oceanography/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Expore Current Velocity Measured with  ADCP in R</title>
+      <link>/10/18/2018/expore-current-velocity-measured-with-adcp-in-r/</link>
+      <pubDate>Thu, 18 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/10/18/2018/expore-current-velocity-measured-with-adcp-in-r/</guid>
+      <description>PackagesWe need some packages to process ADCP data. These packages includes
+require(oce)require(tidyverse)require(visdat)require(naniar)require(UpSetR)Ingest the ADCPThe LTA dataset was imported into R with read.adp() function from oce package
+pemba = read.adp(&amp;quot;./adcp/ADCP_DATA/2007_05/M72-5_OS75011_000000.LTA&amp;quot;)Extract variables containedThe ADCP was collected using the broadband instrument with a frequency of 75KHz making a total of 100 cells spaced at an interval of 16 m making a profile of 1600 m deep.</description>
+    </item>
     
     <item>
       <title>Processing ADCP Data with R</title>

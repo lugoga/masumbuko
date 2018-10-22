@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.48" />
+
+
+<title>Expore Current Velocity Measured with  ADCP in R - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Expore Current Velocity Measured with  ADCP in R - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">2 min read</span>
+    
+
+    <h1 class="article-title">Expore Current Velocity Measured with  ADCP in R</h1>
+
+    
+    <span class="article-date">2018/10/18</span>
+    
+
+    <div class="article-content">
+      <div id="packages" class="section level3">
+<h3>Packages</h3>
+<p>We need some packages to process ADCP data. These packages includes</p>
+<pre class="r"><code>require(oce)
+require(tidyverse)
+require(visdat)
+require(naniar)
+require(UpSetR)</code></pre>
+</div>
+<div id="ingest-the-adcp" class="section level2">
+<h2>Ingest the ADCP</h2>
+<p>The LTA dataset was imported into R with <code>read.adp()</code> function from <code>oce</code> package</p>
+<pre class="r"><code>pemba = read.adp(&quot;./adcp/ADCP_DATA/2007_05/M72-5_OS75011_000000.LTA&quot;)</code></pre>
+<div id="extract-variables-contained" class="section level3">
+<h3>Extract variables contained</h3>
+<p>The ADCP was collected using the broadband instrument with a frequency of 75KHz making a total of 100 cells spaced at an interval of 16 m making a profile of 1600 m deep. The instrument was configured with four beams, each beam measure the meridional-east (V), zonal-north (U) components, the the up and error.</p>
+<pre class="r"><code>#summary(pemba)
+
+beamName(pemba)</code></pre>
+<pre><code>## [1] &quot;east&quot;  &quot;north&quot; &quot;up&quot;    &quot;error&quot;</code></pre>
+<pre class="r"><code>east = pemba[[&quot;v&quot;]][,,1]
+north = pemba[[&quot;v&quot;]][,,2]
+distance = pemba[[&quot;distance&quot;]]
+time = pemba[[&quot;firstTime&quot;]]
+ship.speed = pemba[[&quot;avgSpeed&quot;]]
+lon = pemba[[&quot;firstLongitude&quot;]]
+lat = pemba[[&quot;firstLatitude&quot;]]</code></pre>
+</div>
+<div id="transforming" class="section level3">
+<h3>Transforming</h3>
+<p>calculate velocity from the northe and south components and then create a data frame from this components.</p>
+<pre class="r"><code>vel = sqrt(east^2 + north^2)
+
+dt = data.frame(distance, vel)</code></pre>
+</div>
+<div id="visualize" class="section level3">
+<h3>Visualize</h3>
+<p>Figure <a href="#fig:fig1">1</a>a show the vertical profile of current velocity measured at the station. Although the profile showed the full length from the surface to 1600 m, we noticed that the actual value reached a maximum depth of 250 m (Figure <a href="#fig:fig1">1</a>b). Beyond this depth there was no current data (Figure <a href="#fig:fig1">1</a>a).About 86 percent of cells have missing values compared to 14 percent of cell with current velocity (figure <a href="#fig:fig2">2</a>).</p>
+<pre class="r"><code>cowplot::plot_grid(fig1a,fig1b, nrow = 1, 
+                   labels = c(&quot;a)&quot;, &quot;b)&quot;), 
+                   label_size = 14, 
+                   label_fontface = &quot;plain&quot;, 
+                   label_x = 0.2, label_y = .85)</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2018-10-18-expore-current-velocity-measured-with-adcp-in-r_files/figure-html/fig1-1.png" alt="Current profiles a) " width="672" />
+<p class="caption">
+Figure 1: Current profiles a)
+</p>
+</div>
+<pre class="r"><code>vis_miss(dt%&gt;%select(vel))+
+  theme(axis.text = element_text(colour = 1, size = 12),
+        legend.text = element_text(size = 11, colour = 1),
+        legend.position = c(.86,.25), 
+        legend.background = element_rect(colour = 1, fill = &quot;white&quot;))</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2018-10-18-expore-current-velocity-measured-with-adcp-in-r_files/figure-html/fig2-1.png" alt="The Percentage of missing values in the profile" width="691.2" />
+<p class="caption">
+Figure 2: The Percentage of missing values in the profile
+</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+
