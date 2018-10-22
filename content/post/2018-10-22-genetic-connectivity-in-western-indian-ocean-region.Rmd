@@ -8,5 +8,117 @@ tags:
   - Pemba Channel
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "")
+```
+
+
 # Introduction
 The pemba channel
+Mathew Silas and Said Mgeleka have been working on genetic mark up of the famous seagrass 
+
+
+```{r}
+require(tidyverse)
+require(spData)
+require(sf)
+
+```
+
+
+```{r include=FALSE, warning=FALSE}
+##read Africa continental shapefile that we will use throught the munuscript as basemap dataset for maps
+africa = read_sf("E:/GIS/Tanzania spatial data Bank/EAF14 Tanzania spatial datasets/africa/Spatial/AdmInfr/afcntry.shp")
+
+## clean the file
+wio = africa%>%select(-c(FIPS_CNTRY, REGIONA, EMPTY, EMPTY2))%>%
+  filter(CNTRY_NAME == "Tanzania" | CNTRY_NAME == "Kenya" | CNTRY_NAME == "Mozambique" | CNTRY_NAME == "Madagascar")
+```
+
+```{r}
+# world map
+data("world")
+
+
+# stations
+point = readxl::read_excel("E:/Data Manipulation/Ogalo_mgeleka/stations.xlsx")
+
+point.select = point  %>% 
+  filter(Site %in% c("Inhaca South", "Inhaca North", "Nosy Beach East", " 
+                     Pemba", "Mbweni",  "Mombasa", "Mjimwema")) 
+
+point.select=point.select %>% 
+  mutate(Site = replace(Site,Site == "Mbweni", "Zanzibar"),
+         Site = replace(Site,Site == "Nosy Beach East", "Nosy Beach"))
+
+point.sf = point %>% st_as_sf(coords = c("Long", "Lat")) %>% st_set_crs(4326)
+
+```
+ 
+ 
+```{r map, fig.cap="map", fig.height=8, fig.width=12}
+wio.map = ggplot() + 
+  geom_sf(data = world, col = 1, fill = "ivory")+
+  coord_sf(xlim = c(30,60), ylim = c(-30,5)) +
+  geom_point(data = point.select, aes(x = Long, y = Lat), size = 2)+
+  ggrepel::geom_text_repel(data = point.select, aes(x = Long, y = Lat, label = Site), point.padding = 0.2)+
+  theme_bw() + 
+  theme(panel.background = element_rect(fill = "lightblue"),axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+  ggsn::scalebar(location = "bottomleft", x.min = 35, x.max = 60, y.min = -30, y.max = 5, dist = 400, dd2km = TRUE, model = "WGS84", st.dist = 0.02, st.size = 4)+
+  labs(x = NULL, y = NULL)
+
+
+wio.map
+
+```
+
+```{r}
+zanzibar =ggplot()+ 
+  geom_sf(data = wio, col = "blue", fill = "ivory")+
+  coord_sf(xlim = c(39.1, 39.6), ylim = c(-6.5, -5.63785)) +
+  geom_point(data = point, 
+  aes(x = Long, y = Lat), size = 2)+
+  ggrepel::geom_text_repel(data = point  %>% 
+  filter(Site %in% c("Nungwi", "Chwaka", "Fumba", "Mbweni")), 
+  aes(x = Long, y = Lat, label = Site), point.padding = 0.2)+
+  theme_bw() +
+  theme(panel.background = element_rect(fill = "lightblue"),axis.title = element_blank(),
+        panel.grid = element_line(colour = NA))+
+  scale_x_continuous(breaks = c(39.10, 39.55))+
+  scale_y_continuous(breaks = c(-6.4, -5.7))
+
+
+zanzibar
+```
+
+
+```{r, fig.width=8}
+
+nosy = ggplot()+ 
+  geom_sf(data = wio, col = "black", fill = "grey90")+
+  coord_sf(xlim = c(48.3, 48.53416), ylim = c(-13.64732, -13.45)) +
+  geom_point(data = point, 
+  aes(x = Long, y = Lat), size = 4)+
+  ggrepel::geom_text_repel(data = point  %>%
+  filter(Site %in% c("Nosy Beach East", "Nosy Beach West")),
+  aes(x = Long, y = Lat, label = Site), point.padding = 0.2)+
+  theme_bw() +
+theme(panel.background = element_rect(fill = "lightblue"),axis.title = element_blank(),
+      panel.grid = element_line(colour = NA))+
+scale_x_continuous(breaks = c(48.3, 48.))+
+scale_y_continuous(breaks = c(-13.62, -13.48))
+
+nosy
+
+
+```
+
+
+
+
+
+
+

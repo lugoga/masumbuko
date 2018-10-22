@@ -19,6 +19,11 @@
 
 
 
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
 <link rel="stylesheet" href="/css/fonts.css" media="all">
 <link rel="stylesheet" href="/css/main.css" media="all">
 
@@ -60,7 +65,7 @@
 
   <article class="article">
     
-    <span class="article-duration">1 min read</span>
+    <span class="article-duration">2 min read</span>
     
 
     <h1 class="article-title">Genetic connectivity in Western Indian Ocean Region</h1>
@@ -72,7 +77,80 @@
     <div class="article-content">
       <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>The pemba channel</p>
+<p>The pemba channel Mathew Silas and Said Mgeleka have been working on genetic mark up of the famous seagrass</p>
+<pre class="r"><code>require(tidyverse)
+require(spData)
+require(sf)</code></pre>
+<pre class="r"><code># world map
+data(&quot;world&quot;)
+
+
+# stations
+point = readxl::read_excel(&quot;E:/Data Manipulation/Ogalo_mgeleka/stations.xlsx&quot;)
+
+point.select = point  %&gt;% 
+  filter(Site %in% c(&quot;Inhaca South&quot;, &quot;Inhaca North&quot;, &quot;Nosy Beach East&quot;, &quot; 
+                     Pemba&quot;, &quot;Mbweni&quot;,  &quot;Mombasa&quot;, &quot;Mjimwema&quot;)) 
+
+point.select=point.select %&gt;% 
+  mutate(Site = replace(Site,Site == &quot;Mbweni&quot;, &quot;Zanzibar&quot;),
+         Site = replace(Site,Site == &quot;Nosy Beach East&quot;, &quot;Nosy Beach&quot;))
+
+point.sf = point %&gt;% st_as_sf(coords = c(&quot;Long&quot;, &quot;Lat&quot;)) %&gt;% st_set_crs(4326)</code></pre>
+<pre class="r"><code>wio.map = ggplot() + 
+  geom_sf(data = world, col = 1, fill = &quot;ivory&quot;)+
+  coord_sf(xlim = c(30,60), ylim = c(-30,5)) +
+  geom_point(data = point.select, aes(x = Long, y = Lat), size = 2)+
+  ggrepel::geom_text_repel(data = point.select, aes(x = Long, y = Lat, label = Site), point.padding = 0.2)+
+  theme_bw() + 
+  theme(panel.background = element_rect(fill = &quot;lightblue&quot;),axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+  ggsn::scalebar(location = &quot;bottomleft&quot;, x.min = 35, x.max = 60, y.min = -30, y.max = 5, dist = 400, dd2km = TRUE, model = &quot;WGS84&quot;, st.dist = 0.02, st.size = 4)+
+  labs(x = NULL, y = NULL)
+
+
+wio.map</code></pre>
+<div class="figure"><span id="fig:map"></span>
+<img src="/post/2018-10-22-genetic-connectivity-in-western-indian-ocean-region_files/figure-html/map-1.png" alt="map" width="1152" />
+<p class="caption">
+Figure 1: map
+</p>
+</div>
+<pre class="r"><code>zanzibar =ggplot()+ 
+  geom_sf(data = wio, col = &quot;blue&quot;, fill = &quot;ivory&quot;)+
+  coord_sf(xlim = c(39.1, 39.6), ylim = c(-6.5, -5.63785)) +
+  geom_point(data = point, 
+  aes(x = Long, y = Lat), size = 2)+
+  ggrepel::geom_text_repel(data = point  %&gt;% 
+  filter(Site %in% c(&quot;Nungwi&quot;, &quot;Chwaka&quot;, &quot;Fumba&quot;, &quot;Mbweni&quot;)), 
+  aes(x = Long, y = Lat, label = Site), point.padding = 0.2)+
+  theme_bw() +
+  theme(panel.background = element_rect(fill = &quot;lightblue&quot;),axis.title = element_blank(),
+        panel.grid = element_line(colour = NA))+
+  scale_x_continuous(breaks = c(39.10, 39.55))+
+  scale_y_continuous(breaks = c(-6.4, -5.7))
+
+
+zanzibar</code></pre>
+<p><img src="/post/2018-10-22-genetic-connectivity-in-western-indian-ocean-region_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>nosy = ggplot()+ 
+  geom_sf(data = wio, col = &quot;black&quot;, fill = &quot;grey90&quot;)+
+  coord_sf(xlim = c(48.3, 48.53416), ylim = c(-13.64732, -13.45)) +
+  geom_point(data = point, 
+  aes(x = Long, y = Lat), size = 4)+
+  ggrepel::geom_text_repel(data = point  %&gt;%
+  filter(Site %in% c(&quot;Nosy Beach East&quot;, &quot;Nosy Beach West&quot;)),
+  aes(x = Long, y = Lat, label = Site), point.padding = 0.2)+
+  theme_bw() +
+theme(panel.background = element_rect(fill = &quot;lightblue&quot;),axis.title = element_blank(),
+      panel.grid = element_line(colour = NA))+
+scale_x_continuous(breaks = c(48.3, 48.))+
+scale_y_continuous(breaks = c(-13.62, -13.48))
+
+nosy</code></pre>
+<p><img src="/post/2018-10-22-genetic-connectivity-in-western-indian-ocean-region_files/figure-html/unnamed-chunk-5-1.png" width="768" /></p>
 </div>
 
     </div>
@@ -118,6 +196,18 @@
 
     </div>
     
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
 
     
 

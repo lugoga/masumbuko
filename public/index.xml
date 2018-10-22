@@ -65,8 +65,8 @@ Semba specializes in coding using various programming languages. Coding is nothi
       <pubDate>Mon, 22 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/10/22/2018/genetic-connectivity-in-western-indian-ocean-region/</guid>
-      <description>IntroductionThe pemba channel
-</description>
+      <description>IntroductionThe pemba channel Mathew Silas and Said Mgeleka have been working on genetic mark up of the famous seagrass
+require(tidyverse)require(spData)require(sf)# world mapdata(&amp;quot;world&amp;quot;)# stationspoint = readxl::read_excel(&amp;quot;E:/Data Manipulation/Ogalo_mgeleka/stations.xlsx&amp;quot;)point.select = point %&amp;gt;% filter(Site %in% c(&amp;quot;Inhaca South&amp;quot;, &amp;quot;Inhaca North&amp;quot;, &amp;quot;Nosy Beach East&amp;quot;, &amp;quot; Pemba&amp;quot;, &amp;quot;Mbweni&amp;quot;, &amp;quot;Mombasa&amp;quot;, &amp;quot;Mjimwema&amp;quot;)) point.select=point.select %&amp;gt;% mutate(Site = replace(Site,Site == &amp;quot;Mbweni&amp;quot;, &amp;quot;Zanzibar&amp;quot;),Site = replace(Site,Site == &amp;quot;Nosy Beach East&amp;quot;, &amp;quot;Nosy Beach&amp;quot;))point.sf = point %&amp;gt;% st_as_sf(coords = c(&amp;quot;Long&amp;quot;, &amp;quot;Lat&amp;quot;)) %&amp;gt;% st_set_crs(4326)wio.</description>
     </item>
     
     <item>
