@@ -25,23 +25,43 @@ require(sf)
 
 ```
 
+```{r eval=FALSE}
+## read the shapefile
+africa = read_sf("./africa/Spatial/AdmInfr/afcntry.shp")
 
-```{r include=FALSE, warning=FALSE}
+## seclect the countries of Tanzania, Kenya and Mozambique nad Madagascar
+wio = africa%>%
+  select(-c(FIPS_CNTRY, REGIONA, EMPTY, EMPTY2))%>%
+  filter(CNTRY_NAME == "Tanzania" | 
+           CNTRY_NAME == "Kenya" | 
+           CNTRY_NAME == "Mozambique" | 
+           CNTRY_NAME == "Madagascar")
+
+# stations
+point = readxl::read_excel("./Ogalo_mgeleka/stations.xlsx")
+
+```
+
+
+```{r include=FALSE, warning=FALSE, echo=FALSE}
 ##read Africa continental shapefile that we will use throught the munuscript as basemap dataset for maps
 africa = read_sf("E:/GIS/Tanzania spatial data Bank/EAF14 Tanzania spatial datasets/africa/Spatial/AdmInfr/afcntry.shp")
 
 ## clean the file
 wio = africa%>%select(-c(FIPS_CNTRY, REGIONA, EMPTY, EMPTY2))%>%
   filter(CNTRY_NAME == "Tanzania" | CNTRY_NAME == "Kenya" | CNTRY_NAME == "Mozambique" | CNTRY_NAME == "Madagascar")
+
+## station data
+# stations
+point = readxl::read_excel("E:/Data Manipulation/Ogalo_mgeleka/stations.xlsx")
 ```
 
 ```{r}
+
 # world map
 data("world")
 
 
-# stations
-point = readxl::read_excel("E:/Data Manipulation/Ogalo_mgeleka/stations.xlsx")
 
 point.select = point  %>% 
   filter(Site %in% c("Inhaca South", "Inhaca North", "Nosy Beach East", " 
@@ -63,7 +83,8 @@ wio.map = ggplot() +
   geom_point(data = point.select, aes(x = Long, y = Lat), size = 2)+
   ggrepel::geom_text_repel(data = point.select, aes(x = Long, y = Lat, label = Site), point.padding = 0.2)+
   theme_bw() + 
-  theme(panel.background = element_rect(fill = "lightblue"),axis.text = element_text(size = 11, colour = 1),
+  theme(panel.background = element_rect(fill = "lightblue"),
+        axis.text = element_text(size = 11, colour = 1),
         panel.grid = element_line(colour = NA))+
   scale_x_continuous(breaks = c(35,55))+
   scale_y_continuous(breaks = c(-25, 2)) +
@@ -75,19 +96,20 @@ wio.map
 
 ```
 
-```{r}
+```{r , fig.height=3, fig.width=8}
 zanzibar =ggplot()+ 
   geom_sf(data = wio, col = "black", fill = "ivory")+
-  coord_sf(xlim = c(39.1, 39.6), ylim = c(-6.5, -5.63785)) +
+  coord_sf(xlim = c(38.1, 42), ylim = c(-6.5, -5.63785)) +
   geom_point(data = point, 
   aes(x = Long, y = Lat), size = 2)+
   ggrepel::geom_text_repel(data = point  %>% 
   filter(Site %in% c("Nungwi", "Chwaka", "Fumba", "Mbweni")), 
   aes(x = Long, y = Lat, label = Site), point.padding = 0.2)+
   theme_bw() +
-  theme(panel.background = element_rect(fill = "lightblue"),axis.title = element_blank(),
+  theme(axis.text = element_text(size = 11, colour = 1),
+        panel.background = element_rect(fill = "lightblue"),axis.title = element_blank(),
         panel.grid = element_line(colour = NA))+
-  scale_x_continuous(breaks = c(39.10, 39.55))+
+  # scale_x_continuous(breaks = c(36.10, 39.55))+
   scale_y_continuous(breaks = c(-6.4, -5.7))
 
 
@@ -98,18 +120,19 @@ zanzibar
 ```{r, fig.width=8}
 
 nosy = ggplot()+ 
-  geom_sf(data = wio, col = "black", fill = "grey90")+
-  coord_sf(xlim = c(48.3, 48.53416), ylim = c(-13.64732, -13.45)) +
+  geom_sf(data = wio, col = "black", fill = "ivory")+
+  coord_sf(xlim = c(47.7, 48.7), ylim = c(-13.64732, -13.45)) +
   geom_point(data = point, 
   aes(x = Long, y = Lat), size = 4)+
   ggrepel::geom_text_repel(data = point  %>%
   filter(Site %in% c("Nosy Beach East", "Nosy Beach West")),
   aes(x = Long, y = Lat, label = Site), point.padding = 0.2)+
   theme_bw() +
-theme(panel.background = element_rect(fill = "lightblue"),axis.title = element_blank(),
+  theme(axis.text = element_text(size = 11, colour = 1),
+      panel.background = element_rect(fill = "lightblue"),axis.title = element_blank(),
       panel.grid = element_line(colour = NA))+
-scale_x_continuous(breaks = c(48.3, 48.))+
-scale_y_continuous(breaks = c(-13.62, -13.48))
+  # scale_x_continuous(breaks = c(48.3, 48.))+
+  scale_y_continuous(breaks = c(-13.62, -13.48))
 
 nosy
 
