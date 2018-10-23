@@ -1,0 +1,218 @@
+---
+title: Wind in the western Indian ocean region
+author: Masumbuko Semba
+date: '2018-10-23'
+slug: wind-in-the-western-indian-ocean-region
+categories:
+  - Oceanography
+tags:
+  - Indian Ocean
+  - Satellite
+  - quikscat
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<div id="comparisons-of-wind-stress" class="section level2">
+<h2>Comparisons of Wind Stress</h2>
+<p>A problem faced when using satellite based estimates of wind stress is that the QuikSCAT based estimates start in 1999-07-21 and end in 2009-11-19, while the ASCAT based estimates start in 2009-10-03 and are ongoing. A comparison of the data over the period of overlap would be of interest.</p>
+<pre class="r"><code>require(sf)
+require(xtractomatic)
+require(tidyverse)
+require(lubridate)
+require(DT)
+require(oce)</code></pre>
+<p>extract centroid from polygones</p>
+<pre class="r"><code>centroids = africa%&gt;% 
+  st_centroid() %&gt;% 
+  st_coordinates() %&gt;% 
+  as.tibble() %&gt;%
+  rename(lon = 1, lat = 2)</code></pre>
+<p>merge countries name with centroid</p>
+<pre class="r"><code># make a copy of africa
+country = africa
+
+# remove the geometry and retain the attribute information of the africa countries
+st_geometry(country) = NULL
+
+# bind the country centroid information with the country attribute information 
+country.centroids = centroids %&gt;% 
+  bind_cols(country) %&gt;% 
+  # drop other variables except lon, lat and name
+  select(lon,lat, name = CNTRY_NAME)
+
+# select the countries in the wio region
+country.wio = country.centroids %&gt;% 
+  filter(name %in% c(&quot;Somalia&quot;, &quot;Kenya&quot;, &quot;Uganda&quot;, &quot;Tanzania&quot;, 
+                     &quot;Mozambique&quot;, &quot;South Africa&quot;,&quot;Madagascar&quot;, &quot;Comoros&quot;,
+                     &quot;Seychelles&quot;, &quot;Mauritius&quot;, &quot;Reunion&quot;))</code></pre>
+<p>Table <a href="#tab:tab1">1</a> show the longitude and latitude and name of the countries in the western Indian Ocean region</p>
+<pre class="r"><code>country.wio %&gt;% 
+  kableExtra::kable(&quot;html&quot;, col.names = c(&quot;Longitude&quot;, &quot;Latitude&quot;, &quot;Country&quot;), align = &quot;c&quot;,
+                    caption = &quot;Central point geographical information of the countries in the Western Indian Ocean Region&quot;) %&gt;%
+  kableExtra::column_spec(column = 1:3, width = &quot;8cm&quot;)</code></pre>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Central point geographical information of the countries in the Western Indian Ocean Region
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+Longitude
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+<th style="text-align:center;">
+Country
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+37.86184
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.5334998
+</td>
+<td style="text-align:center;width: 8cm; ">
+Kenya
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+46.70028
+</td>
+<td style="text-align:center;width: 8cm; ">
+-19.3793484
+</td>
+<td style="text-align:center;width: 8cm; ">
+Madagascar
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+35.54924
+</td>
+<td style="text-align:center;width: 8cm; ">
+-17.2637407
+</td>
+<td style="text-align:center;width: 8cm; ">
+Mozambique
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+57.56786
+</td>
+<td style="text-align:center;width: 8cm; ">
+-20.2869497
+</td>
+<td style="text-align:center;width: 8cm; ">
+Mauritius
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+55.54008
+</td>
+<td style="text-align:center;width: 8cm; ">
+-21.1208231
+</td>
+<td style="text-align:center;width: 8cm; ">
+Reunion
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+45.86728
+</td>
+<td style="text-align:center;width: 8cm; ">
+6.0609839
+</td>
+<td style="text-align:center;width: 8cm; ">
+Somalia
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+55.52648
+</td>
+<td style="text-align:center;width: 8cm; ">
+-4.5964703
+</td>
+<td style="text-align:center;width: 8cm; ">
+Seychelles
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+34.82555
+</td>
+<td style="text-align:center;width: 8cm; ">
+-6.2655163
+</td>
+<td style="text-align:center;width: 8cm; ">
+Tanzania
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+32.38847
+</td>
+<td style="text-align:center;width: 8cm; ">
+1.2815748
+</td>
+<td style="text-align:center;width: 8cm; ">
+Uganda
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+25.07996
+</td>
+<td style="text-align:center;width: 8cm; ">
+-28.9920222
+</td>
+<td style="text-align:center;width: 8cm; ">
+South Africa
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+43.67107
+</td>
+<td style="text-align:center;width: 8cm; ">
+-11.8875098
+</td>
+<td style="text-align:center;width: 8cm; ">
+Comoros
+</td>
+</tr>
+</tbody>
+</table>
+<p>Figure <a href="#fig:fig1">1</a> shows the country within the western Indian Ocean region</p>
+<pre class="r"><code>ggplot() + 
+  geom_sf(data = spData::world, col = 1, fill = &quot;ivory&quot;)+
+  coord_sf(xlim = c(30,60), ylim = c(-30,5))+
+  ggrepel::geom_text_repel(data = country.wio, 
+            aes(x = lon, y = lat, label = name), nudge_x = 0.05)+
+  theme_bw() + 
+  theme(panel.background = element_rect(fill = &quot;lightblue&quot;),
+        axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+  ggsn::scalebar(location = &quot;bottomright&quot;, x.min = 35, x.max = 60,
+                 y.min = -30, y.max = 5, dist = 600, dd2km = TRUE, 
+                 model = &quot;WGS84&quot;, st.dist = 0.02, st.size = 4)+
+  labs(x = NULL, y = NULL)</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2018-10-23-wind-in-the-western-indian-ocean-region_files/figure-html/fig1-1.png" alt="Countries in the western Indian Ocean region" width="672" />
+<p class="caption">
+Figure 1: Countries in the western Indian Ocean region
+</p>
+</div>
+</div>

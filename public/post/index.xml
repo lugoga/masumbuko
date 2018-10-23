@@ -6,10 +6,21 @@
     <description>Recent content in Posts on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 20 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 23 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Wind in the western Indian ocean region</title>
+      <link>/10/23/2018/wind-in-the-western-indian-ocean-region/</link>
+      <pubDate>Tue, 23 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/10/23/2018/wind-in-the-western-indian-ocean-region/</guid>
+      <description>Comparisons of Wind StressA problem faced when using satellite based estimates of wind stress is that the QuikSCAT based estimates start in 1999-07-21 and end in 2009-11-19, while the ASCAT based estimates start in 2009-10-03 and are ongoing. A comparison of the data over the period of overlap would be of interest.
+require(sf)require(xtractomatic)require(tidyverse)require(lubridate)require(DT)require(oce)extract centroid from polygones
+centroids = africa%&amp;gt;% st_centroid() %&amp;gt;% st_coordinates() %&amp;gt;% as.</description>
+    </item>
     
     <item>
       <title>Drawing Publication Quality maps with ggplot2 in R</title>
