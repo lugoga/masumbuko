@@ -71,7 +71,7 @@
     <h1 class="article-title">Drawing Publication Quality maps with ggplot2 in R</h1>
 
     
-    <span class="article-date">2018/10/22</span>
+    <span class="article-date">2018/10/20</span>
     
 
     <div class="article-content">
@@ -379,7 +379,7 @@ Figure 4: Sampling stations at Inhaca Mozambique
 Figure 5: The stations in A) Unguja-Tanzania and B) inhaca - Mozambique
 </p>
 </div>
-<p>We can also place several zoomed map that showing the stations in much detailed way (figure <a href="#fig:wc2"><strong>??</strong></a>)</p>
+<p>with <strong>cowplot</strong> package , it is possible to place several inset maps on the main map using the <code>ggdraw()</code> and <code>draw_plo()</code> functions. For example the chunk below produce the figure <a href="#fig:cw2">6</a>.</p>
 <pre class="r"><code>cowplot::ggdraw()+ 
   cowplot::draw_plot(wio.map, x = 0, y = 0, width = 1, height = 1)+
   cowplot::draw_plot(nosy+theme(axis.text = element_blank(), axis.ticks = element_blank()), 
@@ -388,8 +388,8 @@ Figure 5: The stations in A) Unguja-Tanzania and B) inhaca - Mozambique
                      x = .4, y = 0.49,width = .6, height = .6,scale = .6)+
   cowplot::draw_plot(inhaca+theme(axis.text = element_blank(), axis.ticks = element_blank()), 
                      x = .41, y = -0.05,width = .6, height = .6,scale = .6)</code></pre>
-<div class="figure" style="text-align: l"><span id="fig:cw2"></span>
-<img src="/post/2018-10-22-genetic-connectivity-in-western-indian-ocean-region_files/figure-html/cw2-1.png" alt="Map of area of interest drawn on on the WIO region area to show sampling stations" width="960" />
+<div class="figure"><span id="fig:cw2"></span>
+<img src="/post/2018-10-22-genetic-connectivity-in-western-indian-ocean-region_files/figure-html/cw2-1.png" alt="Map of area of interest drawn on on the WIO region area to show sampling stations" width="816" />
 <p class="caption">
 Figure 6: Map of area of interest drawn on on the WIO region area to show sampling stations
 </p>
@@ -397,7 +397,15 @@ Figure 6: Map of area of interest drawn on on the WIO region area to show sampli
 </div>
 <div id="conclusion" class="section level3">
 <h3>Conclusion</h3>
-<p>We have seen the power of <strong>R</strong> and <strong>ggplot2</strong> to draw the publication quality graphics. With <strong>cowplot</strong> package, we can combine several graphics in a single layout. I have note done with Adobe illustrator—is still in high rank of software in my softwarebox. I still use this powerful software to edit and polish vector graphics generated from R.</p>
+<p>We have seen the power of <strong>R</strong> and <strong>ggplot2</strong> to draw the publication quality graphics. With <strong>cowplot</strong> package, we can combine several graphics in a single layout. I have note done with Adobe illustrator—is still in high rank of software in my softwarebox. I still use this powerful software to edit and polish vector graphics generated from R like in figure<a href="#fig:cw3">7</a>. The dotted line in figure<a href="#fig:cw3">7</a> are ocean current in the Western Indian Ocean region. The map was done in R, exported as <code>.eps</code> and ocean current—dotted line were drawn in <strong>adobe illustrator</strong> environement.</p>
+<pre class="r"><code>cowplot::ggdraw() +
+  cowplot::draw_image(&quot;map.png&quot; )</code></pre>
+<div class="figure"><span id="fig:cw3"></span>
+<img src="/post/2018-10-22-genetic-connectivity-in-western-indian-ocean-region_files/figure-html/cw3-1.png" alt="Ocean current in the WIO region" width="672" />
+<p class="caption">
+Figure 7: Ocean current in the WIO region
+</p>
+</div>
 </div>
 <div id="bibliography" class="section level3 unnumbered">
 <h3>Bibliography</h3>

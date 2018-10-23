@@ -60,13 +60,12 @@ Semba specializes in coding using various programming languages. Coding is nothi
     </item>
     
     <item>
-      <title>Genetic connectivity in Western Indian Ocean Region</title>
-      <link>/10/22/2018/genetic-connectivity-in-western-indian-ocean-region/</link>
-      <pubDate>Mon, 22 Oct 2018 00:00:00 +0000</pubDate>
+      <title>Drawing Publication Quality maps with ggplot2 in R</title>
+      <link>/10/20/2018/genetic-connectivity-in-western-indian-ocean-region/</link>
+      <pubDate>Sat, 20 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/10/22/2018/genetic-connectivity-in-western-indian-ocean-region/</guid>
-      <description>IntroductionThe pemba channel Mathew Silas and Said Mgeleka have been working on genetic mark up of the famous seagrass
-require(tidyverse)require(spData)require(sf)# world mapdata(&amp;quot;world&amp;quot;)# stationspoint = readxl::read_excel(&amp;quot;E:/Data Manipulation/Ogalo_mgeleka/stations.xlsx&amp;quot;)point.select = point %&amp;gt;% filter(Site %in% c(&amp;quot;Inhaca South&amp;quot;, &amp;quot;Inhaca North&amp;quot;, &amp;quot;Nosy Beach East&amp;quot;, &amp;quot; Pemba&amp;quot;, &amp;quot;Mbweni&amp;quot;, &amp;quot;Mombasa&amp;quot;, &amp;quot;Mjimwema&amp;quot;)) point.select=point.select %&amp;gt;% mutate(Site = replace(Site,Site == &amp;quot;Mbweni&amp;quot;, &amp;quot;Zanzibar&amp;quot;),Site = replace(Site,Site == &amp;quot;Nosy Beach East&amp;quot;, &amp;quot;Nosy Beach&amp;quot;))point.sf = point %&amp;gt;% st_as_sf(coords = c(&amp;quot;Long&amp;quot;, &amp;quot;Lat&amp;quot;)) %&amp;gt;% st_set_crs(4326)wio.</description>
+      <guid>/10/20/2018/genetic-connectivity-in-western-indian-ocean-region/</guid>
+      <description>Moving from ARGIS to RFor years, ESRI ArcGIS was a core software for most data processing, spatial analysis and drawing of outputs as map. Honestly the elegant high-resolution figures and maps I produced did not come from ArcMap, but rather from Adobe Illustrator. I was doing all the layout of the maps in ArcMap and then export it as in vector format Encapsulated PostScript. I then imported the .</description>
     </item>
     
     <item>
