@@ -65,9 +65,9 @@ Semba specializes in coding using various programming languages. Coding is nothi
       <pubDate>Tue, 23 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/10/23/2018/wind-in-the-western-indian-ocean-region/</guid>
-      <description>Comparisons of Wind StressA problem faced when using satellite based estimates of wind stress is that the QuikSCAT based estimates start in 1999-07-21 and end in 2009-11-19, while the ASCAT based estimates start in 2009-10-03 and are ongoing. A comparison of the data over the period of overlap would be of interest.
-require(sf)require(xtractomatic)require(tidyverse)require(lubridate)require(DT)require(oce)extract centroid from polygones
-centroids = africa%&amp;gt;% st_centroid() %&amp;gt;% st_coordinates() %&amp;gt;% as.</description>
+      <description>The list of erddap data set and server are found at https://coastwatch.pfeg.noaa.gov/erddap/metadata/fgdc/xml/.
+Comparisons of Wind StressA problem faced when using satellite based estimates of wind stress is that the QuikSCAT based estimates start in 1999-07-21 and end in 2009-11-19, while the ASCAT based estimates start in 2009-10-03 and are ongoing. A comparison of the data over the period of overlap would be of interest.
+require(sf)require(tidyverse)require(lubridate)require(oce)require(rerddap)require(gganimate)extract centroid from polygones</description>
     </item>
     
     <item>

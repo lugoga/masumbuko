@@ -65,7 +65,7 @@
 
   <article class="article">
     
-    <span class="article-duration">2 min read</span>
+    <span class="article-duration">5 min read</span>
     
 
     <h1 class="article-title">Wind in the western Indian ocean region</h1>
@@ -78,15 +78,16 @@
       <script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
 
 
+<p>The list of erddap data set and server are found at <a href="https://coastwatch.pfeg.noaa.gov/erddap/metadata/fgdc/xml/" class="uri">https://coastwatch.pfeg.noaa.gov/erddap/metadata/fgdc/xml/</a>.</p>
 <div id="comparisons-of-wind-stress" class="section level2">
 <h2>Comparisons of Wind Stress</h2>
 <p>A problem faced when using satellite based estimates of wind stress is that the QuikSCAT based estimates start in 1999-07-21 and end in 2009-11-19, while the ASCAT based estimates start in 2009-10-03 and are ongoing. A comparison of the data over the period of overlap would be of interest.</p>
 <pre class="r"><code>require(sf)
-require(xtractomatic)
 require(tidyverse)
 require(lubridate)
-require(DT)
-require(oce)</code></pre>
+require(oce)
+require(rerddap)
+require(gganimate)</code></pre>
 <p>extract centroid from polygones</p>
 <pre class="r"><code>centroids = africa%&gt;% 
   st_centroid() %&gt;% 
@@ -114,11 +115,11 @@ country.wio = country.centroids %&gt;%
 <p>Table <a href="#tab:tab1">1</a> show the longitude and latitude and name of the countries in the western Indian Ocean region</p>
 <pre class="r"><code>country.wio %&gt;% 
   kableExtra::kable(&quot;html&quot;, col.names = c(&quot;Longitude&quot;, &quot;Latitude&quot;, &quot;Country&quot;), align = &quot;c&quot;,
-                    caption = &quot;Central point geographical information of the countries in the Western Indian Ocean Region&quot;) %&gt;%
+                    caption = &quot;Geographical information of the countries in the Western Indian Ocean Region&quot;) %&gt;%
   kableExtra::column_spec(column = 1:3, width = &quot;8cm&quot;)</code></pre>
 <table>
 <caption>
-<span id="tab:tab1">Table 1: </span>Central point geographical information of the countries in the Western Indian Ocean Region
+<span id="tab:tab1">Table 1: </span>Geographical information of the countries in the Western Indian Ocean Region
 </caption>
 <thead>
 <tr>
@@ -277,6 +278,426 @@ Comoros
 <img src="/post/2018-10-23-wind-in-the-western-indian-ocean-region_files/figure-html/fig1-1.png" alt="Countries in the western Indian Ocean region" width="672" />
 <p class="caption">
 Figure 1: Countries in the western Indian Ocean region
+</p>
+</div>
+</div>
+<div id="subsetting-griddap" class="section level2">
+<h2>Subsetting griddap()</h2>
+<pre class="r"><code>info(&quot;erdQSstress8day_LonPM180&quot;)</code></pre>
+<p>We can subset ERDDAP grids by setting limits on the dimension variables, the difference being that a subset is defined in coordinate space (latitude and longitude values) and temperal space( time values). Thus for <code>erdQSstress8day_LonPM180</code> if the desired area of the data extract is latitude limits of (7S, 4S), longitude limits of (38E, 41E), and with time limits of (2017-01-01, 2017-01-05) the following would be passed to the function griddap():</p>
+<pre class="r"><code>lon = c(25,65)
+lat =  c(-35,10)
+time = c(&quot;2000-01-01&quot;, &quot;2008-12-31&quot;)
+
+wind = info(&#39;erdQSstress8day_LonPM180&#39;)
+
+wo.wind = griddap(x = wind, 
+                  longitude = lon, 
+                  latitude = lat, 
+                  time = time)</code></pre>
+<p>Geostrophic current</p>
+<pre class="r"><code>geoinfo = info(&quot;erdTAgeo1day_LonPM180&quot;)
+
+lon = c(25,65)
+lat =  c(-35,10)
+time = c(&quot;1993-01-01&quot;, &quot;2012-12-07&quot;)
+
+geostrophic = griddap(geoinfo, longitude = lon, latitude = lat, 
+                       time = time, fields = c(&quot;u_current&quot;, &quot;v_current&quot;))</code></pre>
+<pre class="r"><code>wio.geostrophic =  geostrophic %&gt;% 
+  mutate(date = as.Date(time),
+         vel = sqrt(u_current^2+ v_current^2)) %&gt;%
+  select(date, lon,lat, u = u_current, v = v_current, vel) %&gt;%
+  filter(date &gt;= dmy(010112))</code></pre>
+<p>Table <a href="#tab:tab2">2</a></p>
+<pre class="r"><code>wio %&gt;% sample_n(15) %&gt;%
+  kableExtra::kable(&quot;html&quot;, col.names = c(&quot;Date&quot;,&quot;Longitude&quot;, &quot;Latitude&quot;, &quot;Zonal (U)&quot;, 
+                                          &quot;Meridional (V)&quot;,&quot;Velocity&quot;), 
+                    align = &quot;c&quot;, digits = 4,   
+                    caption = &quot;wind data in the Western Indian Ocean Region&quot;)  %&gt;%
+  kableExtra::column_spec(column = 1:6, width = &quot;8cm&quot;) %&gt;%
+  kableExtra::add_header_above(c(&quot;&quot;, &quot;Geographical Location&quot; = 2, &quot;Current Velocity&quot; = 3))</code></pre>
+<table>
+<caption>
+<span id="tab:tab2">Table 2: </span>wind data in the Western Indian Ocean Region
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Geographical Location
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="3">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Current Velocity
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+Date
+</th>
+<th style="text-align:center;">
+Longitude
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+<th style="text-align:center;">
+Zonal (U)
+</th>
+<th style="text-align:center;">
+Meridional (V)
+</th>
+<th style="text-align:center;">
+Velocity
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-10-13
+</td>
+<td style="text-align:center;width: 8cm; ">
+53.9963
+</td>
+<td style="text-align:center;width: 8cm; ">
+6.25
+</td>
+<td style="text-align:center;width: 8cm; ">
+-0.9589
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.2616
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.9940
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-05-22
+</td>
+<td style="text-align:center;width: 8cm; ">
+45.2469
+</td>
+<td style="text-align:center;width: 8cm; ">
+-8.75
+</td>
+<td style="text-align:center;width: 8cm; ">
+-0.0651
+</td>
+<td style="text-align:center;width: 8cm; ">
+-0.0071
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0655
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-06-02
+</td>
+<td style="text-align:center;width: 8cm; ">
+25.7482
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.75
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-10-14
+</td>
+<td style="text-align:center;width: 8cm; ">
+28.2480
+</td>
+<td style="text-align:center;width: 8cm; ">
+-20.50
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-08-21
+</td>
+<td style="text-align:center;width: 8cm; ">
+25.2482
+</td>
+<td style="text-align:center;width: 8cm; ">
+-6.50
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-08-11
+</td>
+<td style="text-align:center;width: 8cm; ">
+53.4963
+</td>
+<td style="text-align:center;width: 8cm; ">
+-29.25
+</td>
+<td style="text-align:center;width: 8cm; ">
+-0.0271
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0371
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0460
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-06-16
+</td>
+<td style="text-align:center;width: 8cm; ">
+27.9981
+</td>
+<td style="text-align:center;width: 8cm; ">
+-16.75
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-05-24
+</td>
+<td style="text-align:center;width: 8cm; ">
+38.7473
+</td>
+<td style="text-align:center;width: 8cm; ">
+-5.75
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0091
+</td>
+<td style="text-align:center;width: 8cm; ">
+-0.0636
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0643
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-05-26
+</td>
+<td style="text-align:center;width: 8cm; ">
+41.9971
+</td>
+<td style="text-align:center;width: 8cm; ">
+-14.75
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0395
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0210
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0448
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-08-17
+</td>
+<td style="text-align:center;width: 8cm; ">
+29.4980
+</td>
+<td style="text-align:center;width: 8cm; ">
+7.00
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-11-05
+</td>
+<td style="text-align:center;width: 8cm; ">
+45.4968
+</td>
+<td style="text-align:center;width: 8cm; ">
+-28.25
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.2144
+</td>
+<td style="text-align:center;width: 8cm; ">
+-0.0211
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.2154
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-10-14
+</td>
+<td style="text-align:center;width: 8cm; ">
+28.7480
+</td>
+<td style="text-align:center;width: 8cm; ">
+-14.50
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-07-14
+</td>
+<td style="text-align:center;width: 8cm; ">
+50.2465
+</td>
+<td style="text-align:center;width: 8cm; ">
+-22.00
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0677
+</td>
+<td style="text-align:center;width: 8cm; ">
+-0.1054
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.1253
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-10-21
+</td>
+<td style="text-align:center;width: 8cm; ">
+29.4980
+</td>
+<td style="text-align:center;width: 8cm; ">
+-4.25
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-06-22
+</td>
+<td style="text-align:center;width: 8cm; ">
+34.9976
+</td>
+<td style="text-align:center;width: 8cm; ">
+-29.75
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.2142
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.1948
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.2896
+</td>
+</tr>
+</tbody>
+</table>
+<p>decompose day, month, and year as separate variable from the date variable</p>
+<pre class="r"><code># decompose day, month, and year as separate variable from the date variable
+wio = wio %&gt;% 
+  mutate(day = day(date), month = month(date) %&gt;%
+           as.integer(), year = year(date)%&gt;%
+           as.integer()) 
+## group current based on longitude, latitude and month
+wio.month = wio %&gt;% group_by(lon,lat,month) %&gt;% 
+  summarise(u = mean(u, na.rm = T),v = mean(v, na.rm = T), vel= mean(vel, na.rm = T))
+
+## ungroup grouped data frame
+wio.month = wio.month %&gt;% ungroup()</code></pre>
+<p>Figure <a href="#fig:fig2">2</a> shows monthly dynamics of ocean current in the WIO region</p>
+<pre class="r"><code>ggplot() +
+  geom_raster(data = wio.month, 
+              aes(x = lon, y = lat, fill = vel), interpolate = TRUE)+ 
+  geom_sf(data = spData::world, col = 1, fill = &quot;ivory&quot;)+
+  coord_sf(xlim = c(30,60), ylim = c(-30,5))+
+  ggrepel::geom_text_repel(data = country.wio, 
+            aes(x = lon, y = lat, label = name), nudge_x = 0.05)+
+  theme_bw() + 
+  theme(panel.background = element_rect(fill = &quot;lightblue&quot;),
+        axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA), 
+        legend.key.height = unit(3, &quot;lines&quot;),
+        legend.position = c(.92,.25),
+        legend.background = element_rect(colour = 1))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+  labs(x = NULL, y = NULL) +
+  scale_fill_gradientn(colours = oceColors9A(120))+
+  labs(title = &#39;Month: {frame_time}&#39;) +
+  transition_time(month) +
+  ease_aes(&#39;linear&#39;)</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2018-10-23-wind-in-the-western-indian-ocean-region_files/figure-html/fig2-1.gif" alt="monthly mean Current in the western Indian Ocean region"  />
+<p class="caption">
+Figure 2: monthly mean Current in the western Indian Ocean region
 </p>
 </div>
 </div>
