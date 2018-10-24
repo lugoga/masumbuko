@@ -1,5 +1,5 @@
 ---
-title: Obtain Oceanographic Data with R
+title: Access Oceanographic and Environmental Data with R
 author: Masumbuko Semba
 date: '2018-10-23'
 slug: wind-in-the-western-indian-ocean-region
