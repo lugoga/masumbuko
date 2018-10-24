@@ -19,7 +19,7 @@ link-citations: yes
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "")
 ```
 
-**ERDDAP** is a web service developed by Bob Simons of NOAA wth are over sixty [ERDDAP servers](https://coastwatch.pfeg.noaa.gov/erddap/metadata/fgdc/xml/) providing access to a myriad satellite data and model output relevant to oceanography, meteorology, fisheries and marine mammals, among other areas. The good thing about **ERDDAP** is its ability to allow users define the area they interested and then subset data that is within the extent of the defined area. 
+**ERDDAP** is a web service developed by Bob Simons of NOAA serve a repository of environmental variables. There are over sixty **ERDDAP servers** providing access to a myriad satellite data and model output relevant to oceanography, meteorology, fisheries and marine mammals, among other areas. You find the dataset in this link https://coastwatch.pfeg.noaa.gov/erddap/metadata/fgdc/xml/. The good thing about **ERDDAP** is its ability to allow users define the area they interested and then subset data that is within the extent of the defined area. 
 
 @rerddap developed **rerddap** package, which is a general purpose R client for working with **ERDDAP servers** within R environment.  **ERDDAP** is a server built on top of OPenDAP, which serves some NOAA data. ERDDAP allow you to obtain data in either gridded or table format. **rerddap** has two main functions two download these two types. the `griddap()` lets you query from gridded datasets and `tabledap()` lets you query fom tabular dataset.
 
@@ -92,7 +92,7 @@ country.wio = country.centroids %>%
 ```{r tab1, echo=FALSE}
 country.wio %>% 
   kableExtra::kable("html", col.names = c("Longitude", "Latitude", "Country"), align = "c",
-                    caption = "Geographical information of the countries in the Western Indian Ocean Region") %>%
+                    caption = "Geographical information of the countries in the Western Indian Ocean Region", digits = 4) %>%
   kableExtra::column_spec(column = 1:3, width = "8cm")
 ```
 
@@ -154,7 +154,7 @@ $$
 \end{align*}
 $$
 
-Where $2\Omega sin \varphi$ is the Coriolis pparamer. The equation can be mathematically writen as equation \@ref(eq:eq2)
+Where $2\Omega sin \varphi$ is the Coriolis pparamer. The equation can be writen as equation \@ref(eq:eq2)
 
 $$
 \begin{align*}
@@ -163,7 +163,7 @@ v = \frac{1}{f \rho} \frac{\delta p}{\delta x}  (\#eq:eq2)
 \end{align*}
 $$
 
-The geostrophic approximation applied at $z = 0$ leads to a very simple relation--- surface geostrophic current are proportional to surface slope. For example, consider a level surface slightly below the se sea surface, say two meters below the sea surface , at $z = -r$ figure \@ref(eq:eq3) 
+The geostrophic approximation applied at $z = 0$ leads to a very simple relation--- surface geostrophic current are proportional to surface slope. For example, consider a level surface slightly below the se sea surface, say two meters below the sea surface , at $z = -r$ equation \@ref(eq:eq3) 
 
 $$
 \begin{equation}
@@ -198,7 +198,7 @@ cowplot::ggdraw() + cowplot::draw_image("geoid-01.png")
 ```
 
 ### subsetting the Geostrophic Current
-In the previous section I narrated a bit of the physics behind the geostrophic current. We now switch to AVISO that collects and process geostrophic currents from satellite. I first chopped the geostrophic current for the tropical Indian Ocean region with `griddap()` function. Like an **R** array, ERDDAP grids are subsetted by setting limits on the dimension variables, the difference being that a subset is defined in coordinate space (latitude values, longitude values, time values) rather than array space as is done with R arrays. Thus for `erdTAgeo1day_LonPM180` the desired area of the data extract is latitude limits of (35 ^o^S, 10 ^o^N), longitude limits of (25 ^o^E,65 ^o^E), and  time limits of (1993-01-01, 2012-12-31) the following would be passed to the function `griddap()`:
+In the previous section I narrated a bit of the physics behind the geostrophic current. We now switch to AVISO that collects and process geostrophic currents from satellite. I first chopped the geostrophic current for the tropical Indian Ocean region with `griddap()` function. Like an **R** array, ERDDAP grids are subsetted by setting limits on the dimension variables, the difference being that a subset is defined in coordinate space (latitude values, longitude values, time values) rather than array space as is done with R arrays. Thus for `erdTAgeo1day_LonPM180` the desired area of the data extract is latitude limits of (35 ^o^S, 10 ^o^N), longitude limits of (25 ^o^E, 65 ^o^E), and  time limits of (1993-01-01, 2012-12-31) the following would be passed to the function `griddap()`:
 
 ```{r , eval=FALSE}
 
@@ -315,7 +315,7 @@ ggplot(data =somali ,
 ```
 
 ### Remarks
-The package **rerddap** has made access of oceanographic and environmental data into R. Once the data is in the workspace, we can transform, visualize and even animate to uncover subtle clue happening in the tropical Indian Ocean. 
+The package **rerddap** has made access of oceanographic and environmental data into **R**. Once the data is in the workspace, we can transform, visualize and even animate to uncover subtle clue happening in the tropical Indian Ocean. 
 
 
 ### Literature

@@ -17,8 +17,7 @@
       <pubDate>Tue, 23 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/10/23/2018/wind-in-the-western-indian-ocean-region/</guid>
-      <description>ERDDAP is a web service developed by Bob Simons of NOAA wth are over sixty ERDDAP servers providing access to a myriad satellite data and model output relevant to oceanography, meteorology, fisheries and marine mammals, among other areas. The good thing about ERDDAP is its ability to allow users define the area they interested and then subset data that is within the extent of the defined area.
-Chamberlain (2017) developed rerddap package, which is a general purpose R client for working with ERDDAP servers within R environment.</description>
+      <description>ERDDAP is a web service developed by Bob Simons of NOAA serve a repository of environmental variables. There are over sixty ERDDAP servers providing access to a myriad satellite data and model output relevant to oceanography, meteorology, fisheries and marine mammals, among other areas. You find the dataset in this link https://coastwatch.pfeg.noaa.gov/erddap/metadata/fgdc/xml/. The good thing about ERDDAP is its ability to allow users define the area they interested and then subset data that is within the extent of the defined area.</description>
     </item>
     
   </channel>

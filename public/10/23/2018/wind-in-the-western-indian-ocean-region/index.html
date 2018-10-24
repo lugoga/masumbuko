@@ -78,7 +78,7 @@
       <script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
 
 
-<p><strong>ERDDAP</strong> is a web service developed by Bob Simons of NOAA wth are over sixty <a href="https://coastwatch.pfeg.noaa.gov/erddap/metadata/fgdc/xml/">ERDDAP servers</a> providing access to a myriad satellite data and model output relevant to oceanography, meteorology, fisheries and marine mammals, among other areas. The good thing about <strong>ERDDAP</strong> is its ability to allow users define the area they interested and then subset data that is within the extent of the defined area.</p>
+<p><strong>ERDDAP</strong> is a web service developed by Bob Simons of NOAA serve a repository of environmental variables. There are over sixty <strong>ERDDAP servers</strong> providing access to a myriad satellite data and model output relevant to oceanography, meteorology, fisheries and marine mammals, among other areas. You find the dataset in this link <a href="https://coastwatch.pfeg.noaa.gov/erddap/metadata/fgdc/xml/" class="uri">https://coastwatch.pfeg.noaa.gov/erddap/metadata/fgdc/xml/</a>. The good thing about <strong>ERDDAP</strong> is its ability to allow users define the area they interested and then subset data that is within the extent of the defined area.</p>
 <p><span class="citation">Chamberlain (<a href="#ref-rerddap">2017</a>)</span> developed <strong>rerddap</strong> package, which is a general purpose R client for working with <strong>ERDDAP servers</strong> within R environment. <strong>ERDDAP</strong> is a server built on top of OPenDAP, which serves some NOAA data. ERDDAP allow you to obtain data in either gridded or table format. <strong>rerddap</strong> has two main functions two download these two types. the <code>griddap()</code> lets you query from gridded datasets and <code>tabledap()</code> lets you query fom tabular dataset.</p>
 <p>In this post I focus on getting geostrophic current of the Tropical Indian Ocean region from <strong>ERDDAP</strong> server using <strong>rerddap</strong> package in R environment <span class="citation">(R Core Team, <a href="#ref-r">2018</a>)</span>. If you have the package in your machine you can proceed, but if not installed, you can install stable <strong>rerddap</strong> package from the cran or GitHub by uncomment the chunks below</p>
 <pre class="r"><code>#install.packages(&quot;rerddap&quot;)</code></pre>
@@ -140,10 +140,10 @@ Country
 <tbody>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-37.86184
+37.8618
 </td>
 <td style="text-align:center;width: 8cm; ">
-0.5334998
+0.5335
 </td>
 <td style="text-align:center;width: 8cm; ">
 Kenya
@@ -151,10 +151,10 @@ Kenya
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-46.70028
+46.7003
 </td>
 <td style="text-align:center;width: 8cm; ">
--19.3793484
+-19.3793
 </td>
 <td style="text-align:center;width: 8cm; ">
 Madagascar
@@ -162,10 +162,10 @@ Madagascar
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-35.54924
+35.5492
 </td>
 <td style="text-align:center;width: 8cm; ">
--17.2637407
+-17.2637
 </td>
 <td style="text-align:center;width: 8cm; ">
 Mozambique
@@ -173,10 +173,10 @@ Mozambique
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-57.56786
+57.5679
 </td>
 <td style="text-align:center;width: 8cm; ">
--20.2869497
+-20.2869
 </td>
 <td style="text-align:center;width: 8cm; ">
 Mauritius
@@ -184,10 +184,10 @@ Mauritius
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-55.54008
+55.5401
 </td>
 <td style="text-align:center;width: 8cm; ">
--21.1208231
+-21.1208
 </td>
 <td style="text-align:center;width: 8cm; ">
 Reunion
@@ -195,10 +195,10 @@ Reunion
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-45.86728
+45.8673
 </td>
 <td style="text-align:center;width: 8cm; ">
-6.0609839
+6.0610
 </td>
 <td style="text-align:center;width: 8cm; ">
 Somalia
@@ -206,10 +206,10 @@ Somalia
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-55.52648
+55.5265
 </td>
 <td style="text-align:center;width: 8cm; ">
--4.5964703
+-4.5965
 </td>
 <td style="text-align:center;width: 8cm; ">
 Seychelles
@@ -217,10 +217,10 @@ Seychelles
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-34.82555
+34.8255
 </td>
 <td style="text-align:center;width: 8cm; ">
--6.2655163
+-6.2655
 </td>
 <td style="text-align:center;width: 8cm; ">
 Tanzania
@@ -228,10 +228,10 @@ Tanzania
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-32.38847
+32.3885
 </td>
 <td style="text-align:center;width: 8cm; ">
-1.2815748
+1.2816
 </td>
 <td style="text-align:center;width: 8cm; ">
 Uganda
@@ -239,10 +239,10 @@ Uganda
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-25.07996
+25.0800
 </td>
 <td style="text-align:center;width: 8cm; ">
--28.9920222
+-28.9920
 </td>
 <td style="text-align:center;width: 8cm; ">
 South Africa
@@ -250,10 +250,10 @@ South Africa
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-43.67107
+43.6711
 </td>
 <td style="text-align:center;width: 8cm; ">
--11.8875098
+-11.8875
 </td>
 <td style="text-align:center;width: 8cm; ">
 Comoros
@@ -358,14 +358,14 @@ servers()</code></pre>
 \frac{\delta p}{\delta x} = -\rho g \:\tag{1}
 \end{align*}
 \]</span></p>
-<p>Where <span class="math inline">\(2\Omega sin \varphi\)</span> is the Coriolis pparamer. The equation can be mathematically writen as equation <a href="#eq:eq2">(2)</a></p>
+<p>Where <span class="math inline">\(2\Omega sin \varphi\)</span> is the Coriolis pparamer. The equation can be writen as equation <a href="#eq:eq2">(2)</a></p>
 <p><span class="math display" id="eq:eq2">\[
 \begin{align*}
 u = \frac{1}{f \rho} \frac{\delta p}{\delta y}\\ 
 v = \frac{1}{f \rho} \frac{\delta p}{\delta x}  \tag{2}
 \end{align*}
 \]</span></p>
-<p>The geostrophic approximation applied at <span class="math inline">\(z = 0\)</span> leads to a very simple relation— surface geostrophic current are proportional to surface slope. For example, consider a level surface slightly below the se sea surface, say two meters below the sea surface , at <span class="math inline">\(z = -r\)</span> figure <a href="#eq:eq3">(3)</a></p>
+<p>The geostrophic approximation applied at <span class="math inline">\(z = 0\)</span> leads to a very simple relation— surface geostrophic current are proportional to surface slope. For example, consider a level surface slightly below the se sea surface, say two meters below the sea surface , at <span class="math inline">\(z = -r\)</span> equation <a href="#eq:eq3">(3)</a></p>
 <p><span class="math display" id="eq:eq3">\[
 \begin{equation}
  u = v = w = 0 \tag{3}
@@ -398,7 +398,7 @@ Figure 2: The slope of the sea surface relative to the geoid is direcltyl relate
 </div>
 <div id="subsetting-the-geostrophic-current" class="section level3">
 <h3>subsetting the Geostrophic Current</h3>
-<p>In the previous section I narrated a bit of the physics behind the geostrophic current. We now switch to AVISO that collects and process geostrophic currents from satellite. I first chopped the geostrophic current for the tropical Indian Ocean region with <code>griddap()</code> function. Like an <strong>R</strong> array, ERDDAP grids are subsetted by setting limits on the dimension variables, the difference being that a subset is defined in coordinate space (latitude values, longitude values, time values) rather than array space as is done with R arrays. Thus for <code>erdTAgeo1day_LonPM180</code> the desired area of the data extract is latitude limits of (35 <sup>o</sup>S, 10 <sup>o</sup>N), longitude limits of (25 <sup>o</sup>E,65 <sup>o</sup>E), and time limits of (1993-01-01, 2012-12-31) the following would be passed to the function <code>griddap()</code>:</p>
+<p>In the previous section I narrated a bit of the physics behind the geostrophic current. We now switch to AVISO that collects and process geostrophic currents from satellite. I first chopped the geostrophic current for the tropical Indian Ocean region with <code>griddap()</code> function. Like an <strong>R</strong> array, ERDDAP grids are subsetted by setting limits on the dimension variables, the difference being that a subset is defined in coordinate space (latitude values, longitude values, time values) rather than array space as is done with R arrays. Thus for <code>erdTAgeo1day_LonPM180</code> the desired area of the data extract is latitude limits of (35 <sup>o</sup>S, 10 <sup>o</sup>N), longitude limits of (25 <sup>o</sup>E, 65 <sup>o</sup>E), and time limits of (1993-01-01, 2012-12-31) the following would be passed to the function <code>griddap()</code>:</p>
 <pre class="r"><code>#get metadata information on an ERDDAP dataset
 geoinfo = info(&quot;erdTAgeo1day_LonPM180&quot;)
 
@@ -473,73 +473,73 @@ Velocity
 <tbody>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-2012-11-09
+2012-08-13
 </td>
 <td style="text-align:center;width: 8cm; ">
-57.4960
+53.2463
 </td>
 <td style="text-align:center;width: 8cm; ">
-9.00
+1.25
 </td>
 <td style="text-align:center;width: 8cm; ">
--0.1015
+-0.1657
 </td>
 <td style="text-align:center;width: 8cm; ">
-0.0981
+0.0642
 </td>
 <td style="text-align:center;width: 8cm; ">
-0.1412
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; ">
-2012-01-25
-</td>
-<td style="text-align:center;width: 8cm; ">
-36.7474
-</td>
-<td style="text-align:center;width: 8cm; ">
--16.75
-</td>
-<td style="text-align:center;width: 8cm; ">
-NA
-</td>
-<td style="text-align:center;width: 8cm; ">
-NA
-</td>
-<td style="text-align:center;width: 8cm; ">
-NA
+0.1777
 </td>
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-2012-04-11
+2012-06-08
 </td>
 <td style="text-align:center;width: 8cm; ">
-35.9975
+62.4957
 </td>
 <td style="text-align:center;width: 8cm; ">
--24.00
+0.50
 </td>
 <td style="text-align:center;width: 8cm; ">
-0.1698
+0.0058
 </td>
 <td style="text-align:center;width: 8cm; ">
-0.1056
+-0.0016
 </td>
 <td style="text-align:center;width: 8cm; ">
-0.2000
+0.0060
 </td>
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-2012-09-22
+2012-11-01
 </td>
 <td style="text-align:center;width: 8cm; ">
-30.7479
+51.9964
 </td>
 <td style="text-align:center;width: 8cm; ">
--22.00
+3.00
+</td>
+<td style="text-align:center;width: 8cm; ">
+-0.1440
+</td>
+<td style="text-align:center;width: 8cm; ">
+-0.0018
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.1441
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-11-23
+</td>
+<td style="text-align:center;width: 8cm; ">
+38.7473
+</td>
+<td style="text-align:center;width: 8cm; ">
+3.00
 </td>
 <td style="text-align:center;width: 8cm; ">
 NA
@@ -553,42 +553,62 @@ NA
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-2012-05-20
+2012-10-18
 </td>
 <td style="text-align:center;width: 8cm; ">
-61.2457
+58.2460
 </td>
 <td style="text-align:center;width: 8cm; ">
-8.50
+-10.25
 </td>
 <td style="text-align:center;width: 8cm; ">
--0.0257
+-0.0179
 </td>
 <td style="text-align:center;width: 8cm; ">
-0.0896
+0.0427
 </td>
 <td style="text-align:center;width: 8cm; ">
-0.0932
+0.0463
 </td>
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-2012-06-03
+2012-08-18
 </td>
 <td style="text-align:center;width: 8cm; ">
-45.2469
+33.4977
 </td>
 <td style="text-align:center;width: 8cm; ">
--28.75
+-32.25
 </td>
 <td style="text-align:center;width: 8cm; ">
-0.1828
+-0.0611
 </td>
 <td style="text-align:center;width: 8cm; ">
--0.2208
+0.0193
 </td>
 <td style="text-align:center;width: 8cm; ">
-0.2867
+0.0641
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-06-16
+</td>
+<td style="text-align:center;width: 8cm; ">
+55.4961
+</td>
+<td style="text-align:center;width: 8cm; ">
+-9.00
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0000
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0000
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0000
 </td>
 </tr>
 <tr>
@@ -596,70 +616,10 @@ NA
 2012-11-11
 </td>
 <td style="text-align:center;width: 8cm; ">
-51.2464
+32.9977
 </td>
 <td style="text-align:center;width: 8cm; ">
--28.25
-</td>
-<td style="text-align:center;width: 8cm; ">
--0.1815
-</td>
-<td style="text-align:center;width: 8cm; ">
--0.1246
-</td>
-<td style="text-align:center;width: 8cm; ">
-0.2202
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; ">
-2012-05-11
-</td>
-<td style="text-align:center;width: 8cm; ">
-56.2461
-</td>
-<td style="text-align:center;width: 8cm; ">
--32.25
-</td>
-<td style="text-align:center;width: 8cm; ">
--0.0040
-</td>
-<td style="text-align:center;width: 8cm; ">
--0.0036
-</td>
-<td style="text-align:center;width: 8cm; ">
-0.0054
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; ">
-2012-12-06
-</td>
-<td style="text-align:center;width: 8cm; ">
-44.7469
-</td>
-<td style="text-align:center;width: 8cm; ">
--5.25
-</td>
-<td style="text-align:center;width: 8cm; ">
-0.1457
-</td>
-<td style="text-align:center;width: 8cm; ">
-0.1053
-</td>
-<td style="text-align:center;width: 8cm; ">
-0.1797
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; ">
-2012-05-17
-</td>
-<td style="text-align:center;width: 8cm; ">
-35.9975
-</td>
-<td style="text-align:center;width: 8cm; ">
-4.25
+-18.50
 </td>
 <td style="text-align:center;width: 8cm; ">
 NA
@@ -673,33 +633,13 @@ NA
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-2012-11-20
+2012-07-19
 </td>
 <td style="text-align:center;width: 8cm; ">
-63.9956
+37.2474
 </td>
 <td style="text-align:center;width: 8cm; ">
--29.50
-</td>
-<td style="text-align:center;width: 8cm; ">
-0.0477
-</td>
-<td style="text-align:center;width: 8cm; ">
-0.0118
-</td>
-<td style="text-align:center;width: 8cm; ">
-0.0492
-</td>
-</tr>
-<tr>
-<td style="text-align:center;width: 8cm; ">
-2012-10-06
-</td>
-<td style="text-align:center;width: 8cm; ">
-33.2477
-</td>
-<td style="text-align:center;width: 8cm; ">
--0.50
+-2.75
 </td>
 <td style="text-align:center;width: 8cm; ">
 NA
@@ -713,62 +653,122 @@ NA
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-2012-07-26
+2012-10-21
 </td>
 <td style="text-align:center;width: 8cm; ">
-58.9959
+29.9979
 </td>
 <td style="text-align:center;width: 8cm; ">
--32.50
+-22.50
 </td>
 <td style="text-align:center;width: 8cm; ">
-0.0302
+NA
 </td>
 <td style="text-align:center;width: 8cm; ">
--0.0204
+NA
 </td>
 <td style="text-align:center;width: 8cm; ">
-0.0364
+NA
 </td>
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-2012-10-23
+2012-05-21
 </td>
 <td style="text-align:center;width: 8cm; ">
-30.7479
+63.2456
 </td>
 <td style="text-align:center;width: 8cm; ">
--30.75
+7.50
 </td>
 <td style="text-align:center;width: 8cm; ">
--0.1086
+-0.0480
 </td>
 <td style="text-align:center;width: 8cm; ">
--0.1852
+0.0268
 </td>
 <td style="text-align:center;width: 8cm; ">
-0.2147
+0.0550
 </td>
 </tr>
 <tr>
 <td style="text-align:center;width: 8cm; ">
-2012-08-07
+2012-08-15
 </td>
 <td style="text-align:center;width: 8cm; ">
-26.2482
+46.9967
 </td>
 <td style="text-align:center;width: 8cm; ">
--25.25
-</td>
-<td style="text-align:center;width: 8cm; ">
-NA
+-20.50
 </td>
 <td style="text-align:center;width: 8cm; ">
 NA
 </td>
 <td style="text-align:center;width: 8cm; ">
 NA
+</td>
+<td style="text-align:center;width: 8cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-05-24
+</td>
+<td style="text-align:center;width: 8cm; ">
+46.7468
+</td>
+<td style="text-align:center;width: 8cm; ">
+3.00
+</td>
+<td style="text-align:center;width: 8cm; ">
+-0.2065
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.2026
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.2893
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-05-03
+</td>
+<td style="text-align:center;width: 8cm; ">
+50.4965
+</td>
+<td style="text-align:center;width: 8cm; ">
+-33.50
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0151
+</td>
+<td style="text-align:center;width: 8cm; ">
+-0.0002
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0151
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 8cm; ">
+2012-07-03
+</td>
+<td style="text-align:center;width: 8cm; ">
+38.2473
+</td>
+<td style="text-align:center;width: 8cm; ">
+-24.25
+</td>
+<td style="text-align:center;width: 8cm; ">
+-0.0021
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0369
+</td>
+<td style="text-align:center;width: 8cm; ">
+0.0370
 </td>
 </tr>
 </tbody>
@@ -840,7 +840,7 @@ Figure 4: The monthly variation of geostrophic current in area around somali cur
 </div>
 <div id="remarks" class="section level3">
 <h3>Remarks</h3>
-<p>The package <strong>rerddap</strong> has made access of oceanographic and environmental data into R. Once the data is in the workspace, we can transform, visualize and even animate to uncover subtle clue happening in the tropical Indian Ocean.</p>
+<p>The package <strong>rerddap</strong> has made access of oceanographic and environmental data into <strong>R</strong>. Once the data is in the workspace, we can transform, visualize and even animate to uncover subtle clue happening in the tropical Indian Ocean.</p>
 </div>
 <div id="literature" class="section level3 unnumbered">
 <h3>Literature</h3>
