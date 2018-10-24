@@ -60,14 +60,13 @@ Semba specializes in coding using various programming languages. Coding is nothi
     </item>
     
     <item>
-      <title>Wind in the western Indian ocean region</title>
+      <title>Obtain Oceanographic Data with R</title>
       <link>/10/23/2018/wind-in-the-western-indian-ocean-region/</link>
       <pubDate>Tue, 23 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/10/23/2018/wind-in-the-western-indian-ocean-region/</guid>
-      <description>The list of erddap data set and server are found at https://coastwatch.pfeg.noaa.gov/erddap/metadata/fgdc/xml/.
-Comparisons of Wind StressA problem faced when using satellite based estimates of wind stress is that the QuikSCAT based estimates start in 1999-07-21 and end in 2009-11-19, while the ASCAT based estimates start in 2009-10-03 and are ongoing. A comparison of the data over the period of overlap would be of interest.
-require(sf)require(tidyverse)require(lubridate)require(oce)require(rerddap)require(gganimate)extract centroid from polygones</description>
+      <description>ERDDAP is a web service developed by Bob Simons of NOAA wth are over sixty ERDDAP servers providing access to a myriad satellite data and model output relevant to oceanography, meteorology, fisheries and marine mammals, among other areas. The good thing about ERDDAP is its ability to allow users define the area they interested and then subset data that is within the extent of the defined area.
+Chamberlain (2017) developed rerddap package, which is a general purpose R client for working with ERDDAP servers within R environment.</description>
     </item>
     
     <item>

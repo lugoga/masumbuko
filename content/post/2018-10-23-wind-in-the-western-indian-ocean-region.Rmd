@@ -1,5 +1,5 @@
 ---
-title: Wind in the western Indian ocean region
+title: Obtain Oceanographic Data with R
 author: Masumbuko Semba
 date: '2018-10-23'
 slug: wind-in-the-western-indian-ocean-region
@@ -9,26 +9,43 @@ tags:
   - Indian Ocean
   - Satellite
   - quikscat
+  
+bibliography: [blog.bib, argo.bib]
+csl: apa.csl
+link-citations: yes
 ---
 
-The list of erddap data set and server are found at https://coastwatch.pfeg.noaa.gov/erddap/metadata/fgdc/xml/.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "")
 ```
 
-## Comparisons of Wind Stress
-A problem faced when using satellite based estimates of wind stress is that the QuikSCAT based estimates start in 1999-07-21 and end in 2009-11-19, while the ASCAT based estimates start in 2009-10-03 and are ongoing. A comparison of the data over the period of overlap would be of interest.
+**ERDDAP** is a web service developed by Bob Simons of NOAA wth are over sixty [ERDDAP servers](https://coastwatch.pfeg.noaa.gov/erddap/metadata/fgdc/xml/) providing access to a myriad satellite data and model output relevant to oceanography, meteorology, fisheries and marine mammals, among other areas. The good thing about **ERDDAP** is its ability to allow users define the area they interested and then subset data that is within the extent of the defined area. 
 
+@rerddap developed **rerddap** package, which is a general purpose R client for working with **ERDDAP servers** within R environment.  **ERDDAP** is a server built on top of OPenDAP, which serves some NOAA data. ERDDAP allow you to obtain data in either gridded or table format. **rerddap** has two main functions two download these two types. the `griddap()` lets you query from gridded datasets and `tabledap()` lets you query fom tabular dataset.
+
+In this post I focus on getting geostrophic current of the Tropical Indian Ocean region from **ERDDAP** server using **rerddap** package in R environment [@r]. If you have the package in your machine you can proceed, but if not installed, you can install stable **rerddap** package from the cran or GitHub by uncomment the chunks below
 ```{r}
+#install.packages("rerddap")
+```
+
+or development version from GitHub
+```{r}
+#devtools::install_github("ropensci/rerddap")
+```
+
+We call the **rerddap** package along with other package we will use for data processing and visualization with `require()` function.
+```{r}
+require(rerddap)
 require(sf)
 require(tidyverse)
 require(lubridate)
 require(oce)
-require(rerddap)
 require(gganimate)
+require(RColorBrewer)
+
 ```
 
-
+A basemap was required that show the boundaries of the countries within the WIO region. The basemap that contain all African countries was used. Then load the basemap, for this post I used the basemap of Africa , which is the ESRI shapefile format. You can easily import shapefile into R workspace with the `read_sf()` function of `sf` package [@sf].
 
 ```{r include=FALSE, warning=FALSE, echo=FALSE}
 #NOT these is hidden in the output, but it is the one that does the processing of the three chunk above which are simply for for display but never execute as I parsed the argument eval = FALSE in them
@@ -37,19 +54,22 @@ require(gganimate)
 africa = read_sf("E:/GIS/Tanzania spatial data Bank/EAF14 Tanzania spatial datasets/africa/Spatial/AdmInfr/afcntry.shp")
 ```
 
-extract centroid from polygones
-```{r}
+```{r, eval=FALSE}
+## read the shapefile
+africa = read_sf("./africa/Spatial/AdmInfr/afcntry.shp")
 
+```
+
+To make labelling easy on map, I extracted the centroid location (longitude and latitude) from the polygons of country boundaries in Africa layer with `st_centroid()` and `st_coordinates()` function. The attribute information was extracted from the polgon geometry using expression `st_geometry(country) = NULL`. These attribute information was joined with centroid information with `bind_col()` function. Only the information for the countries within the tropical Indian Ocean region was retained and dropped information for other countries outside the region. Table \@ref(tab:tab1) show the longitude and latitude and name of the countries in the western Indian Ocean region used to draw figure \@ref(fig:fig1).
+  
+```{r}
+# extract centroid from polygones
 centroids = africa%>% 
   st_centroid() %>% 
   st_coordinates() %>% 
   as.tibble() %>%
   rename(lon = 1, lat = 2)
-```
 
-
-merge countries name with centroid 
-```{r}
 # make a copy of africa
 country = africa
 
@@ -69,8 +89,7 @@ country.wio = country.centroids %>%
                      "Seychelles", "Mauritius", "Reunion"))
 ```
 
-Table \@ref(tab:tab1) show the longitude and latitude and name of the countries in the western Indian Ocean region
-```{r tab1}
+```{r tab1, echo=FALSE}
 country.wio %>% 
   kableExtra::kable("html", col.names = c("Longitude", "Latitude", "Country"), align = "c",
                     caption = "Geographical information of the countries in the Western Indian Ocean Region") %>%
@@ -78,9 +97,8 @@ country.wio %>%
 ```
 
 
-Figure \@ref(fig:fig1) shows the country within the western Indian Ocean region
- 
-```{r fig1, fig.cap="Countries in the western Indian Ocean region", fig.height=8}
+```{r fig1, fig.cap="Countries in the western Indian Ocean region", fig.height=7}
+## draw map of the tropical indian ocean
 ggplot() + 
   geom_sf(data = spData::world, col = 1, fill = "ivory")+
   coord_sf(xlim = c(30,60), ylim = c(-30,5))+
@@ -99,51 +117,120 @@ ggplot() +
 
 ```
 
+### Geostrophic Current
+One main advantage of using **ERDDAP** is that you only need to download the subset of the data you desire, rather than the entire dataset. You can subset based on temporal--- time range and spatial---geographical extent of interest. This approach is convinient  and essential for oceanographic and environmental variables, which are usually large.
 
+Aviso Zonal Geostrophic Current is inferred from Sea Surface Height Deviation, climatological dynamic height, and ba. I will download the AVISO geostrophic current from `erdTAgeo1day_LonPM180` servers, which contain two gridded Variables: 
 
-##Subsetting griddap()
-```{r eval=FALSE}
-info("erdQSstress8day_LonPM180")
-```
++ u_current (Eastward Sea Water Velocity, ms^-1^)
++ v_current (Northward Sea Water Velocity, ms^-1^) 
 
-We can subset ERDDAP grids by setting limits on the dimension variables, the difference being that a subset is defined in coordinate space (latitude and longitude values) and temperal space( time values). Thus for `erdQSstress8day_LonPM180` if the desired area of the data extract is latitude limits of (7S, 4S), longitude limits of (38E, 41E), and with time limits of (2017-01-01, 2017-01-05) the following would be passed to the function griddap():
-```{r, eval=FALSE}
-
-lon = c(25,65)
-lat =  c(-35,10)
-time = c("2000-01-01", "2008-12-31")
-
-wind = info('erdQSstress8day_LonPM180')
-
-wo.wind = griddap(x = wind, 
-                  longitude = lon, 
-                  latitude = lat, 
-                  time = time)
+Since we know the datasetID is `erdTAgeo1day_LonPM180` and unsure whether is gridded or tabular dataset, you can check the metadata of the dataset with **rerddap** function `info()`. 
+ 
+```{r eval=TRUE}
+## obtain metadata of the dataset
+geoinfo = info("erdTAgeo1day_LonPM180")
+geoinfo
 
 ```
 
-Geostrophic current
+If you do know the datasetId, the first way to find a dataset is to browse the builtin web page for a particular ERDDAP server. You can obtain a list of some public available ERDDAP servers with the `servers()` function as in the command below:
+```{r, collapse=FALSE}
+## call available ERDDAP servers
+servers()
+```
+
+### Surface Geostrophic Currents From Altimetry
+The geostrophic equations are widely used in oceanography to estimate currents. The basic idea is to use hydrographic measurements of temperature, salinity or conductivitiy, and pressure to calculate the density filed of the ocean using the equation of state of sea water. There are several satellite-altimeter systems measuring the oceanic geostrophic current. I will not cover them in this post. 
+
+### Briefly Theory of Geostrophic
+Satellite altimeters used to measure surface geostrophic currents also measure wave height. The geostrophic balance requires that the Coriolis force balance the horizontal pressure gradient. The equations for geographic balance are derived from the equations of motion assuming the flow has no accelaration, $du/dt = dv/dt = dw/dt = 0$: that horizontal velocities are much larger than vertical, $w < u,v$; that the only external force is gravity; and that friction is small. With these assumptions we obtain equation \@ref(eq:eq1)
+
+$$
+\begin{align*}
+\frac{\delta p}{\delta x} = \rho f v \\
+\frac{\delta p}{\delta x} = \rho f u \\
+\frac{\delta p}{\delta x} = -\rho g \:(\#eq:eq1)
+\end{align*}
+$$
+
+Where $2\Omega sin \varphi$ is the Coriolis pparamer. The equation can be mathematically writen as equation \@ref(eq:eq2)
+
+$$
+\begin{align*}
+u = \frac{1}{f \rho} \frac{\delta p}{\delta y}\\ 
+v = \frac{1}{f \rho} \frac{\delta p}{\delta x}  (\#eq:eq2)
+\end{align*}
+$$
+
+The geostrophic approximation applied at $z = 0$ leads to a very simple relation--- surface geostrophic current are proportional to surface slope. For example, consider a level surface slightly below the se sea surface, say two meters below the sea surface , at $z = -r$ figure \@ref(eq:eq3) 
+
+$$
+\begin{equation}
+ u = v = w = 0 (\#eq:eq3)
+\end{equation}
+$$
+
+The pressure of the level is obtained with equation \@ref(eq:eq4)
+
+$$
+\begin{equation}
+ p = \rho g\; (\zeta + r) (\#eq:eq4)
+\end{equation}
+$$
+
+Assuming $\rho$ and $g$ are essentially constant in the upper few meters of the ocean. Sustituting this into equation \@ref(eq:eq1) gives two components $u_s, v_s$ of the surface geostrophic current writen in equation \@ref(eq:eq5)
+The pressure of the level is 
+
+$$
+\begin{align*}
+u_s = \frac{g}{f} \frac{\delta \varsigma}{\delta y}\\
+v_s = \frac{g}{f} \frac{\delta \varsigma}{\delta x} (\#eq:eq5)
+\end{align*}
+$$
+
+### The Oceanic Topography
+We can describe the topography of the sea surface $\varsigma$ as the height of the sea surface relative to a particular level surface---the geoid. And geoid is the level surface that coincide with the surface of the ocean at rest. Thus, according to equation \ref(eq:eq5) the surface geostrophic currents are proportional to the slope of the topography (figure \@ref(fig:topo))
+
+```{r topo, fig.cap="The slope of the sea surface relative to the geoid is direcltyl related to surface geostrophic currents. The slope of 1 meter per 100 kilometers is typical of strong currents", fig.height=2.5, fig.width=7}
+
+cowplot::ggdraw() + cowplot::draw_image("geoid-01.png")
+```
+
+### subsetting the Geostrophic Current
+In the previous section I narrated a bit of the physics behind the geostrophic current. We now switch to AVISO that collects and process geostrophic currents from satellite. I first chopped the geostrophic current for the tropical Indian Ocean region with `griddap()` function. Like an **R** array, ERDDAP grids are subsetted by setting limits on the dimension variables, the difference being that a subset is defined in coordinate space (latitude values, longitude values, time values) rather than array space as is done with R arrays. Thus for `erdTAgeo1day_LonPM180` the desired area of the data extract is latitude limits of (35 ^o^S, 10 ^o^N), longitude limits of (25 ^o^E,65 ^o^E), and  time limits of (1993-01-01, 2012-12-31) the following would be passed to the function `griddap()`:
+
 ```{r , eval=FALSE}
+
+#get metadata information on an ERDDAP dataset
 geoinfo = info("erdTAgeo1day_LonPM180")
 
+## set spatial extent
 lon = c(25,65)
 lat =  c(-35,10)
+## set temperal extent
 time = c("1993-01-01", "2012-12-07")
 
+## download the data
 geostrophic = griddap(geoinfo, longitude = lon, latitude = lat, 
                        time = time, fields = c("u_current", "v_current"))
 
-
 ```
 
+Using equation \@ref(eq:eq6) geostrophic current velocity was computed from the eastward (U) and northward (V) components of sea Water Velocity. 
+
+$$
+\begin{equation}
+Velocity (ms^{-1})\:=\: \sqrt{(U^2+V^2)} (\#eq:eq6)
+\end{equation}
+$$
 
 ```{r eval=FALSE}
 wio.geostrophic =  geostrophic %>% 
   mutate(date = as.Date(time),
-         vel = sqrt(u_current^2+ v_current^2)) %>%
+         vel = sqrt(u_current^2 + v_current^2)) %>%
   select(date, lon,lat, u = u_current, v = v_current, vel) %>%
   filter(date >= dmy(010112))
-
 
 ```
 
@@ -153,7 +240,7 @@ wio.geostrophic =  geostrophic %>%
 wio = read_csv("E:/Data Manipulation/rerddap/wio.csv")
 ```
 
-Table \@ref(tab:tab2)
+Table \@ref(tab:tab2) show the sample of the geostrophic structure of the zonal (V) , meridional (U), current along the longitude and latitude and time within the tropical Indian Ocean region. 
 ```{r tab2}
 wio %>% sample_n(15) %>%
   kableExtra::kable("html", col.names = c("Date","Longitude", "Latitude", "Zonal (U)", 
@@ -164,8 +251,8 @@ wio %>% sample_n(15) %>%
   kableExtra::add_header_above(c("", "Geographical Location" = 2, "Current Velocity" = 3))
 ```
 
-
-decompose day, month, and year as separate variable from the date variable
+### Climatology geostrophic Current
+To calculate the monthly climatology, the date variable in the dataset was separated into three variables---`year`, `month` and `day` using function from **lubridate** package [@lubridate]. Once the month variable were decomposed, the geostrophic values for each grid was grouped into months from January to December. Then the mean geostrophic value in the grid was calculated. 
 
 ```{r}
 # decompose day, month, and year as separate variable from the date variable
@@ -182,17 +269,17 @@ wio.month = wio.month %>% ungroup()
 ```
 
 
-Figure \@ref(fig:fig2) shows monthly dynamics of ocean current in the WIO region
+Table \@ref(tab:tab2) shows climatological monthly ocean current dynamics in the tropical Indian Ocean region  collected between `r wio$date[1]` and `r wio$date[nrow(wio)]`. Figure \@ref(fig:fig2) show the animated climatological monthly geostrophic current. The current velocity were mapped and animated with **gganimate**---grammar of animated graphics[@gganimate]  and **ggplot2**---grammar of graphics packages [@ggplot]
 
-```{r fig2, fig.cap="monthly mean Current in the western Indian Ocean region", fig.height=8}
+```{r fig2, fig.cap="Climatology monthly mean Current in the tropical Indian Ocean region", fig.height=8}
 
 ggplot() +
   geom_raster(data = wio.month, 
               aes(x = lon, y = lat, fill = vel), interpolate = TRUE)+ 
   geom_sf(data = spData::world, col = 1, fill = "ivory")+
   coord_sf(xlim = c(30,60), ylim = c(-30,5))+
-  ggrepel::geom_text_repel(data = country.wio, 
-            aes(x = lon, y = lat, label = name), nudge_x = 0.05)+
+  # ggrepel::geom_text_repel(data = country.wio, 
+  #           aes(x = lon, y = lat, label = name), nudge_x = 0.05)+
   theme_bw() + 
   theme(panel.background = element_rect(fill = "lightblue"),
         axis.text = element_text(size = 11, colour = 1),
@@ -209,3 +296,26 @@ ggplot() +
   ease_aes('linear')
 ```
 
+Figure \@ref(fig:fig3) show the animation of monthly climatological geostrophic current in the area around Somali current. We notice the area experience high speed geostrophic current above 0.5 ms^-1^ from June to October. 
+```{r fig3, fig.cap="The monthly variation of geostrophic current in area around somali current"}
+somali = wio.month %>% filter(lon < 53 & lat >2)
+
+ggplot(data =somali , 
+       aes(x = month, y = vel, fill = as.factor(month)))+
+  geom_boxplot(show.legend = FALSE)+
+  scale_fill_brewer(palette = "Paired")+
+  cowplot::theme_cowplot()+
+  scale_x_continuous(breaks = 1:12, 
+                     labels = month(seq(dmy(010118), dmy(311218), by = "month"), 
+                                    label = TRUE, abbr = TRUE))  +
+  labs(title = "{closest_state}")+
+  transition_states(month, transition_length = 5, state_length = 1, wrap = TRUE, states = ) +
+  ease_aes('linear') +
+  shadow_mark()
+```
+
+### Remarks
+The package **rerddap** has made access of oceanographic and environmental data into R. Once the data is in the workspace, we can transform, visualize and even animate to uncover subtle clue happening in the tropical Indian Ocean. 
+
+
+### Literature
