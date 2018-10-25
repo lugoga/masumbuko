@@ -1,0 +1,436 @@
+---
+title: Processing Satellite Wind Speed Data with R
+author: Masumbuko Semba
+date: '2018-10-25'
+slug: processing-satellite-wind-speed-data-with-r
+categories:
+  - Oceanography
+  - R
+  - Technical
+tags:
+  - Ascat
+  - Indian Ocean
+  - Masumbuko Semba
+  - quikscat
+  - Tanzania
+  - wind speed
+bibliography: [blog.bib, argo.bib]
+csl: apa.csl
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "")
+```
+
+The Advanced Scatterometer (ASCAT) winds products are processed by NOAA/NESDIS utilizing measurements from the scatterometer instrument aboard the EUMETSAT Metop satellites. The instrument uses radar to measure backscatter to determine speed and direction of winds over the surface of the oceans. ASCAT observations fields have regular spatial resolutions of 0.25° in longitude and latitude. 
+
+The daily wind fields are calculated in near real time with a delay of 48 hours. This first version is considered as data test that will provide useful insight for near real time production of high space and time resolutions at global and regional scales. Daily images are archived for 7 days.
+
+@xtracto developed an **xtractomatic** package for R that can access ASCAT daily data through The Environmental Research Division’s Data Access Program (**ERDDAP**).ERDDAP is a simple to use yet powerful web data service developed by Bob Simons [@erddap]. The ERDDAP server can also be directly accessed at http://coastwatch.pfeg.noaa.gov/erddap. 
+
+The **xtractomatic** package accesses data that are served through the ERDDAP server at the NOAA/SWFSC Environmental Research Division. This package has ability to subset and extract satellite and other oceanographic related data from a remote server for a moving point in time along a user-supplied set of longitude, latitude and time points; in a 3D bounding box; or within a polygon (through time).
+
+The goal of this post is to illustrate how to fetch satellite wind data collected by ASCAT with **xtractomatic** package in R [@r]. Then we will look tools that help us to manipulate, transform and visualize wind satellite data. FIrst let us load the packages that holds tools we will use for fetching data manipulate, tranform wind data, and plotting and mapping the results.
+
+```{r}
+require(xtractomatic)
+require(tidyverse)
+require(oce)
+require(lubridate)
+require(gganimate)
+
+```
+
+### Ascat
+As described in the introduction section, we will use the wind data fo the tropical Indian Ocean area from ASCAT. Because the size of the geographical area and the daily wind data, I will limit the amoung of data to extract to within a period January 01 to October 23, 2018. I will use the `xtracto_3D()` function to download the wind data. `xtracto_3D()` extracts wind data within the specified geographical extent. The dataset id for the data are **erdQAxwind1day** for zonal component and **erdQAywind1day** for meridional component. You can use the `getInfo()` function to obtain the metadata of the dataset. 
+
+```{r }
+getInfo("erdQAxwind1day")
+getInfo("erdQAywind1day")
+
+```
+
+```{r fig11, fig.cap="Map of the tropical Western Indian Ocean Region", echo=FALSE, fig.height=7}
+
+centroid = data.frame(name = c("Kenya","Madagascar","Mozambique","Mauritius","Reunion",
+                                  "Somalia","Seychelles","Tanzania","South Africa","Comoros"),
+                      lon = c(37.8618,46.7003,35.5492,57.5679,55.5401,
+                              45.8673,55.5265,34.8255,25.0800,43.6711),
+                      lat = c(-0.5335,-19.3793,-17.2637,-20.2869 ,-21.1208,
+                              6.0610,-4.5965,-6.2655,-28.9920 ,-11.8875))
+ 	 	 
+
+ggplot() + 
+  geom_sf(data = spData::world, col = 1, fill = "ivory")+
+  coord_sf(xlim = c(30,60), ylim = c(-30,5))+
+  ggrepel::geom_text_repel(data = centroid,
+            aes(x = lon, y = lat, label = name), nudge_x = 0.05)+
+  theme_bw() + 
+  theme(panel.background = element_rect(fill = "lightblue"),
+        axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+  ggsn::scalebar(location = "bottomright", x.min = 35, x.max = 60,
+                 y.min = -30, y.max = 5, dist = 600, dd2km = TRUE, 
+                 model = "WGS84", st.dist = 0.02, st.size = 4)+
+  labs(x = NULL, y = NULL)
+```
+
+### Using `xtracto_3D`
+First we define the geographical extent and the time limit. Our area of interest is the tropical Indian Ocean region that lies between longitude 25 ^o^E and 65 ^o^E and latitude 35 ^o^S and 10 ^o^N (figure \@ref(fig:fig11)). And only interested with the data for 2018, so I set the time limit from January 01, 2018 to the latest data available---October 23, 2018. Be aware R understand  `YYY-MM-DD` time format.
+
+```{r eval=FALSE}
+# set spatial extent
+lon = c(25,65)
+lat =  c(-35,10)
+## set temporal extent
+time = c("2018-01-01", "2018-10-23")
+```
+
+The extract will contain data at all of the longitudes, latitudes and times in the requested dataset that are within the given bounds.
+```{r eval=FALSE}
+wind_x = xtracto_3D(dtype = "erdQAxwind1day", 
+                    xpos = lon, 
+                    ypos = lat, 
+                    tpos = time)
+
+wind_y = xtracto_3D(dtype = "erdQAxwind1day", 
+                    xpos = lon, 
+                    ypos = lat, 
+                    tpos = time)
+```
+
+```{r echo=FALSE}
+load("E:/Data Manipulation/xtractomatic/ascat_wio_2018.RData")
+#rm(list = setdiff(ls(), c("wind_x", "wind_y")))
+```
+
+Once the data download has completed, we can check the internal structure of the data with a `glimpse()` function of **dplyr** package [@dplyr]. Glimpsing the file we notice that, apart from the the longitude, latitude and time bounds, there are other information. Thse includes a three-dimension data, variable name and altitude.  
+```{r}
+glimpse(wind_x)
+
+```
+
+We can extract these variables with `$` operator as shown in the chunk below. We obtain the Zonal component and meridional component. 
+
+
+
+```{r}
+
+longitude = wind_x$longitude
+latitude = wind_x$latitude
+time = wind_x$time%>%as.Date()
+
+# eastward velocity (zonal)
+u = wind_x$data
+# northward velocity (meridional)
+v = wind_y$data
+
+```
+
+Looking the class of the `u` and `v` data with `class()` function, we noticed that they are both array--- consisting of a collection of matrix of wind velocity. The `eastward velocity (zonal)` and `northward velocity (v)` both have a dimension of `r dim(u)`--- of longitude, latitude for 296 days begining from `r time[1]` to `r time[296]` . Equation \@ref(eq:eq1) was used to calculate the wind speed from the `u` and `v`. 
+
+$$
+\begin{equation}
+  \phi = \sqrt{(u^2 + v^2)} (\#eq:eq1)
+  
+\end{equation}
+$$
+Where $\phi$ = wind speed; $u$ = zonal and $v$ = meridional component of wind
+
+
+```{r}
+
+# calculate wind velocity
+velocity = sqrt(u^2 + v^2)
+```
+
+Figure \@ref(fig:fig1) show the wind speed within the tropical Indian Ocean on `r time[1]` There are gaps of missing wind speed values. The plot was generated with `imagep()` function of **oce**  package [@oce]. The nice thing with the `imagep()` is its ability to plot matrix data.
+
+```{r fig1, fig.cap="Wind speed of January 1, 2018 in the tropical Indina Ocean"}
+
+imagep(longitude, 
+       latitude, 
+       velocity[,,1], 
+       filledContour = TRUE, 
+       xlab = "Longitude", 
+       ylab = "Latitude")
+```
+
+### Data frame
+Daniel Kelley [-@kelley2018r] desribed data frames as a complement to matrices and lists, and they are very important in R. [@r] states that data frames are fundamental data structure by most of R’s modeling software. Since,  data frame is the primary structure for working with data in R, I converted the array into data frame so that I can use the power of tidyverse---a set of packages that provide a useful set of tools for data cleaning and analysis and visualizing [@tidyverse].
+
+```{r}
+# convert the first matrix of u component into data frame
+u.df = data.frame(longitude, u[,,1] %>% as.data.frame()) %>% 
+  gather(key = "key" , value = "u", 2:182) %>% 
+  mutate(latitude = rep(latitude, each = 161), date = time[1]) %>% 
+  select(date, longitude, latitude, u)%>% 
+  as.tibble()
+
+# convert the first matrix of v component into data frame
+v.df = data.frame(longitude, v[,,1] %>% as.data.frame()) %>% 
+  gather(key = "key" , value = "v", 2:182) %>% 
+  mutate(latitude = rep(latitude, each = 161), date = time[1]) %>% 
+  select(date,longitude, latitude, v)%>% 
+  as.tibble()
+
+# convert the first matrix of wind speed component into data frame
+velocity.df = data.frame(longitude, velocity[,,1] %>% as.data.frame()) %>% 
+  gather(key = "key" , value = "velocity", 2:182) %>% 
+  mutate(latitude = rep(latitude, each = 161), date = time[1]) %>% 
+  select(date,longitude, latitude, velocity)%>% 
+  as.tibble()
+```
+
+Figure \@ref(fig:fig2) is similar to figure \@ref(fig:fig1) the only difference is the tools used. While Figure \@ref(fig:fig1) was drawn with `imagep()` of **oce** package, figure \@ref(fig:fig2) was plotted with **ggplot2**---a package of **tidyverse**.
+
+```{r fig2, fig.cap="Map showing Wind speed of January 1, 2018 in the tropical Indina Ocean", fig.width=7}
+
+ggplot() + 
+  geom_raster(data = velocity.df %>% na.omit(), 
+              aes(x = longitude, y = latitude, fill = velocity), interpolate = FALSE)+
+  geom_sf(data = spData::world, col = "black", fill = "ivory")+
+  coord_sf(xlim = c(30,65), ylim =  c(-30,5))+
+  scale_fill_gradientn(limits = c(0,25), name = "Wind\nSpeed\n(m/s)", 
+                       colours = oceColorsPalette(120))+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA),
+        legend.position = c(.1,.25),
+        legend.background = element_rect(colour = NA, fill = "ivory"))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+  ggsn::scalebar(location = "bottomright", x.min = 35, x.max = 58,
+                 y.min = -30, y.max = 5, dist = 600, dd2km = TRUE, 
+                 model = "WGS84", st.dist = 0.02, st.size = 4)+
+  labs(x = NULL, y = NULL)
+```
+
+### Loops
+The data frame we created above is for single data, however, our dataset has 296 matrix that we need to convert to data frame. To overcome this challenge we loop the process. **R** has several styles of looping structures that provide for repeated calculation. The chunk below contain the steps for looping the matrix, convert them to data frame etc
+
+```{r}
+velocity.all = NULL
+
+for (i in 1:length(time)){
+      velocity.df = data.frame(longitude, velocity[,,i] %>% as.data.frame()) %>% 
+        gather(key = "key" , value = "velocity", 2:182) %>% 
+        mutate(latitude = rep(latitude, each = 161), date = time[i]) %>% 
+        select(date,longitude, latitude, velocity)%>% 
+        as.tibble()
+  
+    velocity.all = velocity.all %>% bind_rows(velocity.df)
+}
+ncol(velocity.all)
+```
+
+The data frame contains `r nrow(velocity.all)` observations and `r ncol(velocity.all)` variables. I used the lubridate package to extract date components from the date variable. These components include the Julian day, the week in a year and month of each observation (Table \@ref(tab:tab1))
+
+```{r tab1}
+velocity.all = velocity.all %>% 
+  mutate(jd = yday(date), week = week(date), month = month(date)) %>% 
+  select(date, jd, week, month, longitude, latitude, velocity)
+
+velocity.all%>%
+  na.omit()%>% 
+  sample_n(15) %>%
+  kableExtra::kable("html", caption = "Wind speed information in the tropical Indian Ocean", 
+                  align = "c", digits = 2) %>% 
+  kableExtra::column_spec(column = 1:7, width = "3cm", color = 1)
+```
+
+Figure \@ref(fig:fig3) show daily wind speed for 296 days of 2018 from `r time[1]` to `r time[296]`
+
+```{r fig3, fig.cap="Animated Wind speed of January 1 to October 23, 2018 in the tropical Indina Ocean"}
+
+wind.animate = ggplot() + 
+  geom_raster(data = velocity.all %>% na.omit(), 
+              aes(x = longitude, y = latitude, fill = velocity), interpolate = FALSE)+
+  geom_sf(data = spData::world, col = "black", fill = "ivory")+
+  coord_sf(xlim = c(30,60), ylim =  c(-30,5))+
+  scale_fill_gradientn(name = "Wind\nSpeed\n(m/s)", limits = c(0,15),
+                       colours = oceColorsPalette(120))+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA),
+        legend.position = c(.1,.25),
+        legend.background = element_rect(colour = NA, fill = "ivory"))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+  ggsn::scalebar(location = "bottomright", x.min = 35, x.max = 58,
+                 y.min = -30, y.max = 5, dist = 600, dd2km = TRUE, 
+                 model = "WGS84", st.dist = 0.02, st.size = 4)+
+  labs(x = NULL, y = NULL)+
+  #animate
+  labs(title = 'Day: {frame_time}') +
+  transition_time(date) +
+  ease_aes('linear')
+
+animate(wind.animate, fps = 3)
+```
+
+
+The daily data gaps and is spatial coverage is incomplete. This makes difficult to explore the wind dynamics in the tropical Indian Ocean region. I merged the data into week---almost 7 days composite. with the equation \@ref(eq:eqn2)
+
+$$ 
+\begin{equation} 
+\bar{x}_{i,j} = \sum_{i=1}^{n}\;\frac{(X_1 \dots+X_n)}{n} (\#eq:eqn2) 
+\end{equation} 
+$$
+Where $i$ = longitude, $j$ = latitude $X$ = wind speed location $i$ & $j$ and $n$ = observation in the location. The mathematical equation \@ref(eq:eqn2) is translated with the code below.
+
+```{r}
+velocity.week = velocity.all %>% 
+  group_by(longitude, latitude, week) %>% 
+  summarise(velocity = mean(velocity, na.rm = TRUE))
+
+velocity.week$week = as.integer(velocity.week$week)
+
+max(velocity.week$week)
+```
+
+Figure \@ref(fig:fig4) show the distribution of wind speed for 43 weeks in 2018 begining on `r time[1]` and ended on `r time[296]`. The wind speed ranged from 0.24 to 24.72 ms^-1^ with majority of observation fall around a mean of 6.69 ms^-1^ (6.69$\pm$2.94)
+
+```{r fig4, fig.cap="Distribution of weekly Wind speed recorded between January 1 to October 23, 2018 in the tropical Indina Ocean"}
+ggplot(data = velocity.week, aes(x = velocity)) + 
+  geom_histogram(col = "ivory", fill = "maroon") +
+  scale_x_continuous(limits = c(0,18),breaks = seq(0,20,4))+
+  cowplot::theme_cowplot()+
+  labs(x = "Wind speed (m/s)", y = "Counts")
+
+
+# psych::describe(velocity.week$velocity)
+```
+
+Figure \@ref(fig:fig5) show daily wind speed of wind speed for 43 weeks in the tropical Indian Ocean region
+
+```{r fig5, fig.cap=" Animated of weekly Wind speed for 2018 in the tropical Indina Ocean"}
+wind.animate.week =  ggplot() + 
+  geom_raster(data = velocity.week, 
+              aes(x = longitude, y = latitude, fill = velocity), interpolate = FALSE)+
+  geom_sf(data = spData::world, col = "black", fill = "ivory")+
+  coord_sf(xlim = c(30,60), ylim =  c(-30,5))+
+  scale_fill_gradientn(name = "Wind\nSpeed\n(m/s)", limits = c(0,15),
+                       colours = oceColorsPalette(120), na.value = "White")+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA),
+        legend.position = c(.1,.25),
+        legend.background = element_rect(colour = NA, fill = "ivory"))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+    labs(x = NULL, y = NULL)+
+  #animate
+  labs(title = 'Week: {frame_time}')+
+  transition_time(week) +
+  ease_aes('linear')
+
+wind.animate.week
+# you can control the speed of the animation with the animate() and parse argument fps =
+# animate(wind.animate.week, fps = 2)
+```
+
+
+
+```{r}
+velocity.month = velocity.all %>% 
+  group_by(longitude, latitude, month) %>% 
+  summarise(velocity = mean(velocity, na.rm = TRUE))
+
+velocity.month$month = as.integer(velocity.month$month)
+
+```
+
+Figure \@ref(fig:fig6) wind speed for the twelve ten months
+
+```{r fig6, fig.cap=" Map of the Tropical Indian Ocean showing monthly Wind speed for 2018"}
+## make label month
+ 
+velocityMonth = velocity.month %>% 
+  mutate(day = 15, year = 2018, date = make_date(year, month, day),
+         Month = month(date, abbr = FALSE, label = TRUE)) %>% 
+  select(date,month, Month, longitude, latitude, velocity)
+
+  ggplot() + 
+  geom_raster(data = velocityMonth, 
+              aes(x = longitude, y = latitude, fill = velocity), interpolate = FALSE)+
+  geom_sf(data = spData::world, col = "black", fill = "ivory")+
+  coord_sf(xlim = c(30,60), ylim =  c(-30,5))+
+  scale_fill_gradientn(name = "Wind\nSpeed\n(m/s)", limits = c(0,15),
+                       colours = oceColorsPalette(120), na.value = "White")+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA),
+        legend.position = "right",
+        legend.background = element_rect(colour = NA, fill = NA),
+        legend.key.height = unit(2.5, "lines"),
+        legend.key.width = unit(1, "lines"))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+  labs(x = NULL, y = NULL)+
+  facet_wrap(~Month, nrow = 2)
+
+```
+
+Figure \@ref(fig:fig7) show minimum, maximum, median and outliers of wind speed for each month in the tropical Indian Ocean region
+```{r fig7, fig.cap=" Animate boxpot showing  showing monthly Wind speed for 2018 in the Tropical Indian Ocean"}
+ggplot(data =velocityMonth %>% filter(between(velocity, 2,15) ), 
+       aes(x = Month, y = velocity, fill = as.factor(month)))+
+  geom_boxplot(show.legend = FALSE)+
+  scale_fill_brewer(palette = "Paired")+
+  cowplot::theme_cowplot()+
+  scale_y_continuous(breaks = seq(0,18,3))+
+  scale_x_discrete(limits = month(seq(dmy(010118), dmy(301018), by = "month"), 
+      label = TRUE, abbr = FALSE) %>% rev())+
+  coord_flip()+
+  # labs(x = "", y = expression(~Wind~speed~(ms^{-1})))+ gganimate dont like expressions
+  labs(y = "Wind speed (m/s)", x = "")+
+  labs(title = "{closest_state}")+
+  transition_states(month, transition_length = 5, state_length = 1, wrap = TRUE ) +
+  ease_aes('linear') +
+  shadow_mark()
+```
+
+Figure \@ref(fig:fig8) is similar to \@ref(fig:fig6), but Figure \@ref(fig:fig8) is animated while figure \@ref(fig:fig6) wind speed for the twelve ten months is static.
+
+
+```{r fig8, fig.cap=" Map of the Tropical Indian Ocean showing animated monthly Wind speed for 2018"}
+wind.animate.month = ggplot() + 
+  geom_raster(data = velocity.month, 
+              aes(x = longitude, y = latitude, fill = velocity), interpolate = FALSE)+
+  geom_sf(data = spData::world, col = "black", fill = "ivory")+
+  coord_sf(xlim = c(30,60), ylim =  c(-30,5))+
+  scale_fill_gradientn(name = "Wind\nSpeed\n(m/s)", limits = c(0,15),
+                       colours = oceColorsPalette(120), na.value = "White")+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA),
+        legend.position = c(.1,.25),
+        legend.background = element_rect(colour = NA, fill = "ivory"))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+    labs(x = NULL, y = NULL) +
+  labs(title = 'Month: {frame_time}')+
+  transition_time(month) +
+  ease_aes('linear')
+
+wind.animate.month
+
+```
+
+### quikscat
+```{r eval=FALSE}
+getInfo("qsux101day")
+getInfo("qsuy101day")
+```
+
+### Bibliography
+

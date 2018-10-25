@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.48" />
+
+
+<title>Processing Satellite Wind Speed Data with R - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Processing Satellite Wind Speed Data with R - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">14 min read</span>
+    
+
+    <h1 class="article-title">Processing Satellite Wind Speed Data with R</h1>
+
+    
+    <span class="article-date">2018/10/25</span>
+    
+
+    <div class="article-content">
+      <script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<p>The Advanced Scatterometer (ASCAT) winds products are processed by NOAA/NESDIS utilizing measurements from the scatterometer instrument aboard the EUMETSAT Metop satellites. The instrument uses radar to measure backscatter to determine speed and direction of winds over the surface of the oceans. ASCAT observations fields have regular spatial resolutions of 0.25° in longitude and latitude.</p>
+<p>The daily wind fields are calculated in near real time with a delay of 48 hours. This first version is considered as data test that will provide useful insight for near real time production of high space and time resolutions at global and regional scales. Daily images are archived for 7 days.</p>
+<p><span class="citation">Mendelssohn (<a href="#ref-xtracto">2018</a>)</span> developed an <strong>xtractomatic</strong> package for R that can access ASCAT daily data through The Environmental Research Division’s Data Access Program (<strong>ERDDAP</strong>).ERDDAP is a simple to use yet powerful web data service developed by Bob Simons <span class="citation">(Simons, <a href="#ref-erddap">2011</a>)</span>. The ERDDAP server can also be directly accessed at <a href="http://coastwatch.pfeg.noaa.gov/erddap" class="uri">http://coastwatch.pfeg.noaa.gov/erddap</a>.</p>
+<p>The <strong>xtractomatic</strong> package accesses data that are served through the ERDDAP server at the NOAA/SWFSC Environmental Research Division. This package has ability to subset and extract satellite and other oceanographic related data from a remote server for a moving point in time along a user-supplied set of longitude, latitude and time points; in a 3D bounding box; or within a polygon (through time).</p>
+<p>The goal of this post is to illustrate how to fetch satellite wind data collected by ASCAT with <strong>xtractomatic</strong> package in R <span class="citation">(R Core Team, <a href="#ref-r">2018</a>)</span>. Then we will look tools that help us to manipulate, transform and visualize wind satellite data. FIrst let us load the packages that holds tools we will use for fetching data manipulate, tranform wind data, and plotting and mapping the results.</p>
+<pre class="r"><code>require(xtractomatic)
+require(tidyverse)
+require(oce)
+require(lubridate)
+require(gganimate)</code></pre>
+<div id="ascat" class="section level3">
+<h3>Ascat</h3>
+<p>As described in the introduction section, we will use the wind data fo the tropical Indian Ocean area from ASCAT. Because the size of the geographical area and the daily wind data, I will limit the amoung of data to extract to within a period January 01 to October 23, 2018. I will use the <code>xtracto_3D()</code> function to download the wind data. <code>xtracto_3D()</code> extracts wind data within the specified geographical extent. The dataset id for the data are <strong>erdQAxwind1day</strong> for zonal component and <strong>erdQAywind1day</strong> for meridional component. You can use the <code>getInfo()</code> function to obtain the metadata of the dataset.</p>
+<pre class="r"><code>getInfo(&quot;erdQAxwind1day&quot;)</code></pre>
+<pre><code>List of 19
+ $ dtypename       : chr &quot;erdQAxwind1day&quot;
+ $ datasetname     : chr &quot;erdQAwind1day&quot;
+ $ longname        : chr &quot;X-Wind, METOP ASCAT, Global, Near Real Time (1 Day Composite) &quot;
+ $ varname         : chr &quot;x_wind&quot;
+ $ hasAlt          : logi TRUE
+ $ latSouth        : logi TRUE
+ $ lon360          : logi TRUE
+ $ minLongitude    : num 0
+ $ maxLongitude    : num 360
+ $ longitudeSpacing: num 0.25
+ $ minLatitude     : num -75
+ $ maxLatitude     : num 75
+ $ latitudeSpacing : num 0.25
+ $ minAltitude     : num 10
+ $ maxAltitude     : num 10
+ $ minTime         : chr &quot;2009-10-03&quot;
+ $ maxTime         : chr &quot;2018-10-23&quot;
+ $ timeSpacing     : num NA
+ $ infoURL         : chr &quot;http://coastwatch.pfeg.noaa.gov/infog/CW_soon_las.html&quot;</code></pre>
+<pre class="r"><code>getInfo(&quot;erdQAywind1day&quot;)</code></pre>
+<pre><code>List of 19
+ $ dtypename       : chr &quot;erdQAywind1day&quot;
+ $ datasetname     : chr &quot;erdQAwind1day&quot;
+ $ longname        : chr &quot;Y-Wind, METOP ASCAT, Global, Near Real Time (1 Day Composite) &quot;
+ $ varname         : chr &quot;y_wind&quot;
+ $ hasAlt          : logi TRUE
+ $ latSouth        : logi TRUE
+ $ lon360          : logi TRUE
+ $ minLongitude    : num 0
+ $ maxLongitude    : num 360
+ $ longitudeSpacing: num 0.25
+ $ minLatitude     : num -75
+ $ maxLatitude     : num 75
+ $ latitudeSpacing : num 0.25
+ $ minAltitude     : num 10
+ $ maxAltitude     : num 10
+ $ minTime         : chr &quot;2009-10-03&quot;
+ $ maxTime         : chr &quot;2018-10-23&quot;
+ $ timeSpacing     : num NA
+ $ infoURL         : chr &quot;http://coastwatch.pfeg.noaa.gov/infog/CW_soon_las.html&quot;</code></pre>
+<div class="figure"><span id="fig:fig11"></span>
+<img src="/post/2018-10-25-processing-satellite-wind-speed-data-with-r_files/figure-html/fig11-1.png" alt="Map of the tropical Western Indian Ocean Region" width="672" />
+<p class="caption">
+Figure 1: Map of the tropical Western Indian Ocean Region
+</p>
+</div>
+</div>
+<div id="using-xtracto_3d" class="section level3">
+<h3>Using <code>xtracto_3D</code></h3>
+<p>First we define the geographical extent and the time limit. Our area of interest is the tropical Indian Ocean region that lies between longitude 25 <sup>o</sup>E and 65 <sup>o</sup>E and latitude 35 <sup>o</sup>S and 10 <sup>o</sup>N (figure <a href="#fig:fig11">1</a>). And only interested with the data for 2018, so I set the time limit from January 01, 2018 to the latest data available—October 23, 2018. Be aware R understand <code>YYY-MM-DD</code> time format.</p>
+<pre class="r"><code># set spatial extent
+lon = c(25,65)
+lat =  c(-35,10)
+## set temporal extent
+time = c(&quot;2018-01-01&quot;, &quot;2018-10-23&quot;)</code></pre>
+<p>The extract will contain data at all of the longitudes, latitudes and times in the requested dataset that are within the given bounds.</p>
+<pre class="r"><code>wind_x = xtracto_3D(dtype = &quot;erdQAxwind1day&quot;, 
+                    xpos = lon, 
+                    ypos = lat, 
+                    tpos = time)
+
+wind_y = xtracto_3D(dtype = &quot;erdQAxwind1day&quot;, 
+                    xpos = lon, 
+                    ypos = lat, 
+                    tpos = time)</code></pre>
+<p>Once the data download has completed, we can check the internal structure of the data with a <code>glimpse()</code> function of <strong>dplyr</strong> package <span class="citation">(Wickham, François, Henry, &amp; Müller, <a href="#ref-dplyr">2018</a>)</span>. Glimpsing the file we notice that, apart from the the longitude, latitude and time bounds, there are other information. Thse includes a three-dimension data, variable name and altitude.</p>
+<pre class="r"><code>glimpse(wind_x)</code></pre>
+<pre><code>List of 7
+ $ data       : num [1:161, 1:181, 1:296] 17.4 16.6 16.4 15.9 13.9 ...
+ $ varname    : chr &quot;x_wind&quot;
+ $ datasetname: chr &quot;erdQAwind1day&quot;
+ $ latitude   : num [1:181(1d)] -35 -34.8 -34.5 -34.2 -34 ...
+ $ longitude  : num [1:161(1d)] 25 25.2 25.5 25.8 26 ...
+ $ time       : POSIXlt[1:296], format: &quot;2018-01-01 12:00:00&quot; &quot;2018-01-02 12:00:00&quot; ...
+ $ altitude   : num 10</code></pre>
+<p>We can extract these variables with <code>$</code> operator as shown in the chunk below. We obtain the Zonal component and meridional component.</p>
+<pre class="r"><code>longitude = wind_x$longitude
+latitude = wind_x$latitude
+time = wind_x$time%&gt;%as.Date()
+
+# eastward velocity (zonal)
+u = wind_x$data
+# northward velocity (meridional)
+v = wind_y$data</code></pre>
+<p>Looking the class of the <code>u</code> and <code>v</code> data with <code>class()</code> function, we noticed that they are both array— consisting of a collection of matrix of wind velocity. The <code>eastward velocity (zonal)</code> and <code>northward velocity (v)</code> both have a dimension of 161, 181, 296— of longitude, latitude for 296 days begining from 2018-01-01 to 2018-10-23 . Equation <a href="#eq:eq1">(1)</a> was used to calculate the wind speed from the <code>u</code> and <code>v</code>.</p>
+$$
+<span class="math display" id="eq:eq1">\[\begin{equation}
+  \phi = \sqrt{(u^2 + v^2)} \tag{1}
+  
+\end{equation}\]</span>
+<p>$$ Where <span class="math inline">\(\phi\)</span> = wind speed; <span class="math inline">\(u\)</span> = zonal and <span class="math inline">\(v\)</span> = meridional component of wind</p>
+<pre class="r"><code># calculate wind velocity
+velocity = sqrt(u^2 + v^2)</code></pre>
+<p>Figure <a href="#fig:fig1">2</a> show the wind speed within the tropical Indian Ocean on 2018-01-01 There are gaps of missing wind speed values. The plot was generated with <code>imagep()</code> function of <strong>oce</strong> package <span class="citation">(Kelley &amp; Richards, <a href="#ref-oce">2018</a>)</span>. The nice thing with the <code>imagep()</code> is its ability to plot matrix data.</p>
+<pre class="r"><code>imagep(longitude, 
+       latitude, 
+       velocity[,,1], 
+       filledContour = TRUE, 
+       xlab = &quot;Longitude&quot;, 
+       ylab = &quot;Latitude&quot;)</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2018-10-25-processing-satellite-wind-speed-data-with-r_files/figure-html/fig1-1.png" alt="Wind speed of January 1, 2018 in the tropical Indina Ocean" width="672" />
+<p class="caption">
+Figure 2: Wind speed of January 1, 2018 in the tropical Indina Ocean
+</p>
+</div>
+</div>
+<div id="data-frame" class="section level3">
+<h3>Data frame</h3>
+<p>Daniel Kelley <span class="citation">(<span class="citeproc-not-found" data-reference-id="kelley2018r"><strong>???</strong></span>)</span> desribed data frames as a complement to matrices and lists, and they are very important in R. <span class="citation">(R Core Team, <a href="#ref-r">2018</a>)</span> states that data frames are fundamental data structure by most of R’s modeling software. Since, data frame is the primary structure for working with data in R, I converted the array into data frame so that I can use the power of tidyverse—a set of packages that provide a useful set of tools for data cleaning and analysis and visualizing <span class="citation">(Wickham, <a href="#ref-tidyverse">2017</a>)</span>.</p>
+<pre class="r"><code># convert the first matrix of u component into data frame
+u.df = data.frame(longitude, u[,,1] %&gt;% as.data.frame()) %&gt;% 
+  gather(key = &quot;key&quot; , value = &quot;u&quot;, 2:182) %&gt;% 
+  mutate(latitude = rep(latitude, each = 161), date = time[1]) %&gt;% 
+  select(date, longitude, latitude, u)%&gt;% 
+  as.tibble()
+
+# convert the first matrix of v component into data frame
+v.df = data.frame(longitude, v[,,1] %&gt;% as.data.frame()) %&gt;% 
+  gather(key = &quot;key&quot; , value = &quot;v&quot;, 2:182) %&gt;% 
+  mutate(latitude = rep(latitude, each = 161), date = time[1]) %&gt;% 
+  select(date,longitude, latitude, v)%&gt;% 
+  as.tibble()
+
+# convert the first matrix of wind speed component into data frame
+velocity.df = data.frame(longitude, velocity[,,1] %&gt;% as.data.frame()) %&gt;% 
+  gather(key = &quot;key&quot; , value = &quot;velocity&quot;, 2:182) %&gt;% 
+  mutate(latitude = rep(latitude, each = 161), date = time[1]) %&gt;% 
+  select(date,longitude, latitude, velocity)%&gt;% 
+  as.tibble()</code></pre>
+<p>Figure <a href="#fig:fig2">3</a> is similar to figure <a href="#fig:fig1">2</a> the only difference is the tools used. While Figure <a href="#fig:fig1">2</a> was drawn with <code>imagep()</code> of <strong>oce</strong> package, figure <a href="#fig:fig2">3</a> was plotted with <strong>ggplot2</strong>—a package of <strong>tidyverse</strong>.</p>
+<pre class="r"><code>ggplot() + 
+  geom_raster(data = velocity.df %&gt;% na.omit(), 
+              aes(x = longitude, y = latitude, fill = velocity), interpolate = FALSE)+
+  geom_sf(data = spData::world, col = &quot;black&quot;, fill = &quot;ivory&quot;)+
+  coord_sf(xlim = c(30,65), ylim =  c(-30,5))+
+  scale_fill_gradientn(limits = c(0,25), name = &quot;Wind\nSpeed\n(m/s)&quot;, 
+                       colours = oceColorsPalette(120))+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = &quot;white&quot;),
+        axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA),
+        legend.position = c(.1,.25),
+        legend.background = element_rect(colour = NA, fill = &quot;ivory&quot;))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+  ggsn::scalebar(location = &quot;bottomright&quot;, x.min = 35, x.max = 58,
+                 y.min = -30, y.max = 5, dist = 600, dd2km = TRUE, 
+                 model = &quot;WGS84&quot;, st.dist = 0.02, st.size = 4)+
+  labs(x = NULL, y = NULL)</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2018-10-25-processing-satellite-wind-speed-data-with-r_files/figure-html/fig2-1.png" alt="Map showing Wind speed of January 1, 2018 in the tropical Indina Ocean" width="672" />
+<p class="caption">
+Figure 3: Map showing Wind speed of January 1, 2018 in the tropical Indina Ocean
+</p>
+</div>
+</div>
+<div id="loops" class="section level3">
+<h3>Loops</h3>
+<p>The data frame we created above is for single data, however, our dataset has 296 matrix that we need to convert to data frame. To overcome this challenge we loop the process. <strong>R</strong> has several styles of looping structures that provide for repeated calculation. The chunk below contain the steps for looping the matrix, convert them to data frame etc</p>
+<pre class="r"><code>velocity.all = NULL
+
+for (i in 1:length(time)){
+      velocity.df = data.frame(longitude, velocity[,,i] %&gt;% as.data.frame()) %&gt;% 
+        gather(key = &quot;key&quot; , value = &quot;velocity&quot;, 2:182) %&gt;% 
+        mutate(latitude = rep(latitude, each = 161), date = time[i]) %&gt;% 
+        select(date,longitude, latitude, velocity)%&gt;% 
+        as.tibble()
+  
+    velocity.all = velocity.all %&gt;% bind_rows(velocity.df)
+}
+ncol(velocity.all)</code></pre>
+<pre><code>[1] 4</code></pre>
+<p>The data frame contains 8625736 observations and 4 variables. I used the lubridate package to extract date components from the date variable. These components include the Julian day, the week in a year and month of each observation (Table <a href="#tab:tab1">1</a>)</p>
+<pre class="r"><code>velocity.all = velocity.all %&gt;% 
+  mutate(jd = yday(date), week = week(date), month = month(date)) %&gt;% 
+  select(date, jd, week, month, longitude, latitude, velocity)
+
+velocity.all%&gt;%
+  na.omit()%&gt;% 
+  sample_n(15) %&gt;%
+  kableExtra::kable(&quot;html&quot;, caption = &quot;Wind speed information in the tropical Indian Ocean&quot;, 
+                  align = &quot;c&quot;, digits = 2) %&gt;% 
+  kableExtra::column_spec(column = 1:7, width = &quot;3cm&quot;, color = 1)</code></pre>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Wind speed information in the tropical Indian Ocean
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+date
+</th>
+<th style="text-align:center;">
+jd
+</th>
+<th style="text-align:center;">
+week
+</th>
+<th style="text-align:center;">
+month
+</th>
+<th style="text-align:center;">
+longitude
+</th>
+<th style="text-align:center;">
+latitude
+</th>
+<th style="text-align:center;">
+velocity
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-08-31
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+243
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+35
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+8
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+39.50
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-25.50
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+10.88
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-09-30
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+273
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+39
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+9
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+49.00
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-27.00
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+4.45
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-07-08
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+189
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+27
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+7
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+54.50
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-16.50
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+10.99
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-02-16
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+47
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+7
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+2
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+56.75
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-28.00
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+7.45
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-09-03
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+246
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+36
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+9
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+50.00
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+3.00
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+3.11
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-05-11
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+131
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+19
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+5
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+50.50
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-16.50
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+6.04
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-01-09
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+9
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+2
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+1
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+59.50
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-21.75
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+7.59
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-09-23
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+266
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+38
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+9
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+41.00
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-7.50
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+7.92
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-06-29
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+180
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+26
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+6
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+58.25
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-4.25
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+5.85
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-07-02
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+183
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+27
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+7
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+62.25
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-15.50
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+12.27
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-05-27
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+147
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+21
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+5
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+63.75
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-32.75
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+2.85
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-04-09
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+99
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+15
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+4
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+37.25
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-22.75
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+11.10
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-05-03
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+123
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+18
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+5
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+57.25
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-14.00
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+11.40
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-02-22
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+53
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+8
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+2
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+59.00
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-26.00
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+8.75
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: 1;">
+2018-02-07
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+38
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+6
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+2
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+53.75
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+-9.50
+</td>
+<td style="text-align:center;width: 3cm; color: 1;">
+6.78
+</td>
+</tr>
+</tbody>
+</table>
+<p>Figure <a href="#fig:fig3">4</a> show daily wind speed for 296 days of 2018 from 2018-01-01 to 2018-10-23</p>
+<pre class="r"><code>wind.animate = ggplot() + 
+  geom_raster(data = velocity.all %&gt;% na.omit(), 
+              aes(x = longitude, y = latitude, fill = velocity), interpolate = FALSE)+
+  geom_sf(data = spData::world, col = &quot;black&quot;, fill = &quot;ivory&quot;)+
+  coord_sf(xlim = c(30,60), ylim =  c(-30,5))+
+  scale_fill_gradientn(name = &quot;Wind\nSpeed\n(m/s)&quot;, limits = c(0,15),
+                       colours = oceColorsPalette(120))+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = &quot;white&quot;),
+        axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA),
+        legend.position = c(.1,.25),
+        legend.background = element_rect(colour = NA, fill = &quot;ivory&quot;))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+  ggsn::scalebar(location = &quot;bottomright&quot;, x.min = 35, x.max = 58,
+                 y.min = -30, y.max = 5, dist = 600, dd2km = TRUE, 
+                 model = &quot;WGS84&quot;, st.dist = 0.02, st.size = 4)+
+  labs(x = NULL, y = NULL)+
+  #animate
+  labs(title = &#39;Day: {frame_time}&#39;) +
+  transition_time(date) +
+  ease_aes(&#39;linear&#39;)
+
+animate(wind.animate, fps = 3)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2018-10-25-processing-satellite-wind-speed-data-with-r_files/figure-html/fig3-1.gif" alt="Animated Wind speed of January 1 to October 23, 2018 in the tropical Indina Ocean"  />
+<p class="caption">
+Figure 4: Animated Wind speed of January 1 to October 23, 2018 in the tropical Indina Ocean
+</p>
+</div>
+<p>The daily data gaps and is spatial coverage is incomplete. This makes difficult to explore the wind dynamics in the tropical Indian Ocean region. I merged the data into week—almost 7 days composite. with the equation <a href="#eq:eqn2">(2)</a></p>
+<p><span class="math display" id="eq:eqn2">\[ 
+\begin{equation} 
+\bar{x}_{i,j} = \sum_{i=1}^{n}\;\frac{(X_1 \dots+X_n)}{n} \tag{2} 
+\end{equation} 
+\]</span> Where <span class="math inline">\(i\)</span> = longitude, <span class="math inline">\(j\)</span> = latitude <span class="math inline">\(X\)</span> = wind speed location <span class="math inline">\(i\)</span> &amp; <span class="math inline">\(j\)</span> and <span class="math inline">\(n\)</span> = observation in the location. The mathematical equation <a href="#eq:eqn2">(2)</a> is translated with the code below.</p>
+<pre class="r"><code>velocity.week = velocity.all %&gt;% 
+  group_by(longitude, latitude, week) %&gt;% 
+  summarise(velocity = mean(velocity, na.rm = TRUE))
+
+velocity.week$week = as.integer(velocity.week$week)
+
+max(velocity.week$week)</code></pre>
+<pre><code>[1] 43</code></pre>
+<p>Figure <a href="#fig:fig4">5</a> show the distribution of wind speed for 43 weeks in 2018 begining on 2018-01-01 and ended on 2018-10-23. The wind speed ranged from 0.24 to 24.72 ms<sup>-1</sup> with majority of observation fall around a mean of 6.69 ms<sup>-1</sup> (6.69$$2.94)</p>
+<pre class="r"><code>ggplot(data = velocity.week, aes(x = velocity)) + 
+  geom_histogram(col = &quot;ivory&quot;, fill = &quot;maroon&quot;) +
+  scale_x_continuous(limits = c(0,18),breaks = seq(0,20,4))+
+  cowplot::theme_cowplot()+
+  labs(x = &quot;Wind speed (m/s)&quot;, y = &quot;Counts&quot;)</code></pre>
+<div class="figure"><span id="fig:fig4"></span>
+<img src="/post/2018-10-25-processing-satellite-wind-speed-data-with-r_files/figure-html/fig4-1.png" alt="Distribution of weekly Wind speed recorded between January 1 to October 23, 2018 in the tropical Indina Ocean" width="672" />
+<p class="caption">
+Figure 5: Distribution of weekly Wind speed recorded between January 1 to October 23, 2018 in the tropical Indina Ocean
+</p>
+</div>
+<pre class="r"><code># psych::describe(velocity.week$velocity)</code></pre>
+<p>Figure <a href="#fig:fig5">6</a> show daily wind speed of wind speed for 43 weeks in the tropical Indian Ocean region</p>
+<pre class="r"><code>wind.animate.week =  ggplot() + 
+  geom_raster(data = velocity.week, 
+              aes(x = longitude, y = latitude, fill = velocity), interpolate = FALSE)+
+  geom_sf(data = spData::world, col = &quot;black&quot;, fill = &quot;ivory&quot;)+
+  coord_sf(xlim = c(30,60), ylim =  c(-30,5))+
+  scale_fill_gradientn(name = &quot;Wind\nSpeed\n(m/s)&quot;, limits = c(0,15),
+                       colours = oceColorsPalette(120), na.value = &quot;White&quot;)+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = &quot;white&quot;),
+        axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA),
+        legend.position = c(.1,.25),
+        legend.background = element_rect(colour = NA, fill = &quot;ivory&quot;))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+    labs(x = NULL, y = NULL)+
+  #animate
+  labs(title = &#39;Week: {frame_time}&#39;)+
+  transition_time(week) +
+  ease_aes(&#39;linear&#39;)
+
+wind.animate.week</code></pre>
+<div class="figure"><span id="fig:fig5"></span>
+<img src="/post/2018-10-25-processing-satellite-wind-speed-data-with-r_files/figure-html/fig5-1.gif" alt=" Animated of weekly Wind speed for 2018 in the tropical Indina Ocean"  />
+<p class="caption">
+Figure 6:  Animated of weekly Wind speed for 2018 in the tropical Indina Ocean
+</p>
+</div>
+<pre class="r"><code># you can control the speed of the animation with the animate() and parse argument fps =
+# animate(wind.animate.week, fps = 2)</code></pre>
+<pre class="r"><code>velocity.month = velocity.all %&gt;% 
+  group_by(longitude, latitude, month) %&gt;% 
+  summarise(velocity = mean(velocity, na.rm = TRUE))
+
+velocity.month$month = as.integer(velocity.month$month)</code></pre>
+<p>Figure <a href="#fig:fig6">7</a> wind speed for the twelve ten months</p>
+<pre class="r"><code>## make label month
+ 
+velocityMonth = velocity.month %&gt;% 
+  mutate(day = 15, year = 2018, date = make_date(year, month, day),
+         Month = month(date, abbr = FALSE, label = TRUE)) %&gt;% 
+  select(date,month, Month, longitude, latitude, velocity)
+
+  ggplot() + 
+  geom_raster(data = velocityMonth, 
+              aes(x = longitude, y = latitude, fill = velocity), interpolate = FALSE)+
+  geom_sf(data = spData::world, col = &quot;black&quot;, fill = &quot;ivory&quot;)+
+  coord_sf(xlim = c(30,60), ylim =  c(-30,5))+
+  scale_fill_gradientn(name = &quot;Wind\nSpeed\n(m/s)&quot;, limits = c(0,15),
+                       colours = oceColorsPalette(120), na.value = &quot;White&quot;)+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = &quot;white&quot;),
+        axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA),
+        legend.position = &quot;right&quot;,
+        legend.background = element_rect(colour = NA, fill = NA),
+        legend.key.height = unit(2.5, &quot;lines&quot;),
+        legend.key.width = unit(1, &quot;lines&quot;))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+  labs(x = NULL, y = NULL)+
+  facet_wrap(~Month, nrow = 2)</code></pre>
+<div class="figure"><span id="fig:fig6"></span>
+<img src="/post/2018-10-25-processing-satellite-wind-speed-data-with-r_files/figure-html/fig6-1.png" alt=" Map of the Tropical Indian Ocean showing monthly Wind speed for 2018" width="672" />
+<p class="caption">
+Figure 7:  Map of the Tropical Indian Ocean showing monthly Wind speed for 2018
+</p>
+</div>
+<p>Figure <a href="#fig:fig7">8</a> show minimum, maximum, median and outliers of wind speed for each month in the tropical Indian Ocean region</p>
+<pre class="r"><code>ggplot(data =velocityMonth %&gt;% filter(between(velocity, 2,15) ), 
+       aes(x = Month, y = velocity, fill = as.factor(month)))+
+  geom_boxplot(show.legend = FALSE)+
+  scale_fill_brewer(palette = &quot;Paired&quot;)+
+  cowplot::theme_cowplot()+
+  scale_y_continuous(breaks = seq(0,18,3))+
+  scale_x_discrete(limits = month(seq(dmy(010118), dmy(301018), by = &quot;month&quot;), 
+      label = TRUE, abbr = FALSE) %&gt;% rev())+
+  coord_flip()+
+  # labs(x = &quot;&quot;, y = expression(~Wind~speed~(ms^{-1})))+ gganimate dont like expressions
+  labs(y = &quot;Wind speed (m/s)&quot;, x = &quot;&quot;)+
+  labs(title = &quot;{closest_state}&quot;)+
+  transition_states(month, transition_length = 5, state_length = 1, wrap = TRUE ) +
+  ease_aes(&#39;linear&#39;) +
+  shadow_mark()</code></pre>
+<div class="figure"><span id="fig:fig7"></span>
+<img src="/post/2018-10-25-processing-satellite-wind-speed-data-with-r_files/figure-html/fig7-1.gif" alt=" Animate boxpot showing  showing monthly Wind speed for 2018 in the Tropical Indian Ocean"  />
+<p class="caption">
+Figure 8:  Animate boxpot showing showing monthly Wind speed for 2018 in the Tropical Indian Ocean
+</p>
+</div>
+<p>Figure <a href="#fig:fig8">9</a> is similar to <a href="#fig:fig6">7</a>, but Figure <a href="#fig:fig8">9</a> is animated while figure <a href="#fig:fig6">7</a> wind speed for the twelve ten months is static.</p>
+<pre class="r"><code>wind.animate.month = ggplot() + 
+  geom_raster(data = velocity.month, 
+              aes(x = longitude, y = latitude, fill = velocity), interpolate = FALSE)+
+  geom_sf(data = spData::world, col = &quot;black&quot;, fill = &quot;ivory&quot;)+
+  coord_sf(xlim = c(30,60), ylim =  c(-30,5))+
+  scale_fill_gradientn(name = &quot;Wind\nSpeed\n(m/s)&quot;, limits = c(0,15),
+                       colours = oceColorsPalette(120), na.value = &quot;White&quot;)+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = &quot;white&quot;),
+        axis.text = element_text(size = 11, colour = 1),
+        panel.grid = element_line(colour = NA),
+        legend.position = c(.1,.25),
+        legend.background = element_rect(colour = NA, fill = &quot;ivory&quot;))+
+  scale_x_continuous(breaks = c(35,55))+
+  scale_y_continuous(breaks = c(-25, 2)) +
+    labs(x = NULL, y = NULL) +
+  labs(title = &#39;Month: {frame_time}&#39;)+
+  transition_time(month) +
+  ease_aes(&#39;linear&#39;)
+
+wind.animate.month</code></pre>
+<div class="figure"><span id="fig:fig8"></span>
+<img src="/post/2018-10-25-processing-satellite-wind-speed-data-with-r_files/figure-html/fig8-1.gif" alt=" Map of the Tropical Indian Ocean showing animated monthly Wind speed for 2018"  />
+<p class="caption">
+Figure 9:  Map of the Tropical Indian Ocean showing animated monthly Wind speed for 2018
+</p>
+</div>
+</div>
+<div id="quikscat" class="section level3">
+<h3>quikscat</h3>
+<pre class="r"><code>getInfo(&quot;qsux101day&quot;)
+getInfo(&quot;qsuy101day&quot;)</code></pre>
+</div>
+<div id="bibliography" class="section level3 unnumbered">
+<h3>Bibliography</h3>
+<div id="refs" class="references">
+<div id="ref-oce">
+<p>Kelley, D., &amp; Richards, C. (2018). <em>Oce: Analysis of oceanographic data</em>. Retrieved from <a href="https://CRAN.R-project.org/package=oce" class="uri">https://CRAN.R-project.org/package=oce</a></p>
+</div>
+<div id="ref-xtracto">
+<p>Mendelssohn, R. (2018). <em>Xtractomatic: Accessing environmental data from erd’s erddap server</em>. Retrieved from <a href="https://CRAN.R-project.org/package=xtractomatic" class="uri">https://CRAN.R-project.org/package=xtractomatic</a></p>
+</div>
+<div id="ref-r">
+<p>R Core Team. (2018). <em>R: A language and environment for statistical computing</em>. Vienna, Austria: R Foundation for Statistical Computing. Retrieved from <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a></p>
+</div>
+<div id="ref-erddap">
+<p>Simons, R. (2011). ERDDAP–The environmental research division’s data access program.’. <em>Available at Http. Coastwatch. Pfeg. Noaa. Gov/Erddap [2016]</em>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, H. (2017). <em>Tidyverse: Easily install and load the ’tidyverse’</em>. Retrieved from <a href="https://CRAN.R-project.org/package=tidyverse" class="uri">https://CRAN.R-project.org/package=tidyverse</a></p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, H., François, R., Henry, L., &amp; Müller, K. (2018). <em>Dplyr: A grammar of data manipulation</em>. Retrieved from <a href="https://CRAN.R-project.org/package=dplyr" class="uri">https://CRAN.R-project.org/package=dplyr</a></p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

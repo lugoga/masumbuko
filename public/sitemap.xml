@@ -28,6 +28,11 @@
   </url>
   
   <url>
+    <loc>/10/25/2018/processing-satellite-wind-speed-data-with-r/</loc>
+    <lastmod>2018-10-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/10/23/2018/wind-in-the-western-indian-ocean-region/</loc>
     <lastmod>2018-10-23T00:00:00+00:00</lastmod>
   </url>
@@ -126,6 +131,12 @@
   </url>
   
   <url>
+    <loc>/tags/ascat/</loc>
+    <lastmod>2018-10-25T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/categories/</loc>
     <lastmod>2018-09-30T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -163,7 +174,7 @@
   
   <url>
     <loc>/tags/indian-ocean/</loc>
-    <lastmod>2018-10-23T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -175,7 +186,7 @@
   
   <url>
     <loc>/tags/masumbuko-semba/</loc>
-    <lastmod>2018-10-18T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -193,7 +204,7 @@
   
   <url>
     <loc>/categories/oceanography/</loc>
-    <lastmod>2018-10-23T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -205,7 +216,7 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2018-10-23T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -221,7 +232,7 @@
   
   <url>
     <loc>/tags/quikscat/</loc>
-    <lastmod>2018-10-23T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -233,7 +244,7 @@
   
   <url>
     <loc>/categories/r/</loc>
-    <lastmod>2018-09-28T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -269,13 +280,13 @@
   
   <url>
     <loc>/tags/tanzania/</loc>
-    <lastmod>2018-10-04T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/categories/technical/</loc>
-    <lastmod>2018-10-02T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -288,6 +299,12 @@
   <url>
     <loc>/categories/tool/</loc>
     <lastmod>2018-09-18T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/wind-speed/</loc>
+    <lastmod>2018-10-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

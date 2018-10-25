@@ -30,6 +30,15 @@
     </item>
     
     <item>
+      <title>Ascat</title>
+      <link>/tags/ascat/</link>
+      <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/ascat/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Ctd</title>
       <link>/tags/ctd/</link>
       <pubDate>Thu, 18 Oct 2018 00:00:00 +0000</pubDate>
@@ -77,7 +86,7 @@
     <item>
       <title>Indian Ocean</title>
       <link>/tags/indian-ocean/</link>
-      <pubDate>Tue, 23 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/indian-ocean/</guid>
       <description></description>
@@ -95,7 +104,7 @@
     <item>
       <title>Masumbuko Semba</title>
       <link>/tags/masumbuko-semba/</link>
-      <pubDate>Thu, 18 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/masumbuko-semba/</guid>
       <description></description>
@@ -131,7 +140,7 @@
     <item>
       <title>Quikscat</title>
       <link>/tags/quikscat/</link>
-      <pubDate>Tue, 23 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/quikscat/</guid>
       <description></description>
@@ -185,7 +194,7 @@
     <item>
       <title>Tanzania</title>
       <link>/tags/tanzania/</link>
-      <pubDate>Thu, 04 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/tanzania/</guid>
       <description></description>
@@ -197,6 +206,15 @@
       <pubDate>Fri, 05 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/temperature/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Wind Speed</title>
+      <link>/tags/wind-speed/</link>
+      <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/wind-speed/</guid>
       <description></description>
     </item>
     
