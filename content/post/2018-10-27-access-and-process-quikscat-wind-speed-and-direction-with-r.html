@@ -1,0 +1,752 @@
+---
+title: Access and Process Quikscat Wind speed and direction with R
+author: Masumbuko Semba
+date: '2018-10-27'
+slug: access-and-process-quikscat-wind-speed-and-direction-with-r
+categories:
+  - Oceanography
+tags:
+  - wind speed
+  - wind direction
+  - Indian Ocean
+  - Tanzania
+  - Masumbuko Semba
+bibliography: [blog.bib, argo.bib]
+csl: apa.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<div id="quikscat" class="section level3">
+<h3>quikscat</h3>
+<p>In his <a href="https://journals.ametsoc.org/doi/abs/10.1175/WAF841.1">An Introduction to the Near–Real–Time QuikSCAT Data</a>, Hoffman <span class="citation">(<a href="#ref-hoffman">2005</a>)</span> described the primary mission of the SeaWinds instrument on the National Aeronautics and Space Administration (NASA) Quick Scatterometer (QuikSCAT ) satellite was to retrieve the surface vector wind over the global ocean (Lungu 2001).</p>
+<p>QuikSCAT has provided an extremely accurate and extraordinarily comprehensive view of the surface wind over the global ocean since July 1999 (Chelton et al. 2004). With an 1800-km-wide swath, QuikSCAT observations cover 90% of the earth every 24 h.</p>
+<p>QuikSCAT data depict the ocean surface wind field, and to provide some insight into the data errors. However, the optimal use of QuikSCAT winds requires proper processing of the data. his</p>
+<p>The prime goal of this post is to illustrate how to fetch quikscat wind data with <strong>xtractomatic</strong> package in R <span class="citation">(R Core Team, <a href="#ref-r">2018</a>)</span>. Then we will look tools that help us to manipulate, transform and visualize wind data both as smooth raster and arrow vector—direction and speed. We need to load some packages we will use for this analytical procedure..</p>
+<pre class="r"><code>require(xtractomatic)
+require(tidyverse)
+require(oce)
+require(lubridate)
+require(gganimate)
+require(sf)</code></pre>
+<p>The SeaWinds on QuikSCAT Level 3 data set consists of gridded values of scalar wind speed, meridional and zonal components of wind velocity, wind speed squared and time given in fraction of a day. The SeaWinds on QuikSCAT Level 3 Daily, Gridded Ocean Wind Vectors data set is available at ERDDAP servers. the dataset ids for zonal is <code>qsux101day</code> and meridional is <code>qsux101day</code>. we can check the metadata information for these datasets with <code>getinfo()</code> function from <strong>xtractomatic</strong> package</p>
+<pre class="r"><code>getInfo(&quot;qsux101day&quot;)
+getInfo(&quot;qsuy101day&quot;)</code></pre>
+<p>We define the tropical Indian Ocean region as geographical boundary and the year 2006 as the time bound</p>
+<pre class="r"><code># set spatial extent
+lon = c(25,65)
+lat =  c(-35,10)
+## set temporal extent
+time = c(&quot;2006-01-01&quot;, &quot;2006-12-31&quot;)</code></pre>
+<p>The the dataset id, spatial and time bounds were passed in the <code>extracto_3D()</code> function as argument to extract and download quikscat data based. Because we want the vector wind fields, the zonal and meridional data were download separately.</p>
+<pre class="r"><code>wind_x = xtracto_3D(dtype = &quot;qsux101day&quot;, 
+                    xpos = lon, 
+                    ypos = lat, 
+                    tpos = time)
+
+wind_y = xtracto_3D(dtype = &quot;qsuy101day&quot;, 
+                    xpos = lon, 
+                    ypos = lat, 
+                    tpos = time)</code></pre>
+<p>The downloaded dataset contain vecotr array of zonal and meridional wind speed velocity along with longitudes, latitudes and times. To obtain these information we first extract location and time bounds as vector</p>
+<pre class="r"><code>## extract location and time bounds as vector
+longitude = wind_x$longitude
+latitude = wind_x$latitude
+time = wind_x$time%&gt;%as.Date()</code></pre>
+<p>The wind field for eastward velocity (U) and northward velocity (V) were exracted as array and compute the velocity of wind speed from these arrays. Each array contain a list of 365 matrices—each matrix contain wind field of a single day.</p>
+<pre class="r"><code>## extract u and v as array
+# eastward velocity (zonal)
+u = wind_x$data
+# northward velocity (meridional)
+v = wind_y$data
+
+# calculate wind velocity
+velocity = sqrt(u^2 + v^2)</code></pre>
+</div>
+<div id="converting-array-to-data-frame." class="section level3">
+<h3>Converting array to data frame.</h3>
+<p>Most data analyis in R works with data frame <span class="citation">(R Core Team, <a href="#ref-r">2018</a>)</span> that are tidy—organize the data that each variable is a column and each observation is a row. Its the tidy data that provide easy data cleaning, modeling and visualization. The tidyr package by Hadley Wickham is designed to help tidy the data <span class="citation">(Wickham &amp; Henry, <a href="#ref-tidyr">2018</a>)</span>. It contains four functions that alter the layout of tabular data sets, while preserving the values and relationships contained in the data sets. The two most important functions in <strong>tidyr</strong> are <code>gather()</code> and <code>spread()</code>. Therefore, the arrays were transformed and tidy to data frame. Because there are 365 matrix for each array, it is tidious to tranform them to data frame manually. I used the <code>for()</code> loop function to iterate the process.</p>
+<pre class="r"><code>n.lon = length(longitude)
+n.lat = length(latitude)+1
+
+u.all = NULL
+
+for (i in 1:length(time)){
+      u.df = data.frame(longitude, u[,,i] %&gt;% as.data.frame()) %&gt;% 
+        gather(key = &quot;key&quot; , value = &quot;u&quot;, 2:n.lat) %&gt;% 
+        mutate(latitude = rep(latitude, each = n.lon), date = time[i]) %&gt;% 
+        select(date,longitude, latitude, u)%&gt;% 
+        as.tibble()
+  
+    u.all = u.all %&gt;% bind_rows(u.df)
+}</code></pre>
+<pre class="r"><code>v.all = NULL
+
+for (i in 1:length(time)){
+      v.df = data.frame(longitude, v[,,i] %&gt;% as.data.frame()) %&gt;% 
+        gather(key = &quot;key&quot; , value = &quot;v&quot;, 2:n.lat) %&gt;% 
+        mutate(latitude = rep(latitude, each = n.lon), date = time[i]) %&gt;% 
+        select(date,longitude, latitude, v)%&gt;% 
+        as.tibble()
+  
+    v.all = v.all %&gt;% bind_rows(v.df)
+}</code></pre>
+<pre class="r"><code>velocity.all = NULL
+
+for (i in 1:length(time)){
+      velocity.df = data.frame(longitude, velocity[,,i] %&gt;% as.data.frame()) %&gt;% 
+        gather(key = &quot;key&quot; , value = &quot;velocity&quot;, 2:n.lat) %&gt;% 
+        mutate(latitude = rep(latitude, each = n.lon), date = time[i]) %&gt;% 
+        select(date,longitude, latitude, velocity)%&gt;% 
+        as.tibble()
+  
+    velocity.all = velocity.all %&gt;% bind_rows(velocity.df)
+}</code></pre>
+</div>
+<div id="wind-fields-manipulation" class="section level3">
+<h3>Wind Fields Manipulation</h3>
+<p>After converting the array into data frame, we can manipulate the data based on daily, weekly and monthly. Here we compute the monthly zonal, meridional and velocity wind observations into main steps. First, because we do not deal with the entire region, we selected data for the area of interest by define the geographical bounds with <code>filter()</code> function. Second, the date variable was decomposed into day, week and month variables. Third, latitude, longitude was aggregated by month and computed the monthly mean of zonal meridional and velocity with <code>summarise()</code> function.</p>
+<pre class="r"><code>velocity.month = velocity.all %&gt;% 
+  filter(between(longitude,38,55)) %&gt;% 
+  filter(between(latitude,-15,-7)) %&gt;% 
+  mutate(day = yday(date) %&gt;% as.integer(), week = week(date)%&gt;% as.integer(), 
+         month = month(date)%&gt;% as.integer())%&gt;%
+  group_by(longitude, latitude, month) %&gt;%
+  summarise(velocity = mean(velocity, na.rm = TRUE))
+
+u.month = u.all %&gt;% 
+  filter(between(longitude,38,55)) %&gt;% 
+  filter(between(latitude,-15,-7)) %&gt;% 
+  mutate(day = yday(date) %&gt;% as.integer(), week = week(date)%&gt;% as.integer(), 
+         month = month(date)%&gt;% as.integer()) %&gt;%
+  group_by(longitude, latitude, month) %&gt;%
+  summarise(u = mean(u, na.rm = TRUE))
+
+v.month = v.all %&gt;% 
+  filter(between(longitude,38,55)) %&gt;% 
+  filter(between(latitude,-15,-7)) %&gt;% 
+  mutate(day = yday(date) %&gt;% as.integer(), week = week(date)%&gt;% as.integer(), 
+         month = month(date)%&gt;% as.integer()) %&gt;%
+  group_by(longitude, latitude, month) %&gt;%
+  summarise(v = mean(v, na.rm = TRUE))</code></pre>
+<p>Once the monthly winded fields were computed, its time to tidy them into a single data frame. The files—<code>u.month</code>, <code>v.month</code> and <code>velocity.month</code> were binded by column with a <code>bind_cols()</code> function and select variable of interest and ungrouped the data frame.</p>
+<pre class="r"><code>month.wind.vector = velocity.month %&gt;% 
+  bind_cols(u.month, v.month) %&gt;%
+  select(longitude, latitude, month, u,v,velocity) %&gt;%
+  ungroup()</code></pre>
+<p>Monsoon winds influence the region and this is clearly in figure (fig:fig1). The northeast expreience week wind (Figure (fig:fig1)a of February 2006 compared to a strong wind during the southeast monsoon winds (Figure (fig:fig1)b) of August 2006.</p>
+<pre class="r"><code>feb = ggplot(data = month.wind.vector %&gt;% filter(month == 2)) + 
+  geom_raster(aes(x = longitude, y = latitude, fill = velocity))+
+  scale_fill_gradientn(limits = c(0,15),colours = oceColorsPalette(120), 
+                       na.value = &quot;white&quot;, name = &quot;Speed\n(m/s)&quot;)+
+  geom_sf(data = spData::world, fill = &quot;grey85&quot;, col = &quot;black&quot;)+
+  coord_sf(xlim = c(39,54), ylim = c(-14.5,-7.5))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = &quot;black&quot;))+
+  labs(x = NULL, y = NULL)
+
+aug = ggplot(data = month.wind.vector %&gt;% filter(month == 8)) + 
+  geom_raster(aes(x = longitude, y = latitude, fill = velocity))+
+  scale_fill_gradientn(limits = c(0,15),colours = oceColorsPalette(120), 
+                       na.value = &quot;white&quot;, name = &quot;Speed\n(m/s)&quot;)+
+  geom_sf(data = spData::world, fill = &quot;grey85&quot;, col = &quot;black&quot;)+
+  coord_sf(xlim = c(39,54), ylim = c(-14.5,-7.5))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = &quot;black&quot;))+
+  labs(x = NULL, y = NULL)
+
+cowplot::plot_grid(feb,aug, nrow = 2, labels = c(&quot;a)&quot;, &quot;b)&quot;), label_x = .7, label_y = .94, label_size = 12)</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2018-10-27-access-and-process-quikscat-wind-speed-and-direction-with-r_files/figure-html/fig1-1.png" alt="Wind speed a) February 2006 and b) August 2006" width="672" />
+<p class="caption">
+Figure 1: Wind speed a) February 2006 and b) August 2006
+</p>
+</div>
+<p>The development of the wind is much clear when the twelve month are drawn in sequantial order (figure <a href="#fig:fig2">2</a>)</p>
+<pre class="r"><code>ggplot(data = month.wind.vector) + 
+  geom_raster(aes(x = longitude, y = latitude, fill = velocity))+
+  scale_fill_gradientn(limits = c(0,15),colours = oceColorsPalette(120), 
+                       na.value = &quot;white&quot;, name = &quot;Speed\n(m/s)&quot;)+
+  geom_sf(data = spData::world, fill = &quot;grey85&quot;, col = &quot;black&quot;)+
+  coord_sf(xlim = c(39,54), ylim = c(-14.5,-7.5))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = &quot;black&quot;))+
+  scale_x_continuous(breaks = c(42,52))+
+  scale_y_continuous(breaks = c(-14,-8))+
+  labs(x = NULL, y = NULL)+
+  facet_wrap(~month, ncol = 3)</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2018-10-27-access-and-process-quikscat-wind-speed-and-direction-with-r_files/figure-html/fig2-1.png" alt="Monthly wind velocity for the year 2006" width="672" />
+<p class="caption">
+Figure 2: Monthly wind velocity for the year 2006
+</p>
+</div>
+<p>Figure <a href="#fig:fig3">3</a> illustrate the animated monthly wind velocity similar to figure <a href="#fig:fig2">2</a>.</p>
+<pre class="r"><code>ggplot(data = month.wind.vector) + 
+  geom_raster(aes(x = longitude, y = latitude, fill = velocity))+
+  scale_fill_gradientn(limits = c(0,15),colours = oceColorsPalette(120), 
+                       na.value = &quot;white&quot;, name = &quot;Speed\n(m/s)&quot;)+
+  geom_sf(data = spData::world, fill = &quot;grey85&quot;, col = &quot;black&quot;)+
+  coord_sf(xlim = c(39,54), ylim = c(-14.5,-7.5))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = &quot;black&quot;))+
+  labs(x = NULL, y = NULL)+
+    #animate
+  labs(title = &#39;Month: {frame_time}&#39;) +
+  transition_time(month) +
+  ease_aes(&#39;linear&#39;)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2018-10-27-access-and-process-quikscat-wind-speed-and-direction-with-r_files/figure-html/fig3-1.gif" alt="Animated monthly wind velocity"  />
+<p class="caption">
+Figure 3: Animated monthly wind velocity
+</p>
+</div>
+</div>
+<div id="make-grid" class="section level3">
+<h3>make grid</h3>
+<p>Overalying the vector wind speed and direction on the wind velocity make the plot a messy. This is because the vector fields and velocity are high resolution and arrow clutter when plotted (figure <a href="#fig:fig4">4</a>). This make the plot unpleasant and we need to reduce the number of vector fields.</p>
+<pre class="r"><code>ggplot(data = month.wind.vector %&gt;% filter(month == 8)) + 
+  geom_raster(aes(x = longitude, y = latitude, fill = velocity))+
+  scale_fill_gradientn(limits = c(0,15),colours = oceColorsPalette(120), 
+                       na.value = &quot;white&quot;, name = &quot;Speed\n(m/s)&quot;)+
+  geom_segment(aes(x = longitude, xend = longitude+u/10, y = latitude, yend = latitude+v/10),
+               arrow = arrow(length = unit(0.2, &quot;cm&quot;)))+
+  geom_sf(data = spData::world, fill = &quot;grey85&quot;, col = &quot;black&quot;)+
+  coord_sf(xlim = c(39,54), ylim = c(-14.5,-7.5))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = &quot;black&quot;))+
+  labs(x = NULL, y = NULL)</code></pre>
+<div class="figure"><span id="fig:fig4"></span>
+<img src="/post/2018-10-27-access-and-process-quikscat-wind-speed-and-direction-with-r_files/figure-html/fig4-1.png" alt="Wind speed and direction overlaid on wind velocity" width="672" />
+<p class="caption">
+Figure 4: Wind speed and direction overlaid on wind velocity
+</p>
+</div>
+<p>that good, we need to grid them and then overlay on the velocity map</p>
+<pre class="r"><code>require(sf)
+require(spData)
+data(&quot;world&quot;)
+
+## make an extent polygone by interactive drawing with the mapview and editmap packages
+# extent = mapview::mapview(world)%&gt;%mapedit::editMap()
+# extent = extent$drawn
+
+#read extent data w
+extent = read_sf(&quot;E:/Data Manipulation/xtractomatic/extent.shp&quot;)
+
+grid = extent %&gt;% 
+  st_make_grid(n = c(30,20)) %&gt;% 
+  st_sf()
+
+# mapview::mapview(grid)</code></pre>
+<p>Unlike dataframe, where you can stitch by rows a data frame with <code>NULL()</code> Object, binding <strong>sf</strong> object and <code>NULL()</code> object will fail. Ttherefore, we must create the simple feature for january first outside the loop and then the looping begin from February and stitch february data to january. The subsequent month data will stitch without problem.</p>
+<pre class="r"><code>## transform monthly month.wind.vector from tabular form to simple feature
+month.wind.vector.sf = month.wind.vector %&gt;% 
+  st_as_sf(coords = c(&quot;longitude&quot;, &quot;latitude&quot;)) %&gt;% 
+  st_set_crs(4326)
+
+ ## select the simple point for January. 
+wind.sf = month.wind.vector.sf %&gt;% filter(month == 1)
+
+## grid the observations and calculate the median of u, v, and velocity in each grid
+grid.wind.month = grid %&gt;% mutate(id = n(),
+                contained = lapply(st_contains(st_sf(geometry),wind.sf), identity),
+                obs = sapply(contained, length),
+                u = sapply(contained, function(x) {median(wind.sf[x,]$u, na.rm = TRUE)}),
+                v = sapply(contained, function(x) {median(wind.sf[x,]$v, na.rm = TRUE)}),
+                velocity = sapply(contained, function(x) {median(wind.sf[x,]$velocity, na.rm = TRUE)}))
+## select the u , v and velocity variable and add a month column
+grid.wind.month = grid.wind.month %&gt;% select(obs, u, v, velocity) %&gt;% mutate(month = 1)
+
+## that is for january, now loop through from February to December, after each loop, the observation are added in the January values in row order
+for (i in 2:12){
+wind.sf = month.wind.vector.sf %&gt;% filter(month == i)
+
+leo = grid %&gt;% mutate(id = n(),
+                contained = lapply(st_contains(st_sf(geometry),wind.sf), identity),
+                obs = sapply(contained, length),
+                u = sapply(contained, function(x) {median(wind.sf[x,]$u, na.rm = TRUE)}),
+                v = sapply(contained, function(x) {median(wind.sf[x,]$v, na.rm = TRUE)}),
+                velocity = sapply(contained, function(x) {median(wind.sf[x,]$velocity, na.rm = TRUE)}))
+
+leo = leo %&gt;% select(obs, u, v, velocity) %&gt;% mutate(month = i)
+
+grid.wind.month = grid.wind.month %&gt;% rbind(leo)
+
+}</code></pre>
+</div>
+<div id="transform-grid-to-data-frame" class="section level3">
+<h3>Transform grid to data frame</h3>
+<p>As mentioned in previous section, the fundamental of data analysis in R rely on data frame. The grids were transformed into data frame. The process involved obtaining the centorid position of grids with <code>st_centroid()</code> and extract the coordinates of the centroid with <code>st_coordinates()</code>. These coordinates were then converted into data frame. The attributes of the grids were then combined with the coordinates of the grids to make a data frame with geograhical location and wind vector fields - zonal, meridional and velocity (table <a href="#tab:tab1">1</a>)</p>
+<pre class="r"><code>## create the centroid coordinates from the grids and rename the coordinates
+grid.wind.points = grid.wind.month %&gt;% 
+  st_centroid() %&gt;% 
+  st_coordinates() %&gt;% 
+  as.tibble() %&gt;%
+  rename(longitude = X, latitude = Y)
+
+## make  a copy of the grid.wind.month
+attributes = grid.wind.month
+## remove the geometry and remain with the attributes
+st_geometry(attributes) = NULL
+
+## bind grid cooordinates with the attributes information
+gridded.wind = grid.wind.points %&gt;% bind_cols(attributes)
+
+gridded.wind %&gt;% 
+  sample_n(15) %&gt;%
+  kableExtra::kable(&quot;html&quot;, caption = &quot;Wind vector fields&quot;, align = &quot;c&quot;, digits = 4) %&gt;%
+  kableExtra::column_spec(column = 1:7, width = &quot;4cm&quot;,color = &quot;black&quot;)</code></pre>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Wind vector fields
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+longitude
+</th>
+<th style="text-align:center;">
+latitude
+</th>
+<th style="text-align:center;">
+obs
+</th>
+<th style="text-align:center;">
+u
+</th>
+<th style="text-align:center;">
+v
+</th>
+<th style="text-align:center;">
+velocity
+</th>
+<th style="text-align:center;">
+month
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+40.2283
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-9.3221
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+20
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-4.6500
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+0.7964
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+5.0729
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+10
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+56.2317
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-14.4064
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+0
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+52.7527
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-9.8305
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+20
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-5.1807
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+6.6102
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+9.0126
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+50.6653
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-12.8811
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+24
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-3.7530
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+4.4700
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+6.8701
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+51.3611
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-13.8979
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+20
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-4.8380
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+6.7907
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+8.9086
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+38.8367
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-13.3895
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+24
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+43.0115
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-12.8811
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+20
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-2.0750
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+0.2051
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+4.1057
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+11
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+56.2317
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-7.2884
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+0
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+52.0569
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-7.7968
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+24
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-4.6448
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+7.2017
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+9.0062
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+40.9241
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-11.8642
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+24
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-1.9765
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+4.1506
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+6.2018
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+52.7527
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-6.2716
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+0
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+53.4485
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-7.7968
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+24
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-3.9798
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+3.7350
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+6.2342
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+42.3157
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-8.8137
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+24
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-3.9338
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+3.3237
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+6.0334
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+39.5325
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-13.8979
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+24
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+NA
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: black;">
+41.6199
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-13.3895
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+20
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+-2.3658
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+3.8161
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+5.9606
+</td>
+<td style="text-align:center;width: 4cm; color: black;">
+8
+</td>
+</tr>
+</tbody>
+</table>
+<p>Figure <a href="#fig:fig5">5</a> show the wind speed and direction. The influence of monsoon winds is much clear in this area. The northeast expreience week wind (Figure (fig:fig5)a of February 2006 compared to a strong wind during the southeast monsoon winds (Figure (fig:fig5)b) of August 2006.</p>
+<pre class="r"><code>feb = ggplot(data = month.wind.vector %&gt;% filter(month == 2)) + 
+  geom_raster(aes(x = longitude, y = latitude, fill = velocity))+
+  scale_fill_gradientn(limits = c(0,15),colours = oceColorsPalette(120), 
+                       na.value = &quot;white&quot;, name = &quot;Speed\n(m/s)&quot;)+
+  geom_segment(data = gridded.wind%&gt;% filter(month == 2),
+               aes(x = longitude, xend = longitude+u/10, y = latitude, yend = latitude+v/10),
+               arrow = arrow(length = unit(0.2, &quot;cm&quot;)))+
+  geom_sf(data = spData::world, fill = &quot;grey85&quot;, col = &quot;black&quot;)+
+  coord_sf(xlim = c(39,54), ylim = c(-14.5,-7.5))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = &quot;black&quot;))+
+  labs(x = NULL, y = NULL)
+
+aug = ggplot(data = month.wind.vector %&gt;% filter(month == 8)) + 
+  geom_raster(aes(x = longitude, y = latitude, fill = velocity))+
+  scale_fill_gradientn(limits = c(0,15),colours = oceColorsPalette(120), 
+                       na.value = &quot;white&quot;, name = &quot;Speed\n(m/s)&quot;)+
+  geom_segment(data = gridded.wind%&gt;% filter(month == 8),
+               aes(x = longitude, xend = longitude+u/10, y = latitude, yend = latitude+v/10),
+               arrow = arrow(length = unit(0.2, &quot;cm&quot;)))+
+  geom_sf(data = spData::world, fill = &quot;grey85&quot;, col = &quot;black&quot;)+
+  coord_sf(xlim = c(39,54), ylim = c(-14.5,-7.5))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = &quot;black&quot;))+
+  labs(x = NULL, y = NULL)
+
+cowplot::plot_grid(feb,aug, nrow = 2, labels = c(&quot;a)&quot;, &quot;b)&quot;), label_x = .7, label_y = .94, label_size = 12)</code></pre>
+<div class="figure"><span id="fig:fig5"></span>
+<img src="/post/2018-10-27-access-and-process-quikscat-wind-speed-and-direction-with-r_files/figure-html/fig5-1.png" alt="Wind speed and direction overlaid on wind velocity" width="672" />
+<p class="caption">
+Figure 5: Wind speed and direction overlaid on wind velocity
+</p>
+</div>
+<p>The animated wind speed and direction of the area is shown in figure <a href="#fig:fig6">6</a>, which highlight how the wind speed and direction various with months throughtout the year. The animated wind speed and direction shows a much clear picture of the characteristic of winds in this area.</p>
+<pre class="r"><code>gridded.wind$month = as.integer(gridded.wind$month)
+
+ggplot() + 
+  geom_raster(data = month.wind.vector, aes(x = longitude, y = latitude, fill = velocity))+
+  scale_fill_gradientn(limits = c(0,15),colours = oceColorsPalette(120), 
+                       na.value = &quot;white&quot;, name = &quot;Speed\n(m/s)&quot;)+
+  geom_segment(data = gridded.wind,
+               aes(x = longitude, xend = longitude+u/10, y = latitude, yend = latitude+v/10),
+               arrow = arrow(length = unit(0.2, &quot;cm&quot;)))+
+  geom_sf(data = spData::world, fill = &quot;grey85&quot;, col = &quot;black&quot;)+
+  coord_sf(xlim = c(39,54), ylim = c(-14.5,-7.5))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = &quot;black&quot;))+
+  labs(x = NULL, y = NULL)+
+    #animate
+  labs(title = &#39;Day: {frame_time}&#39;) +
+  transition_time(month) +
+  ease_aes(&#39;linear&#39;)</code></pre>
+<div class="figure"><span id="fig:fig6"></span>
+<img src="/post/2018-10-27-access-and-process-quikscat-wind-speed-and-direction-with-r_files/figure-html/fig6-1.gif" alt="Animate monthly wind speed and direction"  />
+<p class="caption">
+Figure 6: Animate monthly wind speed and direction
+</p>
+</div>
+</div>
+<div id="bibliography" class="section level3 unnumbered">
+<h3>bibliography</h3>
+<div id="refs" class="references">
+<div id="ref-hoffman">
+<p>Hoffman, R. N., &amp; Leidner, S. M. (2005). An introduction to the near–real–time quikscat data. <em>Weather and Forecasting</em>, <em>20</em>(4), 476–493.</p>
+</div>
+<div id="ref-r">
+<p>R Core Team. (2018). <em>R: A language and environment for statistical computing</em>. Vienna, Austria: R Foundation for Statistical Computing. Retrieved from <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a></p>
+</div>
+<div id="ref-tidyr">
+<p>Wickham, H., &amp; Henry, L. (2018). <em>Tidyr: Easily tidy data with ’spread()’ and ’gather()’ functions</em>. Retrieved from <a href="https://CRAN.R-project.org/package=tidyr" class="uri">https://CRAN.R-project.org/package=tidyr</a></p>
+</div>
+</div>
+</div>

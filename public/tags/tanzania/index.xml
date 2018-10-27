@@ -6,10 +6,20 @@
     <description>Recent content in Tanzania on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 25 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 27 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/tanzania/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Access and Process Quikscat Wind speed and direction with R</title>
+      <link>/10/27/2018/access-and-process-quikscat-wind-speed-and-direction-with-r/</link>
+      <pubDate>Sat, 27 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/10/27/2018/access-and-process-quikscat-wind-speed-and-direction-with-r/</guid>
+      <description>quikscatIn his An Introduction to the Near–Real–Time QuikSCAT Data, Hoffman (2005) described the primary mission of the SeaWinds instrument on the National Aeronautics and Space Administration (NASA) Quick Scatterometer (QuikSCAT ) satellite was to retrieve the surface vector wind over the global ocean (Lungu 2001).
+QuikSCAT has provided an extremely accurate and extraordinarily comprehensive view of the surface wind over the global ocean since July 1999 (Chelton et al.</description>
+    </item>
     
     <item>
       <title>Processing Satellite Wind Speed Data with R</title>
