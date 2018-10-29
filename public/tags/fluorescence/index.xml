@@ -6,10 +6,20 @@
     <description>Recent content in Fluorescence on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 05 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 29 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/fluorescence/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Animating Oceanographic data in R with ggplot2 and gganimate</title>
+      <link>/10/29/2018/animating-oceanographic-data-in-r-with-ggplot2-and-gganimate/</link>
+      <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/10/29/2018/animating-oceanographic-data-in-r-with-ggplot2-and-gganimate/</guid>
+      <description>setwd(&amp;quot;E:/Data Manipulation/xtractomatic&amp;quot;)IntroductionThe increasing popularity of ggplot2 package (Wickham, 2016) had made many people becomes familiar with art of grammer of graphics of static plots. But, most of environmental data are static but rather changes both with time and space. Therefore, animated plots are effective way to communicate these dind of data.
+Pedersen &amp;amp; Robinson (2017) developed gganimate package that extends the grammar of graphic as implemented with ggplot2 with animations.</description>
+    </item>
     
     <item>
       <title>CTD Data in R with oce and tidyverse package</title>

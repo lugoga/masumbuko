@@ -1,0 +1,950 @@
+---
+title: Animating Oceanographic data in R with ggplot2 and gganimate
+author: Masumbuko Semba
+date: '2018-10-29'
+slug: animating-oceanographic-data-in-r-with-ggplot2-and-gganimate
+categories:
+  - Oceanography
+  - R
+tags:
+  - Argo
+  - CTD
+  - wind speed
+  - wind direction
+  - Masumbuko Semba
+  - Temperature
+  - Salinity
+  - Fluorescence
+  - oxygen
+bibliography: [blog.bib, argo.bib]
+csl: apa.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<pre class="r"><code>setwd(&quot;E:/Data Manipulation/xtractomatic&quot;)</code></pre>
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>The increasing popularity of <strong>ggplot2</strong> package <span class="citation">(Wickham, <a href="#ref-ggplot">2016</a>)</span> had made many people becomes familiar with art of grammer of graphics of static plots. But, most of environmental data are static but rather changes both with time and space. Therefore, animated plots are effective way to communicate these dind of data.</p>
+<p><span class="citation">Pedersen &amp; Robinson (<a href="#ref-gganimate">2017</a>)</span> developed <strong>gganimate</strong> package that extends the grammar of graphic as implemented with <strong>ggplot2</strong> with animations. It has several classes and geoms that once added change static plots from <strong>ggplot2</strong> into animations. in this post I show some example of how to animate geospatial data. I will use oceanographic data of wind vector from quikscat, sea surface temperature and chlorophyll from MODIS. I will draw static plots with <strong>ggplot2</strong> and create animation these plots with <strong>gganimate</strong> package package.</p>
+<p>You can install <strong>gganimate</strong>package from github using the <strong>devtools</strong> package. If you havent install the package in your machine, you simply uncomment the chunk below to install it</p>
+<pre class="r"><code># devtools::install_github(&quot;thomasp85/gganimate&quot;)</code></pre>
+<p>Before we start, let’s load the R packages that we will use.</p>
+<pre class="r"><code>require(xtractomatic)
+require(tidyverse)
+require(oce)
+require(lubridate)
+require(gganimate)
+require(sf)</code></pre>
+</div>
+<div id="first-example-quiksat-wind-data" class="section level3">
+<h3>First example: Quiksat Wind data</h3>
+<p>Quiksate contain satellite wind data for all world oceans at 0.125 degree spatial resolution. We can download the wind data using the <strong>extractomatic</strong> package. I will straight to the process and skip the detail of extracting these data, If you can follow in this post, I recommend to look at <a href="www.semba-blog.netlify.com">ascat processin in R</a> for more detail. The the dataset id, spatial and time bounds were passed in the <code>extracto_3D()</code> function as argument to extract and download quikscat data based. Because we want the vector wind fields, the zonal and meridional data were download separately.</p>
+<pre class="r"><code>## zonal compoent
+wind_x = xtracto_3D(dtype = &quot;qsux101day&quot;, 
+                    xpos = c(38.85, 40), 
+                    ypos = c(-6.8, -4.5), 
+                    tpos = c(&quot;2000-01-01&quot;, &quot;2008-12-31&quot;))
+# meridional component
+wind_y = xtracto_3D(dtype = &quot;qsuy101day&quot;, 
+                    xpos = c(38.85, 40), 
+                    ypos = c(-6.8, -4.5), 
+                    tpos = c(&quot;2000-01-01&quot;, &quot;2008-12-31&quot;))
+## Extract
+longitude = wind_x$longitude
+latitude = wind_x$latitude
+time = wind_x$time %&gt;% as.Date()
+# eastward velocity (zonal)
+u = wind_x$data
+# northward velocity (meridional)
+v = wind_y$data
+
+# calculate wind velocity
+velocity = sqrt(u^2 + v^2)</code></pre>
+</div>
+<div id="tranform-array-to-data-frame" class="section level3">
+<h3>Tranform array to data frame</h3>
+<p>Data frame is the principle data storage in R. Because the wind vector data are in array format, they were transformed to data frame first and then organize in the structure that make analysis and plotting much easier. Because there are several matrix that are in array, I used a <code>for()</code> loop function to iterate the process.</p>
+<pre class="r"><code>n.lon = length(longitude)
+n.lat = length(latitude)+1
+
+u.all = NULL
+
+## zonal from array to data frame
+
+for (i in 1:length(time)){
+      u.df = data.frame(longitude, u[,,i] %&gt;% as.data.frame()) %&gt;% 
+        gather(key = &quot;key&quot; , value = &quot;u&quot;, 2:n.lat) %&gt;% 
+        mutate(latitude = rep(latitude, each = n.lon), date = time[i]) %&gt;% 
+        select(date,longitude, latitude, u)%&gt;% 
+        as.tibble()
+  
+    u.all = u.all %&gt;% bind_rows(u.df)
+}
+
+## zonal from array to data frame
+v.all = NULL
+
+for (i in 1:length(time)){
+      v.df = data.frame(longitude, v[,,i] %&gt;% as.data.frame()) %&gt;% 
+        gather(key = &quot;key&quot; , value = &quot;v&quot;, 2:n.lat) %&gt;% 
+        mutate(latitude = rep(latitude, each = n.lon), date = time[i]) %&gt;% 
+        select(date,longitude, latitude, v)%&gt;% 
+        as.tibble()
+  
+    v.all = v.all %&gt;% bind_rows(v.df)
+}
+
+
+## velocity from array to data frame
+velocity.all = NULL
+
+for (i in 1:length(time)){
+      velocity.df = data.frame(longitude, velocity[,,i] %&gt;% as.data.frame()) %&gt;% 
+        gather(key = &quot;key&quot; , value = &quot;velocity&quot;, 2:n.lat) %&gt;% 
+        mutate(latitude = rep(latitude, each = n.lon), date = time[i]) %&gt;% 
+        select(date,longitude, latitude, velocity)%&gt;% 
+        as.tibble()
+  
+    velocity.all = velocity.all %&gt;% bind_rows(velocity.df)
+}</code></pre>
+</div>
+<div id="tidying-the-data-frame" class="section level3">
+<h3>Tidying the data frame</h3>
+<p>Tidying means getting data into the right form in order to feed it into the visualization and modeling stages. This typically requires a large amount of reshaping and transforming of your data—widely known *<strong>tidying</strong>.The wind vector data was manipulated and created new variables using tidy <span class="citation">(@ Wickham &amp; Henry, <a href="#ref-tidyr">2018</a>)</span> and dplyr <span class="citation">(Wickham, François, Henry, &amp; Müller, <a href="#ref-dplyr">2018</a>)</span> packages. Table <a href="#tab:tab1">1</a> show the fifteen random sample of the wind vector within Zanzibar and Pemba channel from Quikscat collected between January 01, 2000 to December 31, 2008.</p>
+<pre class="r"><code>wind = data.frame(u.all, v.all$v, velocity.all$velocity) %&gt;%
+  mutate(day = yday(date) %&gt;%as.integer(), 
+         week = week(date) %&gt;%as.integer(),  month = month(date) %&gt;%as.integer(), 
+         year = year(date) %&gt;%as.integer()) %&gt;%
+  select(date,day, week, month, year,longitude,latitude, u,
+         v = v.all.v, velocity = velocity.all.velocity)</code></pre>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Random sample of wind vector in the area
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+date
+</th>
+<th style="text-align:center;">
+day
+</th>
+<th style="text-align:center;">
+week
+</th>
+<th style="text-align:center;">
+month
+</th>
+<th style="text-align:center;">
+year
+</th>
+<th style="text-align:center;">
+longitude
+</th>
+<th style="text-align:center;">
+latitude
+</th>
+<th style="text-align:center;">
+u
+</th>
+<th style="text-align:center;">
+v
+</th>
+<th style="text-align:center;">
+velocity
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 2cm; color: 1;">
+2001-05-23
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+143
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+21
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+5
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2001
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+39.875
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-6.375
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-0.4263
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+6.3317
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+6.3460
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; color: 1;">
+2001-06-30
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+181
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+26
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+6
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2001
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+39.750
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-6.250
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-2.2709
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+6.7108
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+7.0847
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; color: 1;">
+2002-03-12
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+71
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+11
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+3
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2002
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+40.000
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-4.750
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-3.7493
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-4.0693
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+5.5332
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; color: 1;">
+2003-09-12
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+255
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+37
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+9
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2003
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+39.750
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-5.625
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+3.7976
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2.9117
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+4.7854
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; color: 1;">
+2004-09-19
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+263
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+38
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+9
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2004
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+40.000
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-6.375
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-0.5166
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2.7614
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2.8093
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; color: 1;">
+2005-05-27
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+147
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+21
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+5
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2005
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+40.000
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-4.500
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2.3335
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+7.0677
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+7.4430
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; color: 1;">
+2006-02-07
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+38
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+6
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2006
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+40.000
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-6.125
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-1.3033
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-3.9765
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+4.1846
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; color: 1;">
+2006-06-06
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+157
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+23
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+6
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2006
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+39.625
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-5.875
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-1.4763
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+9.3252
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+9.4414
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; color: 1;">
+2006-08-14
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+226
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+33
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+8
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2006
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+40.000
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-6.750
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-2.9396
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+6.4971
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+7.1312
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; color: 1;">
+2007-08-18
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+230
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+33
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+8
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2007
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+39.625
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-5.750
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2.1020
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+6.1118
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+6.4632
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; color: 1;">
+2008-01-14
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+14
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+1
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2008
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+40.000
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-5.625
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-3.0702
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-1.4840
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+3.4101
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; color: 1;">
+2008-09-19
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+263
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+38
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+9
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2008
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+39.750
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-5.875
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+-2.3978
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+1.1733
+</td>
+<td style="text-align:center;width: 2cm; color: 1;">
+2.6695
+</td>
+</tr>
+</tbody>
+</table>
+<p><code>group_by()</code> and <code>summarise()</code> were piped to compute the monthly mean of zonal (u) meridional (v) and velocity wind speed for each month between January 2000 to December 2008.</p>
+<pre class="r"><code>wind.month = wind %&gt;% 
+  group_by(longitude, latitude, month) %&gt;% 
+  summarise(u = median(u, na.rm = TRUE),
+            v = median(v, na.rm = TRUE), 
+            velocity = median(velocity, na.rm = TRUE))</code></pre>
+</div>
+<div id="development-of-monsoon-winds" class="section level3">
+<h3>Development of Monsoon Winds</h3>
+<p>Animation of time-series data provide new insights that static plots hides. For example, figure <a href="#fig:fig6">1</a> is static plot show the monsoon season climatological median of wind vector. Figure <a href="#fig:fig6">1</a>a is wind vector for February representing the northeast monsoon season and figure <a href="#fig:fig6">1</a>b is for August representing the southeast monsoon season.</p>
+<pre class="r"><code>feb = ggplot() +
+   geom_segment(data = wind.month %&gt;% filter(month == 2), 
+               aes(x = longitude, xend = longitude+u/60, y = latitude, 
+                   yend = latitude+v/60), arrow = arrow(length = unit(0.25, &quot;cm&quot;)))+
+  geom_sf(data = tz.ke, fill = &quot;grey85&quot;, col = 1)+
+  coord_sf(xlim = c(38.7, 40), ylim =  c(-6.7, -4.7))+
+  scale_x_continuous(breaks = c(38.8,40))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = 1))+
+  labs(x = NULL, y = NULL)
+
+
+aug = ggplot() +
+    geom_segment(data = wind.month %&gt;% filter(month == 8), 
+               aes(x = longitude, xend = longitude+u/60, y = latitude, 
+                   yend = latitude+v/60), arrow = arrow(length = unit(0.25, &quot;cm&quot;)))+
+  geom_sf(data = tz.ke, fill = &quot;grey85&quot;, col = 1)+
+  coord_sf(xlim = c(38.7, 40), ylim =  c(-6.7, -4.7))+
+  scale_x_continuous(breaks = c(38.8,40)) +
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = 1))+
+  labs(x = NULL, y = NULL)
+
+
+cowplot::plot_grid(feb, aug,ncol = 2)</code></pre>
+<div class="figure"><span id="fig:fig6"></span>
+<img src="/post/2018-10-29-animating-oceanographic-data-in-r-with-ggplot2-and-gganimate_files/figure-html/fig6-1.png" alt="Climatological monthly Wind vector for a) February and b) August" width="672" />
+<p class="caption">
+Figure 1: Climatological monthly Wind vector for a) February and b) August
+</p>
+</div>
+<p>Figure <a href="#fig:fig7">2</a> is the animation of the wind vector in the area. We have a glimpse of the pattern of wind in the area throughtout the year. The animation in Figure <a href="#fig:fig7">2</a> show a monsoon pattern—the reversing wind direction. It also show clearly when this phonemonon occurs.</p>
+<pre class="r"><code>wind.vector = ggplot() +
+  geom_raster(data = wind.month, aes(x = longitude, y = latitude, fill = velocity))+
+  geom_segment(data = wind.month, 
+               aes(x = longitude, xend = longitude+u/60, y = latitude, 
+                   yend = latitude+v/60), arrow = arrow(length = unit(0.25, &quot;cm&quot;)))+
+  geom_sf(data = tz.ke, fill = &quot;grey85&quot;, col = 1)+
+  coord_sf(xlim = c(38.7, 40), ylim =  c(-6.7, -4.7))+
+  scale_fill_gradientn(colours = oce::oceColorsPalette(120), limits = c(0,12), 
+                       na.value = &quot;white&quot;, name = &quot;Speed\n (m/s)&quot;)+
+  scale_x_continuous(breaks = c(38.8,40))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 14, colour = 1),
+        legend.text = element_text(size = 14, colour = 1), 
+        legend.title = element_text(size = 14, colour = 1),
+        legend.position = c(.12,.17),
+        legend.background = element_rect(colour = 1, fill = &quot;white&quot;))+
+  labs(x = NULL, y = NULL, title = &quot;Month of : {frame_time}&quot;)+
+  transition_time(month) +
+  ease_aes(&quot;linear&quot;)
+
+animate(wind.vector)</code></pre>
+<div class="figure"><span id="fig:fig7"></span>
+<img src="/post/2018-10-29-animating-oceanographic-data-in-r-with-ggplot2-and-gganimate_files/figure-html/fig7-1.gif" alt="Animated Monthly Climatological Median of Wind vector"  />
+<p class="caption">
+Figure 2: Animated Monthly Climatological Median of Wind vector
+</p>
+</div>
+<p>Figure <a href="#fig:fig8">3</a> show the daily climatological median velocity for 365 days. The static figure <a href="#fig:fig8">3</a> can easily animated with just few lines and make an interactive and animated plot as shown in figure <a href="#fig:fig9">4</a></p>
+<pre class="r"><code>## calculate daily climatological median velocity
+wind.vel = wind %&gt;% as.tibble() %&gt;% 
+  mutate(Month = month(date, label = TRUE, abbr = FALSE)) %&gt;% 
+  group_by(day, Month) %&gt;% 
+  summarise(velocity = median(velocity, na.rm = TRUE))
+
+## static plog
+ggplot(data = wind.vel, aes(x = day, y = velocity, group = Month)) +
+  geom_line() +
+  geom_point(size = 1.2) + 
+  coord_cartesian(clip = &quot;off&quot;) +
+  labs(title = &quot;&quot;, 
+       y = expression(~Wind~speed~(ms^{-1})),
+       x = &quot;Number of days in a year&quot;)+
+  theme_bw()+
+  theme(axis.text = element_text(colour = 1, size = 12),
+        axis.title = element_text(size = 14, colour = 1),
+        panel.grid = element_line(colour = NA))+
+  scale_x_continuous(limits = c(0,400),breaks = seq(0,360,30))</code></pre>
+<div class="figure"><span id="fig:fig8"></span>
+<img src="/post/2018-10-29-animating-oceanographic-data-in-r-with-ggplot2-and-gganimate_files/figure-html/fig8-1.png" alt="Median Wind speed between 2000 and 2006 around Zanzibar and Pemba Island" width="672" />
+<p class="caption">
+Figure 3: Median Wind speed between 2000 and 2006 around Zanzibar and Pemba Island
+</p>
+</div>
+<pre class="r"><code>climatology = ggplot(data = wind.vel, aes(x = day, y = velocity, group = Month)) +
+  geom_line() +
+  geom_segment(aes(xend = 364, yend = velocity), linetype = 2, colour = &quot;red&quot;)+
+  geom_point(size = 2) + 
+  geom_text(aes(x = 365, label = Month), hjust = 0) +
+  coord_cartesian(clip = &quot;off&quot;) +
+  labs(title = &quot;&quot;, 
+       y = expression(~Wind~speed~(ms^{-1})),
+       x = &quot;Number of days in a year&quot;)+
+  theme_bw()+
+  theme(axis.text = element_text(colour = 1, size = 12),
+        axis.title = element_text(size = 14, colour = 1),
+        panel.grid = element_line(colour = NA))+
+  scale_x_continuous(limits = c(0,400),breaks = seq(0,360,30))+
+  transition_reveal(Month, day)
+
+animate(climatology)</code></pre>
+<div class="figure"><span id="fig:fig9"></span>
+<img src="/post/2018-10-29-animating-oceanographic-data-in-r-with-ggplot2-and-gganimate_files/figure-html/fig9-1.gif" alt="Daily climatological median Wind speed around Zanzibar and Pemba Island"  />
+<p class="caption">
+Figure 4: Daily climatological median Wind speed around Zanzibar and Pemba Island
+</p>
+</div>
+<p>We can combine the inter-annual and intra-annual variability and animate the results as shown in figure <a href="#fig:fig10">5</a>. The moving points suggest that the wind in the area is very dynamic both within months (intra) and among years (inter)</p>
+<pre class="r"><code>wind.vel.month = wind %&gt;% as.tibble() %&gt;% 
+  mutate(Month = month(date, label = TRUE, abbr = TRUE)) %&gt;% 
+  group_by(day, year, Month) %&gt;% 
+  summarise(velocity = median(velocity, na.rm = TRUE))
+
+
+dynamics = ggplot(data = wind.vel.month, 
+       aes(x = Month, y = velocity, col = Month, size = velocity)) + 
+  geom_point()+
+  guides(fill = FALSE)+
+  labs(title = &quot;Year: {closest_state}&quot;,
+       x = &quot;&quot;,  y = expression(~Wind~speed~(ms^{-1})))+
+  theme_bw()+
+  theme(legend.position = &quot;none&quot;, axis.text = element_text(size = 14, colour = 1),
+        axis.title = element_text(size = 16, colour = 1),
+        plot.title = element_text(size = 14, colour = 1))+
+  scale_size(range = c(0.02,2))+
+  transition_states(states = year,transition_length = 2, state_length = 5, wrap = TRUE) +
+  # ease_aes(&#39;quadratic-in-out&#39;)+
+  enter_fade() + 
+  exit_shrink() +
+  ease_aes(&#39;sine-in-out&#39;)
+  
+animate(dynamics)</code></pre>
+<div class="figure"><span id="fig:fig10"></span>
+<img src="/post/2018-10-29-animating-oceanographic-data-in-r-with-ggplot2-and-gganimate_files/figure-html/fig10-1.gif" alt="interactive median velocity of wind"  />
+<p class="caption">
+Figure 5: interactive median velocity of wind
+</p>
+</div>
+<p>Still on vector wind, figure <a href="#fig:fig11">6</a> show the mean and standard error of the mean for over a period of nine years.</p>
+<pre class="r"><code>wind.vel.stats = wind %&gt;% as.tibble() %&gt;% 
+  mutate(Month = month(date, label = TRUE, abbr = TRUE)) %&gt;% 
+  group_by(year, Month) %&gt;% 
+  summarise(mean = mean(velocity, na.rm = TRUE),
+            sem = sd(velocity, na.rm = TRUE)/sqrt(length(velocity)))
+
+wind.vel.stats$year = as.factor(wind.vel.stats$year)
+
+
+mean_error= ggplot(data = wind.vel.stats, aes(x = Month, y = mean, fill = Month)) +
+  # geom_col(show.legend = FALSE) +  
+  labs(y = expression(~Wind~speed~(ms^{-1})),
+       x = &quot;Number of days in a year&quot;)+
+  # geom_point(aes(x = IV, y = DV), data = df, alpha = .25) +
+  geom_errorbar(aes(ymin = mean - sem, ymax = mean + sem), width = .2) +
+  labs(title = &quot;{closest_state}&quot;)+
+  theme_bw()+
+  theme(legend.position = &quot;none&quot;, axis.text = element_text(size = 14, colour = 1),
+        axis.title = element_text(size = 16, colour = 1),
+        plot.title = element_text(size = 14, colour = 1),
+        panel.grid = element_line(colour = NA))+
+  transition_states(states = year, transition_length = 2, state_length = 1, wrap = FALSE) + 
+  # enter_fade() + 
+  # exit_shrink() +
+  ease_aes(&#39;sine-in-out&#39;)
+
+
+animate(mean_error)</code></pre>
+<div class="figure"><span id="fig:fig11"></span>
+<img src="/post/2018-10-29-animating-oceanographic-data-in-r-with-ggplot2-and-gganimate_files/figure-html/fig11-1.gif" alt="MEan and standard deviation of the mean velocity"  />
+<p class="caption">
+Figure 6: MEan and standard deviation of the mean velocity
+</p>
+</div>
+</div>
+<div id="second-example-ctd" class="section level3">
+<h3>Second example: CTD</h3>
+<p>CTD stands for Conductivity-Temperature-Depth. They contain profiles of several oceanographic variables including temperature, salinity, conductivity, oxygen and fluorescence. I explained how to process CTD files created by Seabird instrument in previous post. I ask you to have a glimpse of the article if you find difficult to follow in this section. Like the wind vector data, CTD data were tranformed into data frame and structured in a format that makes data manipulation, analysis and plotting easy.</p>
+<pre class="r"><code>## read the files in the directory
+files = dir(path = &quot;E:/blogs/masumbuko/content/post/ctd18/&quot;, pattern = &quot;.cnv&quot;, full.names = TRUE)
+
+ctd = list()
+
+## import the file from cnv to oce object
+for (i in 1:length(files)){
+  
+  ctd[[i]] = read.ctd(files[i]) %&gt;% ctdTrim(method = &quot;downcast&quot;) %&gt;% ctdDecimate(p = 1)
+  
+}
+
+## convert oce object to data frame
+ctd.tb = NULL
+
+for (j in 1:length(files)){
+ctd.df = ctd[[j]]@data %&gt;% 
+  as.data.frame() %&gt;% 
+  mutate(lon = ctd[[j]]@metadata$longitude, 
+         lat = ctd[[j]]@metadata$latitude, 
+         time = ctd[[j]]@metadata$time,
+         station = ctd[[j]]@metadata$station %&gt;% as.factor()) %&gt;% 
+  # separate(time, c(&quot;date&quot;, &quot;time&quot;), sep = &quot; &quot;, remove = TRUE) %&gt;% 
+  select(station, time, lon, lat, pressure, depth, temperature, conductivity, 
+         salinity, oxygen, fluorescence, turbidity)
+
+ctd.tb = ctd.tb %&gt;% bind_rows(ctd.df)
+}</code></pre>
+<p>There CTD casts in both Pemba and Zanzibar channel. We first animate the location of the CTD cast as shown in figure <a href="#fig:fig12">7</a>. The CTD cast were animated based on the surface temperature. We notice that the Pemba channel cast had relatively less warmer water compared to the casts in the Zanzibar channel.</p>
+<pre class="r"><code>casts = ggplot()+
+  geom_point(data = ctd.tb %&gt;% filter(pressure == 5),
+             aes(x = lon, y = lat, colour = temperature), size = 4)+
+  geom_sf(data = tz.ke, fill = &quot;grey85&quot;, col = 1)+
+  coord_sf(xlim = c(38.75, 40), ylim = c(-7, -4.8))+
+  scale_x_continuous(breaks = c(38.8,39.8))+
+  scale_y_continuous(breaks = c(-7, -4.9))+
+  theme_bw()+
+  theme(axis.title = element_blank(),
+        panel.grid = element_line(colour = NA),
+        axis.text = element_text(size = 14, colour = 1),
+        legend.position = c(.8,.25),
+        legend.key.height = unit(1.25, &quot;lines&quot;),
+        legend.key.width = unit(.5, &quot;lines&quot;),
+        legend.text = element_text(size = 12, colour = 1))+
+  scale_color_viridis_c(name = &quot;Temp&quot;)+
+ transition_states(time, transition_length = 1, state_length = 3, wrap = TRUE ) +
+  ease_aes(&#39;linear&#39;) +
+  shadow_mark()
+
+animate(casts)</code></pre>
+<div class="figure"><span id="fig:fig12"></span>
+<img src="/post/2018-10-29-animating-oceanographic-data-in-r-with-ggplot2-and-gganimate_files/figure-html/fig12-1.gif" alt="CTD cast locations"  />
+<p class="caption">
+Figure 7: CTD cast locations
+</p>
+</div>
+<p>You can choose any variable that exist in the CTD and animate its profile to see how they change from the surface to the maximum depth at different ctd cast station. For example, figure <a href="#fig:fig13">8</a> show animated salinity profile for each station mapped in figure <a href="#fig:fig12">7</a>. There is substantial difference of the profile because of the measured at station with different depth.</p>
+<pre class="r"><code>salinity.anim = ggplot(data = ctd.tb %&gt;% na.omit(), 
+       aes(x = salinity, y = pressure, size = temperature)) + 
+  geom_point(show.legend = FALSE) +
+  scale_size(range = c(0,1))+
+  scale_y_reverse()+
+  facet_wrap(~station, scales = &quot;free_y&quot;, strip.position = &quot;right&quot;)+
+  scale_x_continuous(position = &quot;top&quot;, breaks = seq(34.8, 35.5, length.out = 6))+
+  theme_bw()+
+  theme(axis.text = element_text(colour = 1, size = 11))+
+  transition_time(depth)+
+  ease_aes(&quot;sine-in-out&quot;)+
+  shadow_mark()
+
+
+animate(salinity.anim)</code></pre>
+<div class="figure"><span id="fig:fig13"></span>
+<img src="/post/2018-10-29-animating-oceanographic-data-in-r-with-ggplot2-and-gganimate_files/figure-html/fig13-1.gif" alt="Salinity profile"  />
+<p class="caption">
+Figure 8: Salinity profile
+</p>
+</div>
+<p>Sometimes our interest is to show different variables at the same station. We can do that but first our data frame has be converted from wide form to long form. Once that is done, we can select the station of interest and animate its profile variables from the surface to the deepest point as shown in figure <a href="#fig:fig14">9</a></p>
+<pre class="r"><code>ctd.tb.long = ctd.tb %&gt;% select(station, lon, lat, pressure, depth, temperature,salinity, oxygen, fluorescence, turbidity) %&gt;% gather(key = &quot;variable&quot;, value = &quot;values&quot;, 6:10)
+
+
+station.anim = ggplot(data = ctd.tb.long%&gt;%filter(station == &quot;AM00882&quot; &amp; variable != &quot;turbidity&quot;) %&gt;% na.omit(), 
+       aes(x = values, y = pressure)) + 
+  geom_point(show.legend = FALSE) +
+  scale_y_reverse()+
+  facet_wrap(~variable, scales = &quot;free&quot;, strip.position = &quot;top&quot;)+
+  scale_x_continuous(position = &quot;top&quot;)+
+  theme_bw()+
+  theme(axis.text = element_text(colour = 1, size = 11))+
+ transition_time(depth)+
+  ease_aes(&quot;sine-in-out&quot;)+
+  shadow_mark()
+
+animate(station.anim)</code></pre>
+<div class="figure"><span id="fig:fig14"></span>
+<img src="/post/2018-10-29-animating-oceanographic-data-in-r-with-ggplot2-and-gganimate_files/figure-html/fig14-1.gif" alt="Vertical profile of fluoresnce, oxygen, salinity and temperature at station AM00882"  />
+<p class="caption">
+Figure 9: Vertical profile of fluoresnce, oxygen, salinity and temperature at station AM00882
+</p>
+</div>
+<p>With tidy data, we more flexible, for example I can use the same data to plot oxygen profile of the six station (figure <a href="#fig:fig15">10</a>)</p>
+<pre class="r"><code>oxy.animate =  ggplot(data = ctd.tb.long%&gt;%filter(variable == &quot;oxygen&quot;) %&gt;% na.omit(), 
+       aes(x = values, y = pressure)) + 
+  geom_point(show.legend = FALSE) +
+  scale_y_reverse()+
+  facet_wrap(~station, scales = &quot;free_y&quot;, strip.position = &quot;top&quot;)+
+  scale_x_continuous(position = &quot;top&quot;)+
+  theme_bw()+
+  theme(axis.text = element_text(colour = 1, size = 11))+
+ transition_time(depth)+
+  ease_aes(&quot;sine-in-out&quot;)+
+  shadow_mark()
+ 
+ animate(oxy.animate)</code></pre>
+<div class="figure"><span id="fig:fig15"></span>
+<img src="/post/2018-10-29-animating-oceanographic-data-in-r-with-ggplot2-and-gganimate_files/figure-html/fig15-1.gif" alt="Vertical profile of oxygen at six stations "  />
+<p class="caption">
+Figure 10: Vertical profile of oxygen at six stations
+</p>
+</div>
+</div>
+<div id="third-example-argo-floats" class="section level3">
+<h3>Third example: Argo floats</h3>
+<p><strong>gganimate</strong> is capable of tracking moving object like Argo floats. Argo floats are like CTD. The data also need to be tranformed to data frame. I have covered the procesin of Argo float data with R in the previous section. Because I wont explain in detail how to process Argo float data in this post, I recommend you glimpse the <a href="www.www.ww.">argo processing</a> if you find difficult to follow along this post. First let us import the file we are going to use in R</p>
+<pre class="r"><code># Import the file
+argo = read.argo(&quot;./Processing/argo_profile/csiro/1901124/1901124_prof.nc&quot;)%&gt;%
+  handleFlags()</code></pre>
+<p>Then transorm the data from oce object to data frame. Note that the process was done with <code>for()</code> loop function as there 217 profiles in this Argo float.</p>
+<pre class="r"><code>## make a section using the profiles recorded in argo float
+argo.section = argo%&gt;%as.section()
+## convert argo section to list
+argo.list = argo.section[[&quot;station&quot;]]
+
+## extract lon from the argo list
+longitude = argo.section[[&quot;longitude&quot;, &quot;byStation&quot;]]
+
+## extract lat from the argo list
+latitude = argo.section[[&quot;latitude&quot;, &quot;byStation&quot;]]
+
+## time can not be extracte the same way lon and lat can. This is because the time is stored in the 
+time = argo.section[[&quot;time&quot;, &quot;byStation&quot;]]
+
+
+## loop through each profile
+argo.tb = NULL
+
+for (i in 1:length(argo.list)){
+
+profile = argo.list[[i]]@data%&gt;%
+  as.data.frame()%&gt;%
+  as.tibble()%&gt;%
+  mutate(Date = argo.list[[i]]@metadata$startTime%&gt;%as_datetime(tz = &quot;&quot;), 
+         Longitude = argo.list[[i]]@metadata$longitude, 
+         Latitude = argo.list[[i]]@metadata$latitude)%&gt;%
+  separate(Date, c(&quot;Date&quot;, &quot;Time&quot;),sep = &quot; &quot;, remove = TRUE)%&gt;%
+  dplyr::select(Scan = scan, Date, Time, Longitude, Latitude, 
+                Depth = pressure, Temperature = temperature, 
+                Salinity = salinity)
+
+argo.tb = argo.tb%&gt;%bind_rows(profile)
+
+}</code></pre>
+<p>We select the surface value of each profile and compute a <code>wakati</code> variable, just a sequence from 1 to 2017 observations of Argo profile. We map the Argo float track and animate it (Figure <a href="#fig:fig17">11</a>)</p>
+<pre class="r"><code>## surface information from Argo float
+argo.surface.tb =  argo.tb%&gt;%filter(Scan == 1)%&gt;% mutate(wakati = 1:217)
+
+## map the location
+argo.animate = ggplot()+
+  geom_sf(data = spData::world, fill = &quot;grey85&quot;, col = 1)+
+  # geom_path(data = argo.surface.tb, 
+  #           aes(x = Longitude, y = Latitude), size =.5, col = 2)+
+  geom_point(data = argo.surface.tb, aes(x = Longitude, y = Latitude, colour = Temperature))+
+  coord_sf(xlim = c(35, 71), ylim = c(-25,0))+
+  ggrepel::geom_text_repel(data = argo.surface.tb%&gt;%slice(seq(3,217,25)),
+                           aes(x = Longitude, y = Latitude, label = Date))+
+  theme_bw()+
+  theme(panel.background = element_rect(colour = 1, fill =NA),
+        panel.grid = element_line(colour = NA),
+        axis.text = element_text(colour = 1, size = 14)) +
+  scale_color_gradientn(colours = oce::oceColors9A(120))+
+ labs(title = &quot;Tracking of Argo float&quot;,
+      # subtitle = &quot;Time:{frame_time}&quot;,
+      x = &quot;&quot;, y = &quot;&quot;, 
+      caption = &quot;Data Source: Argo&quot;)+
+  # transition_reveal(id = 1,along = Date)+
+  transition_time(wakati)+
+  ease_aes(&quot;sine-in-out&quot;)+
+  shadow_mark()
+
+animate(argo.animate)</code></pre>
+<div class="figure"><span id="fig:fig17"></span>
+<img src="/post/2018-10-29-animating-oceanographic-data-in-r-with-ggplot2-and-gganimate_files/figure-html/fig17-1.gif" alt="Tracking Argo float cast locations"  />
+<p class="caption">
+Figure 11: Tracking Argo float cast locations
+</p>
+</div>
+</div>
+<div id="bibliography" class="section level3 unnumbered">
+<h3>Bibliography</h3>
+<div id="refs" class="references">
+<div id="ref-gganimate">
+<p>Pedersen, T. L., &amp; Robinson, D. (2017). <em>Gganimate: A grammar of animated graphics</em>. Retrieved from <a href="http://github.com/thomasp85/gganimate" class="uri">http://github.com/thomasp85/gganimate</a></p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, H. (2016). <em>Ggplot2: Elegant graphics for data analysis</em>. Springer-Verlag New York. Retrieved from <a href="http://ggplot2.org" class="uri">http://ggplot2.org</a></p>
+</div>
+<div id="ref-tidyr">
+<p>Wickham, H., &amp; Henry, L. (2018). <em>Tidyr: Easily tidy data with ’spread()’ and ’gather()’ functions</em>. Retrieved from <a href="https://CRAN.R-project.org/package=tidyr" class="uri">https://CRAN.R-project.org/package=tidyr</a></p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, H., François, R., Henry, L., &amp; Müller, K. (2018). <em>Dplyr: A grammar of data manipulation</em>. Retrieved from <a href="https://CRAN.R-project.org/package=dplyr" class="uri">https://CRAN.R-project.org/package=dplyr</a></p>
+</div>
+</div>
+</div>

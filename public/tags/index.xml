@@ -23,7 +23,7 @@
     <item>
       <title>Argo</title>
       <link>/tags/argo/</link>
-      <pubDate>Wed, 03 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/argo/</guid>
       <description></description>
@@ -41,7 +41,7 @@
     <item>
       <title>Ctd</title>
       <link>/tags/ctd/</link>
-      <pubDate>Thu, 18 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/ctd/</guid>
       <description></description>
@@ -68,7 +68,7 @@
     <item>
       <title>Fluorescence</title>
       <link>/tags/fluorescence/</link>
-      <pubDate>Fri, 05 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/fluorescence/</guid>
       <description></description>
@@ -104,7 +104,7 @@
     <item>
       <title>Masumbuko Semba</title>
       <link>/tags/masumbuko-semba/</link>
-      <pubDate>Sat, 27 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/masumbuko-semba/</guid>
       <description></description>
@@ -116,6 +116,15 @@
       <pubDate>Thu, 20 Sep 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/modis/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Oxygen</title>
+      <link>/tags/oxygen/</link>
+      <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/oxygen/</guid>
       <description></description>
     </item>
     
@@ -167,7 +176,7 @@
     <item>
       <title>Salinity</title>
       <link>/tags/salinity/</link>
-      <pubDate>Fri, 05 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/salinity/</guid>
       <description></description>
@@ -203,7 +212,7 @@
     <item>
       <title>Temperature</title>
       <link>/tags/temperature/</link>
-      <pubDate>Fri, 05 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/temperature/</guid>
       <description></description>
@@ -212,7 +221,7 @@
     <item>
       <title>Wind Direction</title>
       <link>/tags/wind-direction/</link>
-      <pubDate>Sat, 27 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/wind-direction/</guid>
       <description></description>
@@ -221,7 +230,7 @@
     <item>
       <title>Wind Speed</title>
       <link>/tags/wind-speed/</link>
-      <pubDate>Sat, 27 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/wind-speed/</guid>
       <description></description>
