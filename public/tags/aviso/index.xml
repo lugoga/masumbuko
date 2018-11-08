@@ -17,7 +17,7 @@
       <pubDate>Wed, 07 Nov 2018 00:00:00 +0000</pubDate>
       
       <guid>/11/07/2018/read-netcdf-file-with-in-r/</guid>
-      <description>In the previously post I covered how to read and convert netcdf files directly into data frame in R. The approach is simple and straight forward but there flaw in this approach. One main setback of this approach is its inability to read maltiple matrix in an array from a netcdf file. This inability end up obtain a data frame from the of the first matrice of an array dropping out other matrix.</description>
+      <description>In the previously post, I covered how to read and convert netCDF files directly into R and convert to data frames. The approach is simple and straight forward but there flaws in this approach. One main setback of this approach is its inability to read maltiple matrix in an array from a netcdf file. This inability end up obtain a data frame from the of the first matrice of an array dropping out other matrix.</description>
     </item>
     
   </channel>
