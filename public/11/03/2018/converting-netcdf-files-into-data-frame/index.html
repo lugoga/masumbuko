@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.48" />
+
+
+<title>Read and Convert netcdf files into data frame in R - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Read and Convert netcdf files into data frame in R - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">4 min read</span>
+    
+
+    <h1 class="article-title">Read and Convert netcdf files into data frame in R</h1>
+
+    
+    <span class="article-date">2018/11/03</span>
+    
+
+    <div class="article-content">
+      <script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<p>Scientist often store most of oceanographic and environmental variables from satellite sensors in <em>netCDF</em> format. The <em>netCDF</em> data file format contain one or more variables, which are usually structured as regular arrays and metadata describing the contents and format of the data. For example, you might have a variable named “Temperature” that is a function of longitude, latitude, and depth. <em>NetCDF</em> files also contain dimensions, which describe the extent of the variables’ arrays. In our Temperature example, the dimensions are <code>longitude</code>, <code>latitude</code>, and <code>depth</code>. <strong>R</strong> has a <strong>ncdf4</strong> package that allows to read and write netCDF files and its outputs are either array or matrix for the data and atomic vector for other variables like the longitude, latitude, time and depth <span class="citation">(Pierce, <a href="#ref-ncdf4">2017</a>)</span>.</p>
+<p>Unfortunately, neither <em>array</em> nor <em>matrix</em> are the fundamental data storage in R. Instead <em>data table</em> is the primary data storage and its this structure that R like to wrange data— manipulation, transformation, analysis. Similarly, most plotting package use data frame for drawing plots pretty easy. In this post, I will ride you through the routine of reading netCDF file and convert it to data frame with <strong>raster</strong> package. We start by loading the packages we need for this task.</p>
+<pre class="r"><code>require(sf)
+require(tidyverse)
+require(raster)</code></pre>
+<div id="read-the-nc-file" class="section level3">
+<h3>1. read the nc file</h3>
+<p>Apart from creating from scratch raster layer from matrix or image, a <code>raster()</code> function from <strong>raster</strong> package can also read the netCDF files and create a raster layer. We use the sea level anomaly data downloaded from AVISO.</p>
+<pre class="r"><code>sla = raster(&quot;./Altimetry/msla_h/indian_ocean-twosat-msla-h_010193_311295.nc&quot;,
+             level = 180, 
+             varname = &quot;sla&quot;)</code></pre>
+</div>
+<div id="define-projection" class="section level3">
+<h3>2. define projection</h3>
+<p>Because the data is within the world area, we ought to set the projection. <span class="citation">Bivand, Pebesma, Gomez-Rubio, &amp; Pebesma (<a href="#ref-bivand">2008</a>)</span> developed <strong>sp</strong> package that has <code>proj4string()</code> function, which was used to transform the coordinates of the raster layer to the World Geodetic System (“WGS84”).</p>
+<pre class="r"><code>proj4string(sla)=CRS(&quot;+init=EPSG:4326&quot;)</code></pre>
+</div>
+<div id="convert-to-data-frame" class="section level3">
+<h3>3. convert to data frame</h3>
+<p>The last tranformation involves converting raster layer into data frame. The raster layer was transformed into data frame with <code>as.data.frame()</code> function from raster package. The argument <code>xy = TRUE</code> was parsed in the <code>as.data.frame()</code> to ensure that the process returns the longitude and latitude information as well. Table <a href="#tab:tab1">1</a> is the random sample of twelve observation of the sea level anomaly of the data frame created</p>
+<pre class="r"><code>sla.df = raster::as.data.frame(sla, xy = TRUE)
+
+sla.df %&gt;% sample_n(12) %&gt;% kableExtra::kable(&quot;html&quot;, row.names = FALSE, col.names = c(&quot;Longitude&quot;, &quot;Latitude&quot;, &quot;Sea Level Anomaly&quot;), align = &quot;c&quot;, caption = &quot;Random sample of twelve observations showing the sea level anomaly at specific location&quot;) %&gt;%
+  kableExtra::column_spec(column = 1:3, width = &quot;5cm&quot;, color = 1)</code></pre>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Random sample of twelve observations showing the sea level anomaly at specific location
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+Longitude
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+<th style="text-align:center;">
+Sea Level Anomaly
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+47.875
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-28.375
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+0.1161
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+49.375
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+26.875
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+88.875
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-20.375
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.0055
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+67.125
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-71.125
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+87.125
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-61.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+0.0271
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+21.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-3.875
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+56.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-71.125
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+102.125
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-16.875
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.1538
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+99.875
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-35.875
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.0123
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+92.875
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+14.375
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+0.0905
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+42.375
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-2.375
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.0317
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+52.125
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-44.375
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.1258
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="visualize" class="section level3">
+<h3>4. Visualize</h3>
+<p>As the data frame is the primary data structure in R <span class="citation">(R Core Team, <a href="#ref-r">2018</a>)</span>, famous package like tidyverse also depend on tibble—new format of data frame for manipulation and plotting <span class="citation">(Wickham, <a href="#ref-tidyverse">2017</a>)</span>. One of the package of tidyverse is the <strong>ggplot2</strong> <span class="citation">(Wickham, <a href="#ref-ggplot">2016</a>)</span> that support simple features <span class="citation">(E. Pebesma, <a href="#ref-sf">2018</a>)</span> for mapping. The <strong>sf</strong> and *ggplot2** package were used to plot the map of sea level anomaly in figure <a href="#fig:fig1">1</a> using data from data frame showin (table <a href="#tab:tab1">1</a>).</p>
+<pre class="r"><code># 4. plot with ggplot using geom_raster function
+
+ggplot()+
+  geom_raster(data = sla.df,  aes(x = x, y = y, fill = Sea.Level.Anomalies), interpolate = FALSE)+
+  geom_sf(data = spData::world, fill = &quot;grey80&quot;, col = &quot;black&quot;)+
+  # geom_path(data = data, aes(x = lon, y = lat, col = id), size = .75)+
+  coord_sf(xlim = c(30, 60), ylim = c(-30, 0))+
+  # scale_color_jco(name = &quot;Argo float&quot;)+
+  theme_bw()+
+  theme(legend.position = c(.85,.2), 
+        legend.background = element_rect(colour = 1),
+        legend.key.width = unit(.75, &quot;lines&quot;), 
+        legend.text = element_text(size = 11, colour = 1),
+        axis.text = element_text(colour = 1, size = 12))+  
+  geom_label(aes(x = 60, y = 0, label = &quot;a&quot;))+
+  labs(x = NULL, y = NULL)+
+  scale_fill_gradientn(name = &quot;SLA&quot;, colours = oce::oceColors9A(120))+
+  scale_x_continuous(breaks = seq(30, 60,10))+
+  scale_y_continuous(breaks = seq(-30, 5, 10))</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2018-10-30-converting-netcdf-files-into-data-frame_files/figure-html/fig1-1.png" alt="Spatial variation of sea level anomalies in the Indian Ocean" width="672" />
+<p class="caption">
+Figure 1: Spatial variation of sea level anomalies in the Indian Ocean
+</p>
+</div>
+</div>
+<div id="literature" class="section level3 unnumbered">
+<h3>Literature</h3>
+<div id="refs" class="references">
+<div id="ref-bivand">
+<p>Bivand, R. S., Pebesma, E. J., Gomez-Rubio, V., &amp; Pebesma, E. J. (2008). <em>Applied spatial data analysis with r</em> (Vol. 747248717). Springer.</p>
+</div>
+<div id="ref-sf">
+<p>Pebesma, E. (2018). <em>Sf: Simple features for r</em>. Retrieved from <a href="https://CRAN.R-project.org/package=sf" class="uri">https://CRAN.R-project.org/package=sf</a></p>
+</div>
+<div id="ref-ncdf4">
+<p>Pierce, D. (2017). <em>Ncdf4: Interface to unidata netCDF (version 4 or earlier) format data files</em>. Retrieved from <a href="https://CRAN.R-project.org/package=ncdf4" class="uri">https://CRAN.R-project.org/package=ncdf4</a></p>
+</div>
+<div id="ref-r">
+<p>R Core Team. (2018). <em>R: A language and environment for statistical computing</em>. Vienna, Austria: R Foundation for Statistical Computing. Retrieved from <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a></p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, H. (2016). <em>Ggplot2: Elegant graphics for data analysis</em>. Springer-Verlag New York. Retrieved from <a href="http://ggplot2.org" class="uri">http://ggplot2.org</a></p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, H. (2017). <em>Tidyverse: Easily install and load the ’tidyverse’</em>. Retrieved from <a href="https://CRAN.R-project.org/package=tidyverse" class="uri">https://CRAN.R-project.org/package=tidyverse</a></p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

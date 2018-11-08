@@ -28,6 +28,16 @@
   </url>
   
   <url>
+    <loc>/11/07/2018/read-netcdf-file-with-in-r/</loc>
+    <lastmod>2018-11-07T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/11/03/2018/converting-netcdf-files-into-data-frame/</loc>
+    <lastmod>2018-11-03T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/10/29/2018/animating-oceanographic-data-in-r-with-ggplot2-and-gganimate/</loc>
     <lastmod>2018-10-29T00:00:00+00:00</lastmod>
   </url>
@@ -147,6 +157,12 @@
   </url>
   
   <url>
+    <loc>/tags/aviso/</loc>
+    <lastmod>2018-11-07T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/categories/</loc>
     <lastmod>2018-09-30T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -184,7 +200,7 @@
   
   <url>
     <loc>/tags/indian-ocean/</loc>
-    <lastmod>2018-10-27T00:00:00+00:00</lastmod>
+    <lastmod>2018-11-07T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -196,7 +212,7 @@
   
   <url>
     <loc>/tags/masumbuko-semba/</loc>
-    <lastmod>2018-10-29T00:00:00+00:00</lastmod>
+    <lastmod>2018-11-07T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -214,7 +230,7 @@
   
   <url>
     <loc>/categories/oceanography/</loc>
-    <lastmod>2018-10-29T00:00:00+00:00</lastmod>
+    <lastmod>2018-11-07T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -232,7 +248,7 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2018-10-29T00:00:00+00:00</lastmod>
+    <lastmod>2018-11-07T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -260,7 +276,7 @@
   
   <url>
     <loc>/categories/r/</loc>
-    <lastmod>2018-10-29T00:00:00+00:00</lastmod>
+    <lastmod>2018-11-07T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -302,7 +318,7 @@
   
   <url>
     <loc>/categories/technical/</loc>
-    <lastmod>2018-10-25T00:00:00+00:00</lastmod>
+    <lastmod>2018-11-07T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

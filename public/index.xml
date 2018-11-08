@@ -60,6 +60,24 @@ Semba specializes in coding using various programming languages. Coding is nothi
     </item>
     
     <item>
+      <title>Read netCDF file with in R</title>
+      <link>/11/07/2018/read-netcdf-file-with-in-r/</link>
+      <pubDate>Wed, 07 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/11/07/2018/read-netcdf-file-with-in-r/</guid>
+      <description>In the previously post I covered how to read and convert netcdf files directly into data frame in R. The approach is simple and straight forward but there flaw in this approach. One main setback of this approach is its inability to read maltiple matrix in an array from a netcdf file. This inability end up obtain a data frame from the of the first matrice of an array dropping out other matrix.</description>
+    </item>
+    
+    <item>
+      <title>Read and Convert netcdf files into data frame in R</title>
+      <link>/11/03/2018/converting-netcdf-files-into-data-frame/</link>
+      <pubDate>Sat, 03 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/11/03/2018/converting-netcdf-files-into-data-frame/</guid>
+      <description>Scientist often store most of oceanographic and environmental variables from satellite sensors in netCDF format. The netCDF data file format contain one or more variables, which are usually structured as regular arrays and metadata describing the contents and format of the data. For example, you might have a variable named “Temperature” that is a function of longitude, latitude, and depth. NetCDF files also contain dimensions, which describe the extent of the variables’ arrays.</description>
+    </item>
+    
+    <item>
       <title>Animating Oceanographic data in R with ggplot2 and gganimate</title>
       <link>/10/29/2018/animating-oceanographic-data-in-r-with-ggplot2-and-gganimate/</link>
       <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>

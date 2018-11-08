@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.48" />
+
+
+<title>Read netCDF file with in R - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Read netCDF file with in R - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">12 min read</span>
+    
+
+    <h1 class="article-title">Read netCDF file with in R</h1>
+
+    
+    <span class="article-date">2018/11/07</span>
+    
+
+    <div class="article-content">
+      <script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<p>In the previously <a href="">post</a> I covered how to read and convert netcdf files directly into data frame in R. The approach is simple and straight forward but there flaw in this approach. One main setback of this approach is its inability to read maltiple matrix in an array from a netcdf file. This inability end up obtain a data frame from the of the first matrice of an array dropping out other matrix.</p>
+<p>This post aimed to extend the approach and overcome the challenges inherited in the previous post. In this post I will take you through the process of converting a netcdf files into a tabular form widely known as data frame. I have divided this post into three main steps. First, I will show you how to read the metadata contained in the netCDF file, explore the data stored in it and glimpse their internal structures. Second, I will illustrate how to extract the data and Last, we sill finish with the transformation of the data and organize them as data frames.</p>
+<p>We will use the geostrophic current and sea surface height dataset from <a href="http://www.aviso.altimetry.fr">AVISO</a>. The dataset was extracted from <a href="http://opendap.aviso.altimetry.fr/thredds/dodsC/dataset-duacs-nrt-over30d-global-allsat-madt-uv" class="uri">http://opendap.aviso.altimetry.fr/thredds/dodsC/dataset-duacs-nrt-over30d-global-allsat-madt-uv</a>. This dataset provides gridded values of zonal (u) and meridional (v) velocity component. There are several packages in CRAN that read and write netCDF files. I prefer the <strong>ncdf4</strong> packages because it provide tools and functions to access the netCDF files <span class="citation">(Pierce, <a href="#ref-ncdf4">2017</a>)</span>.</p>
+<pre class="r"><code>require(ncdf4)
+require(tidyverse)
+require(ncdump)
+require(sf)</code></pre>
+<div id="understand-the-metadata" class="section level3">
+<h3>Understand the metadata</h3>
+<p>We first explore the metadata of the file with the with the <code>NetCDF()</code> function from <strong>ncdump</strong> package. In summary, the metadata contains information about the netCDF file. These information include longitude, latitude and time as vector (table <a href="#tab:tab1">1</a>) and the east velocity (U) and north velocity (V) as matrix in an array (table <a href="#tab:tab2">2</a>). Because this is the daily data, each matrice represent a single day.We can view the information about the file by printing the <code>uv</code> file in the console.</p>
+<pre class="r"><code>metadata = ncdump::NetCDF(&quot;E:/MatlabWorking/Altimetry/old staff/wio_geostrophic_uv_july_2015.nc&quot;)</code></pre>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Vector data types in the netCDF file
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+Id
+</th>
+<th style="text-align:center;">
+Type
+</th>
+<th style="text-align:center;">
+Length
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 4cm; color: 1;">
+0
+</td>
+<td style="text-align:center;width: 4cm; color: 1;">
+time
+</td>
+<td style="text-align:center;width: 4cm; color: 1;">
+31
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: 1;">
+1
+</td>
+<td style="text-align:center;width: 4cm; color: 1;">
+lat
+</td>
+<td style="text-align:center;width: 4cm; color: 1;">
+420
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; color: 1;">
+2
+</td>
+<td style="text-align:center;width: 4cm; color: 1;">
+lon
+</td>
+<td style="text-align:center;width: 4cm; color: 1;">
+401
+</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>
+<span id="tab:tab2">Table 2: </span>Array data types in the netcdf file
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+Variable
+</th>
+<th style="text-align:center;">
+Long name
+</th>
+<th style="text-align:center;">
+Unit
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 4cm; font-weight: bold;color: 1;">
+v
+</td>
+<td style="text-align:center;width: 10cm; color: 1;">
+Absolute geostrophic velocity; meridional component
+</td>
+<td style="text-align:center;">
+m/s
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; font-weight: bold;color: 1;">
+u
+</td>
+<td style="text-align:center;width: 10cm; color: 1;">
+Absolute geostrophic velocity; zonal component
+</td>
+<td style="text-align:center;">
+m/s
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="extract-the-variable" class="section level3">
+<h3>Extract the variable</h3>
+<p>Once we have identified the variables contained in the netCDF file, we use the <code>nc_open()</code> function to read the the file and assign it with uv name.</p>
+<pre class="r"><code>uv = nc_open(&quot;E:/MatlabWorking/Altimetry/old staff/wio_geostrophic_uv_july_2015.nc&quot;)
+ssh = nc_open(&quot;E:/MatlabWorking/Altimetry/old staff/wio_ssh_july_2015.nc&quot;)</code></pre>
+<p>Once we have the file in the console, we are ready to extract the vector and array from the file. We can do this with <code>ncvar_get()</code>function.</p>
+<pre class="r"><code>## spatial components
+lon = ncvar_get(uv, &quot;lon&quot;)
+lat = ncvar_get(uv, &quot;lat&quot;)
+## temporal component
+time = ncvar_get(uv, &quot;time&quot;)
+
+## geogstrophic current
+u = ncvar_get(uv, &quot;u&quot;)
+v = ncvar_get(uv, &quot;v&quot;)
+
+## sea surface height
+adt = ncvar_get(ssh, &quot;adt&quot;)</code></pre>
+<p>Printing the time we realized that time is the julian days but we do know the starting of the date. However, in the metadata provide information of the beginning data that we can use to transform this julian day into gregorian calendar that we are familiar with.</p>
+<pre class="r"><code>time</code></pre>
+<pre><code> [1] 23922 23923 23924 23925 23926 23927 23928 23929 23930 23931 23932
+[12] 23933 23934 23935 23936 23937 23938 23939 23940 23941 23942 23943
+[23] 23944 23945 23946 23947 23948 23949 23950 23951 23952</code></pre>
+<p>We can transform this days into the calender once we know the original date that AVISO used. Looking on the metadata we spotted that the original date for the calender was assigned as <code>julian_day_unit: days since 1950-01-01 00:00:00</code>. Here comes another challenges, the time is in Julian but the original date is in gregorian format. Therefore, we need to standardize the time to a common format. We first convert the origin time—1950-01-01 00:00:00 to julian day. Once the original time is in the same with the vector time file—julian format, we can add them up and convert from the julian to gregorian calender.</p>
+<pre class="r"><code># convert time original (to) to julian 
+to = insol::JDymd(year = 1950, month = 1, day = 1)
+
+# add the original time to the extracted time
+jd = to+time
+
+#convert the julian day to gregorian calender
+date = insol::JD(jd, inverse = TRUE)</code></pre>
+The converted julian days are summarized in table <a href="#tab:tab3">3</a> which show the julian number, julian day and the calender (gregorian date). We notice that our data were acquired from 2015-07-01 15:00:00 to `r date[31]’.
+<table>
+<caption>
+<span id="tab:tab3">Table 3: </span>Time in number, julian day and gregorian
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+Number time
+</th>
+<th style="text-align:center;">
+Julian Day
+</th>
+<th style="text-align:center;">
+Gregorian Day
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23922
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457205
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-01 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23923
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457206
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-02 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23924
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457207
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-03 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23925
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457208
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-04 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23926
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457209
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-05 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23927
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457210
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-06 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23928
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457211
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-07 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23929
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457212
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-08 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23930
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457213
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-09 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23931
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457214
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-10 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23932
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457215
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-11 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23933
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457216
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-12 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23934
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457217
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-13 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23935
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457218
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-14 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23936
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457219
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-15 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23937
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457220
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-16 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23938
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457221
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-17 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23939
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457222
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-18 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23940
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457223
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-19 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23941
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457224
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-20 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23942
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457225
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-21 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23943
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457226
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-22 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23944
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457227
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-23 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23945
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457228
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-24 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23946
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457229
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-25 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23947
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457230
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-26 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23948
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457231
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-27 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23949
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457232
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-28 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23950
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457233
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-29 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23951
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457234
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-30 15:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+23952
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2457235
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-31 15:00:00
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="transform-to-data-frame" class="section level3">
+<h3>Transform to data frame</h3>
+<p>The final step is the transformation of matrix in arrays into data frame. Because there are thirty one matrix in each array—u,v, and adt, we chained the process in the loop as shown in the chunk below. I will not repeate the looping process in this post, If you cant follow the code in the chunk, I recommend you to read previous post that have sufficient information about how to loop and iterate repetitive process.</p>
+<pre class="r"><code>## zonal component
+
+u.df = NULL
+
+for (i in 1:length(date)) {
+
+ ua = data.frame(lon,u[,,i] %&gt;% as.data.frame())%&gt;% 
+   as.tibble() %&gt;% 
+   gather(key = &quot;key&quot;, value = &quot;u&quot;, 2:421) %&gt;% 
+   mutate(time = date[i], lat = rep(lat, each = 401)) %&gt;% select(time, lon,lat, u)
+ 
+ u.df = u.df %&gt;% bind_rows(ua)
+
+}
+
+
+## meridional compoent
+
+v.df = NULL
+
+for (i in 1:length(date)) {
+
+ va = data.frame(lon, v[,,i] %&gt;% as.data.frame())%&gt;% 
+   as.tibble() %&gt;% 
+   gather(key = &quot;key&quot;, value = &quot;v&quot;, 2:421) %&gt;% 
+   mutate(time = date[i], lat = rep(lat, each = 401)) %&gt;% select(time, lon,lat, v)
+ 
+ v.df = v.df %&gt;% bind_rows(va)
+}
+
+
+## sea surface height
+adt.df = NULL
+
+for (i in 1:length(date)) {
+
+ adta = data.frame(lon,adt[,,i] %&gt;% as.data.frame())%&gt;% 
+   as.tibble() %&gt;% 
+   gather(key = &quot;key&quot;, value = &quot;adt&quot;, 2:421) %&gt;% 
+   mutate(time = date[i], lat = rep(lat, each = 401)) %&gt;% select(time, lon,lat, adt)
+ 
+ adt.df = adt.df %&gt;% bind_rows(adta)
+}</code></pre>
+<pre class="r"><code>aviso = data.frame(u.df, v.df, adt.df) %&gt;% 
+  select(time, lon,lat, u, v, adt) %&gt;% 
+  as.tibble() %&gt;% 
+  mutate(day = lubridate::yday(time))
+
+aviso$time = as.Date(aviso$time)
+aviso$day = as.integer(aviso$day)
+
+date</code></pre>
+<pre><code> [1] &quot;2015-07-01 15:00:00 EAT&quot; &quot;2015-07-02 15:00:00 EAT&quot;
+ [3] &quot;2015-07-03 15:00:00 EAT&quot; &quot;2015-07-04 15:00:00 EAT&quot;
+ [5] &quot;2015-07-05 15:00:00 EAT&quot; &quot;2015-07-06 15:00:00 EAT&quot;
+ [7] &quot;2015-07-07 15:00:00 EAT&quot; &quot;2015-07-08 15:00:00 EAT&quot;
+ [9] &quot;2015-07-09 15:00:00 EAT&quot; &quot;2015-07-10 15:00:00 EAT&quot;
+[11] &quot;2015-07-11 15:00:00 EAT&quot; &quot;2015-07-12 15:00:00 EAT&quot;
+[13] &quot;2015-07-13 15:00:00 EAT&quot; &quot;2015-07-14 15:00:00 EAT&quot;
+[15] &quot;2015-07-15 15:00:00 EAT&quot; &quot;2015-07-16 15:00:00 EAT&quot;
+[17] &quot;2015-07-17 15:00:00 EAT&quot; &quot;2015-07-18 15:00:00 EAT&quot;
+[19] &quot;2015-07-19 15:00:00 EAT&quot; &quot;2015-07-20 15:00:00 EAT&quot;
+[21] &quot;2015-07-21 15:00:00 EAT&quot; &quot;2015-07-22 15:00:00 EAT&quot;
+[23] &quot;2015-07-23 15:00:00 EAT&quot; &quot;2015-07-24 15:00:00 EAT&quot;
+[25] &quot;2015-07-25 15:00:00 EAT&quot; &quot;2015-07-26 15:00:00 EAT&quot;
+[27] &quot;2015-07-27 15:00:00 EAT&quot; &quot;2015-07-28 15:00:00 EAT&quot;
+[29] &quot;2015-07-29 15:00:00 EAT&quot; &quot;2015-07-30 15:00:00 EAT&quot;
+[31] &quot;2015-07-31 15:00:00 EAT&quot;</code></pre>
+Table <a href="#tab:tab4">4</a> is the random sample of twelve observations showing the information of geostrophic current and sea surface height within the tropical Indian Ocean for thirty one days in July 2015.
+<table>
+<caption>
+<span id="tab:tab4">Table 4: </span>Random sample observations
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+Date
+</th>
+<th style="text-align:center;">
+Longitude
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+<th style="text-align:center;">
+U
+</th>
+<th style="text-align:center;">
+V
+</th>
+<th style="text-align:center;">
+adt
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-17
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+67.875
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-21.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+0.0614
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+0.2516
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+1.2381
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-26
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+94.375
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+19.875
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-28
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+30.375
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+24.375
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-06
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+31.375
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+25.375
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-13
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+32.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-39.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.1695
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.2549
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+0.2861
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-24
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+96.375
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-55.875
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.0018
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.0951
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.6086
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-19
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+51.125
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+29.875
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-28
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+73.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-44.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+0.2917
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.0853
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.1540
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-29
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+62.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-67.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-22
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+62.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+2.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.2170
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.1308
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+0.9771
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-12
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+108.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+8.125
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+0.1862
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+0.4575
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+1.1378
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 5cm; color: 1;">
+2015-07-02
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+106.625
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-21.875
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.1104
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+-0.2259
+</td>
+<td style="text-align:center;width: 5cm; color: 1;">
+0.9104
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="visualizemapping-the-ssh" class="section level3">
+<h3>Visualize—Mapping the SSH</h3>
+<p>We have come long way from reading the data from the local machine into R’s environment, extract the variables and transform them into data frame. But the subtle information we are looking from this dataset are still hidden and we ought to uncover them. One way of understanding the data is through visualization. Visualizing data may range from common static exploratory data analysis plots to dynamic, interactive data visualizations in web browsers. R offers control over many aesthetic aspects of plots, but we will stick on <strong>ggplot2</strong> developed by Hadley Wickham <span class="citation">(<a href="#ref-ggplot">2016</a>)</span> because it provide new ways to visualize and communicate data. Figure <a href="#fig:fig1">1</a> for example show the sea surface height anomaly in the tropical Indian Ocean. We can easily spot region with higher and lower sea surface height anomaly. We see a region with high sea surface anomaly in the Mozambique channel and low sea surface height anomaly between latitude 8<span class="math inline">\(^\circ\)</span>S and 4<span class="math inline">\(^\circ\)</span>S and longitude 488<span class="math inline">\(^\circ\)</span>E and 548<span class="math inline">\(^\circ\)</span>E.</p>
+<pre class="r"><code>ggplot()+
+  geom_raster(data = aviso %&gt;% 
+                filter(day == 190 &amp; between(lon,38.5,54.5) &amp; between(lat,-15,-.5)), 
+              aes(x = lon, y = lat, fill = adt), interpolate = TRUE)+
+  geom_sf(data = spData::world, fill = &quot;grey85&quot;, col = 1)+
+  coord_sf(xlim = c(39,53.5), ylim = c(-14.5,-1.5))+
+  scale_fill_gradientn(name = &quot;SSH\n(m)&quot;, colours = oce::oceColorsPalette(120))+
+  labs(title = &quot;&quot;, x = &quot;&quot;, y = &quot;&quot;)+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = 1),
+        legend.key.height = unit(1.5, &quot;cm&quot;))</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2018-10-30-read-netcdf-file-with-in-r_files/figure-html/fig1-1.png" alt="Sea Surface Height Anomaly in the Tropical Indian Ocean Region as of 2015-07-01" width="672" />
+<p class="caption">
+Figure 1: Sea Surface Height Anomaly in the Tropical Indian Ocean Region as of 2015-07-01
+</p>
+</div>
+<p>If we want to check how the sea surface height anaomaly changes over the month of July 2015, then we ought to produce figure <a href="#fig:fig1">1</a> for each day and obtain a total of 31 maps. Then visualize one after the other. That also wont save much and we will still miss the information as they are hidden in the table. Beside, we can animate them and make smooth transition of these maps. Thanks to Thomas Pedersen and David Robinson <span class="citation">(<a href="#ref-gganimate">2017</a>)</span>for developing a <strong>gganimate</strong> that transorm static plot of <strong>ggplot2</strong> into animation. With few line of codes, we transformed static map in figure <a href="#fig:fig1">1</a> into animated figure <a href="#fig:fig2">2</a>, which shown a seamless change of sea surface height in the area.</p>
+<pre class="r"><code>require(gganimate)
+
+ggplot()+
+  geom_raster(data = aviso %&gt;% filter(between(lon,38.5,60.5) &amp; between(lat,-23,2)), 
+              aes(x = lon, y = lat, fill = adt), interpolate = TRUE)+
+  geom_sf(data = spData::world, fill = &quot;grey85&quot;, col = 1)+
+  coord_sf(xlim = c(39.5,58), ylim = c(-21.5,0.5))+
+  scale_fill_gradientn(name = &quot;SSH\n(m)&quot;, colours = oce::oceColorsPalette(120))+
+  labs(title = &quot;&quot;, x = &quot;&quot;, y = &quot;&quot;)+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = 1),
+        legend.key.height = unit(1.5, &quot;cm&quot;))</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2018-10-30-read-netcdf-file-with-in-r_files/figure-html/fig2-1.png" alt="Animation of Sea Surface Height Anomaly in the tropical Indian Ocean from July 1 to July 31, 2015" width="672" />
+<p class="caption">
+Figure 2: Animation of Sea Surface Height Anomaly in the tropical Indian Ocean from July 1 to July 31, 2015
+</p>
+</div>
+<pre class="r"><code>  labs(title = &#39;Date: {frame_time}&#39;) +
+  transition_time(time) +
+  ease_aes(&#39;linear&#39;)</code></pre>
+<pre><code>NULL</code></pre>
+<p>There are times we need to overlay geostrophic field that show speed and direction on the sea surfae height anomaly (Figure <a href="#fig:fig3">3</a>). Unfortunately, the density of the geostrophic often make the plot messy. Therefore, we will reduce the density by creating equal size grid and then calculate the average velocity of the zonal (U) and meridional (V) velocity in each grid.</p>
+<pre class="r"><code>#read extent data w
+extent = read_sf(&quot;E:/Data Manipulation/xtractomatic/aoi.shp&quot;)
+
+grid = extent %&gt;% 
+  st_make_grid(n = c(40,60)) %&gt;% 
+  st_sf()
+
+# transform monthly month.wind.vector from tabular form to simple feature
+aviso.sf = aviso %&gt;% 
+  st_as_sf(coords = c(&quot;lon&quot;, &quot;lat&quot;)) %&gt;% 
+  st_set_crs(4326)
+
+ ## select the simple point for January. 
+aviso.sf.day = aviso.sf %&gt;% filter(day == 182)
+
+## grid the observations and calculate the median of u, v, and velocity in each grid
+aviso.gridded = grid %&gt;% mutate(id = n(),
+                contained = lapply(st_contains(st_sf(geometry),aviso.sf.day), identity),
+                obs = sapply(contained, length),
+                u = sapply(contained, function(x) {median(aviso.sf.day[x,]$u, na.rm = TRUE)}),
+                v = sapply(contained, function(x) {median(aviso.sf.day[x,]$v, na.rm = TRUE)}),
+                adt = sapply(contained, function(x) {median(aviso.sf.day[x,]$adt, na.rm = TRUE)}))
+## select the u , v and velocity variable and add a month column
+aviso.gridded = aviso.gridded %&gt;% select(obs, u, v, adt) %&gt;% mutate(day = 182)
+date</code></pre>
+<pre><code> [1] &quot;2015-07-01 15:00:00 EAT&quot; &quot;2015-07-02 15:00:00 EAT&quot;
+ [3] &quot;2015-07-03 15:00:00 EAT&quot; &quot;2015-07-04 15:00:00 EAT&quot;
+ [5] &quot;2015-07-05 15:00:00 EAT&quot; &quot;2015-07-06 15:00:00 EAT&quot;
+ [7] &quot;2015-07-07 15:00:00 EAT&quot; &quot;2015-07-08 15:00:00 EAT&quot;
+ [9] &quot;2015-07-09 15:00:00 EAT&quot; &quot;2015-07-10 15:00:00 EAT&quot;
+[11] &quot;2015-07-11 15:00:00 EAT&quot; &quot;2015-07-12 15:00:00 EAT&quot;
+[13] &quot;2015-07-13 15:00:00 EAT&quot; &quot;2015-07-14 15:00:00 EAT&quot;
+[15] &quot;2015-07-15 15:00:00 EAT&quot; &quot;2015-07-16 15:00:00 EAT&quot;
+[17] &quot;2015-07-17 15:00:00 EAT&quot; &quot;2015-07-18 15:00:00 EAT&quot;
+[19] &quot;2015-07-19 15:00:00 EAT&quot; &quot;2015-07-20 15:00:00 EAT&quot;
+[21] &quot;2015-07-21 15:00:00 EAT&quot; &quot;2015-07-22 15:00:00 EAT&quot;
+[23] &quot;2015-07-23 15:00:00 EAT&quot; &quot;2015-07-24 15:00:00 EAT&quot;
+[25] &quot;2015-07-25 15:00:00 EAT&quot; &quot;2015-07-26 15:00:00 EAT&quot;
+[27] &quot;2015-07-27 15:00:00 EAT&quot; &quot;2015-07-28 15:00:00 EAT&quot;
+[29] &quot;2015-07-29 15:00:00 EAT&quot; &quot;2015-07-30 15:00:00 EAT&quot;
+[31] &quot;2015-07-31 15:00:00 EAT&quot;</code></pre>
+<pre class="r"><code>## that is for january, now loop through from February to December, after each loop, the observation are added in the January values in row order
+for (i in 183:212){
+  
+aviso.sf.day = aviso.sf %&gt;% filter(day == i)
+
+leo = grid %&gt;% mutate(id = n(),
+                contained = lapply(st_contains(st_sf(geometry),aviso.sf.day), identity),
+                obs = sapply(contained, length),
+                u = sapply(contained, function(x) {median(aviso.sf.day[x,]$u, na.rm = TRUE)}),
+                v = sapply(contained, function(x) {median(aviso.sf.day[x,]$v, na.rm = TRUE)}),
+                adt = sapply(contained, function(x) {median(aviso.sf.day[x,]$adt, na.rm = TRUE)}))
+## select the u , v and velocity variable and add a month column
+leo = leo %&gt;% select(obs, u, v, adt) %&gt;% mutate(day = i)
+
+
+
+
+aviso.gridded = aviso.gridded %&gt;% rbind(leo)
+
+
+## create the centroid coordinates from the grids and rename the coordinates
+aviso.grid.points = aviso.gridded %&gt;% 
+  st_centroid() %&gt;% 
+  st_coordinates() %&gt;% 
+  as.tibble() %&gt;%
+  rename(longitude = X, latitude = Y)
+
+## make  a copy of the grid.wind.month
+attributes = aviso.gridded
+## remove the geometry and remain with the attributes
+st_geometry(attributes) = NULL
+
+## bind grid cooordinates with the attributes information
+gridded.aviso = aviso.grid.points %&gt;% bind_cols(attributes)
+}
+
+gridded.aviso$day = as.integer(gridded.aviso$day)</code></pre>
+<pre class="r"><code>fig3 = ggplot()+
+  geom_raster(data = aviso %&gt;% filter(between(lon,38.5,60.5) &amp; between(lat,-23,2)), 
+              aes(x = lon, y = lat, fill = adt), interpolate = TRUE)+
+  geom_segment(data = gridded.aviso, 
+               aes(x = longitude, y = latitude, 
+                   xend = longitude+u*4, 
+                   yend = latitude+v*4), 
+               arrow = arrow(length = unit(0.15, &quot;cm&quot;)))+
+  geom_sf(data = spData::world, fill = &quot;grey85&quot;, col = 1)+
+  coord_sf(xlim = c(39.5,58), ylim = c(-21.5,0.5))+
+  scale_fill_gradientn(name = &quot;SSH\n(m)&quot;, colours = oce::oceColorsPalette(120))+
+  labs(title = &quot;&quot;, x = &quot;&quot;, y = &quot;&quot;)+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = 1),
+        legend.key.height = unit(1.5, &quot;cm&quot;))+
+  labs(title = &#39;Date: {frame_time}&#39;) +
+  transition_time(time) +
+  ease_aes(&#39;linear&#39;)
+  
+  animate(fig3)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2018-10-30-read-netcdf-file-with-in-r_files/figure-html/fig3-1.gif" alt="geostrophic current overlaid on the sea surfae height"  />
+<p class="caption">
+Figure 3: geostrophic current overlaid on the sea surfae height
+</p>
+</div>
+</div>
+<div id="cited-literature" class="section level3 unnumbered">
+<h3>Cited literature</h3>
+<div id="refs" class="references">
+<div id="ref-gganimate">
+<p>Pedersen, T. L., &amp; Robinson, D. (2017). <em>Gganimate: A grammar of animated graphics</em>. Retrieved from <a href="http://github.com/thomasp85/gganimate" class="uri">http://github.com/thomasp85/gganimate</a></p>
+</div>
+<div id="ref-ncdf4">
+<p>Pierce, D. (2017). <em>Ncdf4: Interface to unidata netCDF (version 4 or earlier) format data files</em>. Retrieved from <a href="https://CRAN.R-project.org/package=ncdf4" class="uri">https://CRAN.R-project.org/package=ncdf4</a></p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, H. (2016). <em>Ggplot2: Elegant graphics for data analysis</em>. Springer-Verlag New York. Retrieved from <a href="http://ggplot2.org" class="uri">http://ggplot2.org</a></p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

@@ -1,0 +1,328 @@
+---
+title: Read netCDF file with in R
+author: Masumbuko Semba
+date: '2018-11-07'
+slug: read-netcdf-file-with-in-r
+categories:
+  - Oceanography
+  - R
+  - Technical
+tags:
+  - aviso
+  - Indian Ocean
+  - Masumbuko Semba
+bibliography: [blog.bib, argo.bib]
+csl: apa.csl
+link-citations: yes
+
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "")
+
+```
+
+
+In the previously [post]() I covered how to read and convert netcdf files directly into data frame in R. The approach is simple and straight forward but there flaw in this approach. One main setback of this approach is its inability to read maltiple matrix in an array from a netcdf file. This inability end up obtain a data frame from the of the first matrice of an array dropping out other matrix. 
+
+This post aimed to extend the approach and overcome the challenges inherited in the previous post. In this post I will take you through the process of converting a netcdf files into a tabular form widely known as data frame. I have divided this post into three main steps. First, I will show you how to read the metadata contained in the netCDF file, explore the data stored in it and glimpse their internal structures. Second, I will illustrate how to extract the data and Last, we sill finish with the transformation of the data and organize them as data frames. 
+
+We will use the geostrophic current and sea surface height dataset from [AVISO](http://www.aviso.altimetry.fr). The dataset was extracted from http://opendap.aviso.altimetry.fr/thredds/dodsC/dataset-duacs-nrt-over30d-global-allsat-madt-uv. This dataset provides gridded values of zonal (u) and meridional (v) velocity component. There are several packages in CRAN that read and write netCDF files. I prefer the **ncdf4** packages because it provide tools and functions to access the netCDF files [@ncdf4].
+
+
+```{r}
+require(ncdf4)
+require(tidyverse)
+require(ncdump)
+require(sf)
+```
+
+### Understand the metadata
+We first explore the metadata of the file with the with the `NetCDF()` function from **ncdump** package. In summary, the  metadata contains information about the netCDF file. These information include longitude, latitude and time as vector (table \@ref(tab:tab1)) and the east velocity (U) and north velocity (V) as matrix in an array (table \@ref(tab:tab2)). Because this is the daily data, each matrice represent a single day.We can view the information about the file by printing the `uv` file in the console.  
+
+```{r}
+metadata = ncdump::NetCDF("E:/MatlabWorking/Altimetry/old staff/wio_geostrophic_uv_july_2015.nc")
+```
+
+
+```{r tab1, echo=FALSE}
+metadata$dimension %>% 
+  dplyr::select(id, name, len) %>%
+  kableExtra::kable("html", col.names = c("Id", "Type", "Length"), align = "c",
+                    caption = "Vector data types in the netCDF file") %>%
+  kableExtra::column_spec(column = 1:3, width = "4cm", color = 1)
+```
+
+```{r tab2, echo=FALSE}
+metadata$variable %>% 
+  dplyr::select(1, 5:6)%>%
+  slice(-1)%>% 
+  select(name =1,longname = 3, unit = 2)%>%
+  kableExtra::kable("html", col.names = c("Variable", "Long name", "Unit"), align = "c",
+                    caption = "Array data types in the netcdf file") %>%
+  kableExtra::column_spec(column = 1, 3, width = "4cm", color = 1)%>%
+  kableExtra::column_spec(column = 2, width = "10cm", color = 1)
+
+```
+
+### Extract the variable
+Once we have identified the variables contained in the netCDF file, we use the `nc_open()` function to read the the file and assign it with uv name.
+```{r}
+uv = nc_open("E:/MatlabWorking/Altimetry/old staff/wio_geostrophic_uv_july_2015.nc")
+ssh = nc_open("E:/MatlabWorking/Altimetry/old staff/wio_ssh_july_2015.nc")
+
+```
+
+Once we have the file in the console, we are ready to extract the vector and array from the file. We can do this with `ncvar_get()`function.
+```{r}
+## spatial components
+lon = ncvar_get(uv, "lon")
+lat = ncvar_get(uv, "lat")
+## temporal component
+time = ncvar_get(uv, "time")
+
+## geogstrophic current
+u = ncvar_get(uv, "u")
+v = ncvar_get(uv, "v")
+
+## sea surface height
+adt = ncvar_get(ssh, "adt")
+
+```
+
+Printing the time we realized that time is the julian days but we do know the starting of the date. However, in the metadata provide information of the beginning data that we can use to transform this julian day into gregorian calendar that we are familiar with.  
+```{r}
+time
+```
+
+We can transform this days into the calender once we know the original date that AVISO used. Looking on the metadata we spotted that the original date for the calender was assigned as `julian_day_unit: days since 1950-01-01 00:00:00`. Here comes another challenges, the time is in Julian but the original date is in gregorian format. Therefore, we need to standardize the time to a common format. We first convert the origin time---1950-01-01 00:00:00 to julian day. Once the original time is in the same with the vector time file---julian format, we can add them up and convert from the julian to gregorian calender.
+```{r}
+# convert time original (to) to julian 
+to = insol::JDymd(year = 1950, month = 1, day = 1)
+
+# add the original time to the extracted time
+jd = to+time
+
+#convert the julian day to gregorian calender
+date = insol::JD(jd, inverse = TRUE)
+
+```
+
+ The converted julian days are summarized in table \@ref(tab:tab3) which show the julian number, julian day and the calender (gregorian date). We notice that our data were acquired from `r date[1]` to `r date[31]'.
+```{r tab3, echo=FALSE}
+
+data.frame(time, jd, date) %>% 
+  kableExtra::kable("html", col.names = c("Number time", "Julian Day", "Gregorian Day"), 
+                    caption = "Time in number, julian day and gregorian", align = "c") %>%
+  kableExtra::column_spec(column = 1:3, width = "5cm", color = 1)
+  
+```
+
+### Transform to data frame
+The final step is the transformation of matrix in arrays into data frame. Because there are thirty one matrix in each array---u,v, and adt, we chained the process in the loop as shown in the chunk below. I will not repeate the looping process in this post, If you cant follow the code in the chunk, I recommend you to read previous post that have sufficient information about how to loop and iterate repetitive process.
+
+```{r}
+## zonal component
+
+u.df = NULL
+
+for (i in 1:length(date)) {
+
+ ua = data.frame(lon,u[,,i] %>% as.data.frame())%>% 
+   as.tibble() %>% 
+   gather(key = "key", value = "u", 2:421) %>% 
+   mutate(time = date[i], lat = rep(lat, each = 401)) %>% select(time, lon,lat, u)
+ 
+ u.df = u.df %>% bind_rows(ua)
+
+}
+
+
+## meridional compoent
+
+v.df = NULL
+
+for (i in 1:length(date)) {
+
+ va = data.frame(lon, v[,,i] %>% as.data.frame())%>% 
+   as.tibble() %>% 
+   gather(key = "key", value = "v", 2:421) %>% 
+   mutate(time = date[i], lat = rep(lat, each = 401)) %>% select(time, lon,lat, v)
+ 
+ v.df = v.df %>% bind_rows(va)
+}
+
+
+## sea surface height
+adt.df = NULL
+
+for (i in 1:length(date)) {
+
+ adta = data.frame(lon,adt[,,i] %>% as.data.frame())%>% 
+   as.tibble() %>% 
+   gather(key = "key", value = "adt", 2:421) %>% 
+   mutate(time = date[i], lat = rep(lat, each = 401)) %>% select(time, lon,lat, adt)
+ 
+ adt.df = adt.df %>% bind_rows(adta)
+}
+
+```
+
+
+```{r}
+aviso = data.frame(u.df, v.df, adt.df) %>% 
+  select(time, lon,lat, u, v, adt) %>% 
+  as.tibble() %>% 
+  mutate(day = lubridate::yday(time))
+
+aviso$time = as.Date(aviso$time)
+aviso$day = as.integer(aviso$day)
+
+date
+```
+
+Table \@ref(tab:tab4) is the random sample of twelve observations showing the information of geostrophic current and sea surface height within the tropical Indian Ocean for thirty one days in July 2015.
+```{r tab4, echo=FALSE}
+
+aviso %>%
+  select(-day) %>% 
+  sample_n(12) %>% 
+  kableExtra::kable("html", col.names = c("Date", "Longitude", "Latitude", "U", "V", "adt"), 
+                    caption = "Random sample observations", align = "c") %>%
+  kableExtra::column_spec(column = 1:6, width = "5cm", color = 1)
+  
+```
+
+### Visualize---Mapping the SSH
+We have come long way from reading the data from the local machine into R's environment, extract the variables and transform them into data frame. But the subtle information we are looking from this dataset are still hidden and we ought to uncover them. One way of understanding the data is through visualization. Visualizing data may range from common static exploratory data analysis plots to dynamic, interactive data visualizations in web browsers. R offers control over many aesthetic aspects of plots, but we will stick on **ggplot2** developed by Hadley Wickham [-@ggplot] because it provide new ways to visualize and communicate data. Figure \@ref(fig:fig1) for example show the sea surface height anomaly in the tropical Indian Ocean. We can easily spot region with higher and lower sea surface height anomaly. We see a region with high sea surface anomaly in the Mozambique channel and low sea surface height anomaly between latitude 8$^\circ$S and 4$^\circ$S and longitude 488$^\circ$E and 548$^\circ$E. 
+
+```{r fig1, fig.cap="Sea Surface Height Anomaly in the Tropical Indian Ocean Region as of 2015-07-01"}
+
+ggplot()+
+  geom_raster(data = aviso %>% 
+                filter(day == 190 & between(lon,38.5,54.5) & between(lat,-15,-.5)), 
+              aes(x = lon, y = lat, fill = adt), interpolate = TRUE)+
+  geom_sf(data = spData::world, fill = "grey85", col = 1)+
+  coord_sf(xlim = c(39,53.5), ylim = c(-14.5,-1.5))+
+  scale_fill_gradientn(name = "SSH\n(m)", colours = oce::oceColorsPalette(120))+
+  labs(title = "", x = "", y = "")+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = 1),
+        legend.key.height = unit(1.5, "cm"))
+```
+If we want to check how the sea surface height anaomaly changes over the month of July 2015, then we ought to produce figure \@ref(fig:fig1) for each day and obtain a total of 31 maps. Then visualize one after the other. That also wont save much and we will still miss the information as they are hidden in the table. Beside, we can animate them and make smooth transition of these maps.  Thanks to Thomas Pedersen and David Robinson [-@gganimate]for developing a **gganimate** that transorm static plot of **ggplot2** into animation. With few line of codes, we transformed static map in figure \@ref(fig:fig1) into animated figure \@ref(fig:fig2), which shown a seamless change of sea surface height in the area.
+
+```{r fig2, fig.cap="Animation of Sea Surface Height Anomaly in the tropical Indian Ocean from July 1 to July 31, 2015"}
+
+require(gganimate)
+
+ggplot()+
+  geom_raster(data = aviso %>% filter(between(lon,38.5,60.5) & between(lat,-23,2)), 
+              aes(x = lon, y = lat, fill = adt), interpolate = TRUE)+
+  geom_sf(data = spData::world, fill = "grey85", col = 1)+
+  coord_sf(xlim = c(39.5,58), ylim = c(-21.5,0.5))+
+  scale_fill_gradientn(name = "SSH\n(m)", colours = oce::oceColorsPalette(120))+
+  labs(title = "", x = "", y = "")+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = 1),
+        legend.key.height = unit(1.5, "cm"))
+  labs(title = 'Date: {frame_time}') +
+  transition_time(time) +
+  ease_aes('linear')
+```
+
+There are times we need to overlay geostrophic field that show speed and direction on the sea surfae height anomaly (Figure \@ref(fig:fig3)). Unfortunately, the density of the geostrophic often make the plot messy. Therefore, we will reduce the density by creating equal size grid and then calculate the average velocity of the zonal (U) and meridional (V) velocity in each grid.
+```{r}
+
+#read extent data w
+extent = read_sf("E:/Data Manipulation/xtractomatic/aoi.shp")
+
+grid = extent %>% 
+  st_make_grid(n = c(40,60)) %>% 
+  st_sf()
+
+# transform monthly month.wind.vector from tabular form to simple feature
+aviso.sf = aviso %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+ ## select the simple point for January. 
+aviso.sf.day = aviso.sf %>% filter(day == 182)
+
+## grid the observations and calculate the median of u, v, and velocity in each grid
+aviso.gridded = grid %>% mutate(id = n(),
+                contained = lapply(st_contains(st_sf(geometry),aviso.sf.day), identity),
+                obs = sapply(contained, length),
+                u = sapply(contained, function(x) {median(aviso.sf.day[x,]$u, na.rm = TRUE)}),
+                v = sapply(contained, function(x) {median(aviso.sf.day[x,]$v, na.rm = TRUE)}),
+                adt = sapply(contained, function(x) {median(aviso.sf.day[x,]$adt, na.rm = TRUE)}))
+## select the u , v and velocity variable and add a month column
+aviso.gridded = aviso.gridded %>% select(obs, u, v, adt) %>% mutate(day = 182)
+date
+
+## that is for january, now loop through from February to December, after each loop, the observation are added in the January values in row order
+for (i in 183:212){
+  
+aviso.sf.day = aviso.sf %>% filter(day == i)
+
+leo = grid %>% mutate(id = n(),
+                contained = lapply(st_contains(st_sf(geometry),aviso.sf.day), identity),
+                obs = sapply(contained, length),
+                u = sapply(contained, function(x) {median(aviso.sf.day[x,]$u, na.rm = TRUE)}),
+                v = sapply(contained, function(x) {median(aviso.sf.day[x,]$v, na.rm = TRUE)}),
+                adt = sapply(contained, function(x) {median(aviso.sf.day[x,]$adt, na.rm = TRUE)}))
+## select the u , v and velocity variable and add a month column
+leo = leo %>% select(obs, u, v, adt) %>% mutate(day = i)
+
+
+
+
+aviso.gridded = aviso.gridded %>% rbind(leo)
+
+
+## create the centroid coordinates from the grids and rename the coordinates
+aviso.grid.points = aviso.gridded %>% 
+  st_centroid() %>% 
+  st_coordinates() %>% 
+  as.tibble() %>%
+  rename(longitude = X, latitude = Y)
+
+## make  a copy of the grid.wind.month
+attributes = aviso.gridded
+## remove the geometry and remain with the attributes
+st_geometry(attributes) = NULL
+
+## bind grid cooordinates with the attributes information
+gridded.aviso = aviso.grid.points %>% bind_cols(attributes)
+}
+
+gridded.aviso$day = as.integer(gridded.aviso$day)
+```
+
+```{r fig3, fig.cap="geostrophic current overlaid on the sea surfae height"}
+
+fig3 = ggplot()+
+  geom_raster(data = aviso %>% filter(between(lon,38.5,60.5) & between(lat,-23,2)), 
+              aes(x = lon, y = lat, fill = adt), interpolate = TRUE)+
+  geom_segment(data = gridded.aviso, 
+               aes(x = longitude, y = latitude, 
+                   xend = longitude+u*4, 
+                   yend = latitude+v*4), 
+               arrow = arrow(length = unit(0.15, "cm")))+
+  geom_sf(data = spData::world, fill = "grey85", col = 1)+
+  coord_sf(xlim = c(39.5,58), ylim = c(-21.5,0.5))+
+  scale_fill_gradientn(name = "SSH\n(m)", colours = oce::oceColorsPalette(120))+
+  labs(title = "", x = "", y = "")+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11, colour = 1),
+        legend.key.height = unit(1.5, "cm"))+
+  labs(title = 'Date: {frame_time}') +
+  transition_time(time) +
+  ease_aes('linear')
+  
+  animate(fig3)
+```
+
+### Cited literature
+
