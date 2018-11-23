@@ -6,10 +6,19 @@
     <description>Recent content in Masumbuko Semba on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 14 Nov 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 23 Nov 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/masumbuko-semba/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Programming: An Essential Skills for Scientists</title>
+      <link>/11/23/2018/programming-an-essential-skills-for-scientists/</link>
+      <pubDate>Fri, 23 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/11/23/2018/programming-an-essential-skills-for-scientists/</guid>
+      <description>IntroductionIn recent years, there’s been an admirable push to get more people to learn programming. But if I’ve never been exposed to programming, why should I invest all of the effort to learn? What’s in it for me? When I was confronted with data limitation challenge in spreadsheet (Brown, 2001), and the issue of repeating the same process over and over again, I decided to learn to program. I started learning R— a statistical and graphical software (James, Witten, Hastie, &amp;amp; Tibshirani, 2013).</description>
+    </item>
     
     <item>
       <title>Publishing Our Academic  Dissertation to Broad Audiences</title>

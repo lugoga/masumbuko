@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Hugo 0.48" />
+<meta name="generator" content="Hugo 0.51" />
 
 
 <title>Processing  CTD data with OCE package in R - Masumbuko Semba&#39;s Blog</title>
@@ -75,7 +75,10 @@
     
 
     <div class="article-content">
-      <p>Oceanographers love MATLAB<span class="math inline">\(^\circledR\)</span> for processing oceanographic data. I have no explanation as to why they love Matlab. I suppose it’s been the <em>de facto</em> standard within the field for a long time, and legacy is a big deal. I have used Matlab for data processing and plotting for several years. With MatLab I implemented a vast amount of tools and rather completed numerical models. Being a self sponsored graduate student at an institution that doesn’t have a subscription, I found sticking to Matlab not only is expensive, but also unsustainable. A chunk of my scripts just sleeping in my drive because I can no longer run the software in my machine.</p>
+      
+
+
+<p>Oceanographers love MATLAB<span class="math inline">\(^\circledR\)</span> for processing oceanographic data. I have no explanation as to why they love Matlab. I suppose it’s been the <em>de facto</em> standard within the field for a long time, and legacy is a big deal. I have used Matlab for data processing and plotting for several years. With MatLab I implemented a vast amount of tools and rather completed numerical models. Being a self sponsored graduate student at an institution that doesn’t have a subscription, I found sticking to Matlab not only is expensive, but also unsustainable. A chunk of my scripts just sleeping in my drive because I can no longer run the software in my machine.</p>
 <p>The Matlab was the core software for my PhD until recent, when I switched to R because of the license issue. The other reason is R as some cool packages that are far easier to use for exploratory and producing publication-quality graphics. Though, I found myself frustrated when learning R because I was doing Matlab syntax in R—which lacked the flexibility of MATLAB. When I learned to unlearn Matlab and learn R syntax, it just took me some weeks to stand up and walk.</p>
 <p>In this article, I’m going to illustrate how to process oceanographic data with <code>oce</code> package in R. <code>oce</code> package has some cool features for reading, processing and plotting oceanographic data. It is written by Dan Kelley and Clark Richards <span class="citation">(<a href="#ref-oce">2018</a>)</span>. <code>oce</code> support many oceanographic data but for this post I will only focus on the CTD measurements. I need oce and ocedata <span class="citation">(Kelley, <a href="#ref-ocedata">2015</a>)</span> package to process the CTD data in R <span class="citation">(R Core Team, <a href="#ref-r">2018</a>)</span>.</p>
 <pre class="r"><code>require(oce)

@@ -1,22 +1,21 @@
 ---
-title: 'Programming: an inevitable skills for researchers'
+title: 'Programming: An Essential Skills for Scientists'
 author: Masumbuko Semba
 date: '2018-11-23'
-slug: programming-an-inevitable-skills
+slug: programming-an-essential-skills-for-scientists
 categories:
   - R
 tags:
-  - programming
-  - coding
-  - science
-  - oceanography
-  - marine
-  - Indian Ocean
+  - R
+  - Masumbuko Semba
 
 bibliography: [blog.bib, argo.bib]
 csl: apa.csl
 link-citations: yes
+
 ---
+
+
 ## Introduction
 
 In recent years, there's been an admirable push to get more people to learn programming. But if I've never been exposed to programming, why should I invest all of the effort to learn? What's in it for me? When I was confronted with data limitation challenge in spreadsheet [@brown], and the issue of repeating the same process over and over again, I decided to learn to program. I started learning R--- a statistical and graphical software [@james]. I then moved to Python [@langtangen], later to Matlab [@trauth]. But now, I do nearly all of my data work in R. A little programming skills obtained by learning R, helped me to do so much more with data than I used to do with out of the box software. Programming skills stretched my brain and ability to work with different types of data. 
@@ -31,4 +30,3 @@ Programming *stretch your brain* and allows you to discover more creative soluti
 
 
 ## Cited resources
-

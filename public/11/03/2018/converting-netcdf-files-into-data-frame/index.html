@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Hugo 0.48" />
+<meta name="generator" content="Hugo 0.51" />
 
 
 <title>Read and Convert netcdf files into data frame in R - Masumbuko Semba&#39;s Blog</title>
@@ -75,7 +75,8 @@
     
 
     <div class="article-content">
-      <script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+      
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
 
 
 <p>Scientist often store most of oceanographic and environmental variables from satellite sensors in <em>netCDF</em> format. The <em>netCDF</em> data file format contain one or more variables, which are usually structured as regular arrays and metadata describing the contents and format of the data. For example, you might have a variable named “Temperature” that is a function of longitude, latitude, and depth. <em>NetCDF</em> files also contain dimensions, which describe the extent of the variables’ arrays. In our Temperature example, the dimensions are <code>longitude</code>, <code>latitude</code>, and <code>depth</code>. <strong>R</strong> has a <strong>ncdf4</strong> package that allows to read and write netCDF files and its outputs are either array or matrix for the data and atomic vector for other variables like the longitude, latitude, time and depth <span class="citation">(Pierce, <a href="#ref-ncdf4">2017</a>)</span>.</p>

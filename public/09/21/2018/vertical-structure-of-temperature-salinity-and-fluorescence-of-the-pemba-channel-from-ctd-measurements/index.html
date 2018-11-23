@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Hugo 0.48" />
+<meta name="generator" content="Hugo 0.51" />
 
 
 <title>Processing ship-based CTD measurements in Pemba Channel with R - Masumbuko Semba&#39;s Blog</title>
@@ -75,7 +75,10 @@
     
 
     <div class="article-content">
-      <p>This post introduces to simple analysis of CTD data using oce<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> package in R<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> environment. CTD stands for conductivity, temperature, and depth, and refers to a package of electronic instruments that measure these properties.A CTD device’s primary function is to detect how the conductivity and temperature of the water column changes relative to depth. Conductivity is a measure of how well a solution conducts electricity. Conductivity is directly related to salinity, which is the concentration of salt and other inorganic compounds in seawater. Salinity is one of the most basic measurements used by ocean scientists. When combined with temperature data, salinity measurements can be used to determine seawater density which is a primary driving force for major ocean currents.</p>
+      
+
+
+<p>This post introduces to simple analysis of CTD data using oce<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> package in R<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> environment. CTD stands for conductivity, temperature, and depth, and refers to a package of electronic instruments that measure these properties.A CTD device’s primary function is to detect how the conductivity and temperature of the water column changes relative to depth. Conductivity is a measure of how well a solution conducts electricity. Conductivity is directly related to salinity, which is the concentration of salt and other inorganic compounds in seawater. Salinity is one of the most basic measurements used by ocean scientists. When combined with temperature data, salinity measurements can be used to determine seawater density which is a primary driving force for major ocean currents.</p>
 <p>CTDs can provide profiles of chemical and physical parameters through the entire water column. The CTD data used in this post were collected with South African Ship Agulhas II June-July 2018. The ship cruised and made nine casts along the Pemba and Zanzibar channel. This expedition was done under the Second International Indian Ocean Expedition (IIOE–2). The IIOE–2 aim to systematically explore our coastal waters, which are poorly known with prime purpose of discovering and advancing the knowledge.</p>
 <pre class="r"><code>require(oce)
 require(ocedata)
