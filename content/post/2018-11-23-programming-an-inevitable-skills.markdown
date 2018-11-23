@@ -27,18 +27,7 @@ Using a programming language like R [@r] can look cryptic at first. That is true
 
 In summary knowing to code can make you 10 times faster in your daily routine. Because programming help you to automate tedious tasks of cleaning and preparing the data that you would otherwise need to do by hand. If you know how to program, computer-related tasks that used to take you a week to finish will now take only a few hours---What a relief?
 
-acording to @r4d Programming *stretch your brain* and allows you to discover more creative solutions than your colleagues who don't know how to program. It lets you go beyond simply using the tools and data sets that everyone else around you uses, to transcend the limitations that your peers are stuck with. For example, you'll be able to write programs to automatically acquire data from new sources, to clean, reformat, and integrate that data with your existing data, and to implement far more sophisticated analyses than your colleagues who can only use pre-existing tools figure <a href="#fig:fig1">1</a>.
-
-
-```r
-plot(iris)
-```
-
-<div class="figure">
-<img src="/post/2018-11-23-programming-an-inevitable-skills_files/figure-html/fig1-1.png" alt="mfano" width="672" />
-<p class="caption">Figure 1 mfano</p>
-</div>
-
+Programming *stretch your brain* and allows you to discover more creative solutions than your colleagues who don't know how to program. It lets you go beyond simply using the tools and data sets that everyone else around you uses, to transcend the limitations that your peers are stuck with. For example, you'll be able to write programs to automatically acquire data from new sources, to clean, reformat, and integrate that data with your existing data, and to implement far more sophisticated analyses than your colleagues who can only use pre-existing tools.
 
 
 ## Cited resources
