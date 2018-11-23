@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Coding on Masumbuko Semba&#39;s Blog</title>
+    <link>/tags/coding/</link>
+    <description>Recent content in Coding on Masumbuko Semba&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 23 Nov 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/coding/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Programming: an inevitable skills for researchers</title>
+      <link>/11/23/2018/programming-an-inevitable-skills/</link>
+      <pubDate>Fri, 23 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/11/23/2018/programming-an-inevitable-skills/</guid>
+      <description>Introduction In recent years, there&amp;rsquo;s been an admirable push to get more people to learn programming. But if I&amp;rsquo;ve never been exposed to programming, why should I invest all of the effort to learn? What&amp;rsquo;s in it for me? When I was confronted with data limitation challenge in spreadsheet [@brown], and the issue of repeating the same process over and over again, I decided to learn to program. I started learning R&amp;mdash; a statistical and graphical software [@james].</description>
+    </item>
+    
+  </channel>
+</rss>
