@@ -17,7 +17,7 @@ date: "2019-09-19T21:48:51-07:00"
 
 7. Mahatane, A., Yunus D. Mgaya, R. B. Hoza, P. O. Onyango, and Semba M (2017). "Co-management of Lake Victoria Fisheries." In Lake Victoria Fisheries Resources : Research and Management in Tanzania, edited by Yunus D. Mgaya and Shigalla B. Mahongo, 219-39. Cham: *Springer International Publishing*.
 
-8. Peter, N., Semba, M., Lugomela, C., & Kyewalyanga, M. S. (2018). The influence of physical-chemical variables on the spatial and seasonal variation of Chlorophyll-a in coastal waters of Unguja, Zanzibar, Tanzania. Western Indian Ocean Journal of Marine Science, 17(2), 25-34.
+8. Peter, N., Semba, M., Lugomela, C., & Kyewalyanga, M. S. (2018). The influence of physical-chemical variables on the spatial and seasonal variation of Chlorophyll-a in coastal waters of Unguja, Zanzibar, Tanzania. *Western Indian Ocean Journal of Marine Science*, 17(2), 25-34.
 
 9. Semba M., Lumpkin R., Kimirei IA., Shaghude Y., & Nyandwi N (**In Review**). Spatial and Seasonal Variations of Surface Current in the Pemba Channel. 
 
