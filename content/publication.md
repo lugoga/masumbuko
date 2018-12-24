@@ -19,5 +19,4 @@ date: "2019-09-19T21:48:51-07:00"
 
 8. Peter, N., Semba, M., Lugomela, C., & Kyewalyanga, M. S. (2018). The influence of physical-chemical variables on the spatial and seasonal variation of Chlorophyll-a in coastal waters of Unguja, Zanzibar, Tanzania. *Western Indian Ocean Journal of Marine Science*, 17(2), 25-34.
 
-9. Semba M., Lumpkin R., Kimirei IA., Shaghude Y., & Nyandwi N (**In Review**). Spatial and Seasonal Variations of Surface Current in the Pemba Channel. 
-
+9. Semba M., Lumpkin R., Kimirei I., Shaghude Y., & Nyandwi N (**Inpress**). Seasonal and Spatial variation of Surface Current in the Pemba Channel, Tanzania. *PLOSONE*,DOI:10.1371/journal.pone.0210303
