@@ -3,7 +3,7 @@ title: "Masumbuko Semba"
 date: "2019-09-19T21:48:51-07:00"
 ---
 
-### Emplyoment
+### Employment
 
 **Position**: Assistant Lecturer
 
@@ -17,7 +17,7 @@ date: "2019-09-19T21:48:51-07:00"
 
 **2004-2007**:  Bachelor Degree in Fisheries and Aquaculture - University of Dar es Salaam
 
-### Extra-cullicular Activities
+### Extracurricular Activities
 
 **Writer**: Write online and digital books on data analyis and programming. 
 
