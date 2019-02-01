@@ -1,0 +1,288 @@
+---
+title: Compute the Mixed Layer Depth (MLD)  along the East African Coastal Current  from   Argo
+  floats data
+author: Masumbuko Semba
+date: '2019-02-01'
+slug: compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data
+categories:
+  - Oceanography
+  - R
+tags:
+  - Argo
+  - Indian Ocean
+  - Mafia Channel
+  - Masumbuko Semba
+  - Salinity
+  - Temperature
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The ocean mixed layer is narrow band of the suface water that is homogenous—where temperature, salinity and density scarcely vary with increasing depth <span class="citation">(Costoya et al. <a href="#ref-costoya">2014</a>)</span>. This homogeneity layer is caused by turbulent vertical mixing that is driven by heat loss from the ocean to the atmosphere and wind stress. The deepest layer affected by this turbulent mixing is called mixed layer depth (MLD), which marks the width of the upper ocean that interacts with the atmosphere. The aim of this post is determine the MLD along the path of the East African Coastal Current. We use the Argo float dataset that contain the profile of temperature and salinity from the surface down to two kilometer deep.</p>
+<p>I use R programming language as an environment for the required routine to calculate the MLD <span class="citation">(R Core Team <a href="#ref-r">2018</a>)</span>. To accomplish this process I need several packages. You can achieve the process just by relying on the base R. but, <span class="citation">Kelley and Richards (<a href="#ref-oce">2018</a>)</span> developed <strong>oce</strong> package that makes <strong>R</strong> programming languages <span class="citation">(R Core Team <a href="#ref-r">2018</a>)</span> capable of handling and analysing wide variety of oceanographical data. First, we load the packages we need for importing, processing, and displaying results into the workspace.</p>
+<pre class="r"><code>require(tidyverse)
+require(oce)
+require(ocedata)
+require(sf)
+require(lubridate)</code></pre>
+<div id="importing-argo-float-dataset" class="section level2">
+<h2>Importing Argo float dataset</h2>
+<p>In this post I used freely available Argo floats profile of salinity and temperature that crossed the coastal water of Tanzania and Kenya. Argo data were obtained as the actual Argo NetCDF files from the <a href="http://www.argo.ucsd.edu/Argo_data_and.html">Argo Data website</a>. Argo recommends the delayed mode for oceanographic application becuase the profiles of salinity and temprature has been adjusted with high quality ship-based CTD and climatological data. Each Argo floats comes with four different files—the first file is profile, which contains all measured profiles; second file is the trajectory, which contains consecutive position information (longitude, latitude and time) of the float while the float is a surface sending data to satellite; the third file is metadata. It contains the float and sensor characteristics; and the fourth file is technical one that store the information of the instrument like battery voltages and intensities.</p>
+<p>Because there were 51 NetCDF file of different float in the region, I first created a directory file that list the names and path of each dataset.</p>
+<pre class="r"><code>argo = dir(&quot;./Processing/argo_profile/&quot;, 
+               pattern = &quot;prof.nc&quot;,
+               recursive = TRUE, 
+               full.names = TRUE)</code></pre>
+<p>After exploration of the argo float dataset, I picked the float along the EACC, which is in NetCDF format. Formating the dataset into oce objects, I simply create a code of three lines shown below. First the <code>read.argo()</code> read and import the NetCDF file into oce object and remove bad data with <code>handleFlags()</code> and finish by aligning the profile into a standard depth from 5 to 400 meters with an interval of 5 m</p>
+<pre class="r"><code>argo.float = argo[39]%&gt;% 
+  read.argo()%&gt;% 
+  handleFlags() %&gt;% 
+  argoGrid(p = seq(5,400,5))</code></pre>
+<p>Once the the argo float dataset has been cleaned, we can extract important information like the longitude, latitude and time the profile was recorded</p>
+<pre class="r"><code>time = argo.float[[&quot;time&quot;]]
+lon = argo.float[[&quot;longitude&quot;]]
+lat = argo.float[[&quot;latitude&quot;]]</code></pre>
+</div>
+<div id="hydrographic-section" class="section level2">
+<h2>Hydrographic Section</h2>
+<p>Because the profiles are in list format, you can convert them directly into section with <code>as.section()</code> function. The section provide a nifty way to subset only the profile we are interested. I did a simple exploration and found that the profile number 206 to 212 cover well the EACC. Therefore, we only pick these profile and drop the rest from the dataset. Because I also need to know the time of each profile, I selected the time and location information using the index method and make a data frame of these information. Figure <a href="#fig:map">1</a> show the location of the profile and the time in which the measurement were done.</p>
+<pre class="r"><code>argo.section = argo.float%&gt;%  
+  as.section()
+
+## make a section from list of argo profile
+eacc.section = argo.section %&gt;% subset(stationId  &gt;= 206 &amp; stationId &lt;= 212)
+
+## obtain the time and spatial information corresponding to each profile
+time.eacc = time[206:212] %&gt;% as.Date()
+lon.eacc = lon[206:212]
+lat.eacc = lat[206:212]
+
+## create a table from the time, lon and lat variable extracted above
+eacc.extract.tb = data.frame(time.eacc, lon.eacc, lat.eacc) %&gt;% 
+  rename(time = 1, lon = 2, lat = 3)</code></pre>
+<div class="figure"><span id="fig:map"></span>
+<img src="/post/2019-02-01-compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data_files/figure-html/map-1.png" alt="Map of the East African Coast showing the location of the Argo float profiles and the date the records were measured" width="672" />
+<p class="caption">
+Figure 1: Map of the East African Coast showing the location of the Argo float profiles and the date the records were measured
+</p>
+</div>
+<p>Figure <a href="#fig:section-argo">2</a> show the vertical section of temperature as function of depth(to the maximum of 400 m) along the East African Coastal Current measured with Argo float with number 1901124 deployed by the CSIRO. This float crossed the East African coastal water between July 19 to August 17, 2014 and made seven profiles on Tanzania and Kenya waters. Looking Figure <a href="#fig:section-argo">2</a>, although our eyes can clearly see the dermacation that separates the warm top water and bottom colder water, but it is hard to pinpoint the depth where the surface warm mixed layer end. Therefore, we must compute the MLD of these profiles using the temperature</p>
+<pre class="r"><code>## order the section and plot it
+eacc.section = eacc.section %&gt;% 
+  sectionSort(by = &quot;latitude&quot;) 
+## plot the eacc section
+eacc.section %&gt;% 
+  plot(ztype = &quot;image&quot;, ylim = c(400,20), xtype = &quot;latitude&quot;, which = &quot;temperature&quot;)</code></pre>
+<div class="figure"><span id="fig:section-argo"></span>
+<img src="/post/2019-02-01-compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data_files/figure-html/section-argo-1.png" alt="Hydrographic section of temperature and salinity" width="672" />
+<p class="caption">
+Figure 2: Hydrographic section of temperature and salinity
+</p>
+</div>
+</div>
+</div>
+<div id="estimate-the-mld" class="section level1">
+<h1>Estimate the MLD</h1>
+<p>To determine the MLD, we apply the method by <span class="citation">Boyer Montégut et al. (<a href="#ref-de2004mixed">2004</a>)</span>, where successively deeper data points in each of the Argo profile potential temperature were examined until one is found with a potential temperature value differing from the value at the 10 m reference depth by more than the threshold value (<span class="math inline">\(\delta\)</span>T)of <span class="math inline">\(\pm\)</span> 0.5 <sup>o</sup>C. Using this approach, the MLD is then computed using a mathematic algorithm shown in the chunk below. In summary, the first line of the code preallocate the list file that will store the mld value for each profile. The <code>For</code> loop in the third line does the process of determing the mld. Notice that there is a nested loop that process the MLD. The first chunk prepare the data and the second loop is the main one that process the MLD</p>
+<p>Figure <a href="#fig:mld">3</a> reveal that the MLD is not the same along the East African Coastal Current (EACC). The four profile off the coastal water of Tanzania have MLD range between 60 and 65 meters (Figure <a href="#fig:mld">3</a> top layer) and the deepest MLD was found further north off the Kenyan coast (Figure <a href="#fig:mld">3</a>bottom right)</p>
+<pre class="r"><code>stations = eacc.section[[&quot;station&quot;]]
+
+mld.temp = list()
+
+par(mfrow = c(2,4))
+
+for (i in 1:length(stations)){
+  # readline(prompt = &quot;ENTER&quot;)
+  ctd = stations[[i]]
+  ctd = ctd %&gt;% subset(pressure &gt; 10)
+ 
+
+      temperature = ctd[[&quot;temperature&quot;]]
+      pressure = ctd[[&quot;pressure&quot;]]
+  
+    for (criterion in 0.5){
+      inMLD =  abs(temperature[1] - temperature) &lt; criterion
+      MLDindex = which.min(inMLD)
+      MLDpressure = pressure[MLDindex]
+      
+        ctd %&gt;% plotProfile(xtype = &quot;temperature&quot;, ylim = c(150,20))
+        abline(h = pressure[MLDindex], lwd = 2, lty = &quot;dashed&quot;)
+        
+       
+        mld.temp[i] = MLDpressure
+
+    }
+}</code></pre>
+<div class="figure"><span id="fig:mld"></span>
+<img src="/post/2019-02-01-compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data_files/figure-html/mld-1.png" alt="Mixed Layer Depth (MLD) for the seven profiles along the East African Coastal Current" width="672" />
+<p class="caption">
+Figure 3: Mixed Layer Depth (MLD) for the seven profiles along the East African Coastal Current
+</p>
+</div>
+<p>Because the object <code>mld.temp</code>is in list form, It was converted into a data frame and then stitch it with the data frame created previous—containing the time, lon, and latitude of the profiles along the EACC. The following code chunk illustrates the process</p>
+<pre class="r"><code>mld.temp = mld.temp %&gt;% 
+  as.data.frame() %&gt;% t() %&gt;% 
+  as.data.frame()%&gt;%  
+  rename(mld = V1)
+
+eacc.mld = eacc.extract.tb %&gt;% bind_cols(mld.temp)</code></pre>
+<p>Table <a href="#tab:tab2">1</a> reveal that during the southeast monsoon season (June to September), the water along the East African Coastal Current experience a shallow mixed layer depth of about 60 m.</p>
+<table>
+<caption>
+<span id="tab:tab2">Table 1: </span>Maximum Mixed layer along the East African Coastal Current computed from Argo profiles
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Profile Location
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="1">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+MLD
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+Date
+</th>
+<th style="text-align:center;">
+Longitude
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+<th style="text-align:center;">
+MLD
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 3cm; color: black;">
+2014-06-19
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+40.372
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+-7.909
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+65
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: black;">
+2014-06-28
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+40.219
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+-7.096
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+60
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: black;">
+2014-07-08
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+39.951
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+-5.570
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+60
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: black;">
+2014-07-18
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+39.940
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+-5.250
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+65
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: black;">
+2014-07-28
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+40.103
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+-4.577
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+50
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: black;">
+2014-08-07
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+40.251
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+-3.989
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+45
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: black;">
+2014-08-17
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+40.506
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+-3.419
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+75
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="reference" class="section level1 unnumbered">
+<h1>Reference</h1>
+<div id="refs" class="references">
+<div id="ref-de2004mixed">
+<p>Boyer Montégut, Clément de, Gurvan Madec, Albert S Fischer, Alban Lazar, and Daniele Iudicone. 2004. “Mixed Layer Depth over the Global Ocean: An Examination of Profile Data and a Profile-Based Climatology.” <em>Journal of Geophysical Research: Oceans</em> 109 (C12). Wiley Online Library.</p>
+</div>
+<div id="ref-costoya">
+<p>Costoya, Xurxo, Maite deCastro, Moncho Gómez-Gesteira, and Fran Santos. 2014. “Mixed Layer Depth Trends in the Bay of Biscay over the Period 1975–2010.” Journal Article. <em>PLOS ONE</em> 9 (6): e99321. doi:<a href="https://doi.org/10.1371/journal.pone.0099321">10.1371/journal.pone.0099321</a>.</p>
+</div>
+<div id="ref-oce">
+<p>Kelley, Dan, and Clark Richards. 2018. <em>Oce: Analysis of Oceanographic Data</em>. <a href="https://CRAN.R-project.org/package=oce" class="uri">https://CRAN.R-project.org/package=oce</a>.</p>
+</div>
+<div id="ref-r">
+<p>R Core Team. 2018. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a>.</p>
+</div>
+</div>
+</div>

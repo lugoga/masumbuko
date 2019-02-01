@@ -7,7 +7,7 @@ date: "2019-09-19T21:48:51-07:00"
 
 **Position**: Assistant Lecturer
 
-**Insitute**: Nelson Mandela African Institution of Science and Technology, P. O. Box 447, Arusha, Tanzania
+**Institute**: Nelson Mandela African Institution of Science and Technology, P. O. Box 447, Arusha, Tanzania
 
 ### Education
 
@@ -19,7 +19,7 @@ date: "2019-09-19T21:48:51-07:00"
 
 ### Extracurricular Activities
 
-**Writer**: Write online and digital books on data analyis and programming. 
+**Writer**: Write online and digital books on data analysis and programming. 
 
 **Designing graphic**:  Design graphics and typeset books
 
@@ -34,7 +34,7 @@ date: "2019-09-19T21:48:51-07:00"
 
 **Biking and Swimming**: Regular exercise for body fitness
 
-**Evangelism**: Preaching the gospal to the world
+**Evangelism**: Preaching the gospel to the world
 
 ### Peer reviewed articles
 
