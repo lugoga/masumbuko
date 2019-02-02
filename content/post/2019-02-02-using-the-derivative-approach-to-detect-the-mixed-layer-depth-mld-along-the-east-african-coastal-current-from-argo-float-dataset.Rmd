@@ -1,0 +1,243 @@
+---
+title: Using the Derivative Approach to Detect the Mixed Layer Depth (MLD) along the
+  East African Coastal Current from Argo float dataset
+author: Masumbuko Semba
+date: '2019-02-02'
+slug: using-the-derivative-approach-to-detect-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-float-dataset
+categories:
+  - Oceanography
+tags:
+  - Argo
+  - CTD
+  - Depth
+  - Temperature
+  - Salinity
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
+```
+
+
+# Introduction
+
+In the [previous post](http://127.0.0.1:4321/02/01/2019/compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data/), I illustrate how to detect the mixed layer depth (MLD) with the change in temperature criterion approach ($\Delta T$). In this post I explain how to detect the MLD using derivatives of water properties based $\delta T/ \delta z$. With this approach, the thermocline can be detected at a depth where $\delta T/ \delta z$ is larges, with the region above considered as the mixed layer depth. Despite its simplest in detecting the MLD, this approach has its disadvantage that the profile data has to be smoothed, which can lead to over or under--estimate the MLD. -@oce developed a `swN2()` function that handle the smoothing shown in equation \@ref(eq:eqn1)
+
+$$
+\begin{equation}
+N^2 = - \frac{g \delta \rho}{\rho \delta z} (\#eq:eqn1)
+\end{equation}
+$$
+
+As  before, we need to load the necessary packages into the workspace required for importing, processing argo dataset, and displaying results.
+```{r}
+require(tidyverse)
+require(oce)
+require(ocedata)
+require(sf)
+require(lubridate)
+```
+
+
+## Read Argo file with oce package
+```{r, echo=FALSE}
+argo = dir("E:/Doctoral/udsm/Processing/argo_profile/", 
+               pattern = "prof.nc",
+               recursive = TRUE, 
+               full.names = TRUE)
+```
+
+```{r}
+argo.float = argo[39]%>% 
+  read.argo()%>% 
+  handleFlags() %>% 
+  argoGrid(p = seq(5,400,5))
+
+```
+
+Once the the argo float dataset has been cleaned, we can extract important information like the longitude, latitude and time the profile was recorded
+```{r}
+time = argo.float[["time"]]
+lon = argo.float[["longitude"]]
+lat = argo.float[["latitude"]]
+
+```
+
+## make a section
+Because the profiles are in list format, we can convert them directly into section with with `as.section()` function
+```{r}
+
+argo.section = argo.float%>%  
+  as.section()
+```
+
+## subset the EACC from the dataset
+The section provide a nifty way to subset only the profile we are interested. I did a simple exploration and found that the profile number 206 to 212 cover well the EACC. Therefore, we only pick these profile and drop the rest from the dataset. Because I also need to know the time of each profile, I selected the time and location information using the index method and make a data frame of these information. Figure \@ref(fig:fig1) show the location of the profile and the time in which the measurement were done and figure \@ref(fig:section) hydrographic section of these station to 200 meter deep
+
+```{r}
+## make a section from list of argo profile
+eacc.section = argo.section %>% subset(stationId  >= 206 & stationId <= 212)
+
+## obtain the time and spatial information corresponding to each profile
+time.eacc = time[206:212] %>% as.Date()
+lon.eacc = lon[206:212]
+lat.eacc = lat[206:212]
+
+## create a table from the time, lon and lat variable extracted above
+eacc.extract.tb = data.frame(time.eacc, lon.eacc, lat.eacc) %>% 
+  rename(time = 1, lon = 2, lat = 3)
+```
+
+```{r map, echo=FALSE,fig.align="center",fig.cap="Map of the East African Coast showing the location of the Argo float profiles and the date the records were measured"}
+
+#read Africa continental shapefile that we will use throught the munuscript as basemap dataset for maps
+africa = read_sf("E:/GIS/Tanzania spatial data Bank/EAF14 Tanzania spatial datasets/africa/Spatial/AdmInfr/afcntry.shp")
+
+# clean the africa dataset and pick boundar of kenya and Tanzania
+eacc.country = africa %>% 
+  select(-c(COUNT, FIPS_CNTRY, REGIONA, EMPTY, EMPTY2)) %>%
+  filter(CNTRY_NAME %in% c("Tanzania",  "Kenya"))
+
+
+## make a map
+ggplot()+
+  geom_sf(data = eacc.country, fill = "grey80", col = "black", size = .5)+
+  coord_sf(xlim = c(38.5,40.8), ylim = c(-7.9, -3.2))+
+  geom_point(data = eacc.extract.tb, aes(x = lon, y = lat), size = 2.5) +
+  geom_text(data = eacc.extract.tb, aes(x = lon+.18, y = lat+.1, label = time))+
+  labs(x = NULL, y = NULL)+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = "grey95"),
+        panel.grid = element_line(colour = "white"))+
+  annotate(geom = "text", x = 40, y = -7.56, label = "Mafia Island")+
+  annotate(geom = "text", x = 39.7, y = -6, label = "Unguja Island")+
+  annotate(geom = "text", x = 40, y = -4.8, label = "Pemba Island")
+
+
+# eacc.section %>% plot(which = "map", xtype = "latitude", ztype = "image")
+  
+```
+
+```{r section, echo=FALSE, fig.cap="Hydrographic section of temperature and salinity", fig.width=6, fig.height=2.5, fig.align="center"}
+eacc.section = eacc.section %>% 
+  sectionSort(by = "latitude") 
+
+
+eacc.section %>% 
+  plot(ztype = "image", ylim = c(400,20), xtype = "latitude", which = "temperature")
+
+
+
+```
+
+
+#The code for derivative determination of MLD
+The mathematical procedure used to detect MLD with the derivative detection show in in figure \@ref(fig:mld) is created with code in the chunk below.
+
+```{r mld, fig.cap="Mixed Layer Depth (MLD) for the seven profiles along the East African Coastal Current"}
+stations = eacc.section[["station"]]
+
+pstar.mld = list()
+
+par(mfrow = c(2,4))
+
+for (j in 1:length(stations)){
+  
+  # readline(prompt = "ENTER")
+  
+  ctd = stations[[j]]
+  ctd = ctd %>% subset(pressure > 10)
+  temperature = ctd[["temperature"]]
+  pressure = ctd[["pressure"]]
+  mid = which.max(swN2(ctd))
+  pstar = pressure[mid]
+  pstar.mld[j] = pstar
+  
+    # plotProfile(ctd, xtype = "N2", ylim = c(150,20))
+    # abline(h = pstar, lwd = 1, lty = 2)
+    
+    plotProfile(ctd, xtype = "temperature", ylim = c(150,20))
+    abline(h = pstar, lwd = 1, lty = 2)
+    
+    # plotProfile(ctd, xtype = "salinity", ylim = c(150,20))
+    # abline(h = pstar, lwd = 1, lty = 2)
+}
+
+pstar.mld = pstar.mld %>%
+  as.data.frame() %>%
+  t() %>%
+  as.tibble() %>%
+  rename(mld = V1)
+
+pstar.mld = eacc.extract.tb %>% bind_cols(pstar.mld)
+
+
+```
+
+
+```{r , echo=FALSE}
+stations = eacc.section[["station"]]
+
+mld.temp = list()
+
+par(mfrow = c(2,4))
+
+for (i in 1:length(stations)){
+  # readline(prompt = "ENTER")
+  ctd = stations[[i]]
+  ctd = ctd %>% subset(pressure > 10)
+ 
+
+      temperature = ctd[["temperature"]]
+      pressure = ctd[["pressure"]]
+  
+    for (criterion in 0.5){
+      inMLD =  abs(temperature[1] - temperature) < criterion
+      MLDindex = which.min(inMLD)
+      MLDpressure = pressure[MLDindex]
+      
+        # ctd %>% plotProfile(xtype = "temperature", ylim = c(150,20))
+        # abline(h = pressure[MLDindex], lwd = 2, lty = "dashed")
+        
+       
+        mld.temp[i] = MLDpressure
+
+    }
+}
+
+mld.temp = mld.temp %>% 
+  as.data.frame() %>% t() %>% 
+  as.data.frame()%>%  
+  rename(mld = V1)
+
+criterion.mld = eacc.extract.tb %>% bind_cols(mld.temp)
+```
+
+# Conclusion
+-@kelley2018r explained that although the mixed-layer depth (MLD) is a parameter of
+great interest, there is little agreement on how it should be defined. This is partly
+because the most appropriate definition can depend on the scientific application. This is clearly illustrated in figure \@ref(fig:mld-compare) that shows the discrepancy of the two approaches, with the derivative method giving a deeper MLD compared to the criterion method. 
+
+```{r mld-compare, echo=FALSE, fig.height=2.4, fig.width=6.0, fig.align="center", fig.cap="Comparison of two methods for inferring mixed-layer depth. Red line: based on Conservative Temperature, with mixed-layer depths inferred using temperature criterion of 0.1 0.5 ◦C Pale green.: based on the peak of N2 derivative."}
+
+mld.df = data.frame(pstar.mld, criterion.mld$mld) %>% rename(derivative = 4, criterion = 5) %>% gather(key = "method", value = "mld", 4:5)
+
+ggplot(data = mld.df, aes(x = lat, y = mld, col = method))+ 
+  geom_line(size = 1.2)+
+  scale_y_reverse()+
+  theme_bw()+
+  theme(panel.background = element_rect(colour = 1, fill = "grey95"),
+        panel.grid = element_line(colour = "white"),
+        axis.text = element_text(size = 11),
+        axis.title = element_text(size = 12)) +
+  labs(x = "Latitude", y = "MLD (m)" )+
+  scale_color_discrete(name = "Method")
+
+
+
+```
+
+

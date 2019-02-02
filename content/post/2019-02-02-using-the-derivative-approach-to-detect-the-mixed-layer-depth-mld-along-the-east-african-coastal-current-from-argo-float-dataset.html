@@ -1,0 +1,143 @@
+---
+title: Using the Derivative Approach to Detect the Mixed Layer Depth (MLD) along the
+  East African Coastal Current from Argo float dataset
+author: Masumbuko Semba
+date: '2019-02-02'
+slug: using-the-derivative-approach-to-detect-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-float-dataset
+categories:
+  - Oceanography
+tags:
+  - Argo
+  - CTD
+  - Depth
+  - Temperature
+  - Salinity
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>In the <a href="http://127.0.0.1:4321/02/01/2019/compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data/">previous post</a>, I illustrate how to detect the mixed layer depth (MLD) with the change in temperature criterion approach (<span class="math inline">\(\Delta T\)</span>). In this post I explain how to detect the MLD using derivatives of water properties based <span class="math inline">\(\delta T/ \delta z\)</span>. With this approach, the thermocline can be detected at a depth where <span class="math inline">\(\delta T/ \delta z\)</span> is larges, with the region above considered as the mixed layer depth. Despite its simplest in detecting the MLD, this approach has its disadvantage that the profile data has to be smoothed, which can lead to over or under–estimate the MLD. <span class="citation">D. Kelley and Richards (<a href="#ref-oce">2018</a>)</span> developed a <code>swN2()</code> function that handle the smoothing shown in equation <a href="#eq:eqn1">(1)</a></p>
+<p><span class="math display" id="eq:eqn1">\[
+\begin{equation}
+N^2 = - \frac{g \delta \rho}{\rho \delta z} \tag{1}
+\end{equation}
+\]</span></p>
+<p>As before, we need to load the necessary packages into the workspace required for importing, processing argo dataset, and displaying results.</p>
+<pre class="r"><code>require(tidyverse)
+require(oce)
+require(ocedata)
+require(sf)
+require(lubridate)</code></pre>
+<div id="read-argo-file-with-oce-package" class="section level2">
+<h2>Read Argo file with oce package</h2>
+<pre class="r"><code>argo.float = argo[39]%&gt;% 
+  read.argo()%&gt;% 
+  handleFlags() %&gt;% 
+  argoGrid(p = seq(5,400,5))</code></pre>
+<p>Once the the argo float dataset has been cleaned, we can extract important information like the longitude, latitude and time the profile was recorded</p>
+<pre class="r"><code>time = argo.float[[&quot;time&quot;]]
+lon = argo.float[[&quot;longitude&quot;]]
+lat = argo.float[[&quot;latitude&quot;]]</code></pre>
+</div>
+<div id="make-a-section" class="section level2">
+<h2>make a section</h2>
+<p>Because the profiles are in list format, we can convert them directly into section with with <code>as.section()</code> function</p>
+<pre class="r"><code>argo.section = argo.float%&gt;%  
+  as.section()</code></pre>
+</div>
+<div id="subset-the-eacc-from-the-dataset" class="section level2">
+<h2>subset the EACC from the dataset</h2>
+<p>The section provide a nifty way to subset only the profile we are interested. I did a simple exploration and found that the profile number 206 to 212 cover well the EACC. Therefore, we only pick these profile and drop the rest from the dataset. Because I also need to know the time of each profile, I selected the time and location information using the index method and make a data frame of these information. Figure <a href="#fig:fig1"><strong>??</strong></a> show the location of the profile and the time in which the measurement were done and figure <a href="#fig:section">2</a> hydrographic section of these station to 200 meter deep</p>
+<pre class="r"><code>## make a section from list of argo profile
+eacc.section = argo.section %&gt;% subset(stationId  &gt;= 206 &amp; stationId &lt;= 212)
+
+## obtain the time and spatial information corresponding to each profile
+time.eacc = time[206:212] %&gt;% as.Date()
+lon.eacc = lon[206:212]
+lat.eacc = lat[206:212]
+
+## create a table from the time, lon and lat variable extracted above
+eacc.extract.tb = data.frame(time.eacc, lon.eacc, lat.eacc) %&gt;% 
+  rename(time = 1, lon = 2, lat = 3)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:map"></span>
+<img src="/post/2019-02-02-using-the-derivative-approach-to-detect-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-float-dataset_files/figure-html/map-1.png" alt="Map of the East African Coast showing the location of the Argo float profiles and the date the records were measured" width="672" />
+<p class="caption">
+Figure 1: Map of the East African Coast showing the location of the Argo float profiles and the date the records were measured
+</p>
+</div>
+<div class="figure" style="text-align: center"><span id="fig:section"></span>
+<img src="/post/2019-02-02-using-the-derivative-approach-to-detect-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-float-dataset_files/figure-html/section-1.png" alt="Hydrographic section of temperature and salinity" width="576" />
+<p class="caption">
+Figure 2: Hydrographic section of temperature and salinity
+</p>
+</div>
+</div>
+</div>
+<div id="the-code-for-derivative-determination-of-mld" class="section level1">
+<h1>The code for derivative determination of MLD</h1>
+<p>The mathematical procedure used to detect MLD with the derivative detection show in in figure <a href="#fig:mld">3</a> is created with code in the chunk below.</p>
+<pre class="r"><code>stations = eacc.section[[&quot;station&quot;]]
+
+pstar.mld = list()
+
+par(mfrow = c(2,4))
+
+for (j in 1:length(stations)){
+  
+  # readline(prompt = &quot;ENTER&quot;)
+  
+  ctd = stations[[j]]
+  ctd = ctd %&gt;% subset(pressure &gt; 10)
+  temperature = ctd[[&quot;temperature&quot;]]
+  pressure = ctd[[&quot;pressure&quot;]]
+  mid = which.max(swN2(ctd))
+  pstar = pressure[mid]
+  pstar.mld[j] = pstar
+  
+    # plotProfile(ctd, xtype = &quot;N2&quot;, ylim = c(150,20))
+    # abline(h = pstar, lwd = 1, lty = 2)
+    
+    plotProfile(ctd, xtype = &quot;temperature&quot;, ylim = c(150,20))
+    abline(h = pstar, lwd = 1, lty = 2)
+    
+    # plotProfile(ctd, xtype = &quot;salinity&quot;, ylim = c(150,20))
+    # abline(h = pstar, lwd = 1, lty = 2)
+}
+
+pstar.mld = pstar.mld %&gt;%
+  as.data.frame() %&gt;%
+  t() %&gt;%
+  as.tibble() %&gt;%
+  rename(mld = V1)
+
+pstar.mld = eacc.extract.tb %&gt;% bind_cols(pstar.mld)</code></pre>
+<div class="figure"><span id="fig:mld"></span>
+<img src="/post/2019-02-02-using-the-derivative-approach-to-detect-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-float-dataset_files/figure-html/mld-1.png" alt="Mixed Layer Depth (MLD) for the seven profiles along the East African Coastal Current" width="672" />
+<p class="caption">
+Figure 3: Mixed Layer Depth (MLD) for the seven profiles along the East African Coastal Current
+</p>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p><span class="citation">D. E. Kelley (<a href="#ref-kelley2018r">2018</a>)</span> explained that although the mixed-layer depth (MLD) is a parameter of great interest, there is little agreement on how it should be defined. This is partly because the most appropriate definition can depend on the scientific application. This is clearly illustrated in figure <a href="#fig:mld-compare">4</a> that shows the discrepancy of the two approaches, with the derivative method giving a deeper MLD compared to the criterion method.</p>
+<div class="figure" style="text-align: center"><span id="fig:mld-compare"></span>
+<img src="/post/2019-02-02-using-the-derivative-approach-to-detect-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-float-dataset_files/figure-html/mld-compare-1.png" alt="Comparison of two methods for inferring mixed-layer depth. Red line: based on Conservative Temperature, with mixed-layer depths inferred using temperature criterion of 0.1 0.5 &lt;U+25E6&gt;C Pale green.: based on the peak of N2 derivative." width="576" />
+<p class="caption">
+Figure 4: Comparison of two methods for inferring mixed-layer depth. Red line: based on Conservative Temperature, with mixed-layer depths inferred using temperature criterion of 0.1 0.5 <U+25E6>C Pale green.: based on the peak of N2 derivative.
+</p>
+</div>
+<div id="refs" class="references">
+<div id="ref-kelley2018r">
+<p>Kelley, Dan E. 2018. “R Tutorial for Oceanographers.” In <em>Oceanographic Analysis with R</em>, 5–90. Springer.</p>
+</div>
+<div id="ref-oce">
+<p>Kelley, Dan, and Clark Richards. 2018. <em>Oce: Analysis of Oceanographic Data</em>. <a href="https://CRAN.R-project.org/package=oce" class="uri">https://CRAN.R-project.org/package=oce</a>.</p>
+</div>
+</div>
+</div>

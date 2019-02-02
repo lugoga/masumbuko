@@ -1,6 +1,6 @@
 ---
-title: Compute the Mixed Layer Depth (MLD)  along the East African Coastal Current  from   Argo
-  floats data
+title: Detect the Mixed Layer Depth (MLD)  along the East African Coastal Current  from   Argo
+  floats data using criterion approach
 author: Masumbuko Semba
 date: '2019-02-01'
 slug: compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data
