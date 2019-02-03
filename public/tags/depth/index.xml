@@ -6,10 +6,19 @@
     <description>Recent content in Depth on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 02 Feb 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 03 Feb 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/depth/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Determine dynamic height and geostrophic velocity along the East African Coastal Current from Argo floats</title>
+      <link>/02/03/2019/determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats/</link>
+      <pubDate>Sun, 03 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/02/03/2019/determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats/</guid>
+      <description>IntroductionI have been working with argo floats data and wrote two post that illustrate how to detect the mixed layer depth with criterion and derivative approaches. In this post, I change the focus. Rather than talking about the mixed layer depth detection, I will illustrate how to calculate the dynamic height and geostrophic velocity from same dataset—Argo float. I use R programming language as an environment for the required routine to calculate the dynamic height and geostrophic current (R Core Team 2018).</description>
+    </item>
     
     <item>
       <title>Using the Derivative Approach to Detect the Mixed Layer Depth (MLD) along the East African Coastal Current from Argo float dataset</title>

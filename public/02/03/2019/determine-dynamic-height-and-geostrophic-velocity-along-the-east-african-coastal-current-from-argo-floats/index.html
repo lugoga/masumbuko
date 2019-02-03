@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.51" />
+
+
+<title>Determine dynamic height and geostrophic velocity along the East African Coastal Current from Argo floats - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Determine dynamic height and geostrophic velocity along the East African Coastal Current from Argo floats - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">6 min read</span>
+    
+
+    <h1 class="article-title">Determine dynamic height and geostrophic velocity along the East African Coastal Current from Argo floats</h1>
+
+    
+    <span class="article-date">2019/02/03</span>
+    
+
+    <div class="article-content">
+      
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>I have been working with argo floats data and wrote two post that illustrate how to detect the mixed layer depth with <a href="https://semba-blog.netlify.com/02/01/2019/compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data/">criterion</a> and <a href="https://semba-blog.netlify.com/02/02/2019/using-the-derivative-approach-to-detect-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-float-dataset/">derivative</a> approaches. In this post, I change the focus. Rather than talking about the mixed layer depth detection, I will illustrate how to calculate the dynamic height and geostrophic velocity from same dataset—Argo float. I use R programming language as an environment for the required routine to calculate the dynamic height and geostrophic current <span class="citation">(R Core Team <a href="#ref-r">2018</a>)</span>. To accomplish this process I need several packages. You can achieve the process just by relying on the base R. but, <span class="citation">Kelley and Richards (<a href="#ref-oce">2018</a>)</span> developed <strong>oce</strong> package that makes <strong>R</strong> programming languages <span class="citation">(R Core Team <a href="#ref-r">2018</a>)</span> capable of handling and analysing wide variety of oceanographical data. As usual, I need to load the necessary packages into the workspace required for importing <span class="citation">(Kelley and Richards <a href="#ref-oce">2018</a>; Pebesma <a href="#ref-sf">2018</a>)</span>, processing argo dataset <span class="citation">(Kelley <a href="#ref-kelley2018r">2018</a>; Wickham and Henry <a href="#ref-tidyr">2018</a>)</span>, mapping <span class="citation">(Pebesma <a href="#ref-sf">2018</a>)</span> and displaying the outputs <span class="citation">(Wickham <a href="#ref-tidyverse">2017</a>)</span>.</p>
+<pre class="r"><code>require(tidyverse)
+require(oce)
+require(ocedata)
+require(sf)
+require(lubridate)</code></pre>
+</div>
+<div id="read-argo-file-with-oce-package" class="section level3">
+<h3>Read Argo file with oce package</h3>
+<p>In this post I used freely available Argo floats profile of salinity and temperature that crossed the coastal water of Tanzania and Kenya. Argo data were obtained as the actual Argo NetCDF files from the <a href="http://www.argo.ucsd.edu/Argo_data_and.html">Argo Data website</a>. Argo recommends the delayed mode for oceanographic application because the profiles of salinity and temperature has been adjusted with high quality ship-based CTD and climatological data. Each Argo floats comes with four different files—the first file is profile, which contains all measured profiles; second file is the trajectory, which contains consecutive position information (longitude, latitude and time) of the float while the float is a surface sending data to satellite; the third file is metadata. It contains the float and sensor characteristics; and the fourth file is technical one that store the information of the instrument like battery voltages and intensities.</p>
+<p>Because there were 51 NetCDF file of different float in the region, I first created a directory file that list the names and path of each dataset.</p>
+<pre class="r"><code>argo.float = argo[39]%&gt;% 
+  read.argo()%&gt;% 
+  handleFlags() %&gt;% 
+  argoGrid(p = seq(5,400,5))</code></pre>
+<p>Once the the argo float dataset has been cleaned, we can extract important information like the longitude, latitude and time the profile was recorded</p>
+<pre class="r"><code>time = argo.float[[&quot;time&quot;]]
+lon = argo.float[[&quot;longitude&quot;]]
+lat = argo.float[[&quot;latitude&quot;]]</code></pre>
+</div>
+<div id="make-a-section" class="section level3">
+<h3>make a section</h3>
+<p>Because the profiles are in list format, we can convert them directly into section with with <code>as.section()</code> function</p>
+<pre class="r"><code>argo.section = argo.float%&gt;%  
+  as.section()</code></pre>
+</div>
+<div id="subset-the-eacc-from-the-dataset" class="section level3">
+<h3>subset the EACC from the dataset</h3>
+<p>The section provide a nifty way to subset only the profile we are interested. I did a simple exploration and found that the profile number 206 to 212 cover well the EACC. Therefore, we only pick these profile and drop the rest from the dataset. Because I also need to know the time of each profile, I selected the time and location information using the index method and make a data frame of these information. Figure <a href="#fig:map">1</a> show the location of the profile and the time in which the measurement were done and figure <a href="#fig:section">2</a> hydrographic section of these station to 200 meter deep</p>
+<pre class="r"><code>## make a section from list of argo profile
+eacc.section = argo.section %&gt;% subset(stationId  &gt;= 206 &amp; stationId &lt;= 212)
+
+## obtain the time and spatial information corresponding to each profile
+time.eacc = time[206:212] %&gt;% as.Date()
+lon.eacc = lon[206:212]
+lat.eacc = lat[206:212]
+
+## create a table from the time, lon and lat variable extracted above
+eacc.extract.tb = data.frame(time.eacc, lon.eacc, lat.eacc) %&gt;% 
+  rename(time = 1, lon = 2, lat = 3)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:map"></span>
+<img src="/post/2019-02-03-determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats_files/figure-html/map-1.png" alt="Map of the East African Coast showing the location of the Argo float profiles and the date the records were measured" width="672" />
+<p class="caption">
+Figure 1: Map of the East African Coast showing the location of the Argo float profiles and the date the records were measured
+</p>
+</div>
+<div class="figure" style="text-align: center"><span id="fig:section"></span>
+<img src="/post/2019-02-03-determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats_files/figure-html/section-1.png" alt="Hydrographic section of temperature" width="576" />
+<p class="caption">
+Figure 2: Hydrographic section of temperature
+</p>
+</div>
+</div>
+<div id="compute-the-dynamic-height" class="section level3">
+<h3>Compute the Dynamic height</h3>
+<p>From the hydrographic section of the East African Coastal current (EACC) obtained from the Argo float, the dynamic height for each station was computed using the <code>swDynamicHeight()</code> function. The chunk below shows all the three main line of code required for the process. The output is a list file contains distance and dynamic height for each station along the section.</p>
+<pre class="r"><code>## calculate  and plot dynamic height
+eacc.dh = eacc.section %&gt;% 
+  sectionSort(by = &quot;latitude&quot;) %&gt;%
+  swDynamicHeight() 
+
+# plot(eacc.dh$distance, eacc.dh$height, type = &quot;l&quot;, 
+#ylab = &quot;Dynamic Height (m)&quot;, xlab = &quot;Distance (km)&quot;)</code></pre>
+<p>The computed dynamic height along the East African coastal current are shown in figure <a href="#fig:dh">3</a>. The figure reveal that the dynamic height increased from latitude 8<sup>o</sup>S to 7<sup>o</sup>S and decreased slightly to latitude 4<sup>o</sup>S. This findings suggest that the EACC flows along the decreasing dynamic height during the southeast season.</p>
+<pre class="r"><code>eacc.dh.df = eacc.dh %&gt;% as.data.frame()
+## get latitude from the section for labelling the x-axis
+lat = eacc.section@metadata$latitude
+## add latitude colum
+eacc.dh.df = data.frame(lat,eacc.dh.df)
+
+ggplot(data = eacc.dh.df, aes(x = lat, y = height)) + 
+  geom_line(size = 1.2, col = &quot;red&quot;) +
+  theme(panel.background = element_rect(colour = &quot;black&quot;),
+        axis.text = element_text(size = 11),
+        axis.title = element_text(size = 12),
+        panel.grid.minor = element_blank())+
+  labs(y = &quot;Dynamic Height (m)&quot;, x = &quot;Latitude&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:dh"></span>
+<img src="/post/2019-02-03-determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats_files/figure-html/dh-1.png" alt="Dynamic Height along the EACC derived from Argo float" width="480" />
+<p class="caption">
+Figure 3: Dynamic Height along the EACC derived from Argo float
+</p>
+</div>
+</div>
+<div id="compute-geostrophic-height" class="section level3">
+<h3>Compute Geostrophic Height</h3>
+<p>Once the dynamic height along the EACC current was determined, we can proceed with the computation of the geostrophic velocity. The code for the process is shown in the chunk below. In summary, the first thing is to determine the coriolis force (<span class="math inline">\(f\)</span>) and acceleration due to gravity (<span class="math inline">\(g\)</span>). The coriolis force (<span class="math inline">\(f\)</span>) and acceleration due to gravity (<span class="math inline">\(g\)</span>) as a function of latitude were computed from latitude using method described by <span class="citation">Gill (<a href="#ref-gill">1982</a>)</span> and <span class="citation">Groten (<a href="#ref-groten">1997</a>)</span>. Then the geostrophic current velocity (<span class="math inline">\(gv\)</span>) was computed using the equation <a href="#eq:eqn1">(1)</a>.</p>
+<p><span class="math display" id="eq:eqn1">\[
+\begin{equation}
+gv = \frac{\frac{\Delta \: DH_i}{\Delta \:D_i} \times g}{ f \times 1000} \tag{1}
+\end{equation}
+\]</span></p>
+<p>Where the <span class="math inline">\(i\)</span> subscript refer to the individual latitude, <span class="math inline">\(\Delta dh\)</span> = change in dynamic height; <span class="math inline">\(\Delta distance\)</span> = change in distane; <span class="math inline">\(g\)</span> = accelation due to gravity; <span class="math inline">\(f\)</span> = coriolis force. In carrying out this calculation, the change in the dynamic height along the latitude was divided by the change in distance. Multiplying by the accelation due to gravity (<span class="math inline">\(g\)</span>) and divide with coriolis force (<span class="math inline">\(f\)</span>) and 1000 to obtain the geostrophic velocity at each latitude shown in figure <a href="#fig:gv">4</a>.</p>
+<pre class="r"><code>## get latitude value along the EACC from the section object
+lat = eacc.section@metadata$latitude%&gt;%round(2)
+## 
+f = coriolis(lat) ## derive coriolis force
+g = gravity(lat) ## derive acceleration due to gravity
+
+## then cacluate and plot the geostrophic velocity
+gv = diff(eacc.dh$height) / diff(eacc.dh$distance) * g / f / 1000
+
+## make a data frame for plotting with ggplot2
+eacc.dh.gv.df = data.frame(lat,gv)
+
+## plot(eac.dh$distance, gv, type = &quot;l&quot;, ylab = &quot;Velocity (m/s)&quot;, xlab = &quot;Distance (km)&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:gv"></span>
+<img src="/post/2019-02-03-determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats_files/figure-html/gv-1.png" alt="Geostrophic velocity derived from Argo float along the EACC" width="480" />
+<p class="caption">
+Figure 4: Geostrophic velocity derived from Argo float along the EACC
+</p>
+</div>
+</div>
+<div id="reference" class="section level3 unnumbered">
+<h3>Reference</h3>
+<div id="refs" class="references">
+<div id="ref-gill">
+<p>Gill, Adrian E. 1982. <em>International Geophysics, 30: Atmosphere-Ocean Dynamics</em>. Elsevier.</p>
+</div>
+<div id="ref-groten">
+<p>Groten, End. 1997. “Current Best Estimates of the Parameters of Common Relevance to Astronomy, Geodesy, and Geodynamics.” <em>Internal Communications of IAG/IUGG Special Commission</em> 3.</p>
+</div>
+<div id="ref-kelley2018r">
+<p>Kelley, Dan. 2018. “R Tutorial for Oceanographers.” In <em>Oceanographic Analysis with R</em>, 5–90. Springer.</p>
+</div>
+<div id="ref-oce">
+<p>Kelley, Dan, and Clark Richards. 2018. <em>Oce: Analysis of Oceanographic Data</em>. <a href="https://CRAN.R-project.org/package=oce" class="uri">https://CRAN.R-project.org/package=oce</a>.</p>
+</div>
+<div id="ref-sf">
+<p>Pebesma, Edzer. 2018. <em>Sf: Simple Features for R</em>. <a href="https://CRAN.R-project.org/package=sf" class="uri">https://CRAN.R-project.org/package=sf</a>.</p>
+</div>
+<div id="ref-r">
+<p>R Core Team. 2018. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, Hadley. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse" class="uri">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+<div id="ref-tidyr">
+<p>Wickham, Hadley, and Lionel Henry. 2018. <em>Tidyr: Easily Tidy Data with ’Spread()’ and ’Gather()’ Functions</em>. <a href="https://CRAN.R-project.org/package=tidyr" class="uri">https://CRAN.R-project.org/package=tidyr</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

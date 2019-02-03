@@ -121,7 +121,7 @@ ggplot()+
   
 ```
 
-```{r section, echo=FALSE, fig.cap="Hydrographic section of temperature and salinity", fig.width=6, fig.height=2.5, fig.align="center"}
+```{r section, echo=FALSE, fig.cap="Hydrographic section of temperature", fig.width=6, fig.height=2.5, fig.align="center"}
 eacc.section = eacc.section %>% 
   sectionSort(by = "latitude") 
 
