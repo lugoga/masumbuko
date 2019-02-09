@@ -28,6 +28,11 @@
   </url>
   
   <url>
+    <loc>/02/08/2019/different-approaches-of-detecting-mixed-layer-depth/</loc>
+    <lastmod>2019-02-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/02/03/2019/determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats/</loc>
     <lastmod>2019-02-03T00:00:00+00:00</lastmod>
   </url>
@@ -170,6 +175,12 @@
   </url>
   
   <url>
+    <loc>/tags/algoa/</loc>
+    <lastmod>2019-02-08T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/argo/</loc>
     <lastmod>2019-02-03T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -201,13 +212,13 @@
   
   <url>
     <loc>/tags/climate/</loc>
-    <lastmod>2018-10-03T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-08T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/ctd/</loc>
-    <lastmod>2019-02-03T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-08T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -243,7 +254,7 @@
   
   <url>
     <loc>/tags/indian-ocean/</loc>
-    <lastmod>2019-02-03T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-08T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -255,13 +266,19 @@
   
   <url>
     <loc>/tags/masumbuko-semba/</loc>
-    <lastmod>2019-02-03T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-08T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/</loc>
     <lastmod>2019-09-19T21:48:51-07:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/mld/</loc>
+    <lastmod>2019-02-08T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -273,7 +290,7 @@
   
   <url>
     <loc>/categories/oceanography/</loc>
-    <lastmod>2019-02-03T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-08T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -291,7 +308,7 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2019-02-03T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-08T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

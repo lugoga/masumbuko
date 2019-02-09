@@ -6,10 +6,19 @@
     <description>Recent content in Climate on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 03 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 08 Feb 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/climate/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Detecting Mixed Layer Depth with Optimal Linear fitting method.</title>
+      <link>/02/08/2019/different-approaches-of-detecting-mixed-layer-depth/</link>
+      <pubDate>Fri, 08 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/02/08/2019/different-approaches-of-detecting-mixed-layer-depth/</guid>
+      <description>IntroductionThe mixed layer is a thin layer with constant temperature and salinity from the surface down to a depth where the values differ from those at the surface (Boyer Montégut et al. 2004). Wind blowing on the ocean stirs the upper layers leading to a thin mixed layer (Stewart 2008). The resulting surface mixed layer is important for local primary production, climate and ocean circulation (Kelley 2018). Although the mixed layer is an important oceanographic parameter, there different approaches that are used and each method depends on the scientific application.</description>
+    </item>
     
     <item>
       <title>Seasonal Climatology of temperature and salinity in the WIO region from Argo floats </title>

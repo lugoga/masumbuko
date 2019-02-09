@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.51" />
+
+
+<title>Detecting Mixed Layer Depth with Optimal Linear fitting method. - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Detecting Mixed Layer Depth with Optimal Linear fitting method. - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">6 min read</span>
+    
+
+    <h1 class="article-title">Detecting Mixed Layer Depth with Optimal Linear fitting method.</h1>
+
+    
+    <span class="article-date">2019/02/08</span>
+    
+
+    <div class="article-content">
+      
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>The mixed layer is a thin layer with constant temperature and salinity from the surface down to a depth where the values differ from those at the surface <span class="citation">(Boyer Montégut et al. <a href="#ref-de2004mixed">2004</a>)</span>. Wind blowing on the ocean stirs the upper layers leading to a thin mixed layer <span class="citation">(Stewart <a href="#ref-stewart">2008</a>)</span>. The resulting surface mixed layer is important for local primary production, climate and ocean circulation <span class="citation">(Kelley <a href="#ref-kelley2018r">2018</a>)</span>. Although the mixed layer is an important oceanographic parameter, there different approaches that are used and each method depends on the scientific application.</p>
+<p>The two classic methods are <a href="http://127.0.0.1:4321/02/01/2019/compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data/">criterion</a> and <a href="http://127.0.0.1:4321/02/01/2019/compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data/">derivative</a> explained in tha last two post in this blog. In this post I explain the third method developed by <span class="citation">Chu and Fan (<a href="#ref-chu">2010</a>)</span>. This method use an optimal linear fitting to determine the mixed layer depth. Using similar approach, <span class="citation">Kelley (<a href="#ref-kelley2018r">2018</a>)</span> wrote a function in R programming language that returns the mixed layer depth and other interesting elements of the calculations. The chunk below highlight the key steps of the function. The argument <code>n</code> determines the number of data levels to examine below the focus depth and the <code>variable</code> argument determine the hydrographic variable that will be used for estimation, the default is temperature.</p>
+<pre class="r"><code>MLDchu = function(ctd, n = 5, variable = &quot;temperature&quot;)
+{
+  pressure = ctd[[&quot;pressure&quot;]]
+  x = ctd[[variable]]
+  ndata = length(pressure)
+  E1 = rep(NA, ndata)
+  E2 = E1
+  E2overE1 = E2
+  kstart = min(n,3)
+  for (k in seq(kstart, ndata-n,1)){
+    above = seq.int(1,k)
+    below = seq.int(k+1, k+n)
+    fit = lm(x~pressure, subset = above)
+    E1[k] = sd(predict(fit) - x[above])
+    pBelow = data.frame(pressure = pressure[below])
+    E2[k] = abs(mean(predict(fit, newdata = pBelow) -x[below]))
+    E2overE1[k] = E2[k] / E1[k]
+    
+  }
+  
+  MLDindex = which.max(E2overE1)
+  return(list(MLD = pressure[MLDindex], MLDindex = MLDindex, E1 = E1, E2 = E2))
+  
+}</code></pre>
+</div>
+<div id="packages" class="section level3">
+<h3>Packages</h3>
+<p>Once we have the function, we can process the ctd data and estimate the MLD for each profile. We rely on <strong>oce</strong> <span class="citation">(Kelley and Richards <a href="#ref-oce">2018</a>)</span> and <strong>tidyverse</strong> <span class="citation">(Wickham <a href="#ref-tidyverse">2017</a>)</span> packages for this routine. We load these packages into the workspace using the <code>require()</code>. If you have not installed these packages in your machine, please go ahead and install them from the CRAN.</p>
+<pre class="r"><code>require(oce)
+require(ocedata)
+require(tidyverse)</code></pre>
+</div>
+<div id="dataset" class="section level3">
+<h3>Dataset</h3>
+<p>We use the ctd data collected in August 2004 with Algoa to demonstrate the process. The dataset cover the four transects along the coastal water of Tanzania (Figure <a href="#fig:map">1</a>). To make easy to process the dataset, we first use the function <code>dir()</code> to read names of downcast files from the local directory . We limit file names by parsing the <code>pattern</code> argument in the function. Because the local directory is not in the working directory, we also parse the <code>full.names()</code> function as the argument that will give the full path of the files.</p>
+<pre class="r"><code>## similar to the chunk above, but this will act as front end, not process anything
+algoa = dir(path = &quot;./ctd_algoa/&quot;, pattern = &quot;dstn&quot;, full.names = TRUE)</code></pre>
+</div>
+<div id="processing-the-ctd-dataset" class="section level3">
+<h3>Processing the CTD dataset</h3>
+<p>Using the <code>for()</code> function to iterate the process of reading the ctd files. Before we loop, an empty list files was created that will store profile data for each ctd cast. Note that the process is chained with the pipe operator (<code>%&gt;%</code>)—pipping. Pipping is important because it reduce the processing time and also avoid creation of intermediate files during the process. It also make writing and reading code easier than the traditional syntax.</p>
+<pre class="r"><code>algoa.list = list()
+
+for (i in 1:length(algoa)){
+  
+  algoa.list[[i]] = algoa[i] %&gt;% read.ctd()
+}</code></pre>
+<pre class="r"><code>## Make a section and plot a map that show the location of each profile
+
+algoa.section = algoa.list %&gt;% as.section()
+
+algoa.section %&gt;% plot(which = &quot;map&quot;)</code></pre>
+<div class="figure"><span id="fig:map"></span>
+<img src="/post/2019-02-08-different-approaches-of-detecting-mixed-layer-depth_files/figure-html/map-1.png" alt="a sketch map showing the CTD cast along the sections" width="672" />
+<p class="caption">
+Figure 1: a sketch map showing the CTD cast along the sections
+</p>
+</div>
+</div>
+<div id="estimate-the-mld-of-pemba-transect" class="section level3">
+<h3>Estimate the MLD of Pemba transect</h3>
+<p>For illustration, we picked only CTD profiles measured along the transect located between the Unguja and Pemba Island shown in. You can easily notice from figure <a href="#fig:map">1</a> that the transect contain profiles recorded above latitude 06<sup>o</sup>S. Because we had already created a <code>MLDchu()</code> function, we use it to determine the MLD of each profile (Figure <a href="#fig:mld">2</a>). The chunk below highlight the steps of estimating the MLD</p>
+<pre class="r"><code>## pick profile for pemba transect only, which are above latitude 
+pemba.section = algoa.section %&gt;% subset(latitude &gt;-6) 
+
+## convert the section into the list
+pemba.list = pemba.section[[&quot;station&quot;]]
+
+lon = pemba.section[[&quot;longitude&quot;]] %&gt;% unique()
+lat = pemba.section[[&quot;latitude&quot;]] %&gt;% unique()
+
+## preallocate the list file that will store mld value
+mld.pemba = list()
+
+## make subplots 
+par(mfrow = c(2,3))
+## loop the process
+for (j in 1:length(pemba.list)){
+  ## get the ctd value of the station
+ctd = pemba.list[[j]] %&gt;% ctdDecimate(p = seq(8,150,10))
+
+## compute the mld of each station
+mld = MLDchu(ctd)
+mld.pemba[j] = mld$MLD
+
+## draw a profile of the ctd cast
+plotProfile(ctd, xtype = &quot;temperature&quot;, main = j)
+## add a line showing the mld
+abline(h = mld$MLD, lwd = 2, lty = &quot;dashed&quot;)
+
+}</code></pre>
+<div class="figure"><span id="fig:mld"></span>
+<img src="/post/2019-02-08-different-approaches-of-detecting-mixed-layer-depth_files/figure-html/mld-1.png" alt="Mixed layer depth of the six profile along the transect within Unguja and Pemba Islands" width="672" />
+<p class="caption">
+Figure 2: Mixed layer depth of the six profile along the transect within Unguja and Pemba Islands
+</p>
+</div>
+</div>
+<div id="make-data-frame-of-the-mld" class="section level3">
+<h3>Make data frame of the MLD</h3>
+<p>To overlay the MLD over the hydrographic section, the list containing the <code>mld</code> was transformed into individual vector and combined with longitude and latitude information. This process create a data frame that show both the location and the mld at each cast. The chunk below highlight the steps involved to make this data frame. Figure <a href="#fig:mld-section">3</a> show the cross of temperature along the pemba transect. The white dotted line indicate the mixed layer depth along the transect.</p>
+<pre class="r"><code>## convert the mld list into tibble
+mld.pemba.tb = mld.pemba%&gt;% as.data.frame() %&gt;% t() %&gt;% as.tibble() %&gt;% rename(mld = 1)
+
+## bind the mld with longitude and latitude information
+mld.pemba.df = data.frame(lon,lat, mld.pemba.tb )</code></pre>
+<pre class="r"><code>par(mfrow = c(1,2))
+## draw a section of the pemba
+pemba.section %&gt;% plot(which = &quot;temperature&quot;, ztype = &quot;image&quot;, ylim = c(200,0), 
+                       xtype = &quot;longitude&quot;, zcol = oceColors9A(120))
+## add the mld into the section
+lines(x = mld.pemba.df$lon, y = mld.pemba.df$mld, col = &quot;white&quot;, lwd = 2, lty = &quot;dashed&quot;)
+
+## draw a contour section of the pemba
+pemba.section %&gt;% plot(which = &quot;temperature&quot;, ztype = &quot;contour&quot;, ylim = c(200,0), 
+                       xtype = &quot;longitude&quot;)
+## add the mld into the section
+lines(x = mld.pemba.df$lon, y = mld.pemba.df$mld, col = &quot;black&quot;, lwd = 2, lty = &quot;dashed&quot;)</code></pre>
+<div class="figure"><span id="fig:mld-section"></span>
+<img src="/post/2019-02-08-different-approaches-of-detecting-mixed-layer-depth_files/figure-html/mld-section-1.png" alt="Mixed layer depth (white color) overlaid on the temperature cross section image (left panel) and contour (right panel)" width="672" />
+<p class="caption">
+Figure 3: Mixed layer depth (white color) overlaid on the temperature cross section image (left panel) and contour (right panel)
+</p>
+</div>
+</div>
+<div id="conclusion" class="section level3">
+<h3>Conclusion</h3>
+<p>We have seen the criterion and the derivatives approaches in the previous post. This post mark the third method—optimal linear fitting.Unlike the other two methods, this technique returns not just the mixed layer depth, but also some other interesting elements of the calculation.</p>
+</div>
+<div id="references" class="section level3 unnumbered">
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-de2004mixed">
+<p>Boyer Montégut, Clément de, Gurvan Madec, Albert S Fischer, Alban Lazar, and Daniele Iudicone. 2004. “Mixed Layer Depth over the Global Ocean: An Examination of Profile Data and a Profile-Based Climatology.” <em>Journal of Geophysical Research: Oceans</em> 109 (C12). Wiley Online Library.</p>
+</div>
+<div id="ref-chu">
+<p>Chu, P, and C. Fan. 2010. “Optimal Linear Fitting for Objective Determination of Ocean Mixed Layer Depth from Glider Profiles.” <em>Journal of Atmospheric and Oceanic Technology</em> 27 (11): 1893–8.</p>
+</div>
+<div id="ref-kelley2018r">
+<p>Kelley, Dan. 2018. “R Tutorial for Oceanographers.” In <em>Oceanographic Analysis with R</em>, 5–90. Springer.</p>
+</div>
+<div id="ref-oce">
+<p>Kelley, Dan, and Clark Richards. 2018. <em>Oce: Analysis of Oceanographic Data</em>. <a href="https://CRAN.R-project.org/package=oce" class="uri">https://CRAN.R-project.org/package=oce</a>.</p>
+</div>
+<div id="ref-stewart">
+<p>Stewart, Robert H. 2008. <em>Introduction to Physical Oceanography</em>. Book. Robert H. Stewart.</p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, Hadley. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse" class="uri">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+
