@@ -1,0 +1,416 @@
+---
+title: Comparing classical methods for estimating the mixed layer depth along the
+  transect off Kimbiji, Tanzania
+author: Masumbuko Semba
+date: '2019-02-09'
+slug: comparing-classical-methods-for-estimating-the-mixed-layer-depth-along-the-transect-off-kimbiji-tanzania
+categories:
+  - Oceanography
+tags:
+  - MLD
+  - CTD
+  - Algoa
+  - oxygen
+  - Kimbiji
+  - Indian Ocean
+  - Tanzania
+  - Masumbuko Semba
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>Upper Ocean is characterized for a quasi-homogeneous layer where temperature, salinity and density almost constant with increasing depth <span class="citation">(Costoya et al. <a href="#ref-costoya">2014</a>)</span>. This homogeneity layer is caused by turbulent vertical mixing that is driven by heat loss from the ocean to the atmosphere, as well as by wind stress <span class="citation">(Stranne et al. <a href="#ref-strane">2018</a>)</span>. The deepest layer affected by this turbulent mixing is called mixed layer depth (MLD), which marks the width of the upper ocean that interacts with the atmosphere <span class="citation">(Kelley <a href="#ref-kelley2018r">2018</a>)</span>.</p>
+<p>The depth of the mixed layer (MLD) influences the exchange of heat and gases between the atmosphere and the ocean and constitutes one of the major factors controlling ocean primary production as it affects the vertical distribution of biological and chemical components in near-surface waters. Estimation of the MLD are often made by means of conductivity, temperature and depth (CTD) casts <span class="citation">(Stranne et al. <a href="#ref-strane">2018</a>)</span>. However, there different techniques are used and there is little agreement on which technique is the best for estimating MLD <span class="citation">(Kelley <a href="#ref-kelley2018r">2018</a>)</span>. In this post I illustrate the classical three approaches that are widely used to estimate the MLD.</p>
+<p>A first group of the methods involves estimating the thickness of a near-surface region within which water properties are nearly constant. I dub this approach as <em>criterion</em> because it base on the criteria to estimate the MLD. For example, the MLD may be defined as the shallowest depth at which density or temperature differs from the surface value by a fixed amount <span class="math inline">\(\Delta \rho\)</span> or <span class="math inline">\(\Delta \Theta\)</span>. <span class="citation">Costoya et al. (<a href="#ref-costoya">2014</a>)</span> reported a temperature ranged 0.1–1.0<sup>o</sup>C and density of 0.125 kgm<sup>-3</sup> are commonly thresholds used in this approach. A second group of methods involves derivatives of water properties, based on, e.g., <span class="math inline">\(\delta \Theta\)</span>/<span class="math inline">\(\delta z\)</span>. For example, the thermocline could be inferred as the spot where |<span class="math inline">\(\delta \Theta\)</span>/<span class="math inline">\(\delta z\)</span>| is largest, with the region above being interpreted as a mixed layer <span class="citation">(Kelley <a href="#ref-kelley2018r">2018</a>)</span>. The third method use optimal fitting to estimate the MLD.</p>
+<p>If you find yourself left out in this post, I have described these method in the previous post. For detail of the <em>criterion</em>, check this <a href="http://127.0.0.1:4321/02/01/2019/compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data/">post</a>. For a length procedure of the <em>derivatives</em> method, check on this <a href="https://semba-blog.netlify.com/02/02/2019/using-the-derivative-approach-to-detect-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-float-dataset/">post</a> and the <em>optimal</em> technique is discussed in this <a href="http://127.0.0.1:4321/02/08/2019/different-approaches-of-detecting-mixed-layer-depth/">post</a>. I only need to load the <strong>oce</strong> package developed by <span class="citation">Kelley and Richards (<a href="#ref-oce">2018</a>)</span> and <strong>tidyverse</strong> package developed by <span class="citation">Wickham (<a href="#ref-tidyverse">2017</a>)</span> for this post. If you have not installed these packages in your machine, stop here and install them first. You may also load the <strong>ocedata</strong> package <span class="citation">(Kelley <a href="#ref-ocedata">2015</a>)</span>. But you can finish this task without it.</p>
+<pre class="r"><code>require(oce)
+require(ocedata)
+require(tidyverse)</code></pre>
+</div>
+<div id="dataset" class="section level3">
+<h3>Dataset</h3>
+<p>To illustrate the concept of estimating the Mixed Layer Depth (MLD) of the upper ocean off coastal of Kimbiji, Tanzania, I used the ctd data collected in August 2004 with Algoa. To make easy to process the dataset, we first use the function dir() to read names of downcast files from the local directory . We limit file names by parsing the pattern argument in the function. Because the local directory is not in the working directory, we also parse the full.names() function as the argument that will give the full path of the files.</p>
+<p>Because there are several ctd cast, the <code>for()</code> function was used to iterate the process of reading the ctd files. Before looping, an empty list files was created to store profile data of each ctd cast. Note that the process is pipped with the pipe operator (<code>%&gt;%</code>). Pipping is important because it reduce the processing time and also avoid creation of intermediate files during the process. It also make writing and reading code easier than the traditional syntax.</p>
+<pre class="r"><code>algoa.list = list()
+
+for (i in 1:length(algoa)){
+  
+  algoa.list[[i]] = algoa[i] %&gt;% read.ctd()
+}</code></pre>
+<p>Then the hydrographic section was created with <code>as.section()</code> fuction. This function requires the ctd cast are in list format—which was done in the above section. Once the section was created, the ctd profiles outside the selected transect covering the Kimbiji water were dropped using the <code>subset()</code> function. Figure <a href="#fig:section">1</a> present the transect with the temperature, oxygen and fluorescence section off the Kimbiji.</p>
+<pre class="r"><code>## Make a section of all ctd casts
+algoa.section = algoa.list %&gt;% as.section()
+
+## subset the section for ctd along the Kimbiji only
+kimbiji.section = algoa.section %&gt;% subset(latitude &gt; -7.2 &amp; latitude &lt; -7)
+
+## plot cross section with a map along the transect of Kimbiji
+kimbiji.section %&gt;%
+  sectionGrid(p = seq(0,300,5)) %&gt;%
+  sectionSmooth() %&gt;%
+  plot(xtype = &quot;longitude&quot;, which = c(&quot;map&quot;, &quot;temperature&quot;, &quot;oxygen&quot;, &quot;fluorescence&quot;), ylim = c(200,5), ztype = &quot;image&quot;)</code></pre>
+<div class="figure"><span id="fig:section"></span>
+<img src="/post/2019-02-09-comparing-classical-methods-for-estimating-the-mixed-layer-depth-along-the-transect-off-kimbiji-tanzania_files/figure-html/section-1.png" alt="Cross section of the transect off Kimbiji" width="672" />
+<p class="caption">
+Figure 1: Cross section of the transect off Kimbiji
+</p>
+</div>
+</div>
+<div id="estimating-mixed-layer-depth" class="section level3">
+<h3>Estimating Mixed Layer Depth</h3>
+<p>The method for estimating the Mixed Layer depth use individual profile of the ctd cast, therefore, the section of Kimbiji was converted to a list file. The chunk below show one line that accomplish conversion of section to list with just a double curl brackets.</p>
+<pre class="r"><code># make a list file of the section from Kimbiji
+kimbiji.ctd.list = kimbiji.section[[&quot;station&quot;]]</code></pre>
+<div id="the-criterion-method" class="section level4">
+<h4>The criterion method</h4>
+<p>The criterion method codes are presented in the chunk below. In a nutshell, the procedure process the mld for each cast, store them in the list file, plot the temperature profile and insert its corresponding MLD. All these steps are done within a loop for the five cast along this transect. Once the loop is terminated, in the same chunk the list file that contain MLD is converted to a data frame. Figure <a href="#fig:mld-criterion">2</a> presents the estimated MLD for each CTD cast off-Kimbiji transect.</p>
+<pre class="r"><code>## criterion
+mld.criterion = list()
+
+par(mfrow = c(2,3))
+
+for (i in 1:length(kimbiji.ctd.list)){
+  # readline(prompt = &quot;ENTER&quot;)
+  ctd = kimbiji.ctd.list[[i]]
+  ctd = ctd %&gt;% subset(pressure &gt; 10)
+ 
+
+      temperature = ctd[[&quot;temperature&quot;]]
+      pressure = ctd[[&quot;pressure&quot;]]
+  
+    for (criterion in 0.5){
+      inMLD =  abs(temperature[1] - temperature) &lt; criterion
+      MLDindex = which.min(inMLD)
+      MLDpressure = pressure[MLDindex]
+      
+        ctd %&gt;% plotProfile(xtype = &quot;temperature&quot;, ylim = c(150,20))
+        abline(h = pressure[MLDindex], lwd = 2, lty = &quot;dashed&quot;)
+        
+       
+        mld.criterion[i] = MLDpressure
+
+    }
+}
+
+mld.criterion = mld.criterion %&gt;% 
+  as.data.frame() %&gt;% t() %&gt;% 
+  as.tibble()%&gt;%  
+  rename(criterion = V1) </code></pre>
+<div class="figure"><span id="fig:mld-criterion"></span>
+<img src="/post/2019-02-09-comparing-classical-methods-for-estimating-the-mixed-layer-depth-along-the-transect-off-kimbiji-tanzania_files/figure-html/mld-criterion-1.png" alt="Mixed Layer Depth  estimated from criterion method for five CTD casts  off-Kimbiji transect" width="672" />
+<p class="caption">
+Figure 2: Mixed Layer Depth estimated from criterion method for five CTD casts off-Kimbiji transect
+</p>
+</div>
+</div>
+</div>
+<div id="the-derivative-method" class="section level2">
+<h2>The derivative method</h2>
+<p>The chunk below highlight how to estimate the MLD with the derivative method. Each cast MLD is stored in the list file and then converted into data frame. Figure <a href="#fig:mld-deri">3</a> presents the estimated MLD for each CTD cast off-Kimbiji transect.</p>
+<pre class="r"><code>## derivative
+
+pstar.mld = list()
+
+par(mfrow = c(2,3))
+
+for (j in 1:length(kimbiji.ctd.list)){
+  
+  # readline(prompt = &quot;ENTER&quot;)
+  
+  ctd = kimbiji.ctd.list[[j]]
+  ctd = ctd %&gt;% subset(pressure &gt; 10)
+  temperature = ctd[[&quot;temperature&quot;]]
+  pressure = ctd[[&quot;pressure&quot;]]
+  mid = which.max(swN2(ctd))
+  pstar = pressure[mid]
+  pstar.mld[j] = pstar
+  
+    # plotProfile(ctd, xtype = &quot;N2&quot;, ylim = c(150,20))
+    # abline(h = pstar, lwd = 1, lty = 2)
+    
+    plotProfile(ctd, xtype = &quot;temperature&quot;, ylim = c(150,20))
+    abline(h = pstar, lwd = 2, lty = 2)
+    
+    # plotProfile(ctd, xtype = &quot;salinity&quot;, ylim = c(150,20))
+    # abline(h = pstar, lwd = 1, lty = 2)
+}
+
+## Convert the list file into data frame
+mld.derivative = pstar.mld %&gt;%
+  as.data.frame() %&gt;%
+  t() %&gt;%
+  as.tibble() %&gt;%
+  rename(derivative = V1)</code></pre>
+<div class="figure"><span id="fig:mld-deri"></span>
+<img src="/post/2019-02-09-comparing-classical-methods-for-estimating-the-mixed-layer-depth-along-the-transect-off-kimbiji-tanzania_files/figure-html/mld-deri-1.png" alt="Mixed Layer Depth  estimated from derivative method for five CTD casts  off-Kimbiji transect" width="672" />
+<p class="caption">
+Figure 3: Mixed Layer Depth estimated from derivative method for five CTD casts off-Kimbiji transect
+</p>
+</div>
+<div id="the-optimal-linear-fitting-method" class="section level3">
+<h3>The Optimal Linear fitting Method</h3>
+<p>The optimal method was first developed by <span class="citation">Chu and Fan (<a href="#ref-chu">2010</a>)</span>. The chunk below highlights the codes for a function developed in R programming languages for estimating the MLD from CTD profiles.</p>
+<pre class="r"><code>MLDchu = function(ctd, n = 5, variable = &quot;temperature&quot;)
+{
+  pressure = ctd[[&quot;pressure&quot;]]
+  x = ctd[[variable]]
+  ndata = length(pressure)
+  E1 = rep(NA, ndata)
+  E2 = E1
+  E2overE1 = E2
+  kstart = min(n,3)
+  for (k in seq(kstart, ndata-n,1)){
+    above = seq.int(1,k)
+    below = seq.int(k+1, k+n)
+    fit = lm(x~pressure, subset = above)
+    E1[k] = sd(predict(fit) - x[above])
+    pBelow = data.frame(pressure = pressure[below])
+    E2[k] = abs(mean(predict(fit, newdata = pBelow) -x[below]))
+    E2overE1[k] = E2[k] / E1[k]
+    
+  }
+  
+  MLDindex = which.max(E2overE1)
+  return(list(MLD = pressure[MLDindex], MLDindex = MLDindex, E1 = E1, E2 = E2))
+  
+}</code></pre>
+<p>Once we have written the <code>MLDchu()</code> function, then estimating the MLD for each cast is done with the code in the chunk below. Figure <a href="#fig:mld-optimal">4</a> presents the estimated MLD for each CTD cast off-Kimbiji transect.</p>
+<pre class="r"><code>lon = kimbiji.section[[&quot;longitude&quot;]] %&gt;% unique()
+lat = kimbiji.section[[&quot;latitude&quot;]] %&gt;% unique()
+
+## preallocate the list file that will store mld value
+mld.optimal = list()
+
+## make subplots 
+par(mfrow = c(2,3))
+## loop the process
+for (j in 1:length(kimbiji.ctd.list)){
+  ## get the ctd value of the station
+ctd = kimbiji.ctd.list[[j]] %&gt;% ctdDecimate(p = seq(8,150,10))
+
+## compute the mld of each station
+mld = MLDchu(ctd)
+mld.optimal[j] = mld$MLD
+
+## draw a profile of the ctd cast
+plotProfile(ctd, xtype = &quot;temperature&quot;)
+## add a line showing the mld
+abline(h = mld$MLD, lwd = 2, lty = &quot;dashed&quot;)
+
+}
+
+## convert the mld list into tibble
+mld.optimal = mld.optimal%&gt;% as.data.frame() %&gt;% t() %&gt;% as.tibble() %&gt;% rename(optimal = 1)</code></pre>
+<div class="figure"><span id="fig:mld-optimal"></span>
+<img src="/post/2019-02-09-comparing-classical-methods-for-estimating-the-mixed-layer-depth-along-the-transect-off-kimbiji-tanzania_files/figure-html/mld-optimal-1.png" alt="Mixed Layer Depth  estimated from optimal method for five CTD casts  off-Kimbiji transect" width="672" />
+<p class="caption">
+Figure 4: Mixed Layer Depth estimated from optimal method for five CTD casts off-Kimbiji transect
+</p>
+</div>
+<p>Lastly, the mld values from optimal, criterion and derivatives method were stitched together with longitude and latitude, which help us to compare the value of the MLD (Table <a href="#tab:tab1"><strong>??</strong></a>).</p>
+<pre class="r"><code>mld.all = data.frame(lon,lat, mld.criterion, mld.derivative, mld.optimal)
+
+mld.all  %&gt;% 
+  kableExtra::kable(format = &quot;html&quot;, digits = 2,col.names = c(&quot;Longitude&quot;, &quot;Latitude&quot;, &quot;Criterion&quot;, &quot;Derivative&quot;, &quot;Optimal&quot;), caption = &quot;Mixed Layer Depth estimated from different methods&quot;, align = &quot;c&quot;) %&gt;%
+  kableExtra::column_spec(column = 1:5, width = &quot;3cm&quot;, color = &quot;black&quot;) %&gt;%
+  kableExtra::add_header_above(c(&quot;Cast Location&quot; = 2, &quot;MLD Methods&quot; = 3))</code></pre>
+<table>
+<caption>
+<span id="tab:unnamed-chunk-6">Table 1: </span>Mixed Layer Depth estimated from different methods
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Cast Location
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="3">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+MLD Methods
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+Longitude
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+<th style="text-align:center;">
+Criterion
+</th>
+<th style="text-align:center;">
+Derivative
+</th>
+<th style="text-align:center;">
+Optimal
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 3cm; color: black;">
+40.26
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+-7.04
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+62
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+91
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+28
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: black;">
+40.10
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+-7.05
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+74
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+131
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+28
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: black;">
+39.93
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+-7.05
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+64
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+93
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+58
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: black;">
+39.76
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+-7.04
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+36
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+109
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+28
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; color: black;">
+39.59
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+-7.04
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+37
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+82
+</td>
+<td style="text-align:center;width: 3cm; color: black;">
+38
+</td>
+</tr>
+</tbody>
+</table>
+<p>Figure <a href="#fig:mld-compare">5</a> is the cross section of temperature superimposed with the lines plots for the three classical methods for estimating the MLD. This figures clearly indicate the deep MLD is from the derivative method followed by the criterion and the optimal method has the shallower MLD. The other clear observation is that the optimal MLD vary toward offshore (Figure <a href="#fig:mld-compare">5</a>). In contrast, the derivative and criterion method, though have different values at each cast, they both show the MLD is getting deeper toward offshore (Figure <a href="#fig:mld-compare">5</a>)</p>
+<pre class="r"><code>par(mfrow = c(1,3))
+
+## temperature section
+kimbiji.section %&gt;%
+  sectionGrid(p = seq(0,300,2)) %&gt;%
+  # sectionSmooth() %&gt;%
+  plot(xtype = &quot;longitude&quot;, which = &quot;temperature&quot;, ylim = c(200,4), ztype = &quot;image&quot;, zlim = c(20,26), zclip = TRUE)
+
+lines(x = mld.all$lon , y = mld.all$criterion, lwd =2, lty = 2)
+lines(x = mld.all$lon , y = mld.all$derivative, lwd =2, lty = 3)
+lines(x = mld.all$lon , y = mld.all$optimal, lwd =2, lty = 1)
+
+## density section
+kimbiji.section %&gt;%
+  sectionGrid(p = seq(0,300,2)) %&gt;%
+  # sectionSmooth() %&gt;%
+  plot(xtype = &quot;longitude&quot;, which = &quot;density&quot;, ylim = c(200,4), ztype = &quot;image&quot;)
+
+lines(x = mld.all$lon , y = mld.all$criterion, lwd =2, lty = 2)
+lines(x = mld.all$lon , y = mld.all$derivative, lwd =2, lty = 3)
+lines(x = mld.all$lon , y = mld.all$optimal, lwd =2, lty = 1)
+
+
+## fluorescence section
+kimbiji.section %&gt;%
+  sectionGrid(p = seq(0,300,2)) %&gt;%
+  # sectionSmooth() %&gt;%
+  plot(xtype = &quot;longitude&quot;, which = &quot;fluorescence&quot;, ylim = c(200,4), ztype = &quot;image&quot;)
+
+lines(x = mld.all$lon , y = mld.all$criterion, lwd =2, lty = 2)
+lines(x = mld.all$lon , y = mld.all$derivative, lwd =2, lty = 3)
+lines(x = mld.all$lon , y = mld.all$optimal, lwd =2, lty = 1)</code></pre>
+<div class="figure"><span id="fig:mld-compare"></span>
+<img src="/post/2019-02-09-comparing-classical-methods-for-estimating-the-mixed-layer-depth-along-the-transect-off-kimbiji-tanzania_files/figure-html/mld-compare-1.png" alt="Method for detecting the Mixed Layer Depth overlaid on cross section of temperature (left panel), density (middle panel) and fluorescence (right panel). The  bold black line is the optimal, the dashed line is the criterion and and the dotted line represent the derivative method" width="672" />
+<p class="caption">
+Figure 5: Method for detecting the Mixed Layer Depth overlaid on cross section of temperature (left panel), density (middle panel) and fluorescence (right panel). The bold black line is the optimal, the dashed line is the criterion and and the dotted line represent the derivative method
+</p>
+</div>
+</div>
+<div id="conclusion" class="section level3">
+<h3>Conclusion</h3>
+<p>We have seen the optimal linear fitting estimated a shallow mixed layer depth (MLD), followed by the criterion and the derivatives has the deeper MLD values. This discrepancy in the result indicate these method depend on the intended scientific application of the MLD. But, because the criterion method used a cut point and the optimal use the linear fitting to determine the MLD, they better at estimating than the derivative method that is affected with the spline interpolation.</p>
+</div>
+<div id="reference" class="section level3 unnumbered">
+<h3>Reference</h3>
+<div id="refs" class="references">
+<div id="ref-chu">
+<p>Chu, P, and C. Fan. 2010. “Optimal Linear Fitting for Objective Determination of Ocean Mixed Layer Depth from Glider Profiles.” <em>Journal of Atmospheric and Oceanic Technology</em> 27 (11): 1893–8.</p>
+</div>
+<div id="ref-costoya">
+<p>Costoya, Xurxo, Maite deCastro, Moncho Gómez-Gesteira, and Fran Santos. 2014. “Mixed Layer Depth Trends in the Bay of Biscay over the Period 1975–2010.” Journal Article. <em>PLOS ONE</em> 9 (6): e99321. doi:<a href="https://doi.org/10.1371/journal.pone.0099321">10.1371/journal.pone.0099321</a>.</p>
+</div>
+<div id="ref-ocedata">
+<p>Kelley, Dan. 2015. <em>Ocedata: Oceanographic Datasets for Oce</em>. <a href="https://CRAN.R-project.org/package=ocedata" class="uri">https://CRAN.R-project.org/package=ocedata</a>.</p>
+</div>
+<div id="ref-kelley2018r">
+<p>———. 2018. “R Tutorial for Oceanographers.” In <em>Oceanographic Analysis with R</em>, 5–90. Springer.</p>
+</div>
+<div id="ref-oce">
+<p>Kelley, Dan, and Clark Richards. 2018. <em>Oce: Analysis of Oceanographic Data</em>. <a href="https://CRAN.R-project.org/package=oce" class="uri">https://CRAN.R-project.org/package=oce</a>.</p>
+</div>
+<div id="ref-strane">
+<p>Stranne, Christian, Larry Mayer, Martin Jakobsson, Elizabeth Weidner, Kevin Jerram, Thomas C Weber, Leif G Anderson, Johan Nilsson, Göran Björk, and Katarina Gårdfeldt. 2018. “Acoustic Mapping of Mixed Layer Depth.” Journal Article. <em>Ocean Science</em> 14 (3).</p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, Hadley. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse" class="uri">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+</div>
+</div>
+</div>

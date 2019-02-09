@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Oxygen on Masumbuko Semba&#39;s Blog</title>
-    <link>/tags/oxygen/</link>
-    <description>Recent content in Oxygen on Masumbuko Semba&#39;s Blog</description>
+    <title>Kimbiji on Masumbuko Semba&#39;s Blog</title>
+    <link>/tags/kimbiji/</link>
+    <description>Recent content in Kimbiji on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 09 Feb 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/oxygen/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/kimbiji/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -18,16 +18,6 @@
       
       <guid>/02/09/2019/comparing-classical-methods-for-estimating-the-mixed-layer-depth-along-the-transect-off-kimbiji-tanzania/</guid>
       <description>IntroductionUpper Ocean is characterized for a quasi-homogeneous layer where temperature, salinity and density almost constant with increasing depth (Costoya et al. 2014). This homogeneity layer is caused by turbulent vertical mixing that is driven by heat loss from the ocean to the atmosphere, as well as by wind stress (Stranne et al. 2018). The deepest layer affected by this turbulent mixing is called mixed layer depth (MLD), which marks the width of the upper ocean that interacts with the atmosphere (Kelley 2018).</description>
-    </item>
-    
-    <item>
-      <title>Animating Oceanographic data in R with ggplot2 and gganimate</title>
-      <link>/10/29/2018/animating-oceanographic-data-in-r-with-ggplot2-and-gganimate/</link>
-      <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/10/29/2018/animating-oceanographic-data-in-r-with-ggplot2-and-gganimate/</guid>
-      <description>setwd(&amp;quot;E:/Data Manipulation/xtractomatic&amp;quot;)IntroductionThe increasing popularity of ggplot2 package (Wickham, 2016) had made many people becomes familiar with art of grammer of graphics of static plots. But, most of environmental data are static but rather changes both with time and space. Therefore, animated plots are effective way to communicate these dind of data.
-Pedersen &amp;amp; Robinson (2017) developed gganimate package that extends the grammar of graphic as implemented with ggplot2 with animations.</description>
     </item>
     
   </channel>
