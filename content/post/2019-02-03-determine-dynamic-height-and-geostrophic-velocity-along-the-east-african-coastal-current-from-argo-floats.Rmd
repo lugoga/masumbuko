@@ -2,7 +2,7 @@
 title: Determine dynamic height and geostrophic velocity along the East African Coastal
   Current from Argo floats
 author: Masumbuko Semba
-date: '2019-02-03'
+date: '2019-01-29'
 slug: determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats
 categories:
   - Oceanography

@@ -21,21 +21,21 @@
     </item>
     
     <item>
-      <title>Determine dynamic height and geostrophic velocity along the East African Coastal Current from Argo floats</title>
-      <link>/02/03/2019/determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats/</link>
-      <pubDate>Sun, 03 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/02/03/2019/determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats/</guid>
-      <description>IntroductionI have been working with argo floats data and wrote two post that illustrate how to detect the mixed layer depth with criterion and derivative approaches. In this post, I change the focus. Rather than talking about the mixed layer depth detection, I will illustrate how to calculate the dynamic height and geostrophic velocity from same dataset—Argo float. I use R programming language as an environment for the required routine to calculate the dynamic height and geostrophic current (R Core Team 2018).</description>
-    </item>
-    
-    <item>
       <title>Detect the Mixed Layer Depth (MLD)  along the East African Coastal Current  from   Argo floats data using criterion approach</title>
       <link>/02/01/2019/compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data/</link>
       <pubDate>Fri, 01 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/02/01/2019/compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data/</guid>
       <description>IntroductionThe ocean mixed layer is narrow band of the suface water that is homogenous—where temperature, salinity and density scarcely vary with increasing depth (Costoya et al. 2014). This homogeneity layer is caused by turbulent vertical mixing that is driven by heat loss from the ocean to the atmosphere and wind stress. The deepest layer affected by this turbulent mixing is called mixed layer depth (MLD), which marks the width of the upper ocean that interacts with the atmosphere.</description>
+    </item>
+    
+    <item>
+      <title>Determine dynamic height and geostrophic velocity along the East African Coastal Current from Argo floats</title>
+      <link>/01/29/2019/determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats/</link>
+      <pubDate>Tue, 29 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/01/29/2019/determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats/</guid>
+      <description>IntroductionI have been working with argo floats data and wrote two post that illustrate how to detect the mixed layer depth with criterion and derivative approaches. In this post, I change the focus. Rather than talking about the mixed layer depth detection, I will illustrate how to calculate the dynamic height and geostrophic velocity from same dataset—Argo float. I use R programming language as an environment for the required routine to calculate the dynamic height and geostrophic current (R Core Team 2018).</description>
     </item>
     
     <item>

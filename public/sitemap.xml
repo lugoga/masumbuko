@@ -33,11 +33,6 @@
   </url>
   
   <url>
-    <loc>/02/03/2019/determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats/</loc>
-    <lastmod>2019-02-03T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/02/02/2019/using-the-derivative-approach-to-detect-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-float-dataset/</loc>
     <lastmod>2019-02-02T00:00:00+00:00</lastmod>
   </url>
@@ -45,6 +40,11 @@
   <url>
     <loc>/02/01/2019/compute-the-mixed-layer-depth-mld-along-the-east-african-coastal-current-from-argo-floats-data/</loc>
     <lastmod>2019-02-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/01/29/2019/determine-dynamic-height-and-geostrophic-velocity-along-the-east-african-coastal-current-from-argo-floats/</loc>
+    <lastmod>2019-01-29T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -182,7 +182,7 @@
   
   <url>
     <loc>/tags/argo/</loc>
-    <lastmod>2019-02-03T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -224,7 +224,7 @@
   
   <url>
     <loc>/tags/depth/</loc>
-    <lastmod>2019-02-03T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -236,7 +236,7 @@
   
   <url>
     <loc>/tags/eacc/</loc>
-    <lastmod>2019-02-03T00:00:00+00:00</lastmod>
+    <lastmod>2019-01-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -329,14 +329,14 @@
   </url>
   
   <url>
-    <loc>/tags/r/</loc>
-    <lastmod>2018-11-23T00:00:00+00:00</lastmod>
+    <loc>/categories/r/</loc>
+    <lastmod>2019-02-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/r/</loc>
-    <lastmod>2019-02-01T00:00:00+00:00</lastmod>
+    <loc>/tags/r/</loc>
+    <lastmod>2018-11-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -348,7 +348,7 @@
   
   <url>
     <loc>/tags/salinity/</loc>
-    <lastmod>2019-02-03T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -384,7 +384,7 @@
   
   <url>
     <loc>/tags/temperature/</loc>
-    <lastmod>2019-02-03T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
