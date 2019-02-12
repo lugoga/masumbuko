@@ -1,0 +1,345 @@
+---
+title: 'Isosurface of temperature, salinity, oxygen and fluorescence in Mafia Channel
+  from CTD data '
+author: Masumbuko Semba
+date: '2019-02-12'
+slug: isosurface-of-temperature-salinity-oxygen-and-fluorescence-in-mafia-channel-from-ctd-data
+categories:
+  - Oceanography
+  - R
+  - Technical
+tags:
+  - CTD
+  - Mafia Channel
+  - Masumbuko Semba
+  - Indian Ocean
+  - pressure
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
+```
+
+
+### Iso surface
+Often times we want to visualize the distribution of oceanographic variables across the space at specific depth. That kind of visualization refers to *isosurface*---layer(s) of constant values of another data variable, such as, constant depth. For this post highlights key steps to create isosurface from CTD profile data in Mafia channel. Because these channel is shallow with an average depth of 20 meters, we will calculate isosurface of f temperature, oxygen, fluorescene at the surface, 10 and 20 meters deep. Several packages are required to processes the CTD data and make isosurface. These packages include **tidyverse** for chaining the process and tidying of data [@tidyverse]; **lubridate** for manipulating date [@lubridate]; **oce** for reading and processing CTD data [@oce] and **sf** for mapping [@sf]. The list of these packages are shown in the chunk below. Just load them using the `require()` function. You must have installed them in your machine before you load them. 
+
+```{r}
+require(tidyverse)
+require(lubridate)
+require(oce)
+require(sf)
+```
+
+### Location information
+The CTD instrument used was not configured with a GPS. The latitude and longitude information at each cast was marked with a handheld GPS unit. These location information were downloaded with mapsource software and exported as comma separated file. The dataset was loaded into the workspace as shown in the chunk below.
+
+
+```{r, eval=FALSE}
+station.tb = read_csv("./Wshark_raw data/cnv/stations.csv")
+```
+
+```{r, echo=FALSE}
+station.tb = read_csv("E:/Data Manipulation/MAFIA_DEC_CTD DATA/Wshark_raw data/cnv/stations.csv")
+```
+
+
+
+```{r echo=FALSE, warning=FALSE}
+#read Africa continental shapefile that we will use throught the munuscript as basemap dataset for maps
+africa = read_sf("E:/GIS/Tanzania spatial data Bank/EAF14 Tanzania spatial datasets/africa/Spatial/AdmInfr/afcntry.shp")
+# clean the file
+africa = africa%>%select(-c(FIPS_CNTRY, REGIONA, EMPTY, EMPTY2))
+
+# filter tanzania only
+tanzania = africa%>%filter(CNTRY_NAME == "Tanzania")
+
+```
+
+
+Then the path of the working directory in my local machine was defined. This is where the files for this post are stored. 
+```{r, eval=FALSE}
+mafia.files = dir("./Wshark_raw data/cnv/", pattern = ".cnv", full.names = TRUE)
+
+```
+
+```{r, echo=FALSE}
+mafia.files = dir("E:/Data Manipulation/MAFIA_DEC_CTD DATA/Wshark_raw data/cnv/", pattern = ".cnv", full.names = TRUE)
+```
+
+
+```{r, eval=FALSE, echo= FALSE}
+# Plot CTD data as time-series against scan number with *plotScan* function, to help with trimming extraneous data from a CTD cast
+
+for (i in 1:length(mafia.files)){
+  #readline(prompt = "Enter")
+  ctd = read.ctd(mafia.files[i])
+  ctd%>%plotScan(main = paste("CtdTime: ", ctd@metadata$startTime) )
+  print(station.tb[i,]$Time)
+}
+```
+
+The plotScan helped us identify the thresholds for cleaning the casts. This include removing all value in a profile measured above the sea surface `pressure > 0`, drop all values measured while the instrument was pulled out of the water and retain only the downcast records. Align the profile values to the standard depth of 0.25 meter interval.  A `for()` loop was used to iterate and run through 40 CTD files. Each processed ctd profile was stored in the list file that was created before the looping. The chunk below show the code that processed the CTD data
+
+```{r}
+mafia.ctd = list()
+
+for (i in 1:length(mafia.files)){
+  mafia.ctd[i] = read.ctd(mafia.files[i]) %>% 
+    ctdTrim(method = "downcast") %>% 
+    ctdDecimate(p = 0.25)%>%
+    subset(pressure >= 0)
+ 
+   mafia.ctd[[i]][["longitude"]] = station.tb$lon[i]
+   mafia.ctd[[i]][["latitude"]] = station.tb$lat[i]
+}
+```
+
+Three profiles were randomly selected and their temperature, and salinity profiles plotted against pressure as shown in figure \@ref(fig:fig2). The chunk below show the code used to plot profiles in in figure \@ref(fig:fig2).
+
+```{r fig2, fig.cap="Profiles of selected CTD cast. An inset map show the location of the cast in the Mafia channel", fig.height=3.5}
+
+par(mfrow = c(1,3))
+
+for (k in c( 8,20,30)){
+
+plot(mafia.ctd[[k]], which = 1)
+plotInset(xleft =  min(mafia.ctd[[k]][["salinity"]], na.rm = TRUE),
+          ybottom =  max(mafia.ctd[[k]][["pressure"]]), 
+          xright =  max(mafia.ctd[[k]][["salinity"]], na.rm = TRUE), 
+          ytop = max(mafia.ctd[[k]][["pressure"]])/2, 
+          expr = plot(mafia.ctd[[k]], 
+                      which = "map", 
+                      coastline = "coastlineWorldFine",
+                      span=50, 
+                      mar=NULL, cex.axis=3/4))
+
+}
+
+
+```
+
+
+### make a data frame from CTD list
+The mafia.ctd is the list file with 40 CTD cast. We need to convert the profile value of each cast to data frame and then combine them to form a large data frame with all the cast embeded. That is tedious to do it manually. However, we can tell R to do it for us using a `for()` loop function. The chunk below highlight the iterated code for the process
+
+```{r}
+
+ctd.tb = list()
+
+for (j in 1:length(mafia.ctd)){
+  
+ctd.tb[[j]] = mafia.ctd[[j]]@data %>% 
+  as.tibble() %>% 
+  mutate(lon = mafia.ctd[[j]]@metadata$longitude,
+         lat = mafia.ctd[[j]]@metadata$latitude,
+         scientists = mafia.ctd[[j]]@metadata$scientist,
+         time = station.tb$Date[j] %>% dmy(),
+         profile = j, 
+         scientists = "Patroba Matiku, Baraka Kuguru & Masumbuko Semba") %>%
+  select(time, lon,lat, scientists, profile, pressure, depth, 
+         temperature, salinity, conductivity, oxygen, fluorescence)
+
+}
+
+ctd.df = ctd.tb %>% bind_rows()
+
+```
+
+
+```{r, eval=FALSE, echo=FALSE}
+##Compare profile of salinity drawn frorm **oce** with that from **ggplot2**
+## oce profile
+mafia.ctd[[1]] %>% plotProfile(xtype = "salinity")
+
+## ggplot profile
+ggplot(data = ctd.df %>% filter(profile == 1) %>% na.omit(), aes(x = salinity, y = depth))+ geom_path()+
+scale_y_reverse(breaks = seq(0,12,2))+
+# cowplot::theme_cowplot() +
+scale_x_continuous(position = "top", breaks = seq(34.95, 35.15, length.out = 5))+
+  theme(axis.text = element_text(size = 12, colour = 1),
+        axis.title = element_text(size = 12, colour = 1),
+        panel.background = element_rect(colour = "black", fill = "white"),
+        panel.grid.major = element_line(colour = "grey70", linetype = 3),
+        axis.ticks.length = unit(.3, "cm"))+
+  labs(x = "Practical Salinity", y = "Pressure [dbar]")
+
+
+```
+
+Figure \@ref(fig:fig1) is a map of Mafia channel showing the location where profiles of temperature, salinity, oxygen, and fluorescene were measured against the water column (depth).
+
+```{r fig1,echo = FALSE, fig.cap="CTD cast in the Mafia Channel"}
+# mafia.sections %>% plot(which = "map")
+
+ctd.area = data.frame(lon = c(39.592, 39.7, 39.7, 39.592,39.592),
+           lat = c(-7.95, -7.95, -7.79, -7.79,-7.95)) %>%  
+  st_as_sf(coords = c("lon", "lat")) %>%
+  st_set_crs(value = 4326) %>%
+  summarise(geometry = st_combine(geometry)) %>%
+  st_cast("POLYGON")
+
+eac = africa %>% 
+  filter(CNTRY_NAME %in% c("Tanzania", "Kenya"))
+
+map = ggplot() + 
+  geom_point(data = ctd.df %>% filter(pressure ==0), aes(x = lon, y = lat), size = 2) + 
+  geom_sf(data = eac, col = 1, fill = "grey82", size = .6) +
+  coord_sf(xlim = c(min(ctd.df$lon)-0.01,max(ctd.df$lon)+ 0.025) , 
+           ylim = c(min(ctd.df$lat)-0.06,max(ctd.df$lat)+ 0.0)) +
+  labs(x = "", y = "")+
+  scale_x_continuous(breaks = seq(39.595, 39.72, length.out = 4) %>% round(2))+
+  theme_bw()+
+  annotate(geom = "text", x = 39.5, y = -7.7, label = "Rufiji Mafia \nChannel")+
+  theme(panel.background = element_rect(fill = "white", colour = "black"),
+        panel.grid = element_line(colour = "gray80", linetype = 3),
+        axis.text = element_text(size = 12, colour = 1))+
+  # ggrepel::geom_text_repel(data = station.tb %>% 
+  #                            separate(Station, c("Site", "Station"), sep = -2), 
+  #                          aes(x = lon, y = lat, label = Station))+
+  annotate(geom = "text", x = 39.62, y = -7.835, label = "Rufiji Mafia Channel", size = 5)
+
+inset = ggplot() + 
+  geom_sf(data = eac, col = 1, fill = "grey70", size=.6) +
+  geom_sf(data = ctd.area, fill = NA, col = "black", size = 1)+
+  coord_sf(xlim = c(39.55, 39.9) , 
+           ylim = c(-8,-7.6)) +
+  theme_bw()+
+  theme(panel.background = element_rect(fill = "white", colour = "black"),
+        panel.grid = element_line(colour = NA, linetype = 3),
+        axis.text = element_blank(),
+        plot.background = element_blank(),
+        axis.ticks = element_blank())+
+  labs(x = NULL, y = NULL)
+
+
+cowplot::ggdraw() +
+  cowplot::draw_plot(map, 0,0,1,1) + 
+  cowplot::draw_plot(inset, 0.575,0.1,0.3,0.3)
+
+```
+
+### Isosurface in Mafia Channel
+Once we have the data frame of each ctd cast, we can make isosurface at three different depth---*surface, 10 and 20 meter*. Because the profiles were measured at randomly locations, we need to grid them and make the distribution evenly.  The `interpBarnes()` function from **oce** package was used for gridding the unevenly distributed ctd points.  We looped the procedure with `for()` function. The loop does three main things--- select the depth; extract the `x = longitude,y = latitude ,z = variable` from the filtered depth---surface; 10 or 20; and interpolate the variables to the specific longitude and latitude. The chunk below highlights the codes used to create an isosurface of temperature shown in figure \@ref(fig:fig3). Similar technique was used to make isosurface of oxygen (Figure \@ref(fig:fig4)); salinity (Figure \@ref(fig:fig5)) and fluorescence (Figure \@ref(fig:fig6)).
+
+```{r  fig3, fig.cap="The spatial distribution of temperature in the Mafia channel at the surface (left panel); 10 m deep (middle panel) and 20 m deep (right panel", fig.height=2.5}
+
+depth = c(0.25,10,20)
+
+par(mfrow = c(1,3))
+
+for (m in depth){
+  
+surface = ctd.df %>% filter(pressure == m)
+x = surface$lon
+y = surface$lat
+z = surface$temperature
+
+interp.temp = interpBarnes(x = x, 
+                           y = y, 
+                           z = z, 
+                           xg = pretty(x, n = 50) , 
+                           yg = pretty(y, n = 50))
+
+imagep(interp.temp$xg, interp.temp$yg, interp.temp$zg, filledContour = TRUE, 
+       col = oce.colors9A(120), main = paste("Depth = ", m, "meters"), zlim = c(27.8,29))
+contour(interp.temp$xg, interp.temp$yg, interp.temp$zg, col = "black", add = TRUE)
+
+}
+
+```
+
+
+```{r fig4, echo=FALSE, fig.cap="The spatial distribution of oxygen in the Mafia channel at the surface (left panel); 10 m deep (middle panel) and 20 m deep (right panel", fig.height=2.5}
+
+depth = c(0.25,10,20)
+
+par(mfrow = c(1,3))
+
+for (m in depth){
+  
+surface = ctd.df %>% filter(pressure == m)
+x = surface$lon
+y = surface$lat
+z = surface$oxygen
+
+interp.temp = interpBarnes(x = x, 
+                           y = y, 
+                           z = z, 
+                           xg = pretty(x, n = 50) , 
+                           yg = pretty(y, n = 50))
+
+imagep(interp.temp$xg, interp.temp$yg, interp.temp$zg, filledContour = TRUE, 
+       col = oce.colors9A(120), main = paste("Depth = ", m, "meters"), zlim = c(2.1,3.1))
+contour(interp.temp$xg, interp.temp$yg, interp.temp$zg, col = "black", add = TRUE)
+
+}
+
+
+```
+
+
+
+```{r  fig5, echo=FALSE, fig.cap="The spatial distribution of salinity in the Mafia channel at the surface (left panel); 10 m deep (middle panel) and 20 m deep (right panel", fig.height=2.5}
+
+depth = c(0.25,10,20)
+
+par(mfrow = c(1,3))
+
+for (m in depth){
+  
+surface = ctd.df %>% filter(pressure == m)
+x = surface$lon
+y = surface$lat
+z = surface$salinity
+
+interp.temp = interpBarnes(x = x, 
+                           y = y, 
+                           z = z, 
+                           xg = pretty(x, n = 50) , 
+                           yg = pretty(y, n = 50))
+
+imagep(interp.temp$xg, interp.temp$yg, interp.temp$zg, filledContour = TRUE, 
+       col = oce.colors9A(120), main = paste("Depth = ", m, "meters"), zlim = c(34,35.50))
+contour(interp.temp$xg, interp.temp$yg, interp.temp$zg, col = "black", add = TRUE)
+
+}
+
+
+```
+
+
+```{r fig6, echo=FALSE, fig.cap="The spatial distribution of fluorescence in the Mafia channel at the surface (left panel); 10 m deep (middle panel) and 20 m deep (right panel", fig.height=2.5}
+
+depth = c(0.25,10,20)
+
+par(mfrow = c(1,3))
+
+for (m in depth){
+  
+surface = ctd.df %>% filter(pressure == m)
+x = surface$lon
+y = surface$lat
+z = surface$fluorescence
+
+interp.temp = interpBarnes(x = x, 
+                           y = y, 
+                           z = z, 
+                           xg = pretty(x, n = 50) , 
+                           yg = pretty(y, n = 50))
+
+imagep(interp.temp$xg, interp.temp$yg, interp.temp$zg, filledContour = TRUE, 
+       col = oce.colors9A(120), main = paste("Depth = ", m, "meters"), zlim = c(0,0.6))
+contour(interp.temp$xg, interp.temp$yg, interp.temp$zg, col = "black", add = TRUE)
+
+}
+
+
+```
+
+
+### References

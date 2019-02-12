@@ -6,6 +6,8 @@ googleAnalytics = "UA-127756435-1"
 disqusShortname = "https-semba-blog-netlify-com"
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
+
+
 [permalinks]
     post = "/:month/:day/:year/:slug/"
     

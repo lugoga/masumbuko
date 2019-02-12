@@ -66,6 +66,15 @@ Designing graphic: Design graphics and typeset books</description>
     </item>
     
     <item>
+      <title>Isosurface of temperature, salinity, oxygen and fluorescence in Mafia Channel from CTD data </title>
+      <link>/02/12/2019/isosurface-of-temperature-salinity-oxygen-and-fluorescence-in-mafia-channel-from-ctd-data/</link>
+      <pubDate>Tue, 12 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/02/12/2019/isosurface-of-temperature-salinity-oxygen-and-fluorescence-in-mafia-channel-from-ctd-data/</guid>
+      <description>Iso surfaceOften times we want to visualize the distribution of oceanographic variables across the space at specific depth. That kind of visualization refers to isosurface—layer(s) of constant values of another data variable, such as, constant depth. For this post highlights key steps to create isosurface from CTD profile data in Mafia channel. Because these channel is shallow with an average depth of 20 meters, we will calculate isosurface of f temperature, oxygen, fluorescene at the surface, 10 and 20 meters deep.</description>
+    </item>
+    
+    <item>
       <title>Comparing classical methods for estimating the mixed layer depth along the transect off Kimbiji, Tanzania</title>
       <link>/02/09/2019/comparing-classical-methods-for-estimating-the-mixed-layer-depth-along-the-transect-off-kimbiji-tanzania/</link>
       <pubDate>Sat, 09 Feb 2019 00:00:00 +0000</pubDate>

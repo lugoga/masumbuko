@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.51" />
+
+
+<title>Isosurface of temperature, salinity, oxygen and fluorescence in Mafia Channel from CTD data  - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Isosurface of temperature, salinity, oxygen and fluorescence in Mafia Channel from CTD data  - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">5 min read</span>
+    
+
+    <h1 class="article-title">Isosurface of temperature, salinity, oxygen and fluorescence in Mafia Channel from CTD data </h1>
+
+    
+    <span class="article-date">2019/02/12</span>
+    
+
+    <div class="article-content">
+      
+
+
+<div id="iso-surface" class="section level3">
+<h3>Iso surface</h3>
+<p>Often times we want to visualize the distribution of oceanographic variables across the space at specific depth. That kind of visualization refers to <em>isosurface</em>—layer(s) of constant values of another data variable, such as, constant depth. For this post highlights key steps to create isosurface from CTD profile data in Mafia channel. Because these channel is shallow with an average depth of 20 meters, we will calculate isosurface of f temperature, oxygen, fluorescene at the surface, 10 and 20 meters deep. Several packages are required to processes the CTD data and make isosurface. These packages include <strong>tidyverse</strong> for chaining the process and tidying of data <span class="citation">(Wickham <a href="#ref-tidyverse">2017</a>)</span>; <strong>lubridate</strong> for manipulating date <span class="citation">(Grolemund and Wickham <a href="#ref-lubridate">2011</a>)</span>; <strong>oce</strong> for reading and processing CTD data <span class="citation">(Kelley and Richards <a href="#ref-oce">2018</a>)</span> and <strong>sf</strong> for mapping <span class="citation">(Pebesma <a href="#ref-sf">2018</a>)</span>. The list of these packages are shown in the chunk below. Just load them using the <code>require()</code> function. You must have installed them in your machine before you load them.</p>
+<pre class="r"><code>require(tidyverse)
+require(lubridate)
+require(oce)
+require(sf)</code></pre>
+</div>
+<div id="location-information" class="section level3">
+<h3>Location information</h3>
+<p>The CTD instrument used was not configured with a GPS. The latitude and longitude information at each cast was marked with a handheld GPS unit. These location information were downloaded with mapsource software and exported as comma separated file. The dataset was loaded into the workspace as shown in the chunk below.</p>
+<pre class="r"><code>station.tb = read_csv(&quot;./Wshark_raw data/cnv/stations.csv&quot;)</code></pre>
+<p>Then the path of the working directory in my local machine was defined. This is where the files for this post are stored.</p>
+<pre class="r"><code>mafia.files = dir(&quot;./Wshark_raw data/cnv/&quot;, pattern = &quot;.cnv&quot;, full.names = TRUE)</code></pre>
+<p>The plotScan helped us identify the thresholds for cleaning the casts. This include removing all value in a profile measured above the sea surface <code>pressure &gt; 0</code>, drop all values measured while the instrument was pulled out of the water and retain only the downcast records. Align the profile values to the standard depth of 0.25 meter interval. A <code>for()</code> loop was used to iterate and run through 40 CTD files. Each processed ctd profile was stored in the list file that was created before the looping. The chunk below show the code that processed the CTD data</p>
+<pre class="r"><code>mafia.ctd = list()
+
+for (i in 1:length(mafia.files)){
+  mafia.ctd[i] = read.ctd(mafia.files[i]) %&gt;% 
+    ctdTrim(method = &quot;downcast&quot;) %&gt;% 
+    ctdDecimate(p = 0.25)%&gt;%
+    subset(pressure &gt;= 0)
+ 
+   mafia.ctd[[i]][[&quot;longitude&quot;]] = station.tb$lon[i]
+   mafia.ctd[[i]][[&quot;latitude&quot;]] = station.tb$lat[i]
+}</code></pre>
+<p>Three profiles were randomly selected and their temperature, and salinity profiles plotted against pressure as shown in figure <a href="#fig:fig2">1</a>. The chunk below show the code used to plot profiles in in figure <a href="#fig:fig2">1</a>.</p>
+<pre class="r"><code>par(mfrow = c(1,3))
+
+for (k in c( 8,20,30)){
+
+plot(mafia.ctd[[k]], which = 1)
+plotInset(xleft =  min(mafia.ctd[[k]][[&quot;salinity&quot;]], na.rm = TRUE),
+          ybottom =  max(mafia.ctd[[k]][[&quot;pressure&quot;]]), 
+          xright =  max(mafia.ctd[[k]][[&quot;salinity&quot;]], na.rm = TRUE), 
+          ytop = max(mafia.ctd[[k]][[&quot;pressure&quot;]])/2, 
+          expr = plot(mafia.ctd[[k]], 
+                      which = &quot;map&quot;, 
+                      coastline = &quot;coastlineWorldFine&quot;,
+                      span=50, 
+                      mar=NULL, cex.axis=3/4))
+
+}</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2019-02-12-isosurface-of-temperature-salinity-oxygen-and-fluorescence-in-mafia-channel-from-ctd-data_files/figure-html/fig2-1.png" alt="Profiles of selected CTD cast. An inset map show the location of the cast in the Mafia channel" width="672" />
+<p class="caption">
+Figure 1: Profiles of selected CTD cast. An inset map show the location of the cast in the Mafia channel
+</p>
+</div>
+</div>
+<div id="make-a-data-frame-from-ctd-list" class="section level3">
+<h3>make a data frame from CTD list</h3>
+<p>The mafia.ctd is the list file with 40 CTD cast. We need to convert the profile value of each cast to data frame and then combine them to form a large data frame with all the cast embeded. That is tedious to do it manually. However, we can tell R to do it for us using a <code>for()</code> loop function. The chunk below highlight the iterated code for the process</p>
+<pre class="r"><code>ctd.tb = list()
+
+for (j in 1:length(mafia.ctd)){
+  
+ctd.tb[[j]] = mafia.ctd[[j]]@data %&gt;% 
+  as.tibble() %&gt;% 
+  mutate(lon = mafia.ctd[[j]]@metadata$longitude,
+         lat = mafia.ctd[[j]]@metadata$latitude,
+         scientists = mafia.ctd[[j]]@metadata$scientist,
+         time = station.tb$Date[j] %&gt;% dmy(),
+         profile = j, 
+         scientists = &quot;Patroba Matiku, Baraka Kuguru &amp; Masumbuko Semba&quot;) %&gt;%
+  select(time, lon,lat, scientists, profile, pressure, depth, 
+         temperature, salinity, conductivity, oxygen, fluorescence)
+
+}
+
+ctd.df = ctd.tb %&gt;% bind_rows()</code></pre>
+<p>Figure <a href="#fig:fig1">2</a> is a map of Mafia channel showing the location where profiles of temperature, salinity, oxygen, and fluorescene were measured against the water column (depth).</p>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2019-02-12-isosurface-of-temperature-salinity-oxygen-and-fluorescence-in-mafia-channel-from-ctd-data_files/figure-html/fig1-1.png" alt="CTD cast in the Mafia Channel" width="672" />
+<p class="caption">
+Figure 2: CTD cast in the Mafia Channel
+</p>
+</div>
+</div>
+<div id="isosurface-in-mafia-channel" class="section level3">
+<h3>Isosurface in Mafia Channel</h3>
+<p>Once we have the data frame of each ctd cast, we can make isosurface at three different depth—<em>surface, 10 and 20 meter</em>. Because the profiles were measured at randomly locations, we need to grid them and make the distribution evenly. The <code>interpBarnes()</code> function from <strong>oce</strong> package was used for gridding the unevenly distributed ctd points. We looped the procedure with <code>for()</code> function. The loop does three main things— select the depth; extract the <code>x = longitude,y = latitude ,z = variable</code> from the filtered depth—surface; 10 or 20; and interpolate the variables to the specific longitude and latitude. The chunk below highlights the codes used to create an isosurface of temperature shown in figure <a href="#fig:fig3">3</a>. Similar technique was used to make isosurface of oxygen (Figure <a href="#fig:fig4">4</a>); salinity (Figure <a href="#fig:fig5">5</a>) and fluorescence (Figure <a href="#fig:fig6">6</a>).</p>
+<pre class="r"><code>depth = c(0.25,10,20)
+
+par(mfrow = c(1,3))
+
+for (m in depth){
+  
+surface = ctd.df %&gt;% filter(pressure == m)
+x = surface$lon
+y = surface$lat
+z = surface$temperature
+
+interp.temp = interpBarnes(x = x, 
+                           y = y, 
+                           z = z, 
+                           xg = pretty(x, n = 50) , 
+                           yg = pretty(y, n = 50))
+
+imagep(interp.temp$xg, interp.temp$yg, interp.temp$zg, filledContour = TRUE, 
+       col = oce.colors9A(120), main = paste(&quot;Depth = &quot;, m, &quot;meters&quot;), zlim = c(27.8,29))
+contour(interp.temp$xg, interp.temp$yg, interp.temp$zg, col = &quot;black&quot;, add = TRUE)
+
+}</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2019-02-12-isosurface-of-temperature-salinity-oxygen-and-fluorescence-in-mafia-channel-from-ctd-data_files/figure-html/fig3-1.png" alt="The spatial distribution of temperature in the Mafia channel at the surface (left panel); 10 m deep (middle panel) and 20 m deep (right panel" width="672" />
+<p class="caption">
+Figure 3: The spatial distribution of temperature in the Mafia channel at the surface (left panel); 10 m deep (middle panel) and 20 m deep (right panel
+</p>
+</div>
+<div class="figure"><span id="fig:fig4"></span>
+<img src="/post/2019-02-12-isosurface-of-temperature-salinity-oxygen-and-fluorescence-in-mafia-channel-from-ctd-data_files/figure-html/fig4-1.png" alt="The spatial distribution of oxygen in the Mafia channel at the surface (left panel); 10 m deep (middle panel) and 20 m deep (right panel" width="672" />
+<p class="caption">
+Figure 4: The spatial distribution of oxygen in the Mafia channel at the surface (left panel); 10 m deep (middle panel) and 20 m deep (right panel
+</p>
+</div>
+<div class="figure"><span id="fig:fig5"></span>
+<img src="/post/2019-02-12-isosurface-of-temperature-salinity-oxygen-and-fluorescence-in-mafia-channel-from-ctd-data_files/figure-html/fig5-1.png" alt="The spatial distribution of salinity in the Mafia channel at the surface (left panel); 10 m deep (middle panel) and 20 m deep (right panel" width="672" />
+<p class="caption">
+Figure 5: The spatial distribution of salinity in the Mafia channel at the surface (left panel); 10 m deep (middle panel) and 20 m deep (right panel
+</p>
+</div>
+<div class="figure"><span id="fig:fig6"></span>
+<img src="/post/2019-02-12-isosurface-of-temperature-salinity-oxygen-and-fluorescence-in-mafia-channel-from-ctd-data_files/figure-html/fig6-1.png" alt="The spatial distribution of fluorescence in the Mafia channel at the surface (left panel); 10 m deep (middle panel) and 20 m deep (right panel" width="672" />
+<p class="caption">
+Figure 6: The spatial distribution of fluorescence in the Mafia channel at the surface (left panel); 10 m deep (middle panel) and 20 m deep (right panel
+</p>
+</div>
+</div>
+<div id="references" class="section level3 unnumbered">
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-lubridate">
+<p>Grolemund, Garrett, and Hadley Wickham. 2011. “Dates and Times Made Easy with lubridate.” <em>Journal of Statistical Software</em> 40 (3): 1–25. <a href="http://www.jstatsoft.org/v40/i03/" class="uri">http://www.jstatsoft.org/v40/i03/</a>.</p>
+</div>
+<div id="ref-oce">
+<p>Kelley, Dan, and Clark Richards. 2018. <em>Oce: Analysis of Oceanographic Data</em>. <a href="https://CRAN.R-project.org/package=oce" class="uri">https://CRAN.R-project.org/package=oce</a>.</p>
+</div>
+<div id="ref-sf">
+<p>Pebesma, Edzer. 2018. <em>Sf: Simple Features for R</em>. <a href="https://CRAN.R-project.org/package=sf" class="uri">https://CRAN.R-project.org/package=sf</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, Hadley. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse" class="uri">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+
