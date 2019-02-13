@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.51" />
+
+
+<title>Mapping with oce - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Mapping with oce - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">11 min read</span>
+    
+
+    <h1 class="article-title">Mapping with oce</h1>
+
+    
+    <span class="article-date">2019/02/13</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p>There are many different things that requires oceanographers to code and write scripts that automate routinely analytical frameworks. However, there is one common use amongst almost all every report, research project or paper will need to have—map indicating to a study area. There are many packages that are often used to make maps in R. And heaps of blog posts, books and tutorials that illustrate different ways to visualize spatial data in R.</p>
+<p>However, this post use an <strong>oce</strong> package, which sound unfamilir to most people, but very powerful package in R. The <strong>oce</strong> package written by <span class="citation">Kelley and Richards (<a href="#ref-oce">2018</a>)</span> is dedicated for drawing plots and maps that meets oceanographic standards. A wide group of functions is provided for plotting maps in oce package. The first step is to call <code>mapPlot()</code> to construct the map, after which points can be added with <code>mapPoints()</code>, lines with <code>mapLines()</code>. The packages needed for the exercise are first loaded into the workspace.</p>
+<pre class="r"><code>require(oce)
+require(ocedata)
+require(ncdf4)
+require(tidyverse)
+require(lubridate)</code></pre>
+<p><span class="citation">Kelley (<a href="#ref-ocedata">2015</a>)</span> developed the <strong>ocedata</strong> package that comes with several Oceanographic datasets including the world coastline at three levels.</p>
+<ul>
+<li><em>coastlineWorld</em>: low resolution suitable for global-scale maps plotted at a small size, e.g. inset diagrams</li>
+<li><em>coastlineWorldMedium</em>: moderate resolution suitable for global- or regional-scale maps, and</li>
+<li><em>coastlineWorldFine</em>: high resolution suitable for shelf-scale maps</li>
+</ul>
+<p>We load the three datasets from the oce package with the <code>data()</code> function as highlighted in this chunk</p>
+<pre class="r"><code>data(&quot;coastlineWorld&quot;)
+data(&quot;coastlineWorldMedium&quot;)
+data(&quot;coastlineWorldFine&quot;)</code></pre>
+<p>For example, the chunk below highlight the code used to make the map in figure <a href="#fig:fig1">1</a>.</p>
+<pre class="r"><code>par(mar=c(2, 2, 1, 1))
+lonlim &lt;- c(35, 55)
+latlim &lt;- c(-35, 2)
+
+
+mapPlot(coastlineWorldFine, 
+        projection=&quot;+proj=moll&quot;,
+        col=&quot;lightgray&quot;, 
+        longitudelim=lonlim, 
+        latitudelim=latlim)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig1"></span>
+<img src="/post/2019-02-13-mapping-with-oce_files/figure-html/fig1-1.png" alt="The Western Indian Ocean Region" width="384" />
+<p class="caption">
+Figure 1: The Western Indian Ocean Region
+</p>
+</div>
+<p>Like other software, a map must start with a baseline and for <strong>oce</strong> package the base is initiated with the <code>mapPlot()</code>. This <code>mapPlot()</code> define the extent of the map from which other layers are added on it. For example, the chunk below show the points in figure <a href="#fig:fig2">2</a> were added on the base with a <code>mapPoints()</code> function.</p>
+<pre class="r"><code>## create points name with their respective locations
+stations = data.frame(name = c(&quot;Stn1&quot;, &quot;Stn2&quot;, &quot;Stn3&quot;),
+                      lon = c(45,41.2,41.3),
+                      lat = c(-25,-11,-3))
+
+## define the margin of the plot
+par(mar=c(2, 2, 1, 1))
+
+## make a base
+mapPlot(coastlineWorldFine, 
+        projection=&quot;+proj=moll&quot;,
+        col=&quot;lightgray&quot;, 
+        longitudelim=lonlim, 
+        latitudelim=latlim)
+## ## overlay the point layer
+mapPoints(longitude = stations$lon,
+          latitude = stations$lat, 
+          pch = 20, 
+          cex = 1.75)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig2"></span>
+<img src="/post/2019-02-13-mapping-with-oce_files/figure-html/fig2-1.png" alt="Map of the Western Indian Ocean region showing experimental sites" width="384" />
+<p class="caption">
+Figure 2: Map of the Western Indian Ocean region showing experimental sites
+</p>
+</div>
+<p>The text on the map for example the station name in figure <a href="#fig:fig3">3</a> was added on the map with <code>mapText()</code> function as shown in the chunk below.</p>
+<pre class="r"><code>## create points name with their respective locations
+stations = data.frame(name = c(&quot;Stn1&quot;, &quot;Stn2&quot;, &quot;Stn3&quot;),
+                      lon = c(45,41.2,41.3),
+                      lat = c(-25,-11,-3))
+
+## define the margin of the plot
+par(mar=c(2, 2, 1, 1))
+
+## make a base
+mapPlot(coastlineWorldFine, 
+        projection=&quot;+proj=moll&quot;,
+        col=&quot;lightgray&quot;, 
+        longitudelim=lonlim, 
+        latitudelim=latlim)
+## ## overlay gridded sst layer
+mapPoints(longitude = stations$lon,
+          latitude = stations$lat, 
+          pch = 20, 
+          cex = 1.75)
+## add station name on the map
+mapText(longitude = stations$lon+1.5,
+          latitude = stations$lat+1.5,
+        labels = stations$name)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig3"></span>
+<img src="/post/2019-02-13-mapping-with-oce_files/figure-html/fig3-1.png" alt="Map of the Western Indian Ocean region showing experimental sites" width="384" />
+<p class="caption">
+Figure 3: Map of the Western Indian Ocean region showing experimental sites
+</p>
+</div>
+<p>The sea surface temperature data were download from the GHRSST website at (<a href="ftp://podaac.jpl.nasa.gov/allData/ghrsst/data/L4/GLOB/NCDC/AVHRR_OI/" class="uri">ftp://podaac.jpl.nasa.gov/allData/ghrsst/data/L4/GLOB/NCDC/AVHRR_OI/</a>) link. You can access the daily SST as well from this website. for this case I download three files of global level for January 2015. This dataset comes in Netcd format and you can import it with the <strong>ncdf4</strong> package <span class="citation">(Pierce <a href="#ref-ncdf4">2017</a>)</span> highlighted in chunk below. Load the netcdf SSF data using the <code>nc_open()</code> function.</p>
+<pre class="r"><code>nc = nc_open(&quot;e:/MatlabWorking/GHRSST/20150101.nc&quot;)</code></pre>
+<p>The loaded file contain several files and we need to separate three variables—longitude, latitude and temperature. But until now we know nothing about the structure of these variables. Figure <a href="#fig:fig0">4</a> is screen shot of the metadata that shows how the variables are written.</p>
+<pre class="r"><code>knitr::include_graphics(&quot;ghrsst.png&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig0"></span>
+<img src="ghrsst.png" alt="Metadata of the netcdf file" width="256" />
+<p class="caption">
+Figure 4: Metadata of the netcdf file
+</p>
+</div>
+<pre class="r"><code># cowplot::draw_image(&quot;ghrsst.png&quot;)</code></pre>
+<p>The you can use the metadata information in figure <a href="#fig:fig0">4</a> to extract these variables. Also the information in the metadata is used to calibrate the temperature values—from Kelvin to degree Celcius scale. The chunk below highlight how to get variables and calibrate the sst.</p>
+<pre class="r"><code>## extract the longitude varibale
+lon = ncvar_get(nc, &quot;lon&quot;)
+## extract the latitude varibale
+lat = ncvar_get(nc, &quot;lat&quot;)
+## extract sst variable
+sst = ncvar_get(nc, &quot;analysed_sst&quot;)
+
+## Kelvin to Degree celcius and calibrate
+sst = sst-273.149993896484</code></pre>
+<p>Once the variables are in the workspace, then, the sst layer is added on a map as image on base map created with <code>mapPlot()</code>. For instance, figure <a href="#fig:fig4">5</a> that shows the distribution of sea surface temperature was plotted by simply adding sst layer with <code>mapImage()</code> functions. The draw back of adding the image layer is that it mask the layers below it, a <code>mapPolygon()</code> function is added to add the country boundary. The country’s boundary data that fits the regional is the low resolution <em>coastlineWorld</em>—it is clear for large scale map as in figure <a href="#fig:fig4">5</a>.</p>
+<pre class="r"><code>par(mar=c(2, 2, 1, 1))
+Zlim = c(15,30)
+
+## make a base
+mapPlot(coastlineWorld, 
+        projection=&quot;+proj=moll&quot;,
+        col=&quot;lightgray&quot;, 
+        longitudelim=lonlim, 
+        latitudelim=latlim, 
+        clip = TRUE)
+## overlay gridded sst layer
+mapImage(longitude = lon,
+         latitude = lat, 
+         z = sst, 
+         zlim = Zlim,
+         col = oceColorsJet(120))
+## add polygon
+mapPolygon(coastlineWorld, 
+        col=&quot;lightgray&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig4"></span>
+<img src="/post/2019-02-13-mapping-with-oce_files/figure-html/fig4-1.png" alt="Map of the Western Indian Ocean region showing distribution of sea surface temperature" width="384" />
+<p class="caption">
+Figure 5: Map of the Western Indian Ocean region showing distribution of sea surface temperature
+</p>
+</div>
+<p>However, you notice that in figure <a href="#fig:fig4">5</a> legend for sea surface temperature is missing. The scalebar in figure <a href="#fig:fig5">6</a> was added with <code>drawPalette()</code> function as shown in the chunk below.</p>
+<pre class="r"><code>par(mar=c(2, 2, 1, 1))
+Zlim = c(15,30)
+
+## draw scalebar
+drawPalette(zlim = Zlim, 
+            col=oce.colorsJet, 
+            at = seq(16,30,2), 
+            pos = 4, 
+            drawTriangles = FALSE)
+## make a base
+mapPlot(coastlineWorld, 
+        projection=&quot;+proj=moll&quot;,
+        col=&quot;lightgray&quot;, 
+        longitudelim=lonlim, 
+        latitudelim=latlim, 
+        clip = TRUE)
+## ## overlay gridded sst layer
+mapImage(longitude = lon,
+         latitude = lat, 
+         z = sst, 
+         zlim = Zlim,
+         filledContour = TRUE,
+         col = oceColorsJet(120))
+## add polygon
+mapPolygon(coastlineWorld, 
+        col=&quot;lightgray&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig5"></span>
+<img src="/post/2019-02-13-mapping-with-oce_files/figure-html/fig5-1.png" alt="Map of the Western Indian Ocean region showing distribution of sea surface temperature" width="384" />
+<p class="caption">
+Figure 6: Map of the Western Indian Ocean region showing distribution of sea surface temperature
+</p>
+</div>
+<p>Contour of gridded seas surface temperature can be added as a layer on a map with <code>mapContour()</code> function. The contour (dotted lines) in figure <a href="#fig:fig6">7</a> is drawn using the code in the chunk below.</p>
+<pre class="r"><code>par(mar=c(2, 2, 1, 1))
+Zlim = c(15,30)
+
+## draw scalebar
+drawPalette(zlim = Zlim, 
+            col=oce.colorsJet, 
+            at = seq(16,30,2), 
+            pos = 4, 
+            drawTriangles = FALSE)
+## make a base
+mapPlot(coastlineWorld, 
+        projection=&quot;+proj=moll&quot;,
+        col=&quot;lightgray&quot;, 
+        longitudelim=lonlim, 
+        latitudelim=latlim, 
+        clip = TRUE)
+## ## overlay gridded sst layer
+mapImage(longitude = lon,
+         latitude = lat, 
+         z = sst, 
+         zlim = Zlim,
+         filledContour = TRUE,
+         col = oceColorsJet(120))
+## ## overlay gridded sst layer
+mapContour(longitude = lon,
+         latitude = lat, 
+         z = sst, 
+         levels =  seq(15,30,2),
+         col = &quot;black&quot;,
+         lwd = .85,lty = 1)
+## add polygon
+mapPolygon(coastlineWorld, 
+        col=&quot;lightgray&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig6"></span>
+<img src="/post/2019-02-13-mapping-with-oce_files/figure-html/fig6-1.png" alt="Map of the Western Indian Ocean region showing distribution of sea surface temperature. solid line are contours" width="384" />
+<p class="caption">
+Figure 7: Map of the Western Indian Ocean region showing distribution of sea surface temperature. solid line are contours
+</p>
+</div>
+<p>The grid on the map like in figure <a href="#fig:fig10">8</a> can be added with the <code>mapGrid()</code> function as shown in chunk below.</p>
+<pre class="r"><code>par(mar=c(2, 2, 1, 1))
+Zlim = c(15,30)
+
+## draw scalebar
+drawPalette(zlim = Zlim, 
+            col=oce.colorsJet, 
+            at = seq(16,30,2), 
+            pos = 4, 
+            drawTriangles = FALSE)
+## make a base
+mapPlot(coastlineWorld, 
+        projection=&quot;+proj=moll&quot;,
+        col=&quot;lightgray&quot;, 
+        longitudelim=lonlim, 
+        latitudelim=latlim, 
+        clip = TRUE)
+## ## overlay gridded sst layer
+mapImage(longitude = lon,
+         latitude = lat, 
+         z = sst, 
+         zlim = Zlim,
+         filledContour = TRUE,
+         col = oceColorsJet(120))
+## ## overlay gridded sst layer
+mapContour(longitude = lon,
+         latitude = lat, 
+         z = sst, 
+         levels =  seq(15,30,2),
+         col = &quot;black&quot;,
+         lwd = .85,lty = 1)
+## add polygon
+mapPolygon(coastlineWorld, 
+        col=&quot;lightgray&quot;)
+## adding grid
+mapGrid(dlongitude = 8, 
+        dlatitude = 8, 
+        lty = 3, lwd = .5)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig10"></span>
+<img src="/post/2019-02-13-mapping-with-oce_files/figure-html/fig10-1.png" alt="Map of the Western Indian Ocean region showing distribution of sea surface temperature. solid line are contours" width="384" />
+<p class="caption">
+Figure 8: Map of the Western Indian Ocean region showing distribution of sea surface temperature. solid line are contours
+</p>
+</div>
+<p>The scale on the map, for instance in figure <a href="#fig:fig11">9</a> the word Indian ocean can be added with the <code>mapScalebar()</code> function as shown in chunk below.</p>
+<pre class="r"><code>par(mar=c(2, 2, 1, 1))
+Zlim = c(15,30)
+
+## draw scalebar
+drawPalette(zlim = Zlim, 
+            col=oce.colorsJet, 
+            at = seq(16,30,2), 
+            pos = 4, 
+            drawTriangles = FALSE)
+## make a base
+mapPlot(coastlineWorld, 
+        projection=&quot;+proj=moll&quot;,
+        col=&quot;lightgray&quot;, 
+        longitudelim=lonlim, 
+        latitudelim=latlim, 
+        clip = TRUE)
+## ## overlay gridded sst layer
+mapImage(longitude = lon,
+         latitude = lat, 
+         z = sst, 
+         zlim = Zlim,
+         filledContour = TRUE,
+         col = oceColorsJet(120))
+## ## overlay gridded sst layer
+mapContour(longitude = lon,
+         latitude = lat, 
+         z = sst, 
+         levels =  seq(15,30,2),
+         col = &quot;black&quot;,
+         lwd = .85,lty = 1)
+## add polygon
+mapPolygon(coastlineWorld, 
+        col=&quot;lightgray&quot;)
+## adding grid
+mapGrid(dlongitude = 8, 
+        dlatitude = 8, 
+        lty = 3, lwd = .5)
+## add text on map
+mapScalebar(x = &quot;topleft&quot;, y = NULL, length = 1000, col = &quot;black&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig11"></span>
+<img src="/post/2019-02-13-mapping-with-oce_files/figure-html/fig11-1.png" alt="Map of the Western Indian Ocean region showing distribution of sea surface temperature. solid line are contours" width="384" />
+<p class="caption">
+Figure 9: Map of the Western Indian Ocean region showing distribution of sea surface temperature. solid line are contours
+</p>
+</div>
+<p>One thing that is great about R is the ability to create reproducible code—for instance the chunk below show how simple you can make local area mapp (Figure <a href="#fig:fig7">10</a>) from regional map (Figure <a href="#fig:fig6">7</a>) by simply adjusting the limit of longitude and latitude and Zlim—for palette.</p>
+<pre class="r"><code>## adjust the spatial extent to local area
+lonlim = c(38.0, 41)
+latlim = c(-7,-4)
+Zlim = c(27,30)
+
+par(mar=c(2, 2, 1, 1))
+
+## draw scalebar
+drawPalette(zlim = Zlim, 
+            col=oce.colorsJet, 
+            at = seq(27,30,0.5), 
+            pos = 4, 
+            drawTriangles = FALSE)
+## make a base
+mapPlot(coastlineWorld, 
+        projection=&quot;+proj=moll&quot;,
+        col=&quot;lightgray&quot;, 
+        longitudelim=lonlim, 
+        latitudelim=latlim, 
+        clip = TRUE)
+## ## overlay gridded sst layer
+mapImage(longitude = lon,
+         latitude = lat, 
+         z = sst, 
+         zlim = Zlim,
+         filledContour = FALSE,
+         col = oceColorsJet(120))
+## ## overlay gridded sst layer
+mapContour(longitude = lon,
+         latitude = lat, 
+         z = sst, 
+         levels =  seq(27,30,.5),lty = 3,
+         col = &quot;black&quot;,
+         lwd = 1.25)
+## add polygon
+mapPolygon(coastlineWorldFine, 
+        col=&quot;lightgray&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig7"></span>
+<img src="/post/2019-02-13-mapping-with-oce_files/figure-html/fig7-1.png" alt="Map showing distribution of sea surface temperature within the Pemba and Zanzibar channels. Dotted line are contours" width="384" />
+<p class="caption">
+Figure 10: Map showing distribution of sea surface temperature within the Pemba and Zanzibar channels. Dotted line are contours
+</p>
+</div>
+<p>Sometimes you might have wish to show the transect of the sampling on the map like in figure <a href="#fig:fig8">11</a>. Just add a line layer with <code>mapLines()</code> function and parse the longitude and latitude arguments with the geographical location stored in the dataset.</p>
+<pre class="r"><code>## fictious transect
+transect = data.frame(lon = seq(38, 43, length.out = 15),
+                      lat = seq(-5.2, -6.52, length.out = 15))
+
+## adjust the spatial extent to local area
+lonlim = c(38.0, 41)
+latlim = c(-7,-4)
+Zlim = c(27,30)
+
+par(mar=c(2, 2, 1, 1))
+
+## draw scalebar
+drawPalette(zlim = Zlim, 
+            col=oce.colorsJet, 
+            at = seq(27,30,0.5), 
+            pos = 4, 
+            drawTriangles = FALSE)
+## make a base
+mapPlot(coastlineWorld, 
+        projection=&quot;+proj=moll&quot;,
+        col=&quot;lightgray&quot;, 
+        longitudelim=lonlim, 
+        latitudelim=latlim, 
+        clip = TRUE)
+## ## overlay gridded sst layer
+mapImage(longitude = lon,
+         latitude = lat, 
+         z = sst, 
+         zlim = Zlim,
+         filledContour = FALSE,
+         col = oceColorsJet(120))
+## ## overlay gridded sst layer
+mapContour(longitude = lon,
+         latitude = lat, 
+         z = sst, 
+         levels =  seq(27,30,.5),lty = 3,
+         col = &quot;black&quot;,
+         lwd = 1.25)
+## add transect
+mapLines(longitude = transect$lon, 
+         latitude = transect$lat, 
+         col = &quot;black&quot;, lwd = 2)
+## add point
+mapPoints(longitude = transect$lon, 
+          latitude = transect$lat, 
+          col = &quot;black&quot;, pch = 20, cex = 1.75)
+## add polygon
+mapPolygon(coastlineWorldFine, 
+        col=&quot;lightgray&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig8"></span>
+<img src="/post/2019-02-13-mapping-with-oce_files/figure-html/fig8-1.png" alt="Map showing distribution of sea surface temperature within the Pemba and Zanzibar channels. Dotted line are contours" width="384" />
+<p class="caption">
+Figure 11: Map showing distribution of sea surface temperature within the Pemba and Zanzibar channels. Dotted line are contours
+</p>
+</div>
+<pre class="r"><code>load(&quot;wind_quikscat_grid.RData&quot;)
+wind = wind.quik$data
+wind.jan =  wind %&gt;% filter(time == dmy(160100))</code></pre>
+<pre class="r"><code>## adjust the spatial extent to local area
+lonlim = c(39.0, 40)
+latlim = c(-5.7,-4.1)
+Zlim = c(27,29)
+
+par(mar=c(2, 2, 1, 1))
+
+
+## draw scalebar
+drawPalette(zlim = Zlim, 
+            col=oce.colorsJet, 
+            at = seq(27,30,0.5), 
+            pos = 4, 
+            drawTriangles = FALSE)
+## make a base
+mapPlot(coastlineWorldFine, 
+        projection=&quot;+proj=moll&quot;,
+        col=&quot;lightgray&quot;, 
+        longitudelim=lonlim, 
+        latitudelim=latlim, 
+        clip = TRUE)
+## ## overlay gridded sst layer
+mapImage(longitude = lon,
+         latitude = lat, 
+         z = sst, 
+         zlim = Zlim,
+         filledContour = TRUE, 
+         # zclip = TRUE,
+         col = oceColorsJet(120))
+## ## overlay wind vector
+mapDirectionField(longitude =wind.jan$lon, 
+                  latitude = wind.jan$lat, 
+                  u = wind.jan$y_wind, 
+                  v = wind.jan$x_wind, 
+                  scale = 0.02, 
+                  length = 0.1)
+## add polygon
+mapPolygon(coastlineWorldFine, 
+        col=&quot;lightgray&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig9"></span>
+<img src="/post/2019-02-13-mapping-with-oce_files/figure-html/fig9-1.png" alt="Map showing distribution of sea surface temperature within the Pemba and Zanzibar channels. Arrows are vector showing the speed and direction of wind" width="384" />
+<p class="caption">
+Figure 12: Map showing distribution of sea surface temperature within the Pemba and Zanzibar channels. Arrows are vector showing the speed and direction of wind
+</p>
+</div>
+<p>Figure <a href="#fig:fig12">13</a> show the bathmetry within the Western Indian Ocean region (WIO) for which the steps are summarized in the chunk below</p>
+<pre class="r"><code>## set the extent
+lonlim = c(45.0, 55)
+latlim = c(-35,2)
+Zlim = c(-6000,0)
+
+par(mar=c(2, 2, 1, 1))
+
+
+## draw scalebar
+drawPalette(zlim = Zlim, 
+            col=oce.colorsGebco(120), 
+            at = seq(-6000,0,1000), 
+            pos = 4, 
+            drawTriangles = FALSE)
+## make a base
+mapPlot(coastlineWorld, 
+        projection=&quot;+proj=mill&quot;,
+        col=&quot;lightgray&quot;, 
+        longitudelim=lonlim, 
+        latitudelim=latlim, 
+        clip = TRUE)
+## ## overlay gridded sst layer
+mapImage(longitude = Lon,
+         latitude = Lat, 
+         z = etopo.mat, 
+         zlim = Zlim,
+         filledContour = TRUE, 
+         # zclip = TRUE,
+         col = oceColorsGebco(120))
+## add polygon
+mapPolygon(coastlineWorldFine, 
+        col=&quot;lightgray&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig12"></span>
+<img src="/post/2019-02-13-mapping-with-oce_files/figure-html/fig12-1.png" alt="Bathmetry of the Western Indian Ocean Region" width="480" />
+<p class="caption">
+Figure 13: Bathmetry of the Western Indian Ocean Region
+</p>
+</div>
+<div id="conclusion." class="section level2">
+<h2>Conclusion.</h2>
+<p>In this post I have taken time illustrating on making maps with oce package in R environment <span class="citation">(R Core Team <a href="#ref-r">2018</a>)</span>. But take it from me! I have just touch the surface of this package. <strong>oce</strong> is a powerful tool with tons of functions for handling, processing and analyzing different format of oceanographic data. The package also comes with specialized function for visualizing and plotting graphics that meets oceanographic standard.</p>
+<div id="references" class="section level3 unnumbered">
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-ocedata">
+<p>Kelley, Dan. 2015. <em>Ocedata: Oceanographic Datasets for Oce</em>. <a href="https://CRAN.R-project.org/package=ocedata" class="uri">https://CRAN.R-project.org/package=ocedata</a>.</p>
+</div>
+<div id="ref-oce">
+<p>Kelley, Dan, and Clark Richards. 2018. <em>Oce: Analysis of Oceanographic Data</em>. <a href="https://CRAN.R-project.org/package=oce" class="uri">https://CRAN.R-project.org/package=oce</a>.</p>
+</div>
+<div id="ref-ncdf4">
+<p>Pierce, David. 2017. <em>Ncdf4: Interface to Unidata netCDF (Version 4 or Earlier) Format Data Files</em>. <a href="https://CRAN.R-project.org/package=ncdf4" class="uri">https://CRAN.R-project.org/package=ncdf4</a>.</p>
+</div>
+<div id="ref-r">
+<p>R Core Team. 2018. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a>.</p>
+</div>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+
