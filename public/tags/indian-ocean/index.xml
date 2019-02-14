@@ -6,10 +6,19 @@
     <description>Recent content in Indian Ocean on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 13 Feb 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 14 Feb 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/indian-ocean/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Mapping the bathymetry of Coastal Tanzania from ETOPO1 with oce package in R</title>
+      <link>/02/14/2019/mapping-the-bathmetry-of-coastal-tanzania-from-etopo1-with-oce-package-in-r/</link>
+      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/02/14/2019/mapping-the-bathmetry-of-coastal-tanzania-from-etopo1-with-oce-package-in-r/</guid>
+      <description>In the previous post, we explore the power of oce package in mapping oceanographic data. In this post we will continue that theme and dive to process topographic data and map the bathymetry. We will grab ETOPO1 dataset— a 1 arc-minute global relief model that integrates land topography and ocean bathymetry. We will process the data and then use different ways to visualize the bathymetric information. There is no much statistics or modelling in this post, but the post focus on letting you know how to process the ascii (.</description>
+    </item>
     
     <item>
       <title>Mapping with oce</title>

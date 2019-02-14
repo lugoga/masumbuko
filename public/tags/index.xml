@@ -57,6 +57,15 @@
     </item>
     
     <item>
+      <title>Bathymetry</title>
+      <link>/tags/bathymetry/</link>
+      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/bathymetry/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Bookdown</title>
       <link>/tags/bookdown/</link>
       <pubDate>Wed, 14 Nov 2018 00:00:00 +0000</pubDate>
@@ -111,6 +120,15 @@
     </item>
     
     <item>
+      <title>Etopo</title>
+      <link>/tags/etopo/</link>
+      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/etopo/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Fluorescence</title>
       <link>/tags/fluorescence/</link>
       <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
@@ -131,7 +149,7 @@
     <item>
       <title>Indian Ocean</title>
       <link>/tags/indian-ocean/</link>
-      <pubDate>Wed, 13 Feb 2019 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/indian-ocean/</guid>
       <description></description>
@@ -192,6 +210,15 @@
     </item>
     
     <item>
+      <title>Mtwara</title>
+      <link>/tags/mtwara/</link>
+      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/mtwara/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Oce</title>
       <link>/tags/oce/</link>
       <pubDate>Wed, 13 Feb 2019 00:00:00 +0000</pubDate>
@@ -210,9 +237,18 @@
     </item>
     
     <item>
+      <title>Pemba</title>
+      <link>/tags/pemba/</link>
+      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/pemba/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Pemba Channel</title>
       <link>/tags/pemba-channel/</link>
-      <pubDate>Sat, 20 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/pemba-channel/</guid>
       <description></description>
@@ -284,7 +320,7 @@
     <item>
       <title>Tanzania</title>
       <link>/tags/tanzania/</link>
-      <pubDate>Sat, 09 Feb 2019 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/tanzania/</guid>
       <description></description>
