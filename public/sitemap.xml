@@ -28,6 +28,11 @@
   </url>
   
   <url>
+    <loc>/02/15/2019/primary-production-chlorophyll-concentration-and-sea-surface-temperature-in-tanzania-waters/</loc>
+    <lastmod>2019-02-15T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/02/14/2019/mapping-the-bathmetry-of-coastal-tanzania-from-etopo1-with-oce-package-in-r/</loc>
     <lastmod>2019-02-14T00:00:00+00:00</lastmod>
   </url>
@@ -237,6 +242,12 @@
   </url>
   
   <url>
+    <loc>/tags/chlorophyll/</loc>
+    <lastmod>2019-02-15T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/climate/</loc>
     <lastmod>2019-02-08T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -287,6 +298,12 @@
   <url>
     <loc>/tags/indian-ocean/</loc>
     <lastmod>2019-02-14T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/categories/insitu/</loc>
+    <lastmod>2019-02-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -346,7 +363,7 @@
   
   <url>
     <loc>/categories/oceanography/</loc>
-    <lastmod>2019-02-14T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -370,13 +387,19 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2019-02-14T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/pressure/</loc>
     <lastmod>2019-02-12T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/primary-productivity/</loc>
+    <lastmod>2019-02-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -421,6 +444,12 @@
   </url>
   
   <url>
+    <loc>/categories/satellite/</loc>
+    <lastmod>2019-02-15T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/surface-current/</loc>
     <lastmod>2018-09-30T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -446,7 +475,7 @@
   
   <url>
     <loc>/tags/temperature/</loc>
-    <lastmod>2019-02-02T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

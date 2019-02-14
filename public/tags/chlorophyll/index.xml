@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Chlorophyll on Masumbuko Semba&#39;s Blog</title>
+    <link>/tags/chlorophyll/</link>
+    <description>Recent content in Chlorophyll on Masumbuko Semba&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 15 Feb 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/chlorophyll/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Primary Production, chlorophyll-concentration and Sea surface temperature in Tanzania waters</title>
+      <link>/02/15/2019/primary-production-chlorophyll-concentration-and-sea-surface-temperature-in-tanzania-waters/</link>
+      <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/02/15/2019/primary-production-chlorophyll-concentration-and-sea-surface-temperature-in-tanzania-waters/</guid>
+      <description>Introductionrequire(tidyverse)require(oce)require(highcharter)require(lubridate)files = dir(&amp;quot;./extracted/&amp;quot;, pattern = &amp;quot;chl_&amp;quot;, full.names = TRUE)sites = c(&amp;quot;EEZ&amp;quot;, &amp;quot;Mafia&amp;quot;, &amp;quot;Pemba&amp;quot;, &amp;quot;Zanzibar&amp;quot;)chlorophyllchl = list()for (i in 1:length(files)){chl[[i]] = files[i] %&amp;gt;% readxl::read_excel()%&amp;gt;% rename(date = 1, year = 2, chl = 3) %&amp;gt;% mutate(month = month(date), day = 15,site = sites[i], date = make_date(year = year, month = month, day = day)) %&amp;gt;%arrange(date)}chl = chl %&amp;gt;% bind_rows()gg = ggplot()+geom_raster(data = chl, aes(x = year, y = month, fill = chl), interpolate = T, na.</description>
+    </item>
+    
+  </channel>
+</rss>

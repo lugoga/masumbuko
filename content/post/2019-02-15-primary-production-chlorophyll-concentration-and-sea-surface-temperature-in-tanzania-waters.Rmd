@@ -1,0 +1,230 @@
+---
+title: Primary Production, chlorophyll-concentration and Sea surface temperature in
+  Tanzania waters
+author: Masumbuko Semba
+date: '2019-02-15'
+slug: primary-production-chlorophyll-concentration-and-sea-surface-temperature-in-tanzania-waters
+categories:
+  - Oceanography
+  - satellite
+  - insitu
+tags:
+  - Temperature
+  - primary productivity
+  - chlorophyll
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
+```
+
+### Introduction
+
+```{r}
+require(tidyverse)
+require(oce)
+require(highcharter)
+require(lubridate)
+```
+
+
+```{r}
+
+files = dir("./extracted/", pattern = "chl_", full.names = TRUE)
+
+sites = c("EEZ", "Mafia", "Pemba", "Zanzibar")
+```
+
+### chlorophyll
+```{r}
+
+chl = list()
+for (i in 1:length(files)){
+
+chl[[i]] = files[i] %>% readxl::read_excel()%>% 
+  rename(date = 1, year = 2, chl = 3) %>% 
+  mutate(month = month(date), 
+         day = 15,
+         site = sites[i], 
+         date = make_date(year = year, month = month, day = day)) %>%
+  arrange(date)
+}
+
+chl = chl %>% bind_rows()
+
+```
+
+
+```{r, fig.height=5, fig.width=10, eval=FALSE}
+gg = ggplot()+
+  geom_raster(data = chl, aes(x = year, y = month, fill =  chl), interpolate = T, na.rm = TRUE)+
+  geom_contour(data = chl, aes(x = year, y = month, z =  chl), col = 1)+
+  scale_y_reverse(breaks = 1:12)+
+  scale_fill_gradientn(colours = oceColors9A(120))+
+  facet_wrap(~site, scales = "free_y")
+
+plotly::ggplotly(gg)
+```
+
+```{r fig1, fig.cap="Heatmap of chlorophyll-a concentration in Mafia channel"}
+hchart(object = chl%>%filter(site == "Mafia"), "heatmap", hcaes(x = year, y = month, value = chl, group = site))
+```
+
+```{r ,eval=FALSE}
+gb =ggplot(data = chl, aes(x = date, y = chl, col = site))+geom_line()
+    plotly::ggplotly(gb)
+```
+
+```{r fig2, fig.cap="monthly chlorophyll-a concentration"}
+
+hchart(object = chl, "line", hcaes(x = date, y = chl, group = site))
+```
+
+
+```{r fig3,  fig.cap="Hovmoller diagram of chlorophyll concentration"}
+month = 1:12
+year = 2003:2018
+
+chl.array = array(data = chl$chl, dim = c(length(month),length(year),length(sites)))
+
+par(mfrow = c(2,2))
+for (j in 1:length(sites)){
+imagep(year, month, chl.array[,,j]%>%t(),filledContour = T, col = oceColors9A(120),  flipy = T, main = sites[j])
+contour(year, month,chl.array[,,j]%>%t() , add = T)
+}
+
+```
+
+
+### Primary productivity
+```{r}
+files = dir("./extracted/", pattern = "pp_", full.names = TRUE)
+sites = c("EEZ", "Mafia", "Pemba", "Zanzibar")
+```
+
+
+```{r}
+
+pp = list()
+for (i in 1:length(files)){
+
+pp[[i]] = files[i] %>% readxl::read_excel()%>% 
+  rename(date = 1, year = 2, pp = 3) %>% 
+  mutate(month = month(date), 
+         day = 15,
+         site = sites[i], 
+         date = make_date(year = year, month = month, day = day)) %>%
+  arrange(date)
+}
+
+pp = pp %>% bind_rows()
+
+```
+
+
+```{r, fig.height=5, fig.width=10,eval=FALSE}
+gg = ggplot()+
+  geom_raster(data = pp, aes(x = year, y = month, fill =  pp), interpolate = T, na.rm = TRUE)+
+  geom_contour(data = pp, aes(x = year, y = month, z =  pp), col = 1)+
+  scale_y_reverse(breaks = 1:12)+
+  scale_fill_gradientn(colours = oceColors9A(120))+
+  facet_wrap(~site, scales = "free_y")
+
+plotly::ggplotly(gg)
+```
+
+```{r fig4, fig.cap="Heat map of primary productivity in Mafia channel"}
+hchart(object = pp%>%filter(site == "Mafia"), "heatmap", hcaes(x = year, y = month, value = pp, group = site))
+```
+
+```{r ,eval=FALSE}
+gb =ggplot(data = pp, aes(x = date, y = pp, col = site))+geom_line()
+    plotly::ggplotly(gb)
+```
+
+```{r fig5, fig.cap="Monthly mean of primary production between 2003 and 2018"}
+hchart(object = pp, "line", hcaes(x = date, y = pp, group = site))
+```
+
+
+```{r fig6,  fig.cap="Hovmoller diagram of primary productivity"}
+
+pp.array = array(data = pp$pp, dim = c(length(month),length(year),length(sites)))
+
+par(mfrow = c(2,2))
+for (j in 1:length(sites)){
+imagep(year, month, pp.array[,,j]%>%t(),filledContour = T, col = oceColors9A(120),  flipy = T, main = sites[j])
+contour(year, month,pp.array[,,j]%>%t() , add = T)
+}
+
+```
+
+
+### Temperature
+
+```{r}
+files = dir("./extracted/", pattern = "sst_", full.names = TRUE)
+sites = c("EEZ", "Mafia", "Pemba", "Zanzibar")
+```
+
+
+```{r}
+
+sst = list()
+for (i in 1:length(files)){
+
+sst[[i]] = files[i] %>% readxl::read_excel()%>% 
+  rename(date = 1, year = 2, sst = 3) %>% 
+  mutate(month = month(date), 
+         day = 15,
+         site = sites[i], 
+         date = make_date(year = year, month = month, day = day)) %>%
+  arrange(date)
+}
+
+sst = sst %>% bind_rows()
+
+```
+
+
+```{r, fig.height=5, fig.width=10, eval=FALSE}
+gg = ggplot()+
+  geom_raster(data = sst, aes(x = year, y = month, fill =  sst), interpolate = T, na.rm = TRUE)+
+  geom_contour(data = sst, aes(x = year, y = month, z =  sst), col = 1)+
+  scale_y_reverse(breaks = 1:12)+
+  scale_fill_gradientn(colours = oceColors9A(120))+
+  facet_wrap(~site, scales = "free_y")
+
+plotly::ggplotly(gg)
+```
+
+```{r fig7, fig.cap="heatmap of sea surface temperature in Mafia channel"}
+hchart(object = sst%>%filter(site == "Mafia"), "heatmap", hcaes(x = year, y = month, value = sst, group = site))
+```
+
+```{r, ,eval=FALSE}
+gb =ggplot(data = sst, aes(x = date, y = sst, col = site))+geom_line()
+    plotly::ggplotly(gb)
+```
+
+```{r fig8, fig.cap="monthly mean of sea surface temperature between 2003 and 2018"}
+hchart(object = sst, "line", hcaes(x = date, y = sst, group = site))
+```
+
+
+```{r fig9,  fig.cap="Hovmoller diagrams of sea surface temperature"}
+
+sst.array = array(data = sst$sst, dim = c(length(month),length(year),length(sites)))
+
+par(mfrow = c(2,2))
+for (j in 1:length(sites)){
+imagep(year, month, sst.array[,,j]%>%t(),filledContour = T, col = oceColors9A(120),  flipy = T, main = sites[j])
+contour(year, month,sst.array[,,j]%>%t() , add = T)
+}
+
+```
+

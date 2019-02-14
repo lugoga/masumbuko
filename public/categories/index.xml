@@ -21,9 +21,18 @@
     </item>
     
     <item>
+      <title>Insitu</title>
+      <link>/categories/insitu/</link>
+      <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/insitu/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Oceanography</title>
       <link>/categories/oceanography/</link>
-      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/categories/oceanography/</guid>
       <description></description>
@@ -35,6 +44,15 @@
       <pubDate>Tue, 12 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/categories/r/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Satellite</title>
+      <link>/categories/satellite/</link>
+      <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/satellite/</guid>
       <description></description>
     </item>
     
