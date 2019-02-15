@@ -40,6 +40,8 @@ sites = c("EEZ", "Mafia", "Pemba", "Zanzibar")
 ```
 
 ### chlorophyll
+Chla is certainly the most commonly derived parameter in water quality mainly because of its use in determining the trophic status of waters. The Chla estimation allows forecasting of the phytoplankton concentration and is therefore an important component in the derivation of secondary products such as primary production.
+
 ```{r}
 
 chl = list()
