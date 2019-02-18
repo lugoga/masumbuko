@@ -17,7 +17,7 @@
       <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/02/15/2019/primary-production-chlorophyll-concentration-and-sea-surface-temperature-in-tanzania-waters/</guid>
-      <description>Introductionrequire(tidyverse)require(oce)require(highcharter)require(lubridate)files = dir(&amp;quot;./extracted/&amp;quot;, pattern = &amp;quot;chl_&amp;quot;, full.names = TRUE)sites = c(&amp;quot;EEZ&amp;quot;, &amp;quot;Mafia&amp;quot;, &amp;quot;Pemba&amp;quot;, &amp;quot;Zanzibar&amp;quot;)chlorophyllChla is certainly the most commonly derived parameter in water quality mainly because of its use in determining the trophic status of waters.</description>
+      <description>Introductionrequire(tidyverse)require(oce)require(highcharter)require(lubridate)files = dir(&amp;quot;extracted/&amp;quot;, pattern = &amp;quot;chl_&amp;quot;, full.names = TRUE)chlorophyllChla is certainly the most commonly derived parameter in water quality mainly because of its use in determining the trophic status of waters.</description>
     </item>
     
   </channel>

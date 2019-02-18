@@ -71,7 +71,7 @@ Designing graphic: Design graphics and typeset books</description>
       <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/02/15/2019/primary-production-chlorophyll-concentration-and-sea-surface-temperature-in-tanzania-waters/</guid>
-      <description>Introductionrequire(tidyverse)require(oce)require(highcharter)require(lubridate)files = dir(&amp;quot;./extracted/&amp;quot;, pattern = &amp;quot;chl_&amp;quot;, full.names = TRUE)sites = c(&amp;quot;EEZ&amp;quot;, &amp;quot;Mafia&amp;quot;, &amp;quot;Pemba&amp;quot;, &amp;quot;Zanzibar&amp;quot;)chlorophyllChla is certainly the most commonly derived parameter in water quality mainly because of its use in determining the trophic status of waters.</description>
+      <description>Introductionrequire(tidyverse)require(oce)require(highcharter)require(lubridate)files = dir(&amp;quot;extracted/&amp;quot;, pattern = &amp;quot;chl_&amp;quot;, full.names = TRUE)chlorophyllChla is certainly the most commonly derived parameter in water quality mainly because of its use in determining the trophic status of waters.</description>
     </item>
     
     <item>
@@ -368,6 +368,15 @@ pemba = read.adp(&amp;quot;./adcp/ADCP_DATA/2007_05/M72-5_OS75011_000000.LTA&amp
       
       <guid>/project/</guid>
       <description>Sustainable Oceans, Livelihoods and food Security Through Increased Capacity in Ecosystem research in the Western Indian Ocean*SOLSTICE-WIO is a four-year collaborative project funded by the UK Global Challenges Research Fund (GCRF). Launched in October 2017, it brings together local knowledge and international research expertise to address challenges facing the Western Indian Ocean region in a cost-effective way. SOLSTICE demonstrate its approach to strengthening research capacity through three case studies in Kenya, Tanzania and South Africa show in Figure 1.</description>
+    </item>
+    
+    <item>
+      <title>Results</title>
+      <link>/01/01/1/results/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/01/01/1/results/</guid>
+      <description>require(tidyverse)require(oce)require(highcharter)require(lubridate)chlorophyllsetwd(&amp;quot;e:/Data Manipulation/kuguru/extracted/&amp;quot;)files = dir(&amp;quot;./&amp;quot;, pattern = &amp;quot;chl_&amp;quot;)sites = c(&amp;quot;EEZ&amp;quot;, &amp;quot;Mafia&amp;quot;, &amp;quot;Pemba&amp;quot;, &amp;quot;Zanzibar&amp;quot;)chl = list()for (i in 1:length(files)){chl[[i]] = files[i] %&amp;gt;% readxl::read_excel()%&amp;gt;% rename(date = 1, year = 2, chl = 3) %&amp;gt;% mutate(month = month(date), day = 15,site = sites[i], date = make_date(year = year, month = month, day = day)) %&amp;gt;%arrange(date)}chl = chl %&amp;gt;% bind_rows()gg = ggplot()+geom_raster(data = chl, aes(x = year, y = month, fill = chl), interpolate = T, na.</description>
     </item>
     
   </channel>

@@ -67,7 +67,7 @@
 
   <article class="article">
     
-    <span class="article-duration">5 min read</span>
+    <span class="article-duration">6 min read</span>
     
 
     <h1 class="article-title">Primary Production, chlorophyll-concentration and Sea surface temperature in Tanzania waters</h1>
@@ -128,14 +128,19 @@
 require(oce)
 require(highcharter)
 require(lubridate)</code></pre>
-<pre class="r"><code>files = dir(&quot;./extracted/&quot;, pattern = &quot;chl_&quot;, full.names = TRUE)
-
-sites = c(&quot;EEZ&quot;, &quot;Mafia&quot;, &quot;Pemba&quot;, &quot;Zanzibar&quot;)</code></pre>
+<pre class="r"><code>files = dir(&quot;extracted/&quot;, pattern = &quot;chl_&quot;, full.names = TRUE)</code></pre>
 </div>
 <div id="chlorophyll" class="section level3">
 <h3>chlorophyll</h3>
 <p>Chla is certainly the most commonly derived parameter in water quality mainly because of its use in determining the trophic status of waters. The Chla estimation allows forecasting of the phytoplankton concentration and is therefore an important component in the derivation of secondary products such as primary production.</p>
-<pre class="r"><code>chl = list()
+</div>
+<div id="looping-the-files" class="section level3">
+<h3>Looping the files</h3>
+<p>There are four sites— The exclusive economic zone (EEZ) and three channels of Pemba, Zanzibar and Mafia. Each site has three files—primary productivity, chlorophyll-<em>a</em> and sea surface temperature—making a total of twelve files. Procesing each files is rather tedious! Its also inefficient—because repeating reading the files is boring and sometimes the mind can drop off to sleep more easily if you are not focusing on the process. Thankfully, most programming languages have what is called a <em>for loop</em> , which repeates reading the files over and over until it finish all the fires in the working directory. So using the loop actually save us from writing hundred kubes if code. The chunk below show the <em>for loop</em> that was used to read excell files that store the value of chlorophyll from the directory.</p>
+<pre class="r"><code>sites = c(&quot;EEZ&quot;, &quot;Mafia&quot;, &quot;Pemba&quot;, &quot;Zanzibar&quot;)
+
+chl = list()
+
 for (i in 1:length(files)){
 
 chl[[i]] = files[i] %&gt;% readxl::read_excel()%&gt;% 
@@ -148,6 +153,7 @@ chl[[i]] = files[i] %&gt;% readxl::read_excel()%&gt;%
 }
 
 chl = chl %&gt;% bind_rows()</code></pre>
+<p>In summary this chunk tell something like this: at line <code>1</code> we create a list object and assigned <code>sites</code> site names — EEZ, Mafia, Pemba and Zanzibar Channel. At line <code>2</code> The next line dummy list files that will store the data for each file is defined. The next line at line <code>3</code> sets up the <code>for</code> loop, which will run the command in the block. In this line we loop through the items by reading the excel file from the local directory and then assigned the file with <code>i</code>. Once the file is read, its variable names are replaced with meaningful names—date, year and chl. Then new variables—month, day,date, and name of the site <code>i</code> are created with <code>mutate()</code> function and the whole dataset is arrnged in ascending order using the date variable with the <code>arrange()</code> function. Since the list contain four data frame for each site, we bind them together with the <code>bind_rows()</code> function.</p>
 <pre class="r"><code>gg = ggplot()+
   geom_raster(data = chl, aes(x = year, y = month, fill =  chl), interpolate = T, na.rm = TRUE)+
   geom_contour(data = chl, aes(x = year, y = month, z =  chl), col = 1)+

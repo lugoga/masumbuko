@@ -1,28 +1,15 @@
 ---
-title: Primary Production, chlorophyll-concentration and Sea surface temperature in
-  Tanzania waters
-author: Masumbuko Semba
-date: '2019-02-15'
-slug: primary-production-chlorophyll-concentration-and-sea-surface-temperature-in-tanzania-waters
-categories:
-  - Oceanography
-  - satellite
-  - insitu
-tags:
-  - Temperature
-  - primary productivity
-  - chlorophyll
-bibliography: [blog.bib]
-# csl: apa.csl
-link-citations: yes
+title: "Results"
+author: "Masumbuko Semba"
+date: "February 14, 2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
 ```
-
-### Introduction
 
 ```{r}
 require(tidyverse)
@@ -30,29 +17,18 @@ require(oce)
 require(highcharter)
 require(lubridate)
 ```
-
-
+### chlorophyll
 ```{r}
+setwd("e:/Data Manipulation/kuguru/extracted/")
 
-files = dir("extracted/", pattern = "chl_", full.names = TRUE)
-
-
+files = dir("./", pattern = "chl_")
+sites = c("EEZ", "Mafia", "Pemba", "Zanzibar")
 ```
 
-### chlorophyll
-Chla is certainly the most commonly derived parameter in water quality mainly because of its use in determining the trophic status of waters. The Chla estimation allows forecasting of the phytoplankton concentration and is therefore an important component in the derivation of secondary products such as primary production.
-
-
-### Looping the files
-There are four sites--- The exclusive economic zone (EEZ) and three channels of Pemba, Zanzibar and Mafia. Each site has three files---primary productivity, chlorophyll-*a* and sea surface temperature---making a total of twelve files. Procesing each files is rather tedious! Its also inefficient---because repeating reading the files is boring and sometimes the mind can drop off to sleep more easily if you are not focusing on the process. Thankfully, most programming  languages have what is called a *for loop* , which repeates reading the files over and over until it finish all the fires in the working directory. So using the loop actually save us from writing hundred kubes if code. The chunk below show the *for loop* that was used to read excell files that store the value of chlorophyll from the directory. 
-
 
 ```{r}
 
-sites = c("EEZ", "Mafia", "Pemba", "Zanzibar")
-
 chl = list()
-
 for (i in 1:length(files)){
 
 chl[[i]] = files[i] %>% readxl::read_excel()%>% 
@@ -68,7 +44,6 @@ chl = chl %>% bind_rows()
 
 ```
 
-In summary this chunk tell something like this: at line `1`  we create a list object and assigned `sites` site names --- EEZ, Mafia, Pemba and Zanzibar Channel. At line `2` The next line dummy list files that will store the data for each file is defined. The next line at line `3` sets up the `for` loop, which will run the command in the block. In this line we loop through the items by reading the excel file from the local directory and then assigned the file with `i`. Once the file is read, its variable names are replaced with meaningful names---date, year and chl. Then new variables---month, day,date, and name of the site `i` are created with `mutate()` function and the whole dataset is arrnged in ascending order using the date variable with the `arrange()` function. Since the list contain four data frame for each site, we bind them together with the `bind_rows()` function. 
 
 ```{r, fig.height=5, fig.width=10, eval=FALSE}
 gg = ggplot()+
@@ -81,7 +56,7 @@ gg = ggplot()+
 plotly::ggplotly(gg)
 ```
 
-```{r fig1, fig.cap="Heatmap of chlorophyll-a concentration in Mafia channel"}
+```{r}
 hchart(object = chl%>%filter(site == "Mafia"), "heatmap", hcaes(x = year, y = month, value = chl, group = site))
 ```
 
@@ -90,13 +65,12 @@ gb =ggplot(data = chl, aes(x = date, y = chl, col = site))+geom_line()
     plotly::ggplotly(gb)
 ```
 
-```{r fig2, fig.cap="monthly chlorophyll-a concentration"}
-
+```{r}
 hchart(object = chl, "line", hcaes(x = date, y = chl, group = site))
 ```
 
 
-```{r fig3,  fig.cap="Hovmoller diagram of chlorophyll concentration"}
+```{r , fig.width=9}
 month = 1:12
 year = 2003:2018
 
@@ -113,7 +87,7 @@ contour(year, month,chl.array[,,j]%>%t() , add = T)
 
 ### Primary productivity
 ```{r}
-files = dir("./extracted/", pattern = "pp_", full.names = TRUE)
+files = dir("./", pattern = "pp_")
 sites = c("EEZ", "Mafia", "Pemba", "Zanzibar")
 ```
 
@@ -148,7 +122,7 @@ gg = ggplot()+
 plotly::ggplotly(gg)
 ```
 
-```{r fig4, fig.cap="Heat map of primary productivity in Mafia channel"}
+```{r}
 hchart(object = pp%>%filter(site == "Mafia"), "heatmap", hcaes(x = year, y = month, value = pp, group = site))
 ```
 
@@ -157,12 +131,12 @@ gb =ggplot(data = pp, aes(x = date, y = pp, col = site))+geom_line()
     plotly::ggplotly(gb)
 ```
 
-```{r fig5, fig.cap="Monthly mean of primary production between 2003 and 2018"}
+```{r}
 hchart(object = pp, "line", hcaes(x = date, y = pp, group = site))
 ```
 
 
-```{r fig6,  fig.cap="Hovmoller diagram of primary productivity"}
+```{r , fig.width=9}
 
 pp.array = array(data = pp$pp, dim = c(length(month),length(year),length(sites)))
 
@@ -178,7 +152,7 @@ contour(year, month,pp.array[,,j]%>%t() , add = T)
 ### Temperature
 
 ```{r}
-files = dir("./extracted/", pattern = "sst_", full.names = TRUE)
+files = dir("./", pattern = "sst_")
 sites = c("EEZ", "Mafia", "Pemba", "Zanzibar")
 ```
 
@@ -213,7 +187,7 @@ gg = ggplot()+
 plotly::ggplotly(gg)
 ```
 
-```{r fig7, fig.cap="heatmap of sea surface temperature in Mafia channel"}
+```{r}
 hchart(object = sst%>%filter(site == "Mafia"), "heatmap", hcaes(x = year, y = month, value = sst, group = site))
 ```
 
@@ -222,12 +196,12 @@ gb =ggplot(data = sst, aes(x = date, y = sst, col = site))+geom_line()
     plotly::ggplotly(gb)
 ```
 
-```{r fig8, fig.cap="monthly mean of sea surface temperature between 2003 and 2018"}
+```{r}
 hchart(object = sst, "line", hcaes(x = date, y = sst, group = site))
 ```
 
 
-```{r fig9,  fig.cap="Hovmoller diagrams of sea surface temperature"}
+```{r, fig.width=9}
 
 sst.array = array(data = sst$sst, dim = c(length(month),length(year),length(sites)))
 
