@@ -1,0 +1,49 @@
+---
+title: The Reasons for Creating my blog!
+author: Masumbuko Semba
+date: '2019-02-19'
+slug: why-i-created-a-static-blog-from-scratch
+categories:
+  - Information Technology
+tags:
+  - Masumbuko Semba
+  
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
+```
+
+According to [firstpage](https://www.firstpagemarketing.com/blog/the-importance-of-blogging/);
+
+> ...blogging was initially used as a unique platform to share a person’s thoughts, feelings, opinions or experiences---an online journal or diary with a minimal following. 
+
+Today, it has grown into a platform used by millions, everyone from individuals to businesses. The simplicity of a blog makes it easy for anyone to launch a blog and become a self-proclaimed “expert.” But how is it important in the world today, with unprecedented advent in technology and computing?
+
+```{r, fig.align="center", echo=FALSE, eval=FALSE}
+cowplot::ggdraw() +
+  cowplot::draw_image("data_science_model.png")
+```
+
+
+After my first year chasing water---working on  the physical processes driving ocean current in the Indian Ocean, I ended up filling several notebooks and counterbooks with notes, script codes and graphics. Tracing these assets was hurdle and I had to spend several hours trying to figure out the location and working directories of each piece of work I had done previously. It was embarassing and thought wasnt health and effective way to store information!. The other subtle reason is that my brain tend to forget the code I write very soon and retrieving the things I have learned was hard. I had to look for a gatetway where I can post hard codes of the script I write and develop---a place that is easy to retrieve them. I got the idea to have my own blog---a platform that I will document most of the work I do and I can access---offline and online. It came out to be platform where I showcase my work, share content with other people dealing with physical oceanography and those like to script with R programming language. The constant demanding of writing a post every week has 
+
+#### Developing the blog
+I did not started the blog from scratch, I used the *hugo-template* and **blogdown** package developed by Xie and Thomas [-@blogdown] to create this blog. To make it less intimidating, I broke it down into pieces. The first stage I worked to simply develop a simple blog and deploy it. Then, once the blog was up and running, I had a glimpse of the blod and started working on the designing and appearance of the blog. Once the design was better and the quick loading of the pages, I started writing and pushing articles at least every week.
+
+### hosting: Netlify
+with so many tools available, its hard to know that right for the scope of the project. The important criteria for me were
+
++ Free hosting for a custom domain
++ Ease of use
++ Ability to serve dynamic
++ Built in HTTPS security
+
+Netlify is a hosting and erverlesss backend service for static sites. It gave me everything I was looking for plus bonus features that I had not even thought of like
+
+#### continuous deployment
+Link your Github account and Netlify automatically built and deploy my blot. Every push of the updated blot in the Github is continuosuly deployed with Netlify

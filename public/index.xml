@@ -66,12 +66,32 @@ Designing graphic: Design graphics and typeset books</description>
     </item>
     
     <item>
+      <title>Time series analysis in R</title>
+      <link>/02/20/2019/time-series-analysis-in-r/</link>
+      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/02/20/2019/time-series-analysis-in-r/</guid>
+      <description>Any quantitative value measured over regular time intervals makes a Time Series. Time-series analysis aims to investigate the temporal behavior of a variable \(X_{t}\). Examples include the investigation of long-term records of sea surface temperature, sea-level fluctuations, millennium-scale variations in the atmosphere-ocean system, the eff ect of the El-Niño/Southern Oscillation on tropical rainfall and sedimentation (Trauth 2015). R has extensive facilities for analyzing time series data. These packages provides various tools with which to detect these temporal patterns.</description>
+    </item>
+    
+    <item>
+      <title>The Reasons for Creating my blog!</title>
+      <link>/02/19/2019/why-i-created-a-static-blog-from-scratch/</link>
+      <pubDate>Tue, 19 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/02/19/2019/why-i-created-a-static-blog-from-scratch/</guid>
+      <description>According to firstpage;
+…blogging was initially used as a unique platform to share a person’s thoughts, feelings, opinions or experiences—an online journal or diary with a minimal following.
+Today, it has grown into a platform used by millions, everyone from individuals to businesses. The simplicity of a blog makes it easy for anyone to launch a blog and become a self-proclaimed “expert.” But how is it important in the world today, with unprecedented advent in technology and computing?</description>
+    </item>
+    
+    <item>
       <title>Primary Production, chlorophyll-concentration and Sea surface temperature in Tanzania waters</title>
       <link>/02/15/2019/primary-production-chlorophyll-concentration-and-sea-surface-temperature-in-tanzania-waters/</link>
       <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/02/15/2019/primary-production-chlorophyll-concentration-and-sea-surface-temperature-in-tanzania-waters/</guid>
-      <description>Introductionrequire(tidyverse)require(oce)require(highcharter)require(lubridate)files = dir(&amp;quot;extracted/&amp;quot;, pattern = &amp;quot;chl_&amp;quot;, full.names = TRUE)chlorophyllChla is certainly the most commonly derived parameter in water quality mainly because of its use in determining the trophic status of waters.</description>
+      <description>Introductionrequire(tidyverse)require(oce)require(highcharter)require(lubridate)files = dir(&amp;quot;extracted/&amp;quot;, pattern = &amp;quot;chl_&amp;quot;, full.names = TRUE)chlorophyll-aChlorophyll-a is certainly the most commonly derived parameter in water quality mainly because of its use in determining the trophic status of waters.</description>
     </item>
     
     <item>

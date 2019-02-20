@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Sea Surface Temperature on Masumbuko Semba&#39;s Blog</title>
+    <link>/tags/sea-surface-temperature/</link>
+    <description>Recent content in Sea Surface Temperature on Masumbuko Semba&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 20 Feb 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/sea-surface-temperature/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Time series analysis in R</title>
+      <link>/02/20/2019/time-series-analysis-in-r/</link>
+      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/02/20/2019/time-series-analysis-in-r/</guid>
+      <description>Any quantitative value measured over regular time intervals makes a Time Series. Time-series analysis aims to investigate the temporal behavior of a variable \(X_{t}\). Examples include the investigation of long-term records of sea surface temperature, sea-level fluctuations, millennium-scale variations in the atmosphere-ocean system, the eff ect of the El-Niño/Southern Oscillation on tropical rainfall and sedimentation (Trauth 2015). R has extensive facilities for analyzing time series data. These packages provides various tools with which to detect these temporal patterns.</description>
+    </item>
+    
+  </channel>
+</rss>

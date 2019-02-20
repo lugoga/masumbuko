@@ -7,7 +7,7 @@ slug: primary-production-chlorophyll-concentration-and-sea-surface-temperature-i
 categories:
   - Oceanography
   - satellite
-  - insitu
+  - MODIS
 tags:
   - Temperature
   - primary productivity
@@ -39,12 +39,12 @@ files = dir("extracted/", pattern = "chl_", full.names = TRUE)
 
 ```
 
-### chlorophyll
-Chla is certainly the most commonly derived parameter in water quality mainly because of its use in determining the trophic status of waters. The Chla estimation allows forecasting of the phytoplankton concentration and is therefore an important component in the derivation of secondary products such as primary production.
+### chlorophyll-a
+Chlorophyll-*a* is certainly the most commonly derived parameter in water quality mainly because of its use in determining the trophic status of waters. The Chla estimation allows forecasting of the phytoplankton concentration and is therefore an important component in the derivation of secondary products such as primary production.
 
 
 ### Looping the files
-There are four sites--- The exclusive economic zone (EEZ) and three channels of Pemba, Zanzibar and Mafia. Each site has three files---primary productivity, chlorophyll-*a* and sea surface temperature---making a total of twelve files. Procesing each files is rather tedious! Its also inefficient---because repeating reading the files is boring and sometimes the mind can drop off to sleep more easily if you are not focusing on the process. Thankfully, most programming  languages have what is called a *for loop* , which repeates reading the files over and over until it finish all the fires in the working directory. So using the loop actually save us from writing hundred kubes if code. The chunk below show the *for loop* that was used to read excell files that store the value of chlorophyll from the directory. 
+There are four sites---The exclusive economic zone (EEZ) and three channels of Pemba, Zanzibar and Mafia. Each site has three files---primary productivity, chlorophyll-*a* and sea surface temperature---making a total of twelve files. Procesing each files is rather tedious! Its also inefficient---because repeating reading the files is boring and sometimes the mind can drop off to sleep more easily if you are not focusing on the process. Thankfully, most programming  languages have what is called a *for loop* , which repeates reading the files over and over until it finish all the fires in the working directory. So using the loop actually save us from writing hundred kubes if code. The chunk below show the *for loop* that was used to read excell files that store the value of chlorophyll from the directory. 
 
 
 ```{r}

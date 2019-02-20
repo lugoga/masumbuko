@@ -21,11 +21,20 @@
     </item>
     
     <item>
-      <title>Insitu</title>
-      <link>/categories/insitu/</link>
+      <title>Information Technology</title>
+      <link>/categories/information-technology/</link>
+      <pubDate>Tue, 19 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/information-technology/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Modis</title>
+      <link>/categories/modis/</link>
       <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/categories/insitu/</guid>
+      <guid>/categories/modis/</guid>
       <description></description>
     </item>
     
@@ -57,9 +66,18 @@
     </item>
     
     <item>
+      <title>Statistics</title>
+      <link>/categories/statistics/</link>
+      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/statistics/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Technical</title>
       <link>/categories/technical/</link>
-      <pubDate>Tue, 12 Feb 2019 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/categories/technical/</guid>
       <description></description>

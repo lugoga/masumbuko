@@ -1,0 +1,402 @@
+---
+title: Time series analysis in R
+author: Masumbuko Semba
+date: '2019-02-20'
+slug: time-series-analysis-in-r
+categories:
+  - Technical
+  - Statistics
+tags:
+  - sea surface temperature
+  - Zanzibar
+  - Unguja
+  - Tanzania
+  - East Africa
+  - Indian Ocean
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<p>Any quantitative value measured over regular time intervals makes a <em>Time Series</em>. Time-series analysis aims to investigate the temporal behavior of a variable <span class="math inline">\(X_{t}\)</span>. Examples include the investigation of long-term records of sea surface temperature, sea-level fluctuations, millennium-scale variations in the atmosphere-ocean system, the eff ect of the El-Niño/Southern Oscillation on tropical rainfall and sedimentation <span class="citation">(Trauth <a href="#ref-trauth">2015</a>)</span>. R has <a href="http://cran.r-project.org/web/views/TimeSeries.html">extensive facilities</a> for analyzing time series data. These packages provides various tools with which to detect these temporal patterns. Understanding the underlying processes that produced the observed data allows us to predict future values of the variable.</p>
+<p>This post describes how to create time series objects, decompose the time series into seasonal, trend and error components. We use the <strong>lubridate</strong><span class="citation">(Grolemund and Wickham <a href="#ref-lubridate">2011</a>)</span>, <strong>tidyverse</strong> <span class="citation">Wickham (<a href="#ref-tidyverse">2017</a>)</span>] package to tidy and process the date and data; <strong>ts</strong> and <strong>forecast</strong><span class="citation">(Hyndman et al. <a href="#ref-forecast">2018</a>)</span> packages for creating and manipulating time series objects and <strong>oce</strong><span class="citation">(Kelley and Richards <a href="#ref-oce">2018</a>)</span> and <strong>ggplot2</strong><span class="citation">(Wickham <a href="#ref-ggplot">2016</a>)</span> packages to visualize the outputs of the time series.</p>
+<pre class="r"><code>require(tidyverse)
+require(lubridate)
+require(oce)
+require(lubridate)
+require(forecast)</code></pre>
+<div id="dataset" class="section level3">
+<h3>Dataset</h3>
+<p>In this post we use the daily sea surface temperature collected near Chumbe Island in Unguja with a data logger for a period of 21 years —from January 01, 1997 to December 31, 2017. The data is in excel, therefore, we import the dataset into the workspace with the <code>readxl::read_excel()</code> function.</p>
+<pre class="r"><code>all = readxl::read_excel(&quot;E:/Data Manipulation/Temperature data/processing/Chumbe_SST_Temperature 1997-30Nov2017_IMS_Muhando.xlsx&quot;)</code></pre>
+<p>The data comes in wide format—multiple columns—each column represent a year. Therefore, this dataset was converted from multiple columns format —wide format into a long format.The chunk below simply highlight the transformation steps.</p>
+<pre class="r"><code>## change from wide form to long form with gather function
+
+all = all %&gt;% gather(key = &quot;year&quot;, value = &quot;sst&quot;, 2:22)</code></pre>
+<p>We notice that the February month has been treated with 29 days for all the years. Some years are short with only 28 days. Table <a href="#tab:tab1">1</a> highlight the wrongly entered temperature values for the 29<sup>th</sup> February for years which end on the 28<sup>th</sup>. Therefore all these values must be trimmed off.</p>
+<pre class="r"><code>index =which(all$sst&gt; 500)
+
+all %&gt;% slice(index) %&gt;% separate(day, c(&quot;Year&quot;, &quot;Month&quot;, &quot;Day&quot;), sep = &quot;-&quot;) %&gt;% unite(Date, c(&quot;Day&quot;, &quot;Month&quot;, &quot;year&quot;), sep = &quot;-&quot;) %&gt;% select(-Year) %&gt;% kableExtra::kable(format = &quot;html&quot;, col.names = c(&quot;Date&quot;, &quot;Temperature&quot;), caption = &quot;Wrongly entered temperature values&quot;) %&gt;%
+  kableExtra::column_spec(column = 1:2, width = &quot;3 cm&quot;)</code></pre>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Wrongly entered temperature values
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:right;">
+Temperature
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-1997
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-1998
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-1999
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-2001
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-2002
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-2003
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-2005
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-2006
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-2007
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-2009
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-2010
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-2011
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-2013
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-2014
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-2015
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3 cm; ">
+29-02-2017
+</td>
+<td style="text-align:right;width: 3 cm; ">
+1000
+</td>
+</tr>
+</tbody>
+</table>
+<p>The chunk below highlight code of lines that I used to clean the dataset by removing the wrongly entered temperature values for the day 29 for years ending on the 28<sup>th</sup>.</p>
+<pre class="r"><code>all.tb = all %&gt;% 
+  filter(is.na(sst)) %&gt;% 
+  bind_rows(all %&gt;% 
+              filter(sst &gt; 15 &amp; sst &lt; 40)) %&gt;% 
+  separate(day, c(&quot;mwaka&quot;, &quot;month&quot;, &quot;siku&quot;), sep = &quot;-&quot;) %&gt;% 
+  separate(siku, c(&quot;siku&quot;, &quot;muda&quot;), sep = &quot; &quot;) %&gt;% 
+  mutate(date = make_date(year, month, siku)) %&gt;% 
+  arrange(date) %&gt;% 
+  select(date, sst)</code></pre>
+<p>Figure <a href="#fig:missing-ggplot">1</a> show that some years the temperature values are missing. For us to use these data in time series it must be complete, with each day with a values.</p>
+<pre class="r"><code>all.tb = all.tb %&gt;% mutate(year = year(date), day.year = yday(date))
+
+ggplot(data = all.tb, aes(y = day.year, x = year))+
+  geom_raster(aes(fill = sst), interpolate = F)+
+  geom_contour(aes(z = sst), col = &quot;black&quot;, bins = 3 )+
+  theme(plot.background = element_blank(),
+        legend.position = &quot;bottom&quot;,
+        panel.border = element_blank(),
+        axis.text = element_text(colour = &quot;black&quot;, size = 11),
+        axis.title = element_text(colour = 1, size = 12),
+        legend.key.width = unit(30, &quot;mm&quot;),
+        legend.key.height = unit(4, &quot;mm&quot;),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 11))+
+  scale_x_continuous(breaks = seq(1997,2017,2), position = &quot;top&quot;) +
+  scale_y_reverse(breaks = seq(15,370,30)
+                  # labels = month(seq(dmy(010119), dmy(021219),
+                  #                    by = &quot;month&quot;), label = T, abbr = F)
+                  )+
+  scale_fill_gradientn(colours = oceColorsJet(210), 
+                       na.value = NA, 
+                       breaks =seq(24.5,31,1))+ 
+  guides(fill = guide_colorbar(title = expression (Temperature~(degree~C)), 
+                               title.position = &quot;top&quot;, title.hjust = 0.5,
+                               title.vjust = 0.25, 
+                               label.vjust = 1, raster = TRUE, frame.colour = NULL,
+                               ticks.colour = 1, reverse = FALSE)) +
+  labs(x = &quot;&quot;, y = &quot;Number of days in a Year&quot;)</code></pre>
+<div class="figure"><span id="fig:missing-ggplot"></span>
+<img src="/post/2019-02-20-time-series-analysis-in-r_files/figure-html/missing-ggplot-1.png" alt="Heatmaps of daily sea surface temperature " width="672" />
+<p class="caption">
+Figure 1: Heatmaps of daily sea surface temperature
+</p>
+</div>
+<p>As we have in figure <a href="#fig:missing-ggplot">1</a> there gaps in our dataset—with some years missing data for more than six year period. Since the time series dont like the missing data, we will fill the missing data with an interpolation. We use the <code>oce::interpBarnes()</code> function to predict the missing temperature values in our dataset. The chunk below highlight the key procedure of using <code>oce::interpBarnes()</code> function. Figure <a href="#fig:origin-interp">2</a> show the origin temperature values and the interpolated ones. The codes used to create this figures are highlighted in the chunk below.</p>
+<pre class="r"><code>## define the total number of days in a year
+days = 1:366
+#define the total number of years as indicated by the data
+years = 1997:2017
+
+
+par(mfrow = c(2,1))
+
+## make a matrix using the origin temperature values
+all.mat = matrix(all.tb$sst, nrow = length(days)) 
+## plot the matrix
+imagep(y = years, x = days, z = all.mat, filledContour = F, ylim = c(2017,1997),zlab = expression(Temperature~(degree *C)), xlab = &quot;Day&quot;)
+contour(y = years, x = days, z = all.mat, add = TRUE, col = 1, nlevels = 3)
+
+## interpolate the missing values
+interpolated.temperature = interpBarnes(x = all.tb$day.year, y = all.tb$year, z = all.tb$sst, xgl = 366, ygl = 21)
+
+## plot the interpolated values
+imagep(x = interpolated.temperature$xg, y = interpolated.temperature$yg, z = interpolated.temperature$zg, filledContour = F, ylim = c(2017,1997),zlab = expression(Temperature~(degree *C)), xlim = c(1,360), xlab = &quot;Day&quot;)
+contour(x = interpolated.temperature$xg, y = interpolated.temperature$yg, z = interpolated.temperature$zg, col = 1, nlevels = 4,add = TRUE)</code></pre>
+<div class="figure"><span id="fig:origin-interp"></span>
+<img src="/post/2019-02-20-time-series-analysis-in-r_files/figure-html/origin-interp-1.png" alt="Temperature values for origin data (top panel) and interpolated values (bottom panel)" width="672" />
+<p class="caption">
+Figure 2: Temperature values for origin data (top panel) and interpolated values (bottom panel)
+</p>
+</div>
+<p>As we have observed, time series analysis hate missing values (Figure <a href="#fig:origin-interp">2</a>) and since we managed to fill the missing values with an interpolation technique (Figure <a href="#fig:origin-interp">2</a>), we can now work with the function in time series. Unfortunate the matrix temperature interpolated data is longer than the period of the data duration. Therefore, we convert it data frame and then remove again a day in years with only days in February. The chunk below contains the codes that was used for cleaning and transformation of the interpolated dataset.</p>
+<pre class="r"><code>## extracted the matrix of interpolated values
+interpolated.sst.mat = interpolated.temperature$zg
+## check the dimension if is 366 days and 21 years (1997:2017)
+dim(interpolated.sst.mat)</code></pre>
+<pre><code>[1] 366  21</code></pre>
+<pre class="r"><code>## tranform the matrix into the tabular form and combine the interpolated values with the raw
+interpolated.sst.tb = interpolated.sst.mat %&gt;% 
+  as.tibble()  %&gt;% 
+  gather(key = &quot;year&quot;, value = &quot;sst&quot;,1:21)  %&gt;%
+  select(-year, sst.interp = sst)%&gt;% 
+  bind_cols(all)
+
+ ## make an index of short years of 28 days in february that appear with 29 days 
+ index = which(all$sst ==1000)
+ 
+ ## check if the wrong days exist
+ interpolated.sst.tb %&gt;% slice(index)</code></pre>
+<pre><code># A tibble: 16 x 4
+   sst.interp day                 year    sst
+        &lt;dbl&gt; &lt;dttm&gt;              &lt;chr&gt; &lt;dbl&gt;
+ 1       27.7 2016-02-29 00:00:00 1997   1000
+ 2       29.1 2016-02-29 00:00:00 1998   1000
+ 3       29.5 2016-02-29 00:00:00 1999   1000
+ 4       28.6 2016-02-29 00:00:00 2001   1000
+ 5       28.6 2016-02-29 00:00:00 2002   1000
+ 6       28.8 2016-02-29 00:00:00 2003   1000
+ 7       27.4 2016-02-29 00:00:00 2005   1000
+ 8       29.4 2016-02-29 00:00:00 2006   1000
+ 9       29.0 2016-02-29 00:00:00 2007   1000
+10       29.8 2016-02-29 00:00:00 2009   1000
+11       29.3 2016-02-29 00:00:00 2010   1000
+12       29.0 2016-02-29 00:00:00 2011   1000
+13       28.8 2016-02-29 00:00:00 2013   1000
+14       28.7 2016-02-29 00:00:00 2014   1000
+15       28.8 2016-02-29 00:00:00 2015   1000
+16       29.3 2016-02-29 00:00:00 2017   1000</code></pre>
+<pre class="r"><code> ## trim off the dataset all short years with the wrong 29th February
+ interpolated.sst.tb = interpolated.sst.tb %&gt;% slice(-index)
+ 
+ ## now the data is clean we can sequeance the number of days with
+ interpolated.sst.tb = interpolated.sst.tb %&gt;% 
+   mutate(date = seq(dmy(010197), dmy(311217), by = &quot;day&quot;)) %&gt;% 
+   select(date, sst.interp, sst.original =sst)</code></pre>
+</div>
+<div id="creating-a-time-series" class="section level3">
+<h3>Creating a time series</h3>
+<p>The <code>ts()</code> function convert a numeric vector into an R time series object. The format is <code>ts(vector, start=, end=, frequency=)</code> where <em>start</em> and <em>end</em> are the times of the first and last observation and <em>frequency</em> is the number of observations per unit time (1=annual, 4=quartely, 12=monthly,365.24=daily, etc.). Our dataset contain daily sea surface temperature observations from 1997-01-01 to 2017-12-31. The time series for this object was created with the line code in the chunk below</p>
+<pre class="r"><code>temperature.ts = ts(data = interpolated.sst.tb$sst.interp, 
+                    start = c(1997,1), 
+                    frequency = 365.24)
+
+temperature.ts %&gt;% plot(ylab = expression(Temperature~(degree*C)))</code></pre>
+<div class="figure"><span id="fig:ts"></span>
+<img src="/post/2019-02-20-time-series-analysis-in-r_files/figure-html/ts-1.png" alt="Time seris of sea surface temperture" width="672" />
+<p class="caption">
+Figure 3: Time seris of sea surface temperture
+</p>
+</div>
+<p>We can see from figure <a href="#fig:ts">3</a> that there seems to be seasonal variation in the daily temperature at Chumbe—there is a peak every northeast monsoon season, and a trough every southeast monsoon. Again, it seems that this time series could probably be described using an additive model, as the seasonal fluctuations are roughly constant in size over time and do not seem to depend on the level of the time series, and the random fluctuations also seem to be roughly constant in size over time</p>
+<p>We notice in figure <a href="#fig:ts">3</a> that the temperature declined gradually from 1997 and reached its lowest in 2006 and then raised in 2007 and has been oscilating ever since. We can split the two epoch with the <code>window()</code> function and plot the two epochs shown in figure <a href="#fig:epochs">4</a>. The code for spliting the time series and make plots shown in figure <a href="#fig:epochs">4</a> is highlighted in the chunk below.</p>
+<pre class="r"><code>par(mfrow = c(1,2))
+epoch1 = window(x = temperature.ts, start = c(1997,1), end = c(2005,12))
+epoch1 %&gt;% plot(main = &quot;Before January 2006&quot;)
+
+epoch2 = window(x = temperature.ts, start = c(2007,1), end = c(2017,12))
+epoch2 %&gt;% plot(main = &quot;After December 2006&quot;)</code></pre>
+<div class="figure"><span id="fig:epochs"></span>
+<img src="/post/2019-02-20-time-series-analysis-in-r_files/figure-html/epochs-1.png" alt="Time series before 2006 (top panel) and after 2006 (bottom panel)" width="672" />
+<p class="caption">
+Figure 4: Time series before 2006 (top panel) and after 2006 (bottom panel)
+</p>
+</div>
+</div>
+<div id="decomposing-time-series" class="section level3">
+<h3>Decomposing Time Series</h3>
+<p>Decomposing a time series means separating it into its constituent components, which are usually a <em>trend</em> component and an <em>irregular</em> component, and if it is a seasonal time series, a <em>seasonal</em> component.</p>
+</div>
+<div id="decomposing-seasonal-data" class="section level3">
+<h3>Decomposing Seasonal Data</h3>
+<p>A seasonal time series consists of a trend component, a seasonal component and an irregular component. Decomposing the time series means separating the time series into these three components: that is, estimating these three components.</p>
+<p>To estimate the <em>trend</em> component and <em>seasonal</em> component of a seasonal time series that can be described using an <strong>additive model</strong>, we can use the <code>decompose()</code> function in R. This function estimates the <em>trend</em>, <em>seasonal</em>, and <em>irregular</em> components of a time series that can be described using an <strong>additive model</strong>.</p>
+<p>The function <code>decompose()</code> returns a list object as its result, where the estimates of the <em>seasonal</em>, <em>trend</em> and <em>irregular</em> component are stored in named elements of that list objects, called <code>seasonal</code>, <code>trend</code>, and <code>random</code>, respectively.</p>
+<p>For example, given the daily temperature in Chumbe Island is seasonal with a maximum during the northeast season and minimum in southeast period, and can probably be described using an additive model since the seasonal and random fluctuations seem to be roughly constant in size over time. The chunk below highlight the codes that we can type to estimate the <em>trend</em>, <em>seasonal</em> and <em>irregular</em> components of this time series. The <code>decompose()</code> and <code>forecast::stl()</code> splits the time series into these time series components;</p>
+<pre class="r"><code>temperature.components = decompose(temperature.ts)</code></pre>
+<p>The estimated values of the <em>seasonal</em>, <em>trend</em> and <em>irregular</em> components are now stored in variables <code>temperature.components$seasonal</code>, <code>temperature.components$trend</code> and <code>temperature.components$random</code>. For example, we can print out the estimated values of the seasonal component by typing:</p>
+<pre class="r"><code>temperature.components$seasonal</code></pre>
+<p>The estimated seasonal factors are given for the days. The positive (largest seasonal factor) day 1 to 151 which coincide with the NE season and the negative value (small seasonal factor) is from day 152 to day 320, which appears on SE season. These seasonal factor are the same each year from 1997 to 2017, indicating that there seems to be a peak in temperature in NE and a trough in temperature in SE each year. Figure <a href="#fig:components">5</a> show the estimated <em>trend</em>, <em>seasonal</em>, and <em>irregular</em> components of the time series created with the line of code in the chunk here:</p>
+<pre class="r"><code>temperature.components %&gt;% plot()</code></pre>
+<div class="figure"><span id="fig:components"></span>
+<img src="/post/2019-02-20-time-series-analysis-in-r_files/figure-html/components-1.png" alt="Decomposition of additive time series" width="672" />
+<p class="caption">
+Figure 5: Decomposition of additive time series
+</p>
+</div>
+<p>Figure <a href="#fig:components">5</a> show the original time series (top), the estimated <em>trend</em> component (second from top), the <em>seasonal</em> third from top), and the <em>irregular</em> component (bottom). We see that the estimated <em>trend</em> component shows a small decrease from about 28 in 1998 to about 26.5 in 2006, followed by a steady increase from then on to about 28 in 2017.</p>
+</div>
+<div id="seasonally-adjusting" class="section level3">
+<h3>Seasonally Adjusting</h3>
+<p>If you have a seasonal time series that can be described using an additive model, you can seasonally adjust the time series by estimating the seasonal component, and subtracting the estimated seasonal component from the original time series. We can do this using the estimate of the seasonal component calculated by the <code>decompose()</code> function.</p>
+<p>For example, to seasonally adjust the time series of the daily temperature in Chumbe Island, we can estimate the seasonal component using “decompose()”, and then subtract the seasonal component from the original time series:</p>
+<pre class="r"><code>par(mfrow = c(2,1))
+par(mar = c(2.5,2.5,0,0))
+
+temperature.ts %&gt;% plot(labels = FALSE, xlab = &quot;&quot;)
+# draw an axis on the left 
+Axis(side=2, labels=TRUE, las = 2)
+
+
+temperature.ts.adjusted = temperature.ts -temperature.components$seasonal
+temperature.ts.adjusted %&gt;% plot(xlab = &quot;&quot;)</code></pre>
+<div class="figure"><span id="fig:adjusted"></span>
+<img src="/post/2019-02-20-time-series-analysis-in-r_files/figure-html/adjusted-1.png" alt="Time series of sea surface temperature before removing the seasonal variation (top pane) and after the seasonality removed (bottom panel)" width="672" />
+<p class="caption">
+Figure 6: Time series of sea surface temperature before removing the seasonal variation (top pane) and after the seasonality removed (bottom panel)
+</p>
+</div>
+<p>You can see from figure <a href="#fig:adjusted">6</a> the seasonal variation has been removed from the seasonally adjusted time series. The seasonally adjusted time series now just contains the trend component and an irregular component.</p>
+</div>
+<div id="references" class="section level3 unnumbered">
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-lubridate">
+<p>Grolemund, Garrett, and Hadley Wickham. 2011. “Dates and Times Made Easy with lubridate.” <em>Journal of Statistical Software</em> 40 (3): 1–25. <a href="http://www.jstatsoft.org/v40/i03/" class="uri">http://www.jstatsoft.org/v40/i03/</a>.</p>
+</div>
+<div id="ref-forecast">
+<p>Hyndman, Rob J, George Athanasopoulos, Christoph Bergmeir, Gabriel Caceres, Leanne Chhay, Mitchell O’Hara-Wild, Fotios Petropoulos, Slava Razbash, Earo Wang, and Farah Yasmeen. 2018. “Forecast: Forecasting Functions for Time Series and Linear Models.”</p>
+</div>
+<div id="ref-oce">
+<p>Kelley, Dan, and Clark Richards. 2018. <em>Oce: Analysis of Oceanographic Data</em>. <a href="https://CRAN.R-project.org/package=oce" class="uri">https://CRAN.R-project.org/package=oce</a>.</p>
+</div>
+<div id="ref-trauth">
+<p>Trauth, Martin. 2015. <em>MATLAB® Recipes for Earth Sciences</em>. Book. 4th ed. 2015. Berlin, Heidelberg: Berlin, Heidelberg : Springer Berlin Heidelberg : Imprint Springer.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org" class="uri">http://ggplot2.org</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>———. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse" class="uri">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+</div>
+</div>

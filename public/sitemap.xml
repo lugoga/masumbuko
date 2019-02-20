@@ -28,6 +28,16 @@
   </url>
   
   <url>
+    <loc>/02/20/2019/time-series-analysis-in-r/</loc>
+    <lastmod>2019-02-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/02/19/2019/why-i-created-a-static-blog-from-scratch/</loc>
+    <lastmod>2019-02-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/02/15/2019/primary-production-chlorophyll-concentration-and-sea-surface-temperature-in-tanzania-waters/</loc>
     <lastmod>2019-02-15T00:00:00+00:00</lastmod>
   </url>
@@ -278,6 +288,12 @@
   </url>
   
   <url>
+    <loc>/tags/east-africa/</loc>
+    <lastmod>2019-02-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/etopo/</loc>
     <lastmod>2019-02-14T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -297,13 +313,13 @@
   
   <url>
     <loc>/tags/indian-ocean/</loc>
-    <lastmod>2019-02-14T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/insitu/</loc>
-    <lastmod>2019-02-15T00:00:00+00:00</lastmod>
+    <loc>/categories/information-technology/</loc>
+    <lastmod>2019-02-19T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -327,7 +343,7 @@
   
   <url>
     <loc>/tags/masumbuko-semba/</loc>
-    <lastmod>2019-02-13T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-19T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -340,6 +356,12 @@
   <url>
     <loc>/tags/mld/</loc>
     <lastmod>2019-02-09T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/categories/modis/</loc>
+    <lastmod>2019-02-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -387,7 +409,7 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2019-02-15T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -414,14 +436,14 @@
   </url>
   
   <url>
-    <loc>/tags/r/</loc>
-    <lastmod>2018-11-23T00:00:00+00:00</lastmod>
+    <loc>/categories/r/</loc>
+    <lastmod>2019-02-12T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/r/</loc>
-    <lastmod>2019-02-12T00:00:00+00:00</lastmod>
+    <loc>/tags/r/</loc>
+    <lastmod>2018-11-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -442,14 +464,26 @@
   </url>
   
   <url>
+    <loc>/categories/satellite/</loc>
+    <lastmod>2019-02-15T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/satellite/</loc>
     <lastmod>2018-10-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/satellite/</loc>
-    <lastmod>2019-02-15T00:00:00+00:00</lastmod>
+    <loc>/tags/sea-surface-temperature/</loc>
+    <lastmod>2019-02-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/categories/statistics/</loc>
+    <lastmod>2019-02-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -467,13 +501,13 @@
   
   <url>
     <loc>/tags/tanzania/</loc>
-    <lastmod>2019-02-14T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/categories/technical/</loc>
-    <lastmod>2019-02-12T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -490,6 +524,12 @@
   </url>
   
   <url>
+    <loc>/tags/unguja/</loc>
+    <lastmod>2019-02-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/wind-direction/</loc>
     <lastmod>2018-10-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -498,6 +538,12 @@
   <url>
     <loc>/tags/wind-speed/</loc>
     <lastmod>2018-10-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/zanzibar/</loc>
+    <lastmod>2019-02-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
