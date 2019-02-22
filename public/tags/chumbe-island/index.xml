@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Chumbe Island on Masumbuko Semba&#39;s Blog</title>
+    <link>/tags/chumbe-island/</link>
+    <description>Recent content in Chumbe Island on Masumbuko Semba&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 22 Feb 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/chumbe-island/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Exploring Time Series Data in R</title>
+      <link>/02/22/2019/exploring-time-series-data-in-r/</link>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/02/22/2019/exploring-time-series-data-in-r/</guid>
+      <description>IntroductionShumway and Stoffer (2017) in the book with a title Time series analysis and its applications: with R examples clearly stated that when dealing with any time series analysis the first step you ought to do befure further investigation is careful examination of the recorded data. This means before looking more closely at the particular statistical methods, it is appropriate to plot the recorded data against time. This scrutiny often suggests the method of analysis as well as statistics that will be of use in summarizing the information in the data.</description>
+    </item>
+    
+  </channel>
+</rss>

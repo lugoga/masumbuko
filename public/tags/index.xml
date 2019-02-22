@@ -66,9 +66,18 @@
     </item>
     
     <item>
+      <title>Blogdown</title>
+      <link>/tags/blogdown/</link>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/blogdown/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Bookdown</title>
       <link>/tags/bookdown/</link>
-      <pubDate>Wed, 14 Nov 2018 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/bookdown/</guid>
       <description></description>
@@ -80,6 +89,15 @@
       <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/chlorophyll/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Chumbe Island</title>
+      <link>/tags/chumbe-island/</link>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/chumbe-island/</guid>
       <description></description>
     </item>
     
@@ -167,7 +185,7 @@
     <item>
       <title>Indian Ocean</title>
       <link>/tags/indian-ocean/</link>
-      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/indian-ocean/</guid>
       <description></description>
@@ -309,6 +327,24 @@
     </item>
     
     <item>
+      <title>Rmarkdown</title>
+      <link>/tags/rmarkdown/</link>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/rmarkdown/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Rstudio</title>
+      <link>/tags/rstudio/</link>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/rstudio/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Rufiji River</title>
       <link>/tags/rufiji-river/</link>
       <pubDate>Thu, 04 Oct 2018 00:00:00 +0000</pubDate>
@@ -338,7 +374,7 @@
     <item>
       <title>Sea Surface Temperature</title>
       <link>/tags/sea-surface-temperature/</link>
-      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/sea-surface-temperature/</guid>
       <description></description>
@@ -356,7 +392,7 @@
     <item>
       <title>Tanzania</title>
       <link>/tags/tanzania/</link>
-      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/tanzania/</guid>
       <description></description>
@@ -372,9 +408,18 @@
     </item>
     
     <item>
+      <title>Time Series</title>
+      <link>/tags/time-series/</link>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/time-series/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Unguja</title>
       <link>/tags/unguja/</link>
-      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/unguja/</guid>
       <description></description>

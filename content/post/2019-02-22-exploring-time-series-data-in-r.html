@@ -1,0 +1,1144 @@
+---
+title: Exploring Time Series Data in R
+author: Masumbuko Semba
+date: '2019-02-22'
+slug: exploring-time-series-data-in-r
+categories:
+  - R
+  - Statistics
+  - Tool
+tags:
+  - Time Series
+  - sea surface temperature
+  - Indian Ocean
+  - Unguja
+  - Chumbe Island
+  - Tanzania
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p><span class="citation">Shumway and Stoffer (<a href="#ref-shum">2017</a>)</span> in the book with a title <em>Time series analysis and its applications: with R examples</em> clearly stated that when dealing with any time series analysis the first step you ought to do befure further investigation is careful examination of the recorded data. This means before looking more closely at the particular statistical methods, it is appropriate to plot the recorded data against time. This scrutiny often suggests the method of analysis as well as statistics that will be of use in summarizing the information in the data.</p>
+<p>R has several packages to work with time series data and others for visualizing the outputs from time series process. For example, <span class="citation">Horikoshi and Tang (<a href="#ref-ggfortify">2016</a>)</span> developed <strong>ggfortify</strong> package— an extension to <strong>ggplot2</strong> that makes easy to plot time series objects. The package can handle the output of many time series packages, including: <code>zoo::zooreg()</code> <span class="citation">(Zeileis and Grothendieck <a href="#ref-zoo">2005</a>)</span>, <code>xts::xts()</code> <span class="citation">(Ryan and Ulrich <a href="#ref-xts">2018</a>)</span>, <code>timeSeries::timSeries()</code>, <code>tseries::irts()</code> <span class="citation">(Trapletti and Hornik <a href="#ref-tseries">2018</a>)</span>, <code>forecast::forecast()</code> <span class="citation">(Hyndman et al. <a href="#ref-forecast">2018</a>)</span>, <code>vars:vars()</code>.</p>
+<p>Another interesting package is the <strong>ggpmisc</strong> package developed by <span class="citation">Aphalo (<a href="#ref-ggpmisc">2016</a>)</span>, which provides two useful methods for time series object:</p>
+<ul>
+<li><code>stat_peaks()</code> finds at which x positions local y maxima are located, and</li>
+<li><code>stat_valleys()</code> finds at which x positions local y minima are located.</li>
+</ul>
+<p>In this post I will take you through the Here, we’ll show how to easily:</p>
+<ol style="list-style-type: decimal">
+<li>process and visualize daily sea surface temperature for recorded between January 1997 and December 2017 near Chumbe Island in Unguja Island in the Indian ocean</li>
+<li>Identify shifts in mean and/or variance in a time series using the <strong>changepoint</strong> package <span class="citation">(Killick, Haynes, and Eckley <a href="#ref-changepoint">2016</a>)</span>.</li>
+<li>Identify shifts for non parametric time series object with the <strong>changepoint.np</strong> package <!-- 4. Detect jumps in a data using the strucchange [@achim] package  --> <!-- 5. Detect peaks and valleys using the ggpmisc package --></li>
+</ol>
+<p>We first load the package into the workspace that we need for this process:</p>
+<pre class="r"><code>require(astsa)
+require(ggfortify)
+require(tidyverse)
+require(ggpmisc)
+require(strucchange)
+require(changepoint)
+require(lubridate)
+require(oce)</code></pre>
+</div>
+<div id="process-sea-surface-temperature-data" class="section level3">
+<h3>Process sea surface temperature data</h3>
+<p>In this post we use the daily sea surface temperature collected near Chumbe Island in Unguja with a data logger for a period of 21 years —from January 01, 1997 to December 31, 2017. The data is in excel, therefore, we import the dataset into the workspace with the <strong>readxl</strong> package <span class="citation">(Wickham and Bryan <a href="#ref-readxl">2018</a>)</span>.</p>
+<pre class="r"><code>all = readxl::read_excel(&quot;./Chumbe_SST_Temperature 1997-30Nov2017.xlsx&quot;)</code></pre>
+<p>Once the dataset in the workspace we noticed that is in the wide format—multiple columns—each column represent a year (Table <a href="#tab:tab1">1</a>).</p>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Sample of Sea surface temperature arranged in a wide format
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+day
+</th>
+<th style="text-align:right;">
+1997
+</th>
+<th style="text-align:right;">
+1998
+</th>
+<th style="text-align:right;">
+2001
+</th>
+<th style="text-align:right;">
+2004
+</th>
+<th style="text-align:right;">
+2007
+</th>
+<th style="text-align:right;">
+2010
+</th>
+<th style="text-align:right;">
+2013
+</th>
+<th style="text-align:right;">
+2016
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+1997-08-02
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.66
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.00
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+24.89
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.30
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.74
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.48
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.28
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+1997-06-17
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.82
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.91
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.21
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.06
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.59
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.60
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.32
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.96
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+1997-02-12
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.19
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.59
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.29
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.14
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.60
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.98
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+29.02
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.90
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+1997-06-11
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.84
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.58
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.03
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.50
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.59
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.41
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.96
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.19
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+1997-04-25
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.57
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+29.95
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.66
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.68
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.60
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+29.30
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.96
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+29.49
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+1997-11-25
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.66
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.41
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.94
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+NA
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.13
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.61
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.36
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+1997-05-13
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+NA
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+30.19
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.15
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.95
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.60
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.50
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.13
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.62
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+1997-12-26
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+29.61
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+29.44
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.42
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.01
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.94
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.73
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.87
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+29.12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+1997-07-28
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.63
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.93
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.36
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.32
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.92
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.80
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.75
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.36
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+1997-02-23
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.45
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+29.04
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.57
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.33
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.26
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+29.51
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+29.17
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+28.33
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+1997-08-05
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.87
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.08
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.17
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.36
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.97
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.45
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+25.36
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.37
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+1997-06-02
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.86
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.85
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.46
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+26.91
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.92
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.93
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.32
+</td>
+<td style="text-align:right;width: 1.7cm; ">
+27.74
+</td>
+</tr>
+</tbody>
+</table>
+<p>Time series requires the data arranged in long format, therefore, this dataset was tranformed from multiple columns format —wide format into a long format (Table <a href="#tab:tab2">2</a>) with a <code>gather()</code> function from <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr">2018</a>)</span>.The chunk below highlight the transformation steps.</p>
+<pre class="r"><code>## change from wide form to long form with gather function
+all = all %&gt;% gather(key = &quot;year&quot;, value = &quot;sst&quot;, 2:22)</code></pre>
+<table>
+<caption>
+<span id="tab:tab2">Table 2: </span>SST arranged in a long format
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+day
+</th>
+<th style="text-align:left;">
+year
+</th>
+<th style="text-align:right;">
+sst
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1997-01-18
+</td>
+<td style="text-align:left;width: 2.5cm; ">
+2017
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.14
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1997-12-07
+</td>
+<td style="text-align:left;width: 2.5cm; ">
+1997
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.45
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1997-01-10
+</td>
+<td style="text-align:left;width: 2.5cm; ">
+2011
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.96
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1997-06-21
+</td>
+<td style="text-align:left;width: 2.5cm; ">
+1998
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.89
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1997-01-03
+</td>
+<td style="text-align:left;width: 2.5cm; ">
+2007
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1997-04-11
+</td>
+<td style="text-align:left;width: 2.5cm; ">
+2011
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.39
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1997-04-21
+</td>
+<td style="text-align:left;width: 2.5cm; ">
+2004
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.60
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1997-03-31
+</td>
+<td style="text-align:left;width: 2.5cm; ">
+2014
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.90
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1997-07-07
+</td>
+<td style="text-align:left;width: 2.5cm; ">
+2006
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.59
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1997-08-01
+</td>
+<td style="text-align:left;width: 2.5cm; ">
+2008
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+25.63
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1997-10-03
+</td>
+<td style="text-align:left;width: 2.5cm; ">
+2012
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.38
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1997-12-18
+</td>
+<td style="text-align:left;width: 2.5cm; ">
+2012
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.95
+</td>
+</tr>
+</tbody>
+</table>
+<p>I noticed that the February month has been treated with 29 days for all the years. Some years are short with only 28 days. Table <a href="#tab:tab1">1</a> highlight the wrongly entered temperature values for the 29<sup>th</sup> February for years which end on the 28<sup>th</sup>. Therefore all these values must be trimmed off.</p>
+<pre class="r"><code>index =which(all$sst&gt; 35)
+
+wrong.date = all %&gt;% slice(index) </code></pre>
+<table>
+<caption>
+<span id="tab:tab3">Table 3: </span>Wrongly entered SST
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:right;">
+Temperature
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-1997
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-1998
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-1999
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-2001
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-2002
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-2003
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-2005
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-2006
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-2007
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-2009
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-2010
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-2011
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-2013
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-2014
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-2015
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5 cm; ">
+29-02-2017
+</td>
+<td style="text-align:right;width: 5 cm; ">
+1000
+</td>
+</tr>
+</tbody>
+</table>
+<p>To obtain the clean time series that range between January 1,1997 to December 31, 2017 and extra temperature values of wrongly entered date for short years without the 29<sup>th</sup> February were removed. This chunk below highlight code of lines that was used to clean the time series.</p>
+<pre class="r"><code>all.tb = all %&gt;% 
+  filter(is.na(sst)) %&gt;% 
+  bind_rows(all %&gt;% 
+              filter(sst &gt; 15 &amp; sst &lt; 40)) %&gt;% 
+  separate(day, c(&quot;mwaka&quot;, &quot;month&quot;, &quot;siku&quot;), sep = &quot;-&quot;) %&gt;% 
+  separate(siku, c(&quot;siku&quot;, &quot;muda&quot;), sep = &quot; &quot;) %&gt;% 
+  mutate(date = make_date(year, month, siku)) %&gt;% 
+  arrange(date) %&gt;% 
+  select(date, sst)</code></pre>
+<p>When we plot the time series in heatmap showin in figure <a href="#fig:missing-ggplot">1</a>, I noticed missing temperature values for some years.</p>
+<pre class="r"><code>## define the total number of days in a year
+days = 1:366
+#define the total number of years as indicated by the data
+years = 1997:2017
+
+
+## make a matrix using the origin temperature values
+all.mat = matrix(all.tb$sst, nrow = length(days)) 
+## plot the matrix
+imagep(x = years, y = days, z = all.mat %&gt;% t(), filledContour = F, 
+       ylim = c(365,0),
+       ylab = &quot;Day&quot;, 
+       col = oceColors9A(120),
+       zlab = expression(Temperature~(degree *C)))
+## add contour
+contour(x = years, y = days, z = all.mat %&gt;% t(), add = TRUE, col = 1, nlevels = 3)</code></pre>
+<div class="figure"><span id="fig:missing-ggplot"></span>
+<img src="/post/2019-02-22-exploring-time-series-data-in-r_files/figure-html/missing-ggplot-1.png" alt="Heatmaps of daily sea surface temperature. Several days in year 1999,2000,2002,2003,2004 and 2005 miss temperature values" width="768" />
+<p class="caption">
+Figure 1: Heatmaps of daily sea surface temperature. Several days in year 1999,2000,2002,2003,2004 and 2005 miss temperature values
+</p>
+</div>
+<p>And since a <code>ts()</code> function that used to create time series object hates missing values—requires dataset with complete values, the missing values were filled with <code>interpBarnes()</code> function from <strong>oce</strong> packaage <span class="citation">(Kelley and Richards <a href="#ref-oce">2018</a>)</span>. The the output of interpolated temperature are shown in figure <a href="#fig:interp">2</a>.</p>
+<pre class="r"><code>## define the total number of days in a year
+days = 1:366
+#define the total number of years as indicated by the data
+years = 1997:2017
+
+## create day and year variables from date
+all.tb = all.tb %&gt;% mutate(year = year(date), day.year = yday(date))
+
+## interpolate the missing values
+interpolated.temperature = interpBarnes(x = all.tb$day.year, 
+                                        y = all.tb$year, 
+                                        z = all.tb$sst, 
+                                        xgl = 366, 
+                                        ygl = 21)</code></pre>
+<div class="figure"><span id="fig:interp"></span>
+<img src="/post/2019-02-22-exploring-time-series-data-in-r_files/figure-html/interp-1.png" alt="Temperature values interpolated sea surface temperature using the Barnes algorithm" width="768" />
+<p class="caption">
+Figure 2: Temperature values interpolated sea surface temperature using the Barnes algorithm
+</p>
+</div>
+<p>Once we have filled the missing temperature values in the data set, we can now proceed with the creation of the time series object. Unfortunate the interpolated temperature values is in matrix format. Therefore, we convert it data frame and then remove again a day in years with only days in February. The chunk below contains the codes that was used for cleaning and transformation of the interpolated dataset.</p>
+<pre class="r"><code>## extracted the matrix of interpolated values
+interpolated.sst.mat = interpolated.temperature$zg
+
+## check the dimension if is 366 days and 21 years (1997:2017)
+# dim(interpolated.sst.mat)
+
+## tranform the matrix into the tabular form and combine the interpolated values with the raw
+interpolated.sst.tb = interpolated.sst.mat %&gt;% 
+  as.tibble()  %&gt;% 
+  gather(key = &quot;year&quot;, value = &quot;sst&quot;,1:21)  %&gt;%
+  select(-year, sst.interp = sst)%&gt;% 
+  bind_cols(all)
+
+ ## make an index of short years of 28 days in february that appear with 29 days 
+ index = which(all$sst ==1000)
+ 
+ ## check if the wrong days exist
+ # interpolated.sst.tb %&gt;% slice(index) ## uncomment if you want to observe those days
+ 
+ ## trim off the dataset all short years with the wrong 29th February
+ interpolated.sst.tb = interpolated.sst.tb %&gt;% slice(-index)
+ 
+ ## now the data is clean we can sequeance the number of days with
+ interpolated.sst.tb = interpolated.sst.tb %&gt;% 
+   mutate(date = seq(dmy(010197), dmy(311217), by = &quot;day&quot;)) %&gt;% 
+   select(date, sst.interp, sst.original =sst)</code></pre>
+</div>
+<div id="visualization-of-time-seris" class="section level3">
+<h3>Visualization of Time seris</h3>
+</div>
+<div id="time-series-objects-in-r" class="section level3">
+<h3>time series objects in R</h3>
+<p>To visualize time series we need first to create them. The <code>ts()</code> function convert a numeric vector into an R time series object. The format is <code>ts(vector, start=, end=, frequency=)</code> where <em>start</em> and <em>end</em> are the times of the first and last observation and <em>frequency</em> is the number of observations per unit time (1=annual, 4=quartely, 12=monthly,365.24=daily, etc.). Our dataset contain daily sea surface temperature observations from 1997-01-01 to 2017-12-31. The daily time series object was created with the line code in the chunk below</p>
+<pre class="r"><code>daily.ts = ts(data = interpolated.sst.tb$sst.interp, 
+                    start = c(1997,1), 
+                    frequency = 365.24)</code></pre>
+<p>We can visualize the plot with the base <code>plot()</code> function shwon in figure <a href="#fig:base">3</a></p>
+<pre class="r"><code>daily.ts %&gt;% plot(xlab = &quot;&quot;, las = 1,
+                  ylab = expression(Temperature~(degree*C)))</code></pre>
+<div class="figure"><span id="fig:base"></span>
+<img src="/post/2019-02-22-exploring-time-series-data-in-r_files/figure-html/base-1.png" alt="Daily time series plotted with the base function" width="768" />
+<p class="caption">
+Figure 3: Daily time series plotted with the base function
+</p>
+</div>
+<p>We can also visualize the plot with the base <code>tsplot()</code> function from <strong>astsa</strong> package shwon in figure <a href="#fig:astsa">4</a></p>
+<pre class="r"><code>daily.ts %&gt;% tsplot(xlab = &quot;&quot;, las = 1,
+                  ylab = expression(Temperature~(degree*C)))</code></pre>
+<div class="figure"><span id="fig:astsa"></span>
+<img src="/post/2019-02-22-exploring-time-series-data-in-r_files/figure-html/astsa-1.png" alt="Daily time series plotted with the base function" width="768" />
+<p class="caption">
+Figure 4: Daily time series plotted with the base function
+</p>
+</div>
+<p>The popular <strong>ggplot2</strong> package also support direct plotting of time series object shown in figure <a href="#fig:gg">5</a> and the code for this figure is highlighted below;</p>
+<pre class="r"><code>ggplot(data = daily.ts)+
+  geom_line()+
+  theme(axis.text = element_text(size = 11, colour = &quot;black&quot;),
+        axis.title = element_text(size = 14, colour = &quot;black&quot;),
+        panel.border = element_rect(colour = &quot;black&quot;, fill = NA),
+        panel.background = element_rect(fill = &quot;white&quot;),
+        panel.grid = element_blank(), 
+        panel.grid.major.y = element_line(colour = &quot;grey70&quot;, size = 0.25, linetype = 3)) +
+  scale_x_continuous(breaks = seq(1997,2017,2)) +
+  scale_y_continuous(breaks = seq(24.5, 30.5,1.25)) +
+  labs(x = &quot;&quot;, y = expression(Anomaly~(degree*C)))</code></pre>
+<div class="figure"><span id="fig:gg"></span>
+<img src="/post/2019-02-22-exploring-time-series-data-in-r_files/figure-html/gg-1.png" alt="Daily time series plotted with the ggplot" width="768" />
+<p class="caption">
+Figure 5: Daily time series plotted with the ggplot
+</p>
+</div>
+<p>Before <strong>ggplot2</strong> support of time series plotting was implemented, this function was offered by the <code>autoplot()</code> function from <strong>ggpmisc</strong> package. The figure <a href="#fig:auto">6</a> was plotted with the <code>autoplot()</code> using the code in the chunk below.</p>
+<pre class="r"><code>autoplot(object = daily.ts) +
+  theme(axis.text = element_text(size = 11, colour = &quot;black&quot;),
+        axis.title = element_text(size = 14, colour = &quot;black&quot;),
+        panel.border = element_rect(colour = &quot;black&quot;, fill = NA),
+        panel.background = element_rect(fill = &quot;white&quot;),
+        panel.grid = element_blank(), 
+        panel.grid.major.y = element_line(colour = &quot;grey70&quot;, size = 0.25, linetype = 3)) +
+  scale_x_continuous(breaks = seq(1997,2017,2)) +
+  scale_y_continuous(breaks = seq(24.5, 30.5,0.75)) +
+  labs(x = &quot;&quot;, y = expression(Temperature~anomaly~(degree*C)))</code></pre>
+<div class="figure"><span id="fig:auto"></span>
+<img src="/post/2019-02-22-exploring-time-series-data-in-r_files/figure-html/auto-1.png" alt="Daily time series plotted with the autoplot function" width="768" />
+<p class="caption">
+Figure 6: Daily time series plotted with the autoplot function
+</p>
+</div>
+</div>
+<div id="identify-shifts-in-mean-andor-variance-in-a-time-series" class="section level3">
+<h3>Identify shifts in mean and/or variance in a time series</h3>
+<p>Our second object is to identify the change in mean or variance of the time series. This phonmenon is widely referred as <em>changepoints</em>—an instance in time where the statistical properties before and after this time point differ. We can calculate the optimal position and number of changepoints for daily time series using the <code>changepoint::cpt.meanvar()</code> function and print the summary of the results as the chunk highlight</p>
+<pre class="r"><code>## Identify change point of daily sea surface temperature
+daily.changepoints = daily.ts %&gt;% 
+  changepoint::cpt.meanvar() 
+
+daily.changepoints %&gt;% summary()</code></pre>
+<pre><code>Created Using changepoint version 2.2.2 
+Changepoint type      : Change in mean and variance 
+Method of analysis    : AMOC 
+Test Statistic  : Normal 
+Type of penalty       : MBIC with value, 26.83522 
+Minimum Segment Length : 2 
+Maximum no. of cpts   : 1 
+Changepoint Locations : 3249 </code></pre>
+<p>The summary report indicate there are two segments with one change point. The change point occured on 2005-11-23. Table <a href="#tab:tab4">4</a> show the first segment had a relatively lower mean surface temperature compared witht eh second segment, however, the variance of the first segment was relatively higher than the other. We can visualize these information graphically presented as in figure @ref(fig:cpt.daily) with a <code>plot()</code> function from <strong>changepoint</strong> package <span class="citation">(Killick, Haynes, and Eckley <a href="#ref-changepoint">2016</a>)</span></p>
+<pre class="r"><code>## all.tb$date[3249] # uncomment to get the date of change point
+
+daily.changepoints %&gt;% 
+  param.est() %&gt;% 
+  data.frame() %&gt;% 
+  mutate(segment = c(&quot;First&quot;, &quot;Second&quot;)) %&gt;% select(segment, mean, variance) %&gt;%
+  kableExtra::kable(format = &quot;html&quot;, digits = 2, 
+                    caption = &quot;Mean and variance of change point for daily sst&quot;,
+                    col.names = c(&quot;Segment&quot;, &quot;Mean&quot;, &quot;Variance&quot;)) %&gt;%
+  kableExtra::column_spec(column = 1:3, width = &quot;3cm&quot;) %&gt;%
+  kableExtra::add_header_above(c(&quot;&quot;, &quot;Parameters&quot; = 2))</code></pre>
+<table>
+<caption>
+<span id="tab:tab4">Table 4: </span>Mean and variance of change point for daily sst
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Parameters
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Segment
+</th>
+<th style="text-align:right;">
+Mean
+</th>
+<th style="text-align:right;">
+Variance
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+First
+</td>
+<td style="text-align:right;width: 3cm; ">
+27.24
+</td>
+<td style="text-align:right;width: 3cm; ">
+1.85
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+Second
+</td>
+<td style="text-align:right;width: 3cm; ">
+27.68
+</td>
+<td style="text-align:right;width: 3cm; ">
+1.48
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>daily.changepoints %&gt;% 
+  changepoint::plot(xlab = &quot;&quot;, ylab = expression(Temperature~(degree*C)), las = 1)</code></pre>
+<div class="figure">
+<img src="/post/2019-02-22-exploring-time-series-data-in-r_files/figure-html/cpt.daily-1.png" alt="Location of the change point of sea surface temperature" width="768" />
+<p class="caption">
+(#fig:cpt.daily)Location of the change point of sea surface temperature
+</p>
+</div>
+<p>Similar to <code>changepoint::plot()</code>, you can visualize the change point values with <code>autoplot()</code>. However, there subtle difference between the two plotting device. The change the means of the segements are solid line and horizontally drawn with <code>changepoint::plot()</code> (figure @ref(fig:cpt.daily)) contrary to dotted and vertically drawn with the <code>autoplot()</code> function (Figure @ref(fig:cpt.auto))</p>
+<pre class="r"><code>daily.changepoints %&gt;% 
+  autoplot()+
+  theme(axis.text = element_text(size = 11, colour = &quot;black&quot;),
+        axis.title = element_text(size = 14, colour = &quot;black&quot;),
+        panel.border = element_rect(colour = &quot;black&quot;, fill = NA),
+        panel.background = element_rect(fill = &quot;white&quot;),
+        panel.grid = element_blank(), 
+        panel.grid.major.y = element_line(colour = &quot;grey70&quot;, size = 0.25, linetype = 3)) +
+  scale_x_continuous(breaks = seq(1997,2017,2)) +
+  scale_y_continuous(breaks = seq(24.5, 30.5,0.75)) +
+  labs(x = &quot;&quot;, y = expression(Temperature~anomaly~(degree*C)))</code></pre>
+<div class="figure">
+<img src="/post/2019-02-22-exploring-time-series-data-in-r_files/figure-html/cpt.auto-1.png" alt="Location of the change point of sea surface temperature with autoplot" width="768" />
+<p class="caption">
+(#fig:cpt.auto)Location of the change point of sea surface temperature with autoplot
+</p>
+</div>
+<p>We have been visualizing the daily sea surface temperature time series object. This is the high frequency data. Let us now process and monthly average time series from this dataset. we need to create a <em>week</em>,<em>month</em> and <em>year</em> variables from the date in the dataset as shown in the chunk below;</p>
+<pre class="r"><code>interpolated.sst.split = interpolated.sst.tb %&gt;% 
+  mutate(week = week(date) %&gt;% as.integer(), 
+         month = month(date) %&gt;% as.integer(),
+         year = year(date) %&gt;% as.integer()) %&gt;%
+  select(date, week, month, year, sst = sst.interp)</code></pre>
+<p>Then we compute the monthly and annual average sea surface temperature</p>
+<pre class="r"><code>## monthly mean temperature
+monthly.temperature = interpolated.sst.split %&gt;% 
+  group_by(month, year) %&gt;% 
+  summarise(sst = median(sst, na.rm = T))%&gt;%
+  ungroup() %&gt;% 
+  arrange(year, month)
+
+## monthly ts
+month.ts = ts(data = monthly.temperature$sst, start = c(1997,1), frequency = 12)
+
+## annual mean temperature
+annually.temperature = interpolated.sst.split %&gt;% 
+  group_by(year) %&gt;% 
+  summarise(sst = mean(sst, na.rm = T))%&gt;%
+  ungroup() %&gt;% 
+  arrange(year)
+
+# Annual ts
+annual.ts = ts(data = annually.temperature$sst, start = c(1997,1), frequency = 1)</code></pre>
+<p>And present the monthly and annual time series of sea surface temperature graphically as in figure <a href="#fig:month-annual">7</a> with the <code>tsplot()</code> function of <strong>astsa</strong> package <span class="citation">(D. Stoffer <a href="#ref-astsa">2017</a>)</span>.</p>
+<pre class="r"><code>par(mfrow = c(2,1))
+month.ts%&gt;% tsplot(las = 1, ylab = expression(Temperature~(degree*C)), xlab = &quot;&quot;)
+annual.ts%&gt;% tsplot(las = 1, ylab = expression(Temperature~(degree*C)), xlab = &quot;&quot;)</code></pre>
+<div class="figure"><span id="fig:month-annual"></span>
+<img src="/post/2019-02-22-exploring-time-series-data-in-r_files/figure-html/month-annual-1.png" alt="Average surface temperature for month (top) and year (bottom)" width="768" />
+<p class="caption">
+Figure 7: Average surface temperature for month (top) and year (bottom)
+</p>
+</div>
+<p>Figure figure <a href="#fig:month-annual">7</a> is similar to figure <a href="#fig:month-annual-g">8</a>, however, while mongh and annual object figure <a href="#fig:month-annual">7</a> were plotted with the <code>tsplot()</code> function from <strong>astsa</strong> package and combined with <code>par(mfrow = c(2,1))</code>, figure <a href="#fig:month-annual-g">8</a> was plotted with <strong>ggplot2</strong> and the annual and monthly object were combined with the <code>plot_grid()</code> function from <strong>cowplot</strong> package.</p>
+<pre class="r"><code>## plot monthly ts
+monthly.fig = ggplot(data = month.ts)+ 
+  geom_line()+
+    theme(axis.text = element_text(size = 11, colour = &quot;black&quot;),
+        axis.title = element_text(size = 14, colour = &quot;black&quot;),        
+        axis.text.x = element_blank(),
+        panel.border = element_rect(colour = &quot;black&quot;, fill = NA),
+        panel.background = element_rect(fill = &quot;white&quot;),
+        panel.grid = element_blank(), 
+        panel.grid.major.y = element_line(colour = &quot;grey70&quot;, size = 0.25, linetype = 3)) +
+  labs(x = &quot;&quot;, y = expression(Temperature~(degree*C)))+
+  scale_y_continuous(breaks = seq(25.5,30.50, length.out = 4) %&gt;% round(2))+
+  scale_x_continuous(breaks = seq(1997,2017,2))
+
+## plot annual ts
+annual.fig = ggplot(data = annual.ts)+ 
+  geom_line()+
+  theme(axis.text = element_text(size = 11, colour = &quot;black&quot;),
+        axis.title = element_text(size = 14, colour = &quot;black&quot;),
+        panel.border = element_rect(colour = &quot;black&quot;, fill = NA),
+        panel.background = element_rect(fill = &quot;white&quot;),
+        panel.grid = element_blank(), 
+        panel.grid.major.y = element_line(colour = &quot;grey70&quot;, size = 0.25, linetype = 3)) +
+  labs(x = &quot;&quot;, y = expression(Temperature~(degree*C)))+
+  scale_y_continuous(breaks = seq(27.2,28.0, length.out = 4) %&gt;% round(2))+
+  scale_x_continuous(breaks = seq(1997,2017,2))
+
+## combine month and annual ts with cowplot
+cowplot::plot_grid(monthly.fig, 
+                   annual.fig, 
+                   nrow = 2, ncol = 1, 
+                   labels = c(&quot;Monthly&quot;, &quot;Yearly&quot;), label_size = 12, 
+                   label_fontface = &quot;bold&quot;, label_x = 0.85, label_y = 0.98)</code></pre>
+<div class="figure"><span id="fig:month-annual-g"></span>
+<img src="/post/2019-02-22-exploring-time-series-data-in-r_files/figure-html/month-annual-g-1.png" alt="Average surface temperature for month (top) and year (bottom)" width="768" />
+<p class="caption">
+Figure 8: Average surface temperature for month (top) and year (bottom)
+</p>
+</div>
+</div>
+<div id="detect-the-change-pointpoints-of-monthly" class="section level3">
+<h3>Detect the change pointpoints of monthly</h3>
+<pre class="r"><code>month.cpts = month.ts %&gt;% changepoint::cpt.meanvar() 
+month.cpts %&gt;% param.est() %&gt;% as.data.frame()</code></pre>
+<pre><code>      mean variance
+1 27.49570  1.61604
+2 28.43789       NA</code></pre>
+<pre class="r"><code>month.cpts %&gt;% summary()</code></pre>
+<pre><code>Created Using changepoint version 2.2.2 
+Changepoint type      : Change in mean and variance 
+Method of analysis    : AMOC 
+Test Statistic  : Normal 
+Type of penalty       : MBIC with value, 16.58829 
+Minimum Segment Length : 2 
+Maximum no. of cpts   : 1 
+Changepoint Locations : 251 </code></pre>
+<pre class="r"><code>month.cpts%&gt;% changepoint::plot()</code></pre>
+<p><img src="/post/2019-02-22-exploring-time-series-data-in-r_files/figure-html/unnamed-chunk-12-1.png" width="768" /></p>
+<p>We notice that the change points using the <strong>changepoint</strong> package is unnoticable with the monthly and yearly time series (figure). Let try using a non parametric function as well to discover the change point for these time series <span class="citation">(Haynes et al. <a href="#ref-changepoint_np">2016</a>)</span>.</p>
+<pre class="r"><code>month.cpts.np = month.ts %&gt;% changepoint.np::cpt.np() 
+
+month.cpts.np%&gt;% changepoint::plot()</code></pre>
+<p><img src="/post/2019-02-22-exploring-time-series-data-in-r_files/figure-html/unnamed-chunk-13-1.png" width="768" /></p>
+<p>We notice that the change point occured at index 13,16,42,90, and 94. We can spot the month directyl by creating a monthly vector dataset from January 1997 to December 2017 and then those index to identify the month. the chunk below hightlight how to construct the month vector and extract the month with the index identified</p>
+<pre class="r"><code>analysis.month = seq(dmy(010197), dmy(311217), by = &quot;month&quot;)
+analysis.month[cpts(month.cpts.np)]</code></pre>
+<pre><code>[1] &quot;1998-01-01&quot; &quot;1998-04-01&quot; &quot;2000-06-01&quot; &quot;2004-06-01&quot; &quot;2004-10-01&quot;</code></pre>
+<p>We clearly now obtain the month in which the change occured. The first change occured between 1998-01-01 and 1998-04-01— A period of 1997/1998 El-Nino when the temperature rose above normal. This was followed with the low temperature in 2000-06-01 and then the other change occured between 2004-06-01 and 2004-10-01 when temperature rose sharply.</p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-ggpmisc">
+<p>Aphalo, Pedro J. 2016. <em>Learn R ...as You Learnt Your Mother Tongue</em>. Leanpub. <a href="https://leanpub.com/learnr" class="uri">https://leanpub.com/learnr</a>.</p>
+</div>
+<div id="ref-changepoint_np">
+<p>Haynes, Kaylea, Rebecca Killick, Paul Fearnhead, and Idris Eckley. 2016. <em>Changepoint.np: Methods for Nonparametric Changepoint Detection</em>. <a href="https://CRAN.R-project.org/package=changepoint.np" class="uri">https://CRAN.R-project.org/package=changepoint.np</a>.</p>
+</div>
+<div id="ref-ggfortify">
+<p>Horikoshi, Masaaki, and Yuan Tang. 2016. <em>Ggfortify: Data Visualization Tools for Statistical Analysis Results</em>. <a href="https://CRAN.R-project.org/package=ggfortify" class="uri">https://CRAN.R-project.org/package=ggfortify</a>.</p>
+</div>
+<div id="ref-forecast">
+<p>Hyndman, Rob J, George Athanasopoulos, Christoph Bergmeir, Gabriel Caceres, Leanne Chhay, Mitchell O’Hara-Wild, Fotios Petropoulos, Slava Razbash, Earo Wang, and Farah Yasmeen. 2018. “Forecast: Forecasting Functions for Time Series and Linear Models.”</p>
+</div>
+<div id="ref-oce">
+<p>Kelley, Dan, and Clark Richards. 2018. <em>Oce: Analysis of Oceanographic Data</em>. <a href="https://CRAN.R-project.org/package=oce" class="uri">https://CRAN.R-project.org/package=oce</a>.</p>
+</div>
+<div id="ref-changepoint">
+<p>Killick, Rebecca, Kaylea Haynes, and Idris A. Eckley. 2016. <em>Changepoint: An R Package for Changepoint Analysis</em>. <a href="https://CRAN.R-project.org/package=changepoint" class="uri">https://CRAN.R-project.org/package=changepoint</a>.</p>
+</div>
+<div id="ref-xts">
+<p>Ryan, Jeffrey A., and Joshua M. Ulrich. 2018. <em>Xts: EXtensible Time Series</em>. <a href="https://CRAN.R-project.org/package=xts" class="uri">https://CRAN.R-project.org/package=xts</a>.</p>
+</div>
+<div id="ref-shum">
+<p>Shumway, Robert H, and David S Stoffer. 2017. <em>Time Series Analysis and Its Applications: With R Examples</em>. Book. Springer.</p>
+</div>
+<div id="ref-astsa">
+<p>Stoffer, David. 2017. <em>Astsa: Applied Statistical Time Series Analysis</em>. <a href="https://CRAN.R-project.org/package=astsa" class="uri">https://CRAN.R-project.org/package=astsa</a>.</p>
+</div>
+<div id="ref-tseries">
+<p>Trapletti, Adrian, and Kurt Hornik. 2018. <em>Tseries: Time Series Analysis and Computational Finance</em>. <a href="https://CRAN.R-project.org/package=tseries" class="uri">https://CRAN.R-project.org/package=tseries</a>.</p>
+</div>
+<div id="ref-readxl">
+<p>Wickham, Hadley, and Jennifer Bryan. 2018. <em>Readxl: Read Excel Files</em>. <a href="https://CRAN.R-project.org/package=readxl" class="uri">https://CRAN.R-project.org/package=readxl</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr" class="uri">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+<div id="ref-zoo">
+<p>Zeileis, Achim, and Gabor Grothendieck. 2005. “Zoo: S3 Infrastructure for Regular and Irregular Time Series.” <em>Journal of Statistical Software</em> 14 (6): 1–27. doi:<a href="https://doi.org/10.18637/jss.v014.i06">10.18637/jss.v014.i06</a>.</p>
+</div>
+</div>
+</div>

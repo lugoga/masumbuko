@@ -1,0 +1,482 @@
+---
+title: Exploring Time Series Data in R
+author: Masumbuko Semba
+date: '2019-02-22'
+slug: exploring-time-series-data-in-r
+categories:
+  - R
+  - Statistics
+  - Tool
+tags:
+  - Time Series
+  - sea surface temperature
+  - Indian Ocean
+  - Unguja
+  - Chumbe Island
+  - Tanzania
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
+```
+
+
+### Introduction
+
+@shum in the book with a title *Time series analysis and its applications: with R examples* clearly stated that when dealing with any time series analysis the first step you ought to do befure further investigation is careful examination of the recorded data. This means before looking more closely at the particular statistical methods, it is appropriate to plot the recorded data against time. This scrutiny often suggests the method of analysis as well as statistics that will be of use in summarizing the information in the data. 
+
+R has several packages to work with time series data and others for visualizing the outputs from time series process. For example, @ggfortify developed **ggfortify** package--- an extension to **ggplot2** that makes easy to plot time series objects. The package can handle the output of many time series packages, including: `zoo::zooreg()` [@zoo], `xts::xts()` [@xts], `timeSeries::timSeries()`, `tseries::irts()` [@tseries], `forecast::forecast()` [@forecast], `vars:vars()`.
+
+Another interesting package is the **ggpmisc** package developed by -@ggpmisc, which provides two useful methods for time series object:
+
++ `stat_peaks()` finds at which x positions local y maxima are located, and
++ `stat_valleys()` finds at which x positions local y minima are located.
+
+In this post I will take you through the Here, we'll show how to easily:
+
+1. process and visualize daily sea surface temperature for recorded between January 1997 and December 2017 near Chumbe Island in Unguja Island in the Indian ocean 
+2. Identify shifts in mean and/or variance in a time series using the **changepoint** package [@changepoint].
+3. Identify shifts for non parametric time series object with the **changepoint.np** package
+<!-- 4. Detect jumps in a data using the strucchange [@achim] package  -->
+<!-- 5. Detect peaks and valleys using the ggpmisc package -->
+
+We first load the package into the workspace that we need for this process:
+
+```{r}
+require(astsa)
+require(ggfortify)
+require(tidyverse)
+require(ggpmisc)
+require(strucchange)
+require(changepoint)
+require(lubridate)
+require(oce)
+
+
+```
+
+
+### Process sea surface temperature data
+In this post we use the daily sea surface temperature collected near Chumbe Island in Unguja with a data logger for a period of 21 years ---from January 01, 1997 to December 31, 2017. The data is in excel, therefore, we import the dataset into the workspace with the **readxl** package [@readxl].
+
+```{r, eval=FALSE}
+all = readxl::read_excel("./Chumbe_SST_Temperature 1997-30Nov2017.xlsx")
+```
+
+
+```{r echo=FALSE}
+all = readxl::read_excel("E:/Data Manipulation/Temperature data/processing/Chumbe_SST_Temperature 1997-30Nov2017_IMS_Muhando.xlsx")
+
+```
+
+Once the dataset in the workspace we noticed that is in the  wide format---multiple columns---each column represent a year (Table \@ref(tab:tab1)). 
+
+```{r tab1, echo=FALSE}
+all %>% sample_n(12) %>% filter() %>% select(1:2,seq(3,22,3)) %>%
+  kableExtra::kable(format = "html",
+                    caption = "Sample of Sea surface temperature arranged in a wide format", digits = 2) %>%
+  kableExtra::column_spec(column = 1, width = "2.5cm")%>%
+  kableExtra::column_spec(column = 2:9, width = "1.7cm")
+```
+
+Time series requires the data arranged in long format, therefore, this dataset was tranformed from multiple columns format ---wide format into a long format (Table \@ref(tab:tab2)) with a `gather()` function from **dplyr** package [@dplyr].The chunk below highlight the transformation steps.
+
+```{r}
+
+## change from wide form to long form with gather function
+all = all %>% gather(key = "year", value = "sst", 2:22)
+
+```
+
+```{r tab2, echo=FALSE}
+all %>% sample_n(12) %>% 
+  kableExtra::kable(format = "html",
+                    caption = "SST arranged in a long format", digits = 2) %>%
+  kableExtra::column_spec(column = 1, width = "3cm")%>%
+  kableExtra::column_spec(column = 2:3, width = "2.5cm")
+```
+
+I noticed that the February month has been treated with 29 days for all the years. Some years are short with only 28 days. Table \@ref(tab:tab1) highlight the wrongly entered temperature values for the 29^th^ February for years which end on the 28^th^. Therefore all these values must be trimmed off. 
+
+```{r}
+
+index =which(all$sst> 35)
+
+wrong.date = all %>% slice(index) 
+```
+
+
+```{r tab3, echo=FALSE}
+
+wrong.date%>% separate(day, c("Year", "Month", "Day"), sep = "-") %>% unite(Date, c("Day", "Month", "year"), sep = "-") %>% select(-Year) %>% kableExtra::kable(format = "html", col.names = c("Date", "Temperature"), caption = "Wrongly entered SST") %>%
+  kableExtra::column_spec(column = 1:2, width = "5 cm")
+
+```
+
+To obtain the clean time series that range between January 1,1997 to December 31, 2017 and extra temperature values of wrongly entered date for short years without the 29^th^ February were removed. This chunk below highlight code of lines that was used to clean the time series.
+
+```{r}
+
+all.tb = all %>% 
+  filter(is.na(sst)) %>% 
+  bind_rows(all %>% 
+              filter(sst > 15 & sst < 40)) %>% 
+  separate(day, c("mwaka", "month", "siku"), sep = "-") %>% 
+  separate(siku, c("siku", "muda"), sep = " ") %>% 
+  mutate(date = make_date(year, month, siku)) %>% 
+  arrange(date) %>% 
+  select(date, sst)
+
+```
+
+When we plot the time series in heatmap showin in figure \@ref(fig:missing-ggplot), I noticed missing temperature values for some years. 
+
+```{r missing-ggplot-del, fig.cap="Heatmaps of daily sea surface temperature. Several days in year 1999,2000,2002,2003,2004 and 2005 miss temperature values", echo=FALSE, eval=FALSE}
+
+all.tb = all.tb %>% mutate(year = year(date), day.year = yday(date))
+
+ggplot(data = all.tb, aes(y = day.year, x = year))+
+  geom_raster(aes(fill = sst), interpolate = F)+
+  geom_contour(aes(z = sst), col = "black", bins = 3 )+
+  theme(plot.background = element_blank(),
+        legend.position = "bottom",
+        panel.border = element_blank(),
+        axis.text = element_text(colour = "black", size = 11),
+        axis.title = element_text(colour = 1, size = 12),
+        legend.key.width = unit(30, "mm"),
+        legend.key.height = unit(4, "mm"),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 11))+
+  scale_x_continuous(breaks = seq(1997,2017,2), position = "top") +
+  scale_y_reverse(breaks = seq(15,370,30)
+                  # labels = month(seq(dmy(010119), dmy(021219),
+                  #                    by = "month"), label = T, abbr = F)
+                  )+
+  scale_fill_gradientn(colours = oceColorsJet(210), 
+                       na.value = NA, 
+                       breaks =seq(24.5,31,1))+ 
+  guides(fill = guide_colorbar(title = expression (Temperature~(degree~C)), 
+                               title.position = "top", title.hjust = 0.5,
+                               title.vjust = 0.25, 
+                               label.vjust = 1, raster = TRUE, frame.colour = NULL,
+                               ticks.colour = 1, reverse = FALSE)) +
+  labs(x = "", y = "Number of days in a Year")
+  
+
+```
+
+```{r missing-ggplot, fig.cap="Heatmaps of daily sea surface temperature. Several days in year 1999,2000,2002,2003,2004 and 2005 miss temperature values", fig.height=4, fig.width=8}
+
+## define the total number of days in a year
+days = 1:366
+#define the total number of years as indicated by the data
+years = 1997:2017
+
+
+## make a matrix using the origin temperature values
+all.mat = matrix(all.tb$sst, nrow = length(days)) 
+## plot the matrix
+imagep(x = years, y = days, z = all.mat %>% t(), filledContour = F, 
+       ylim = c(365,0),
+       ylab = "Day", 
+       col = oceColors9A(120),
+       zlab = expression(Temperature~(degree *C)))
+## add contour
+contour(x = years, y = days, z = all.mat %>% t(), add = TRUE, col = 1, nlevels = 3)
+```
+
+
+And since a `ts()` function that used to create time series object hates missing values---requires dataset with complete values, the missing values were filled with `interpBarnes()` function from **oce** packaage [@oce]. The the output of interpolated temperature are shown in figure \@ref(fig:interp). 
+```{r interpolation}
+
+## define the total number of days in a year
+days = 1:366
+#define the total number of years as indicated by the data
+years = 1997:2017
+
+## create day and year variables from date
+all.tb = all.tb %>% mutate(year = year(date), day.year = yday(date))
+
+## interpolate the missing values
+interpolated.temperature = interpBarnes(x = all.tb$day.year, 
+                                        y = all.tb$year, 
+                                        z = all.tb$sst, 
+                                        xgl = 366, 
+                                        ygl = 21)
+```
+
+```{r interp, fig.cap="Temperature values interpolated sea surface temperature using the Barnes algorithm", echo=FALSE, fig.height=4, fig.width=8}
+## plot the interpolated values
+imagep(y = interpolated.temperature$xg, 
+       x = interpolated.temperature$yg, 
+       z = interpolated.temperature$zg %>% t(), 
+       filledContour = F, 
+       # xlim = c(2017,1997),
+       zlab = expression(Temperature~(degree *C)), 
+       ylim = c(360, 1),
+       ylab = "Day", col = oceColors9A(120))
+contour(y = interpolated.temperature$xg, x = interpolated.temperature$yg, z = interpolated.temperature$zg %>% t(), col = 1, nlevels = 4,add = TRUE)
+```
+
+Once we have filled the missing temperature values in the data set, we can now proceed with the creation of the time series object. Unfortunate the interpolated temperature values is in matrix format. Therefore, we convert it data frame and then remove again a day in years with only  days in February. The chunk below contains the codes that was used for cleaning and transformation of the interpolated dataset.
+
+```{r}
+
+## extracted the matrix of interpolated values
+interpolated.sst.mat = interpolated.temperature$zg
+
+## check the dimension if is 366 days and 21 years (1997:2017)
+# dim(interpolated.sst.mat)
+
+## tranform the matrix into the tabular form and combine the interpolated values with the raw
+interpolated.sst.tb = interpolated.sst.mat %>% 
+  as.tibble()  %>% 
+  gather(key = "year", value = "sst",1:21)  %>%
+  select(-year, sst.interp = sst)%>% 
+  bind_cols(all)
+
+ ## make an index of short years of 28 days in february that appear with 29 days 
+ index = which(all$sst ==1000)
+ 
+ ## check if the wrong days exist
+ # interpolated.sst.tb %>% slice(index) ## uncomment if you want to observe those days
+ 
+ ## trim off the dataset all short years with the wrong 29th February
+ interpolated.sst.tb = interpolated.sst.tb %>% slice(-index)
+ 
+ ## now the data is clean we can sequeance the number of days with
+ interpolated.sst.tb = interpolated.sst.tb %>% 
+   mutate(date = seq(dmy(010197), dmy(311217), by = "day")) %>% 
+   select(date, sst.interp, sst.original =sst)
+
+```
+
+
+### Visualization of Time seris
+
+### time series objects in R
+To visualize time series we need first to create them. The `ts()` function convert a numeric vector into an R time series object. The format is `ts(vector, start=, end=, frequency=)` where *start* and *end* are the times of the first and last observation and *frequency* is the number of observations per unit time (1=annual, 4=quartely, 12=monthly,365.24=daily, etc.). Our dataset contain daily sea surface temperature observations from `r interpolated.sst.tb$date[1]` to `r interpolated.sst.tb$date[nrow(interpolated.sst.tb)]`. The daily time series object was created with the line code in the chunk below
+
+
+```{r}
+
+daily.ts = ts(data = interpolated.sst.tb$sst.interp, 
+                    start = c(1997,1), 
+                    frequency = 365.24)
+```
+
+We can visualize the plot with the base `plot()` function shwon in figure \@ref(fig:base)
+```{r base, fig.cap="Daily time series plotted with the base function", fig.height=4, fig.width=8}
+
+daily.ts %>% plot(xlab = "", las = 1,
+                  ylab = expression(Temperature~(degree*C)))
+
+```
+
+We can also visualize the plot with the base `tsplot()` function from **astsa** package shwon in figure \@ref(fig:astsa)
+```{r astsa, fig.cap="Daily time series plotted with the base function", fig.height=4, fig.width=8}
+
+daily.ts %>% tsplot(xlab = "", las = 1,
+                  ylab = expression(Temperature~(degree*C)))
+
+```
+
+The popular **ggplot2** package also support direct plotting of time series object shown in figure \@ref(fig:gg) and the code for this figure is highlighted below;
+
+```{r gg, fig.cap="Daily time series plotted with the ggplot", fig.height=2.6, fig.width=8}
+
+ggplot(data = daily.ts)+
+  geom_line()+
+  theme(axis.text = element_text(size = 11, colour = "black"),
+        axis.title = element_text(size = 14, colour = "black"),
+        panel.border = element_rect(colour = "black", fill = NA),
+        panel.background = element_rect(fill = "white"),
+        panel.grid = element_blank(), 
+        panel.grid.major.y = element_line(colour = "grey70", size = 0.25, linetype = 3)) +
+  scale_x_continuous(breaks = seq(1997,2017,2)) +
+  scale_y_continuous(breaks = seq(24.5, 30.5,1.25)) +
+  labs(x = "", y = expression(Anomaly~(degree*C)))
+```
+
+Before **ggplot2** support of time series plotting was implemented, this function was offered by the `autoplot()` function from **ggpmisc** package. The figure \@ref(fig:auto) was plotted with the `autoplot()` using the code in the chunk below. 
+```{r auto, fig.cap="Daily time series plotted with the autoplot function", fig.height=4, fig.width=8}
+autoplot(object = daily.ts) +
+  theme(axis.text = element_text(size = 11, colour = "black"),
+        axis.title = element_text(size = 14, colour = "black"),
+        panel.border = element_rect(colour = "black", fill = NA),
+        panel.background = element_rect(fill = "white"),
+        panel.grid = element_blank(), 
+        panel.grid.major.y = element_line(colour = "grey70", size = 0.25, linetype = 3)) +
+  scale_x_continuous(breaks = seq(1997,2017,2)) +
+  scale_y_continuous(breaks = seq(24.5, 30.5,0.75)) +
+  labs(x = "", y = expression(Temperature~anomaly~(degree*C)))
+```
+
+### Identify shifts in mean and/or variance in a time series 
+
+Our second object is to identify the change in mean or variance of the time series. This phonmenon is widely referred as *changepoints*---an instance in time where the statistical properties before and after this time point differ. We can calculate the optimal position and number of changepoints for daily time series using the `changepoint::cpt.meanvar()` function and print the summary of the results as the chunk highlight
+
+```{r}
+## Identify change point of daily sea surface temperature
+daily.changepoints = daily.ts %>% 
+  changepoint::cpt.meanvar() 
+
+daily.changepoints %>% summary()
+```
+
+The summary report indicate there are two segments with one change point. The change point occured on `r all.tb$date[3249]`. Table \@ref(tab:tab4) show the first segment had a relatively lower mean surface temperature compared witht eh second segment, however, the variance of the first segment was relatively higher than the other. We can visualize these information graphically presented as in figure \@ref(fig:cpt.daily) with a `plot()` function from **changepoint** package [@changepoint]
+
+```{r tab4}
+
+## all.tb$date[3249] # uncomment to get the date of change point
+
+daily.changepoints %>% 
+  param.est() %>% 
+  data.frame() %>% 
+  mutate(segment = c("First", "Second")) %>% select(segment, mean, variance) %>%
+  kableExtra::kable(format = "html", digits = 2, 
+                    caption = "Mean and variance of change point for daily sst",
+                    col.names = c("Segment", "Mean", "Variance")) %>%
+  kableExtra::column_spec(column = 1:3, width = "3cm") %>%
+  kableExtra::add_header_above(c("", "Parameters" = 2))
+```
+
+
+```{r cpt.daily, fig.cap="Location of the change point of sea surface temperature", fig.height=4, fig.width=8}
+
+daily.changepoints %>% 
+  changepoint::plot(xlab = "", ylab = expression(Temperature~(degree*C)), las = 1)
+```
+
+Similar to `changepoint::plot()`, you can visualize the change point values with `autoplot()`. However, there subtle difference between the two plotting device. The change the means of the segements are solid line and horizontally drawn with `changepoint::plot()` (figure \@ref(fig:cpt.daily)) contrary to dotted and vertically drawn with the `autoplot()` function (Figure \@ref(fig:cpt.auto))
+
+```{r cpt.auto, fig.cap="Location of the change point of sea surface temperature with autoplot", fig.height=4, fig.width=8}
+
+daily.changepoints %>% 
+  autoplot()+
+  theme(axis.text = element_text(size = 11, colour = "black"),
+        axis.title = element_text(size = 14, colour = "black"),
+        panel.border = element_rect(colour = "black", fill = NA),
+        panel.background = element_rect(fill = "white"),
+        panel.grid = element_blank(), 
+        panel.grid.major.y = element_line(colour = "grey70", size = 0.25, linetype = 3)) +
+  scale_x_continuous(breaks = seq(1997,2017,2)) +
+  scale_y_continuous(breaks = seq(24.5, 30.5,0.75)) +
+  labs(x = "", y = expression(Temperature~anomaly~(degree*C)))
+```
+
+We have been visualizing the daily sea surface temperature time series object. This is the high frequency data. Let us now process and monthly average time series from this dataset. we need to create a *week*,*month* and *year* variables from the date in the dataset as shown in the chunk below;
+
+```{r}
+interpolated.sst.split = interpolated.sst.tb %>% 
+  mutate(week = week(date) %>% as.integer(), 
+         month = month(date) %>% as.integer(),
+         year = year(date) %>% as.integer()) %>%
+  select(date, week, month, year, sst = sst.interp)
+```
+
+Then we compute the monthly and annual average sea surface temperature
+```{r}
+
+## monthly mean temperature
+monthly.temperature = interpolated.sst.split %>% 
+  group_by(month, year) %>% 
+  summarise(sst = median(sst, na.rm = T))%>%
+  ungroup() %>% 
+  arrange(year, month)
+
+## monthly ts
+month.ts = ts(data = monthly.temperature$sst, start = c(1997,1), frequency = 12)
+
+## annual mean temperature
+annually.temperature = interpolated.sst.split %>% 
+  group_by(year) %>% 
+  summarise(sst = mean(sst, na.rm = T))%>%
+  ungroup() %>% 
+  arrange(year)
+
+# Annual ts
+annual.ts = ts(data = annually.temperature$sst, start = c(1997,1), frequency = 1)
+
+```
+
+And present the monthly and annual time series of sea surface temperature graphically as in figure \@ref(fig:month-annual) with the `tsplot()` function of **astsa** package [@astsa]. 
+
+```{r month-annual, fig.cap="Average surface temperature for month (top) and year (bottom)", fig.width=8}
+
+par(mfrow = c(2,1))
+month.ts%>% tsplot(las = 1, ylab = expression(Temperature~(degree*C)), xlab = "")
+annual.ts%>% tsplot(las = 1, ylab = expression(Temperature~(degree*C)), xlab = "")
+
+```
+
+Figure figure \@ref(fig:month-annual) is similar to figure \@ref(fig:month-annual-g), however, while mongh and annual object figure \@ref(fig:month-annual) were plotted with the `tsplot()` function from **astsa** package and combined with `par(mfrow = c(2,1))`, figure \@ref(fig:month-annual-g) was plotted with **ggplot2** and the annual and monthly object were combined with the `plot_grid()` function from **cowplot** package.
+
+```{r month-annual-g, fig.cap="Average surface temperature for month (top) and year (bottom)", fig.width=8}
+
+## plot monthly ts
+monthly.fig = ggplot(data = month.ts)+ 
+  geom_line()+
+    theme(axis.text = element_text(size = 11, colour = "black"),
+        axis.title = element_text(size = 14, colour = "black"),        
+        axis.text.x = element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA),
+        panel.background = element_rect(fill = "white"),
+        panel.grid = element_blank(), 
+        panel.grid.major.y = element_line(colour = "grey70", size = 0.25, linetype = 3)) +
+  labs(x = "", y = expression(Temperature~(degree*C)))+
+  scale_y_continuous(breaks = seq(25.5,30.50, length.out = 4) %>% round(2))+
+  scale_x_continuous(breaks = seq(1997,2017,2))
+
+## plot annual ts
+annual.fig = ggplot(data = annual.ts)+ 
+  geom_line()+
+  theme(axis.text = element_text(size = 11, colour = "black"),
+        axis.title = element_text(size = 14, colour = "black"),
+        panel.border = element_rect(colour = "black", fill = NA),
+        panel.background = element_rect(fill = "white"),
+        panel.grid = element_blank(), 
+        panel.grid.major.y = element_line(colour = "grey70", size = 0.25, linetype = 3)) +
+  labs(x = "", y = expression(Temperature~(degree*C)))+
+  scale_y_continuous(breaks = seq(27.2,28.0, length.out = 4) %>% round(2))+
+  scale_x_continuous(breaks = seq(1997,2017,2))
+
+## combine month and annual ts with cowplot
+cowplot::plot_grid(monthly.fig, 
+                   annual.fig, 
+                   nrow = 2, ncol = 1, 
+                   labels = c("Monthly", "Yearly"), label_size = 12, 
+                   label_fontface = "bold", label_x = 0.85, label_y = 0.98)
+
+```
+
+
+### Detect the change pointpoints of monthly
+```{r, , fig.width=8}
+month.cpts = month.ts %>% changepoint::cpt.meanvar() 
+month.cpts %>% param.est() %>% as.data.frame()
+month.cpts %>% summary()
+month.cpts%>% changepoint::plot()
+```
+
+We notice that the change points using the **changepoint** package is unnoticable with the monthly and yearly time series (figure). Let try using a non parametric function as well to discover the change point for these time series [@changepoint_np].
+```{r, fig.width=8}
+month.cpts.np = month.ts %>% changepoint.np::cpt.np() 
+
+month.cpts.np%>% changepoint::plot()
+```
+
+
+We notice that the change point occured at index 13,16,42,90, and 94. We can spot the month directyl by creating a monthly vector dataset from January 1997 to December 2017 and then those index to identify the month. the chunk below hightlight how to construct the month vector and extract the month with the index identified
+```{r}
+analysis.month = seq(dmy(010197), dmy(311217), by = "month")
+analysis.month[cpts(month.cpts.np)]
+```
+
+We clearly now obtain the month in which the change occured. The first change occured between 1998-01-01 and 1998-04-01--- A period of 1997/1998 El-Nino when the temperature rose above normal. This was followed with the low temperature in 2000-06-01 and then the other change occured between 2004-06-01 and 2004-10-01 when temperature rose sharply.
+
+## References
