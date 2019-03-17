@@ -113,8 +113,9 @@ contour(year, month,chl.array[,,j]%>%t() , add = T)
 
 ### Primary productivity
 ```{r}
-files = dir("./extracted/", pattern = "pp_", full.names = TRUE)
+files = dir("./extracted/", pattern = "pp_", full.names = TRUE, include.dirs = TRUE, recursive = T)
 sites = c("EEZ", "Mafia", "Pemba", "Zanzibar")
+
 ```
 
 
@@ -149,7 +150,7 @@ plotly::ggplotly(gg)
 ```
 
 ```{r fig4, fig.cap="Heat map of primary productivity in Mafia channel"}
-hchart(object = pp%>%filter(site == "Mafia"), "heatmap", hcaes(x = year, y = month, value = pp, group = site))
+hchart(object = pp%>%filter(site == "Zanzibar"), "heatmap", hcaes(x = year, y = month, value = pp, group = site))
 ```
 
 ```{r ,eval=FALSE}
@@ -168,7 +169,15 @@ pp.array = array(data = pp$pp, dim = c(length(month),length(year),length(sites))
 
 par(mfrow = c(2,2))
 for (j in 1:length(sites)){
-imagep(year, month, pp.array[,,j]%>%t(),filledContour = T, col = oceColors9A(120),  flipy = T, main = sites[j])
+  
+  imagep(year, 
+         month, 
+         pp.array[,,j]%>%t(),
+         filledContour = T, 
+         col = oceColors9A(120),  
+         flipy = T,
+         main = sites[j])
+  
 contour(year, month,pp.array[,,j]%>%t() , add = T)
 }
 
