@@ -66,6 +66,15 @@ Designing graphic: Design graphics and typeset books</description>
     </item>
     
     <item>
+      <title>Interactive map with leaflet</title>
+      <link>/03/17/2019/interactive-map-with-leaflet/</link>
+      <pubDate>Sun, 17 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/03/17/2019/interactive-map-with-leaflet/</guid>
+      <description>This post aim to train you how to make an interactive in R. We are going to focus on some poular packages for these task, many are part onf an tidyverse ecosystem (Wickham 2017) with addition of leaflet(Cheng, Karambelkar, and Xie 2018) package. To work with these post you need to have version 3.4 and above of R(R Core Team 2018) installed in your machine.</description>
+    </item>
+    
+    <item>
       <title>Exploring Time Series Data in R</title>
       <link>/02/22/2019/exploring-time-series-data-in-r/</link>
       <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>

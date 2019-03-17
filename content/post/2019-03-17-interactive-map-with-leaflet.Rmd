@@ -1,0 +1,127 @@
+---
+title: Interactive map with leaflet
+author: Masumbuko Semba
+date: '2019-03-17'
+slug: interactive-map-with-leaflet
+categories:
+  - Oceanography
+tags:
+  - CTD
+  - Tanzania
+  - Pemba Channel
+  - Zanzibar
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
+```
+
+This post aim to train you how to make an interactive in R. We are going to focus on some poular packages for these task, many are part onf an **tidyverse** ecosystem [@tidyverse] with addition of **leaflet**[@leaflet] package. To work with these post you need to have version 3.4 and above of **R**[@r] installed in your machine. You also need to install the add-on packages **leaflet** and **tidyverse** if are not in your machine. We laod the packages we need for this task with `require()` function.
+
+
+```{r}
+require(tidyverse)
+require(oce)
+require(leaflet)
+require(RColorBrewer)
+```
+
+
+
+```{r, echo=FALSE}
+
+load("E:/Data Manipulation/ctd_bongo2018/ioe2")
+pemba_zanzibar = section %>% subset( latitude >= -7) 
+pemba_zanzibar_ctd = pemba_zanzibar[["station"]]
+```
+
+```{r, echo=FALSE}
+ctd.tb = list()
+for (i in 1:length(pemba_zanzibar_ctd)){
+
+st = pemba_zanzibar_ctd[[i]]
+
+ctd.tb[[i]] =  st@data %>%
+  as_tibble()%>%
+  select(pressure, temperature, fluorescence, oxygen) %>% 
+  mutate(lon = st@metadata$longitude, lat = st@metadata$latitude, 
+         date = st@metadata$startTime, station = i)
+}
+
+ctd.tb = ctd.tb %>% bind_rows()
+```
+
+
+```{r, echo=FALSE}
+surface = ctd.tb %>% filter(pressure == 5)
+```
+
+
+Then we load the data from the local directory into R's workspace with the `read_csv()` function from **readr** package [@readr].
+```{r, eval=FALSE}
+surface = read_csv("./surface_ctd.csv")
+```
+
+ Table \@ref(tab:tab1) show the dataset contains six variable---temperature, fluorescence, oxygen all measured at water depth of 5 meter. The dataset also contains geographical (longitude and latitude) information, that we can used for making interactive map.
+```{r tab1}
+surface %>%
+  select(1:6) %>%
+  knitr::kable(format = "html", digits = 2, 
+               col.names = c("Pressure", "Temperature", "Fluorescence", "Oxygen", "Longitude", "Latitude"),
+               align = "c", 
+               caption = "A table showing the variable in the dataset") %>%
+  kableExtra::column_spec(column = 1:6, width = "4cm")
+```
+
+We map the location and show the variation of fluorence in each marker. We need to color the location markers with fluorescence values. To build a colour palette, we can use some utility functions in the **leaflet** package. The code below create a function that will generate a Yellow--Orange--Red palette from **RcolorBrewer** [@rcolorbrewer] package. The `domain` argument ensure that our colour scale will grade from the minimum to maximum fluorescence values.  
+
+```{r}
+oranges = colorNumeric(palette = "YlOrRd" ,
+                       domain = range(surface$fluorescence))
+
+```
+
+
+We can now map the markers and specify the location markers coded with the `oranges` function of color pallete we just created
+```{r}
+
+
+leaflet(data = surface) %>%
+  addProviderTiles("Esri.OceanBasemap") %>%
+  addCircleMarkers(lng = ~lon, 
+                   lat = ~lat, 
+                   radius = 5, 
+                   color = "grey80",  
+                   weight = 1, 
+                   fill = TRUE, 
+                   fillOpacity = 0.7, 
+                   fillColor = ~oranges(fluorescence)) 
+```
+
+We further add a legend to tell us what shade of color correspond to which value of fluorescence
+```{r}
+
+
+leaflet(data = surface) %>%
+  addProviderTiles("Esri.OceanBasemap") %>%
+  addCircleMarkers(lng = ~lon, 
+                   lat = ~lat, 
+                   radius = 8, 
+                   color = "grey80",  
+                   weight = 1, 
+                   fill = TRUE, 
+                   fillOpacity = 0.7, 
+                   fillColor = ~oranges(fluorescence)) %>%
+  addLegend(position = "topright", 
+            pal = oranges, 
+            values = surface$fluorescence, 
+            title = "mg/L", 
+            opacity = 1)
+  
+```
+
+## References

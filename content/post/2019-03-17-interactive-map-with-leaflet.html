@@ -1,0 +1,309 @@
+---
+title: Interactive map with leaflet
+author: Masumbuko Semba
+date: '2019-03-17'
+slug: interactive-map-with-leaflet
+categories:
+  - Oceanography
+tags:
+  - CTD
+  - Tanzania
+  - Pemba Channel
+  - Zanzibar
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/leaflet/leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet/leaflet.js"></script>
+<link href="/rmarkdown-libs/leafletfix/leafletfix.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4-compressed.js"></script>
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4leaflet.js"></script>
+<link href="/rmarkdown-libs/rstudio_leaflet/rstudio_leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet-binding/leaflet.js"></script>
+<script src="/rmarkdown-libs/leaflet-providers/leaflet-providers.js"></script>
+<script src="/rmarkdown-libs/leaflet-providers-plugin/leaflet-providers-plugin.js"></script>
+
+
+<p>This post aim to train you how to make an interactive in R. We are going to focus on some poular packages for these task, many are part onf an <strong>tidyverse</strong> ecosystem <span class="citation">(Wickham <a href="#ref-tidyverse">2017</a>)</span> with addition of <strong>leaflet</strong><span class="citation">(Cheng, Karambelkar, and Xie <a href="#ref-leaflet">2018</a>)</span> package. To work with these post you need to have version 3.4 and above of <strong>R</strong><span class="citation">(R Core Team <a href="#ref-r">2018</a>)</span> installed in your machine. You also need to install the add-on packages <strong>leaflet</strong> and <strong>tidyverse</strong> if are not in your machine. We laod the packages we need for this task with <code>require()</code> function.</p>
+<pre class="r"><code>require(tidyverse)
+require(oce)
+require(leaflet)
+require(RColorBrewer)</code></pre>
+<p>Then we load the data from the local directory into R’s workspace with the <code>read_csv()</code> function from <strong>readr</strong> package <span class="citation">(Wickham, Hester, and Francois <a href="#ref-readr">2017</a>)</span>.</p>
+<pre class="r"><code>surface = read_csv(&quot;./surface_ctd.csv&quot;)</code></pre>
+<p>Table <a href="#tab:tab1">1</a> show the dataset contains six variable—temperature, fluorescence, oxygen all measured at water depth of 5 meter. The dataset also contains geographical (longitude and latitude) information, that we can used for making interactive map.</p>
+<pre class="r"><code>surface %&gt;%
+  select(1:6) %&gt;%
+  knitr::kable(format = &quot;html&quot;, digits = 2, 
+               col.names = c(&quot;Pressure&quot;, &quot;Temperature&quot;, &quot;Fluorescence&quot;, &quot;Oxygen&quot;, &quot;Longitude&quot;, &quot;Latitude&quot;),
+               align = &quot;c&quot;, 
+               caption = &quot;A table showing the variable in the dataset&quot;) %&gt;%
+  kableExtra::column_spec(column = 1:6, width = &quot;4cm&quot;)</code></pre>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>A table showing the variable in the dataset
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+Pressure
+</th>
+<th style="text-align:center;">
+Temperature
+</th>
+<th style="text-align:center;">
+Fluorescence
+</th>
+<th style="text-align:center;">
+Oxygen
+</th>
+<th style="text-align:center;">
+Longitude
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+5
+</td>
+<td style="text-align:center;width: 4cm; ">
+26.94
+</td>
+<td style="text-align:center;width: 4cm; ">
+0.36
+</td>
+<td style="text-align:center;width: 4cm; ">
+3.97
+</td>
+<td style="text-align:center;width: 4cm; ">
+39.29
+</td>
+<td style="text-align:center;width: 4cm; ">
+-5.02
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+5
+</td>
+<td style="text-align:center;width: 4cm; ">
+26.96
+</td>
+<td style="text-align:center;width: 4cm; ">
+0.59
+</td>
+<td style="text-align:center;width: 4cm; ">
+4.01
+</td>
+<td style="text-align:center;width: 4cm; ">
+39.24
+</td>
+<td style="text-align:center;width: 4cm; ">
+-5.26
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+5
+</td>
+<td style="text-align:center;width: 4cm; ">
+26.90
+</td>
+<td style="text-align:center;width: 4cm; ">
+0.46
+</td>
+<td style="text-align:center;width: 4cm; ">
+3.99
+</td>
+<td style="text-align:center;width: 4cm; ">
+39.19
+</td>
+<td style="text-align:center;width: 4cm; ">
+-5.44
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+5
+</td>
+<td style="text-align:center;width: 4cm; ">
+27.01
+</td>
+<td style="text-align:center;width: 4cm; ">
+0.40
+</td>
+<td style="text-align:center;width: 4cm; ">
+3.99
+</td>
+<td style="text-align:center;width: 4cm; ">
+39.11
+</td>
+<td style="text-align:center;width: 4cm; ">
+-5.71
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+5
+</td>
+<td style="text-align:center;width: 4cm; ">
+27.28
+</td>
+<td style="text-align:center;width: 4cm; ">
+0.39
+</td>
+<td style="text-align:center;width: 4cm; ">
+3.90
+</td>
+<td style="text-align:center;width: 4cm; ">
+39.07
+</td>
+<td style="text-align:center;width: 4cm; ">
+-5.93
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+5
+</td>
+<td style="text-align:center;width: 4cm; ">
+27.32
+</td>
+<td style="text-align:center;width: 4cm; ">
+0.31
+</td>
+<td style="text-align:center;width: 4cm; ">
+3.96
+</td>
+<td style="text-align:center;width: 4cm; ">
+38.99
+</td>
+<td style="text-align:center;width: 4cm; ">
+-6.14
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+5
+</td>
+<td style="text-align:center;width: 4cm; ">
+27.38
+</td>
+<td style="text-align:center;width: 4cm; ">
+0.32
+</td>
+<td style="text-align:center;width: 4cm; ">
+3.99
+</td>
+<td style="text-align:center;width: 4cm; ">
+39.01
+</td>
+<td style="text-align:center;width: 4cm; ">
+-6.26
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+5
+</td>
+<td style="text-align:center;width: 4cm; ">
+27.26
+</td>
+<td style="text-align:center;width: 4cm; ">
+0.30
+</td>
+<td style="text-align:center;width: 4cm; ">
+3.99
+</td>
+<td style="text-align:center;width: 4cm; ">
+39.24
+</td>
+<td style="text-align:center;width: 4cm; ">
+-6.49
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+5
+</td>
+<td style="text-align:center;width: 4cm; ">
+26.71
+</td>
+<td style="text-align:center;width: 4cm; ">
+0.58
+</td>
+<td style="text-align:center;width: 4cm; ">
+3.97
+</td>
+<td style="text-align:center;width: 4cm; ">
+39.35
+</td>
+<td style="text-align:center;width: 4cm; ">
+-6.67
+</td>
+</tr>
+</tbody>
+</table>
+<p>We map the location and show the variation of fluorence in each marker. We need to color the location markers with fluorescence values. To build a colour palette, we can use some utility functions in the <strong>leaflet</strong> package. The code below create a function that will generate a Yellow–Orange–Red palette from <strong>RcolorBrewer</strong> <span class="citation">(Neuwirth <a href="#ref-rcolorbrewer">2014</a>)</span> package. The <code>domain</code> argument ensure that our colour scale will grade from the minimum to maximum fluorescence values.</p>
+<pre class="r"><code>oranges = colorNumeric(palette = &quot;YlOrRd&quot; ,
+                       domain = range(surface$fluorescence))</code></pre>
+<p>We can now map the markers and specify the location markers coded with the <code>oranges</code> function of color pallete we just created</p>
+<pre class="r"><code>leaflet(data = surface) %&gt;%
+  addProviderTiles(&quot;Esri.OceanBasemap&quot;) %&gt;%
+  addCircleMarkers(lng = ~lon, 
+                   lat = ~lat, 
+                   radius = 5, 
+                   color = &quot;grey80&quot;,  
+                   weight = 1, 
+                   fill = TRUE, 
+                   fillOpacity = 0.7, 
+                   fillColor = ~oranges(fluorescence)) </code></pre>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["Esri.OceanBasemap",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addCircleMarkers","args":[[-5.02016666666667,-5.265,-5.437,-5.714,-5.92533333333333,-6.1355,-6.2595,-6.4895,-6.67183333333333],[39.2936666666667,39.2406666666667,39.187,39.1095,39.0703333333333,38.9923333333333,39.0065,39.2426666666667,39.3546666666667],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"grey80","weight":1,"opacity":0.5,"fill":true,"fillColor":["#FFDF83","#800026","#FD6F32","#FEB44E","#FFBE58","#FFF6B6","#FFF3AF","#FFFFCC","#960026"],"fillOpacity":0.7},null,null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-6.67183333333333,-5.02016666666667],"lng":[38.9923333333333,39.3546666666667]}},"evals":[],"jsHooks":[]}</script>
+<p>We further add a legend to tell us what shade of color correspond to which value of fluorescence</p>
+<pre class="r"><code>leaflet(data = surface) %&gt;%
+  addProviderTiles(&quot;Esri.OceanBasemap&quot;) %&gt;%
+  addCircleMarkers(lng = ~lon, 
+                   lat = ~lat, 
+                   radius = 8, 
+                   color = &quot;grey80&quot;,  
+                   weight = 1, 
+                   fill = TRUE, 
+                   fillOpacity = 0.7, 
+                   fillColor = ~oranges(fluorescence)) %&gt;%
+  addLegend(position = &quot;topright&quot;, 
+            pal = oranges, 
+            values = surface$fluorescence, 
+            title = &quot;mg/L&quot;, 
+            opacity = 1)</code></pre>
+<div id="htmlwidget-2" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["Esri.OceanBasemap",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addCircleMarkers","args":[[-5.02016666666667,-5.265,-5.437,-5.714,-5.92533333333333,-6.1355,-6.2595,-6.4895,-6.67183333333333],[39.2936666666667,39.2406666666667,39.187,39.1095,39.0703333333333,38.9923333333333,39.0065,39.2426666666667,39.3546666666667],8,null,null,{"interactive":true,"className":"","stroke":true,"color":"grey80","weight":1,"opacity":0.5,"fill":true,"fillColor":["#FFDF83","#800026","#FD6F32","#FEB44E","#FFBE58","#FFF6B6","#FFF3AF","#FFFFCC","#960026"],"fillOpacity":0.7},null,null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addLegend","args":[{"colors":["#FFFFCC , #FFFDC6 1.64502095247039%, #FFE38B 18.6885995083816%, #FEB852 35.7321780642927%, #FD8138 52.7757566202038%, #ED3422 69.819335176115%, #BF0126 86.8629137320261%, #800026 "],"labels":["0.30","0.35","0.40","0.45","0.50","0.55"],"na_color":null,"na_label":"NA","opacity":1,"position":"topright","type":"numeric","title":"mg/L","extra":{"p_1":0.0164502095247039,"p_n":0.868629137320261},"layerId":null,"className":"info legend","group":null}]}],"limits":{"lat":[-6.67183333333333,-5.02016666666667],"lng":[38.9923333333333,39.3546666666667]}},"evals":[],"jsHooks":[]}</script>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-leaflet">
+<p>Cheng, Joe, Bhaskar Karambelkar, and Yihui Xie. 2018. <em>Leaflet: Create Interactive Web Maps with the Javascript ’Leaflet’ Library</em>. <a href="https://CRAN.R-project.org/package=leaflet" class="uri">https://CRAN.R-project.org/package=leaflet</a>.</p>
+</div>
+<div id="ref-rcolorbrewer">
+<p>Neuwirth, Erich. 2014. <em>RColorBrewer: ColorBrewer Palettes</em>. <a href="https://CRAN.R-project.org/package=RColorBrewer" class="uri">https://CRAN.R-project.org/package=RColorBrewer</a>.</p>
+</div>
+<div id="ref-r">
+<p>R Core Team. 2018. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, Hadley. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse" class="uri">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+<div id="ref-readr">
+<p>Wickham, Hadley, Jim Hester, and Romain Francois. 2017. <em>Readr: Read Rectangular Text Data</em>. <a href="https://CRAN.R-project.org/package=readr" class="uri">https://CRAN.R-project.org/package=readr</a>.</p>
+</div>
+</div>
+</div>

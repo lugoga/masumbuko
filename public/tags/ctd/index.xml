@@ -6,10 +6,19 @@
     <description>Recent content in Ctd on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 12 Feb 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 17 Mar 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/ctd/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Interactive map with leaflet</title>
+      <link>/03/17/2019/interactive-map-with-leaflet/</link>
+      <pubDate>Sun, 17 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/03/17/2019/interactive-map-with-leaflet/</guid>
+      <description>This post aim to train you how to make an interactive in R. We are going to focus on some poular packages for these task, many are part onf an tidyverse ecosystem (Wickham 2017) with addition of leaflet(Cheng, Karambelkar, and Xie 2018) package. To work with these post you need to have version 3.4 and above of R(R Core Team 2018) installed in your machine.</description>
+    </item>
     
     <item>
       <title>Isosurface of temperature, salinity, oxygen and fluorescence in Mafia Channel from CTD data </title>
