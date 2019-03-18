@@ -106,6 +106,7 @@ dygraph(data = muda.wakati, main = "Sea surface temperature", ylab = "Degree Cel
           labelLoc = "bottom", color = "red")
 ```
 
+
 Sometime we may wish to zoom back to original state of the chart, rather than double click, you add the `dyUnzoom()` function that add a button to zoom back when the chart is zoomed. 
 ```{r interactive-zoom, fig.cap="An interactive sea surface temperature time series charts recorded Near Chumbe Island, Unguja in 2012. Zoom in to see the buttom for unzooming"}
 
@@ -264,10 +265,10 @@ dygraph(data = sst.anomaly.sites,
   dyAxis("y", label = "Temperature [oC]" ) %>%
   dyOptions(axisLineWidth = 1.5, fillGraph = FALSE, drawGrid = FALSE)%>%
   ##Add a vertical event line to a dygraph
-  dyEvent(c("2009-1-15", "2016-05-15"), c("La-Nina", "El-Nino"), labelLoc = "bottom") %>%
+  dyEvent(c("2009-1-15", "2016-05-15"), c("La-Nina", "El-Nino"), labelLoc = "bottom")%>%
   dyHighlight(highlightCircleSize = 5, 
               highlightSeriesBackgroundAlpha = 0.2,
-              hideOnMouseOut = FALSE)   
+              hideOnMouseOut = FALSE)
 ```
 
 
