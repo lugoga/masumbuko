@@ -25,7 +25,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "
 ```
 
 
-Interactive plot can overcome the dilemma of complex or detailed plot like the hour temperature records plotted over a year. They also offers readers an option or tools to explore the plot in detail. R has several package that turn static plot into interactive ones. In this post, I will show you how to create an interactive time series using the **dygraphs** package developed and maintained by @dygraphs.  We first load the packages into the workspace in R [@r]. Other packages I need for this task include the **lubridate**[@lubridate] for manipulating date and the **tidyverse** [@tidyverse] for data manipulation
+Interactive plots can help users overcome the dilemma of complex or detailed plot like the hour temperature records plotted over a year. They also offers readers an option or tools to explore the plot in detail. R has several package that turn static plot into interactive ones. In this post, I will show you how to create an interactive time series using the **dygraphs** package developed and maintained by @dygraphs.  We first load the packages into the workspace in R [@r]. Other packages I need for this task include the **lubridate**[@lubridate] for manipulating date and the **tidyverse** [@tidyverse] for data manipulation
 
 ```{r}
 require(tidyverse)
@@ -83,6 +83,42 @@ dygraph(data = muda.wakati, main = "Sea surface temperature", ylab = "Degree Cel
 Pretty simple, Play around with the changing the `rollperiod` number on the chart to smooth. Since the records are 15 minutes interval, to obtain a hourly average, you can punch 4 in the box, and if you want a daily smooth, you have to get a product of 24 hours by 4 (four records in 1 hour) to obtain 96, which you I have used in the  and smooth the line to daily average. 
 
 
+We can further specify the region with highest and lowest value of temperature with the `dyShading()` as shown in figure \@ref(fig:interactive-shading)
+
+```{r interactive-shading, fig.cap="An interactive sea surface temperature time series charts recorded Near Chumbe Island, Unguja in 2012 shaded period of peak value"}
+
+dygraph(data = muda.wakati, main = "Sea surface temperature", ylab = "Degree Celcius") %>%
+  dyRoller(rollPeriod = 96) %>%
+  dyRangeSelector() %>% 
+  dyShading(from = "2012-3-15", to = "2012-4-15", color = "lightpink")%>% 
+  dyShading(from = "2012-7-20", to = "2012-8-5", color = "palegreen")
+```
+
+alternative to`dyShading()` function that add region, we use the `dyEvent()`function that add a vertical line mark the occurrence of a particular event as shown in figure as shown in figure \@ref(fig:interactive-event)
+
+```{r interactive-event, fig.cap="An interactive sea surface temperature time series charts recorded Near Chumbe Island, Unguja in 2012. Dotted line indicate the monsoon season characteristic"}
+
+dygraph(data = muda.wakati, main = "Sea surface temperature", ylab = "Degree Celcius") %>%
+  dyRoller(rollPeriod = 96) %>%
+  dyRangeSelector() %>% 
+  dyEvent(x = c("2012-2-21","2012-4-2", "2012-7-24"), 
+          label = c("Kaskazi","Matarahi", "Kusi"), 
+          labelLoc = "bottom", color = "red")
+```
+
+Sometime we may wish to zoom back to original state of the chart, rather than double click, you add the `dyUnzoom()` function that add a button to zoom back when the chart is zoomed. 
+```{r interactive-zoom, fig.cap="An interactive sea surface temperature time series charts recorded Near Chumbe Island, Unguja in 2012. Zoom in to see the buttom for unzooming"}
+
+dygraph(data = muda.wakati, main = "Sea surface temperature", ylab = "Degree Celcius") %>%
+  dyRoller(rollPeriod = 96) %>%
+  dyRangeSelector() %>% 
+  dyEvent(x = c("2012-2-21","2012-4-2", "2012-7-24"), 
+          label = c("Kaskazi","Matarahi", "Kusi"), 
+          labelLoc = "bottom", color = "red") %>%
+  dyUnzoom()
+```
+
+
 ### dygrpah series group
 **dygraph** allows to add series of group into a chart. For this example I used the primary productivity along the three channel of Tanzania---Pemba, Zanzibar and Mafia and the Exclusive Economic Zone. The sample data for this are shown in table \@ref(tab:tab2).
 ```{r, echo=FALSE}
@@ -124,7 +160,7 @@ pp.wide %>% rename(Date = date) %>% sample_n(size = 12) %>%
   kableExtra::add_header_above(c("","", "Coastal Channels" = 3))
 ```
 
-For dygraphs to make ttime series group chart, we must tweek the data to the format it recognize. This involves making a time series object using the `ts()` function for each group. Once the object are created,are then combined to create time series group object with the `cbind()` function.  The chunk below contains the line codes for the process. 
+For dygraphs to make time series group chart, we must tweak the data to the format it recognize. This involves making a time series object using the `ts()` function for each group. Once the object are created,are then combined to create time series group object with the `cbind()` function.  The chunk below contains the line codes for the process. 
 
 ```{r}
 pp.sites = cbind(EEZ = ts(data = pp.wide$EEZ, start = c(2003,1), frequency = 12),
@@ -133,19 +169,19 @@ pp.sites = cbind(EEZ = ts(data = pp.wide$EEZ, start = c(2003,1), frequency = 12)
                  Zanzibar = ts(data = pp.wide$Zanzibar, start = c(2003,1), frequency = 12))
 ```
 
-The line of code in the chunk below were used to make a time series group chart shown in figure \@ref(fig:pp-group). This chart is smoothed with twelve months---this means they present the annual variability of primary producitivity. 
+The line of code in the chunk below were used to make a time series group chart shown in figure \@ref(fig:pp-group). This chart is smoothed with twelve months---this means they present the annual variability of primary productivity. 
 
 ```{r pp-group, fig.cap="Time series group of primary production in Coastal and Marine Waters of Tanzania"}
 dygraph(data = pp.sites, 
         main = "Primary Production") %>%
-  dySeries(name = "EEZ", stepPlot = TRUE, color = "red") %>%
+  dySeries(name = "EEZ", stepPlot = FALSE, color = "red") %>%
   dyGroup(c("Mafia", "Pemba", "Zanzibar"), drawPoints = FALSE, 
           color = c("blue", "green", "black")) %>%
   dyRoller(rollPeriod = 12)%>%
   dyRangeSelector()
 ```
 
-It is obvious that that Mafia channel is more productive that other channels and the EEZ (Figure \@ref(fig:pp-group)). However, the anomaly of primary productivity shown in figure \@ref(fig:pp-anomaly) reveal that all sites have similar patterns of up and down trends. The sea surface temperature anomaly also show upward trend for all the sites between 2003 and 2010 then unclear trend thereafter  (Figure \@ref(fig:sst-anomaly)). Notice these series were averaged with 12---reflecting an annual smoothing. If you want to see detailed monthly anomaly variation, simply change the value 12 in the lower left corner of the chart with 1. The lines of code for computing anomalies for site and making time series group and ploting them with dygraphs is shown in the chunk below. 
+It is obvious that that Mafia channel is more productive that other channels and the EEZ (Figure \@ref(fig:pp-group)). However, the anomaly of primary productivity shown in figure \@ref(fig:pp-anomaly) reveal that all sites have similar patterns of up and down trends. The sea surface temperature anomaly also show upward trend for all the sites between 2003 and 2010 then unclear trend thereafter  (Figure \@ref(fig:sst-anomaly)). Notice these series were averaged with 12---reflecting an annual smoothing. If you want to see detailed monthly anomaly variation, simply change the value 12 in the lower left corner of the chart with 1. The lines of code for computing anomalies for site and making time series group and plotting them with dygraphs is shown in the chunk below. 
 
 ```{r pp-anomaly, fig.cap="Time series group of primary production anomaly in Coastal channels and Marine Waters of Tanzania"}
 
@@ -170,7 +206,8 @@ dygraph(data = pp.anomaly.sites,
   dyGroup(c("Mafia", "Pemba", "Zanzibar"), drawPoints = FALSE, 
           color = c("blue", "green", "black")) %>%
   dyRoller(rollPeriod = 12)%>%
-  dyRangeSelector()
+  dyRangeSelector()%>%
+  dyCrosshair(direction = "vertical")
 ```
 
 
@@ -222,7 +259,15 @@ dygraph(data = sst.anomaly.sites,
   dyGroup(c("Mafia", "Pemba", "Zanzibar"), drawPoints = FALSE, 
           color = c("blue", "green", "black")) %>%
   dyRoller(rollPeriod = 12)%>%
-  dyRangeSelector()
+  dyRangeSelector()%>%
+  dyCrosshair(direction = "vertical")%>%
+  dyAxis("y", label = "Temperature [oC]" ) %>%
+  dyOptions(axisLineWidth = 1.5, fillGraph = FALSE, drawGrid = FALSE)%>%
+  ##Add a vertical event line to a dygraph
+  dyEvent(c("2009-1-15", "2016-05-15"), c("La-Nina", "El-Nino"), labelLoc = "bottom") %>%
+  dyHighlight(highlightCircleSize = 5, 
+              highlightSeriesBackgroundAlpha = 0.2,
+              hideOnMouseOut = FALSE)   
 ```
 
 
