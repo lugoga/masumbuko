@@ -6,10 +6,19 @@
     <description>Recent content in Modis on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 15 Feb 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 18 Mar 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/modis/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>dygraphs for interactive time series oceanographical data</title>
+      <link>/03/18/2019/interactive-time-series-of-in-situ-sea-surface-temperature-with-dygraphs-package/</link>
+      <pubDate>Mon, 18 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/03/18/2019/interactive-time-series-of-in-situ-sea-surface-temperature-with-dygraphs-package/</guid>
+      <description>Interactive plot can overcome the dilemma of complex or detailed plot like the hour temperature records plotted over a year. They also offers readers an option or tools to explore the plot in detail. R has several package that turn static plot into interactive ones. In this post, I will show you how to create an interactive time series using the dygraphs package developed and maintained by Vanderkam et al.</description>
+    </item>
     
     <item>
       <title>Primary Production, chlorophyll-concentration and Sea surface temperature in Tanzania waters</title>

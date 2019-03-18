@@ -1,0 +1,229 @@
+---
+title: dygraphs for interactive time series oceanographical data
+author: Masumbuko Semba
+date: '2019-03-18'
+slug: interactive-time-series-of-in-situ-sea-surface-temperature-with-dygraphs-package
+categories:
+  - Information Technology
+  - Oceanography
+  - R
+  - Technical
+  - satellite
+  - Statistics
+  - MODIS
+tags:
+  - sea surface temperature
+  - Time Series
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
+```
+
+
+Interactive plot can overcome the dilemma of complex or detailed plot like the hour temperature records plotted over a year. They also offers readers an option or tools to explore the plot in detail. R has several package that turn static plot into interactive ones. In this post, I will show you how to create an interactive time series using the **dygraphs** package developed and maintained by @dygraphs.  We first load the packages into the workspace in R [@r]. Other packages I need for this task include the **lubridate**[@lubridate] for manipulating date and the **tidyverse** [@tidyverse] for data manipulation
+
+```{r}
+require(tidyverse)
+require(lubridate)
+require(dygraphs)
+```
+
+Once the packages are loaded, its time to load the dataset from the working directory into R. The function `read.table()` was used to import the dataset. 
+
+```{r, eval=FALSE}
+temperature = read.table("./Temperature data/Chumbe_19Jan12_in.txt", sep = "\t", header = T) 
+
+```
+
+Table \@ref(tab:tab1) show the sample of the first five and last five records of the dataset. You notice that the first record of the temperature was measured on `r dmy_hms("190112 00:01:00")` and the last records was captured on `r dmy_hms("190112 00:01:00")`. You notice also that the temperature was recorded at an interval of 15 mins.
+
+```{r tab1, echo=FALSE}
+temperature = read.table("E:/Data Manipulation/Temperature data/Chumbe_19Jan12_in.txt", 
+                         sep = "\t", header = T) %>% as.tibble() %>% select(Date, Time, Temperature)
+
+temperature %>% 
+  head() %>% 
+  bind_rows(temperature %>% tail()) %>% 
+  knitr::kable(format = "html", caption = "Sample of temperature records at Chumbe", align = "c") %>% kableExtra::column_spec(column = 1:3, width = "4cm")
+
+```
+
+A keen observation of the *Time* variable in table \@ref(tab:tab1) you notice that the minutes have been placed in the position of hours---which is totally missing in the dataset. Since we know the begin time and the time interval, we can create a new variable *muda* using the `seq()` as shown in the chunk below.
+```{r}
+temperature.15min = temperature %>% 
+  mutate(date = mdy(Date)) %>% 
+  filter(date <= dmy(310812)) %>% 
+  mutate(muda = seq(dmy_hms("190112 00:00:00"),
+                    dmy_hms("310812 23:59:00"),
+                    length.out = n()))
+
+```
+
+Although the dataset contain time in the standard R format, we can not plug  this dataset direct into the **dygraphs**. This is because the dataset must be in the `xts` format to work with the package. The chunk below show how to convert this dataset into the `xts` format. 
+```{r}
+muda.wakati = xts::xts(x = temperature.15min$Temperature, 
+                       order.by = temperature.15min$muda)
+
+```
+
+Now we have the dataset that we used to make an interactive chart shown in figure \@ref(fig:interactive) using the **dygraphs** package. This chart was created by adding two options. First, add a date range selector with the `dyRoller()` function. The function allows the person interacting with the plot to average the time by entering the number at the bottom left of the plot, which smooth the Y-value over the specified number of time scale units. Second, add a range selector to the bottom of the chart with `dyRangeSelector()`. This allow the users to pan and zoom to various date ranges. 
+
+```{r interactive, fig.cap="An interactive sea surface temperature time series charts recorded Near Chumbe Island, Unguja in 2012"}
+
+dygraph(data = muda.wakati, main = "Sea surface temperature", ylab = "Degree Celcius") %>%
+  dyRoller(rollPeriod = 96) %>%
+  dyRangeSelector()
+```
+
+Pretty simple, Play around with the changing the `rollperiod` number on the chart to smooth. Since the records are 15 minutes interval, to obtain a hourly average, you can punch 4 in the box, and if you want a daily smooth, you have to get a product of 24 hours by 4 (four records in 1 hour) to obtain 96, which you I have used in the  and smooth the line to daily average. 
+
+
+### dygrpah series group
+**dygraph** allows to add series of group into a chart. For this example I used the primary productivity along the three channel of Tanzania---Pemba, Zanzibar and Mafia and the Exclusive Economic Zone. The sample data for this are shown in table \@ref(tab:tab2).
+```{r, echo=FALSE}
+files = dir("./extracted/", pattern = "pp_", full.names = TRUE, include.dirs = TRUE, recursive = T)
+
+sites = c("EEZ", "Mafia", "Pemba", "Zanzibar")
+
+```
+
+
+```{r,echo=FALSE}
+
+pp = list()
+
+for (i in 1:length(files)){
+
+pp[[i]] = files[i] %>% readxl::read_excel()%>% 
+  rename(date = 1, year = 2, pp = 3) %>% 
+  mutate(month = month(date), 
+         day = 15,
+         site = sites[i], 
+         date = make_date(year = year, month = month, day = day)) %>%
+  arrange(date)
+}
+
+pp = pp %>% bind_rows()
+
+```
+
+```{r tab2, echo=FALSE}
+pp.wide = pp %>% 
+  select(site, pp, date) %>% spread(key = "site", value = "pp") 
+
+pp.wide %>% rename(Date = date) %>% sample_n(size = 12) %>%
+  knitr::kable(format = "html", caption = "Sample of primary Production in Tanzania",
+               align = "c", digits = 0) %>% 
+  kableExtra::column_spec(column = 1, width = "4cm") %>%
+  kableExtra::column_spec(column = 2:5, width = "2cm") %>%
+  kableExtra::add_header_above(c("","", "Coastal Channels" = 3))
+```
+
+For dygraphs to make ttime series group chart, we must tweek the data to the format it recognize. This involves making a time series object using the `ts()` function for each group. Once the object are created,are then combined to create time series group object with the `cbind()` function.  The chunk below contains the line codes for the process. 
+
+```{r}
+pp.sites = cbind(EEZ = ts(data = pp.wide$EEZ, start = c(2003,1), frequency = 12),
+                 Mafia = ts(data = pp.wide$Mafia, start = c(2003,1), frequency = 12),
+                 Pemba = ts(data = pp.wide$Pemba, start = c(2003,1), frequency = 12),
+                 Zanzibar = ts(data = pp.wide$Zanzibar, start = c(2003,1), frequency = 12))
+```
+
+The line of code in the chunk below were used to make a time series group chart shown in figure \@ref(fig:pp-group). This chart is smoothed with twelve months---this means they present the annual variability of primary producitivity. 
+
+```{r pp-group, fig.cap="Time series group of primary production in Coastal and Marine Waters of Tanzania"}
+dygraph(data = pp.sites, 
+        main = "Primary Production") %>%
+  dySeries(name = "EEZ", stepPlot = TRUE, color = "red") %>%
+  dyGroup(c("Mafia", "Pemba", "Zanzibar"), drawPoints = FALSE, 
+          color = c("blue", "green", "black")) %>%
+  dyRoller(rollPeriod = 12)%>%
+  dyRangeSelector()
+```
+
+It is obvious that that Mafia channel is more productive that other channels and the EEZ (Figure \@ref(fig:pp-group)). However, the anomaly of primary productivity shown in figure \@ref(fig:pp-anomaly) reveal that all sites have similar patterns of up and down trends. The sea surface temperature anomaly also show upward trend for all the sites between 2003 and 2010 then unclear trend thereafter  (Figure \@ref(fig:sst-anomaly)). Notice these series were averaged with 12---reflecting an annual smoothing. If you want to see detailed monthly anomaly variation, simply change the value 12 in the lower left corner of the chart with 1. The lines of code for computing anomalies for site and making time series group and ploting them with dygraphs is shown in the chunk below. 
+
+```{r pp-anomaly, fig.cap="Time series group of primary production anomaly in Coastal channels and Marine Waters of Tanzania"}
+
+## compute anomlay
+pp.anomaly = pp.wide %>% 
+  mutate(eez_an = EEZ-mean(EEZ, na.rm = T),
+         mafia_an = Mafia-mean(Mafia, na.rm = T),
+         pemba_an = Pemba-mean(Pemba, na.rm = T),
+         zenji_an = Zanzibar-mean(Zanzibar, na.rm = T) ) %>% 
+  select(date, EEZ = eez_an, Mafia = mafia_an, Pemba = pemba_an, Zanzibar = zenji_an)
+
+## make a group time series
+pp.anomaly.sites = cbind(EEZ = ts(data = pp.anomaly$EEZ, start = c(2003,1), frequency = 12),
+                         Mafia = ts(data = pp.anomaly$Mafia, start = c(2003,1), frequency = 12),
+                         Pemba = ts(data = pp.anomaly$Pemba, start = c(2003,1), frequency = 12),
+                         Zanzibar = ts(data = pp.anomaly$Zanzibar, start = c(2003,1), frequency = 12))
+
+## plot anomaly chart
+dygraph(data = pp.anomaly.sites, 
+        main = "Anomaly of Primary Production") %>%
+  dySeries(name = "EEZ", stepPlot = FALSE, color = "red") %>%
+  dyGroup(c("Mafia", "Pemba", "Zanzibar"), drawPoints = FALSE, 
+          color = c("blue", "green", "black")) %>%
+  dyRoller(rollPeriod = 12)%>%
+  dyRangeSelector()
+```
+
+
+
+```{r, echo=FALSE, sst-anomaly, fig.cap="Time series group of sea surface temperature anomaly in Coastal channels and Marine Waters of Tanzania"}
+
+## read the files in the directory
+files = dir("./extracted/", pattern = "sst_", full.names = TRUE)
+sites = c("EEZ", "Mafia", "Pemba", "Zanzibar")
+
+## loop through
+sst = list()
+for (i in 1:length(files)){
+
+sst[[i]] = files[i] %>% readxl::read_excel()%>% 
+  rename(date = 1, year = 2, sst = 3) %>% 
+  mutate(month = month(date), 
+         day = 15,
+         site = sites[i], 
+         date = make_date(year = year, month = month, day = day)) %>%
+  arrange(date)
+}
+
+## bind the row
+sst = sst %>% bind_rows()
+
+## make wide format of sst 
+sst.wide = sst %>% 
+  select(site, sst, date) %>% spread(key = "site", value = "sst") 
+
+## compute sst anomlay
+sst.anomaly = sst.wide %>% 
+  mutate(eez_an = EEZ-mean(EEZ, na.rm = T),
+         mafia_an = Mafia-mean(Mafia, na.rm = T),
+         pemba_an = Pemba-mean(Pemba, na.rm = T),
+         zenji_an = Zanzibar-mean(Zanzibar, na.rm = T) ) %>% 
+  select(date, EEZ = eez_an, Mafia = mafia_an, Pemba = pemba_an, Zanzibar = zenji_an)
+
+## make a group time series
+sst.anomaly.sites = cbind(EEZ = ts(data = sst.anomaly$EEZ, start = c(2003,1), frequency = 12),
+                         Mafia = ts(data = sst.anomaly$Mafia, start = c(2003,1), frequency = 12),
+                         Pemba = ts(data = sst.anomaly$Pemba, start = c(2003,1), frequency = 12),
+                         Zanzibar = ts(data = sst.anomaly$Zanzibar, start = c(2003,1), frequency = 12))
+
+## plot anomaly chart
+dygraph(data = sst.anomaly.sites, 
+        main = "Anomaly of Sea surface temperture") %>%
+  dySeries(name = "EEZ", stepPlot = FALSE, color = "red") %>%
+  dyGroup(c("Mafia", "Pemba", "Zanzibar"), drawPoints = FALSE, 
+          color = c("blue", "green", "black")) %>%
+  dyRoller(rollPeriod = 12)%>%
+  dyRangeSelector()
+```
+
+
+### References

@@ -66,6 +66,15 @@ Designing graphic: Design graphics and typeset books</description>
     </item>
     
     <item>
+      <title>dygraphs for interactive time series oceanographical data</title>
+      <link>/03/18/2019/interactive-time-series-of-in-situ-sea-surface-temperature-with-dygraphs-package/</link>
+      <pubDate>Mon, 18 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/03/18/2019/interactive-time-series-of-in-situ-sea-surface-temperature-with-dygraphs-package/</guid>
+      <description>Interactive plot can overcome the dilemma of complex or detailed plot like the hour temperature records plotted over a year. They also offers readers an option or tools to explore the plot in detail. R has several package that turn static plot into interactive ones. In this post, I will show you how to create an interactive time series using the dygraphs package developed and maintained by Vanderkam et al.</description>
+    </item>
+    
+    <item>
       <title>Interactive map with leaflet</title>
       <link>/03/17/2019/interactive-map-with-leaflet/</link>
       <pubDate>Sun, 17 Mar 2019 00:00:00 +0000</pubDate>
