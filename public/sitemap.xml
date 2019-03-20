@@ -28,6 +28,11 @@
   </url>
   
   <url>
+    <loc>/03/20/2019/plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package/</loc>
+    <lastmod>2019-03-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/03/18/2019/interactive-time-series-of-in-situ-sea-surface-temperature-with-dygraphs-package/</loc>
     <lastmod>2019-03-18T00:00:00+00:00</lastmod>
   </url>
@@ -309,7 +314,7 @@
   
   <url>
     <loc>/tags/drifter/</loc>
-    <lastmod>2018-09-30T00:00:00+00:00</lastmod>
+    <lastmod>2019-03-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -345,13 +350,13 @@
   
   <url>
     <loc>/tags/indian-ocean/</loc>
-    <lastmod>2019-02-22T00:00:00+00:00</lastmod>
+    <lastmod>2019-03-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/categories/information-technology/</loc>
-    <lastmod>2019-03-18T00:00:00+00:00</lastmod>
+    <lastmod>2019-03-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -416,8 +421,14 @@
   </url>
   
   <url>
+    <loc>/tags/oceanography/</loc>
+    <lastmod>2019-03-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/categories/oceanography/</loc>
-    <lastmod>2019-03-18T00:00:00+00:00</lastmod>
+    <lastmod>2019-03-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -441,7 +452,7 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2019-03-18T00:00:00+00:00</lastmod>
+    <lastmod>2019-03-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -475,7 +486,7 @@
   
   <url>
     <loc>/categories/r/</loc>
-    <lastmod>2019-03-18T00:00:00+00:00</lastmod>
+    <lastmod>2019-03-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -515,7 +526,7 @@
   
   <url>
     <loc>/categories/satellite/</loc>
-    <lastmod>2019-03-18T00:00:00+00:00</lastmod>
+    <lastmod>2019-03-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -551,7 +562,7 @@
   
   <url>
     <loc>/categories/technical/</loc>
-    <lastmod>2019-03-18T00:00:00+00:00</lastmod>
+    <lastmod>2019-03-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

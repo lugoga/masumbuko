@@ -1,0 +1,446 @@
+---
+title: Plotting streamlines of surface current with ggplot2 and metR package
+author: Masumbuko Semba
+date: '2019-03-20'
+slug: plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package
+categories:
+  - Information Technology
+  - Oceanography
+  - R
+  - Technical
+  - satellite
+tags:
+  - Drifter
+  - Indian Ocean
+  - Oceanography
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
+```
+
+
+One major task for scientists in his their daily routine is to prepare compelling graphics for technical document, reports or manuscripts for publication. Graphics in form of figures carry the weight of the arguments. They need to be clear, attractive and convincing. according to [@], the difference between good and bad figures always lead into the difference between a highly influential or an obscure paper; a grant/contract won or lost; and a job interview gone well or poorly.
+
+For the last ten years I have squeezed myself into preparing figures for scientific publications and have made throusands of figures. Honestly to say that over this period I have switched from one software to the other in the figure preparation pipeline. I made figures using Microsoft Excel, OriginPro, SPSS, Matlab, SigmaPlot, matplotlib in python, base R, ggplot2 in R and many others. However, my current preferred tool for making graphics is the ggplot2 package in R. However, looking on the spectrum over the last ten years and the constant switch from one software/tools to the other, I dont expect that I will continue using ggplot2 for the next ten years.  
+
+One thing I have learned over the years is that automation should be the main skills for scientists. Automation serve time for data preparation, analysis and producing outputs. In this post I will take you through how to visualize vector field of surface current from drifter observation using the *ggplot2* package [@ggplot]. I will further highlight the drawbacks of the default geom of ggplot2 and why it sometimes fail to produce elegant oceanographic plot. Last I will show you how to use altenative geoms from **metR** package [@metr] to make overcome the challenges inherited in **ggplot2** package and plot streamlines.
+
+
+```{r}
+require(metR)
+require(tidyverse)
+require(lubridate)
+require(oce)
+require(ocedata)
+require(sf)
+```
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+world = spData::world
+
+wio = world %>% st_crop(xmin =35 , ymin = -17, xmax = 60, ymax = -2)
+```
+
+
+##  Dataset
+The drifter dataset contain surface current information linked to locations in the physical world. This spatial information help us to understand where the high speed current versus low speed current are found in the ocean. It is helpful to visualize this kind of data in the proper geospatial context i.e to show the data on a realistic map. I have filtered the data to cover the western part of the tropical indian ocean. I prepared and arrange drifter information in data frame---a rectangular collection of variables (columns) and observations (rows).  The dataset contains observation of surface current world wide collected by the Global Drifter Program on all major oceans. Among the variables in the dataset are shown in table \@ref(tab:tab1) include:
+
++ id: a unique number of drifter
++ lon: longitude information
++ lat: latitude information
++ year, month, day, hour of the drifter records
++ u: the zonal component of surface current
++ v: the meridional component of the surface current
+<!-- + sst: the sea surface temperature information -->
+<!-- + season: whether the observation was collected during the northeast (NE) or southeast (SE) monsoon season -->
+
+```{r echo=FALSE}
+## load drifter data
+# drifter = read_table2("E:/Data Manipulation/drifter/tropind_drifters.txt", col_names = FALSE)
+# 
+# ## insert variable names
+# drifter = drifter %>% select(id = X1, lon = X2, lat = X3, year= X8, month =   X9, 
+#                                    day =  X10, hour = X11, drogue = X4, u =X5, v = X6,   sst = X7)
+#  
+# ## create season
+# drifter = drifter %>% 
+#   mutate(season = month, 
+#          season = replace(season,season %in% c(11,12,1,2,3, 4), "NE"),
+#          # season = replace(season,season %in% c(4,10), "IN"),
+#          season = replace(season,season %in% c(5,6,7,8,9,10 ), "SE"))
+# 
+# ## subset for the Area of interest
+# drifter.split = drifter %>% filter(lon >=39 & lon <= 54 & lat >=-17& lat <=-4) 
+
+load("drifter_split.RData")
+```
+
+```{r tab1, echo=FALSE}
+
+drifter.split%>%
+  select(-c(drogue, season, sst)) %>% 
+  sample_n(12) %>% 
+  knitr::kable(format = "html",caption = "A sample of drifter dataset", digits = 2, align = "c")%>%
+  kableExtra::column_spec(column = 1:9, width = "3cm")%>%
+  kableExtra::add_header_above(c("", "Location" = 2, "Date Records" = 4,  "Current" = 2))
+  
+```
+
+The drifter observations were randomly distributed within the area as shown in figure \@ref(fig:fig1) and requires binning---a process of making equal size grid in the area. 
+
+```{r}
+## convert drifter observation into simple features
+drifter.split.sf = drifter.split %>% 
+  st_as_sf(coords = c("lon", "lat")) %>%
+  st_set_crs(4326)
+```
+
+
+```{r fig1, echo=FALSE, fig.cap="The distribution of drifter observation within the area", fig.align="center"}
+
+ggplot() +
+  geom_point(data = drifter.split %>% filter(season == "SE") %>% 
+               sample_frac(.05), aes(x = lon, y = lat))+
+  geom_sf(data = wio,fill = "lightgrey", col = "black")+
+  coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 12, colour = 1))+
+  labs(x = "", y = "")
+  
+
+```
+
+To minimize biasness of sampling, the area was divided into equal size grids show in in figure \@ref(fig:fig2). 
+
+```{r}
+
+## divide the tropical indian ocean region into grids
+drifter.grid = drifter.split.sf %>% 
+  st_make_grid(n = c(70,60))%>%
+  st_sf()
+```
+
+
+```{r fig2, echo=FALSE, fig.cap="Gridded area to fill drifter observations", fig.align="center"}
+
+## 
+ggplot()+geom_sf(data = drifter.grid)+
+  geom_sf(data = wio,fill = "lightgrey", col = "black")+
+  coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 12, colour = 1))
+
+```
+
+
+
+```{r echo=FALSE}
+
+drifter.split.sf.ne = drifter.split.sf%>% filter(season =="NE")
+
+drifter.gridded = drifter.grid %>% 
+  mutate(id = 1:n(), contained = lapply(st_contains(st_sf(geometry),drifter.split.sf.ne),identity),
+         obs = sapply(contained, length),
+         u = sapply(contained, function(x) {median(drifter.split.sf.ne[x,]$u, na.rm = TRUE)}),
+         v = sapply(contained, function(x) {median(drifter.split.sf.ne[x,]$v, na.rm = TRUE)})) 
+
+
+drifter.gridded = drifter.gridded %>% select(obs, u, v) %>% na.omit()
+coordinates = drifter.gridded %>% 
+  st_centroid() %>% 
+  st_coordinates() %>% 
+  as_tibble() %>% rename(x = X, y = Y)
+
+st_geometry(drifter.gridded) = NULL
+
+current.gridded.ne = coordinates %>% 
+  bind_cols(drifter.gridded)%>% 
+  mutate(season = "NE")
+```
+
+Once the area was gridded,  then the the mean value of U and V component and the number of observation were calculated in each grid cell.
+
+```{r}
+drifter.split.sf.se = drifter.split.sf%>% filter(season=="SE")
+
+drifter.gridded = drifter.grid %>% 
+  mutate(id = 1:n(), contained = lapply(st_contains(st_sf(geometry),drifter.split.sf.se),identity),
+         obs = sapply(contained, length),
+         u = sapply(contained, function(x) {median(drifter.split.sf.se[x,]$u, na.rm = TRUE)}),
+         v = sapply(contained, function(x) {median(drifter.split.sf.se[x,]$v, na.rm = TRUE)})) 
+
+```
+
+Then convert the gridded drifter information into data frame
+```{r}
+
+drifter.gridded = drifter.gridded %>% select(obs, u, v) %>% na.omit()
+
+## obtain the centroid coordinates from the grid as table
+coordinates = drifter.gridded %>% 
+  st_centroid() %>% 
+  st_coordinates() %>% 
+  as_tibble() %>% 
+  rename(x = X, y = Y)
+
+## remove the geometry from the simple feature of gridded drifter dataset
+st_geometry(drifter.gridded) = NULL
+
+## stitch together the extracted coordinates and drifter information int a single table for SE monsoon season
+current.gridded.se = coordinates %>% 
+  bind_cols(drifter.gridded) %>% 
+  mutate(season = "SE")
+
+## bind the gridded table for SE and NE
+## Note that similar NE follow similar procedure, hence not shown in the post
+drifter.current.gridded = current.gridded.ne %>% 
+  bind_rows(current.gridded.se)
+
+```
+
+After binning, we found that some grids lack the drifter information, therefore, these grids were filled with the U, V values using the Interpolation technique. The chunk below highlight the code for the process
+```{r}
+## select grids for SE season only
+drf.se = drifter.current.gridded %>%
+  filter(season == "SE")
+
+## interpolate the U component
+u.se = interpBarnes(x = drf.se$x, y = drf.se$y, z = drf.se$u)
+
+## obtain dimension that determine the width (ncol) and length (nrow) for tranforming wide into long format table
+dimension = data.frame(lon = u.se$xg, u.se$zg) %>% dim()
+
+## make a U component data table from interpolated matrix
+u.tb = data.frame(lon = u.se$xg, 
+                  u.se$zg) %>% 
+  gather(key = "lata", value = "u", 2:dimension[2]) %>% 
+  mutate(lat = rep(u.se$yg, each = dimension[1])) %>% 
+  select(lon,lat, u) %>% as.tibble()
+
+## interpolate the V component
+v.se = interpBarnes(x = drf.se$x, 
+                    y = drf.se$y, 
+                    z = drf.se$v)
+
+## make the V component data table from interpolated matrix
+v.tb = data.frame(lon = v.se$xg, v.se$zg) %>% 
+  gather(key = "lata", value = "v", 2:dimension[2]) %>% 
+  mutate(lat = rep(v.se$yg, each = dimension[1])) %>% 
+  select(lon,lat, v) %>% 
+  as.tibble()
+
+## stitch now the V component intot the U data table and compute the velocity
+uv.se = u.tb %>% 
+  bind_cols(v.tb %>% select(v)) %>% 
+  mutate(vel = sqrt(u^2+v^2))
+
+
+```
+
+### Visualising Vector field 
+Figure \@ref(fig:segment) was made with **ggplot2** package. The smoothed velocity grid was created with the `geom_raster()` function and the vector field showing the direction and speed superimposed on the current velocity was done with the `segment()` function. You notice that these geoms did a wonderful job and the figure is surface current speed and direction are clearly distinguished with the arrow and the length of the arrow. The code used to create figure \@ref(fig:segment) are shown in the chunk below.
+
+```{r segment, fig.align="center",fig.cap="Vector field showing speed and direction of surface current created with **ggplot2** package"}
+ggplot() +
+  geom_raster(data = uv.se, aes(x = lon, y = lat, fill = vel), interpolate = TRUE)+
+  geom_segment(data = uv.se, aes(x = lon, xend = lon + u/1.2, y = lat, yend = lat+v/1.2), 
+               arrow = arrow(angle = 20, length = unit(.2, "cm"), type = "open"))+
+  geom_sf(data = wio,fill = "lightgrey", col = "black")+
+  coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+
+  scale_fill_gradientn(name = "Speed\n(m/s)",colours = oceColorsVelocity(120), 
+                       limits = c(0,1.6), breaks =seq(0.1,1.6,.3))+
+  theme_bw()+
+  theme(legend.position = "right",
+        legend.key.height = unit(1.4, "cm"), 
+        legend.background = element_blank(),
+        axis.text = element_text(size = 12, colour = 1))+
+  labs(x = "", y = "")
+```
+
+Figure \@ref(fig:vector) is similar to Figure \@ref(fig:segment) but created with different geoms.  Unlike Figure \@ref(fig:segment) that was created with the `geom_raster()` and `geom_segment()` functions, Figure \@ref(fig:vector) was made using the `geom_contour_fill()` function for smoothed contour of current velocity and the vector field was made with `geom_vector()` function. You can see a very clear difference between Figure \@ref(fig:segment) and Figure \@ref(fig:vector). In figure \@ref(fig:segment) only the current speed is (length) of the arrow differs but the head arrow remain the same for all the segments. But in figure \@ref(fig:vector), the speed and direction are distinguished by the both the arrow and the head of the segment. 
+
+```{r vector, fig.align="center", fig.cap="Vector field showing speed and direction made with **metR** package"}
+ggplot() +
+  metR::geom_contour_fill(data = uv.se, aes(x = lon, y = lat, z = vel), na.fill = TRUE, bins = 70) + 
+  metR::geom_vector(data = uv.se, aes(x = lon, y = lat, dx = u, dy = v), 
+                    arrow.angle = 30, arrow.type = "open", arrow.length = .5, 
+                    pivot = 0,preserve.dir = TRUE, direction = "ccw")+
+   geom_sf(data = wio,fill = "lightgrey", col = "black")+
+  coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+
+  scale_fill_gradientn(name = "Speed\n(m/s)",colours = oceColorsVelocity(120), 
+                       limits = c(0,1.6), breaks =seq(0.1,1.6,.3))+
+  theme_bw()+
+  theme(legend.position = "right",
+        legend.key.height = unit(1.2, "cm"), 
+        legend.background = element_blank(),
+        axis.text = element_text(size = 12, colour = 1))+
+  scale_mag(max = 1.5, name = "Speed", max_size = 0.7)+
+  labs(x = "", y = "")
+
+```
+
+The artifacts of `geom_raster()` function when the argument `interpolate = TRUE` is applied is very visible (Figure \@ref(fig:smoothed)a). This artifact is easily handled with the function `geom_contour_fill()` from **metR** package, which produce a smoothed surface velocity (figure \@ref(fig:smoothed)b). 
+
+```{r smoothed, echo=FALSE, fig.align="center", fig.cap="Smoothed velocity using a) geom_raster() and b) geom_contour_fill() functions"}
+
+fig.raster = ggplot() +
+  geom_raster(data = uv.se, aes(x = lon, y = lat, fill = vel), interpolate = TRUE)+
+  # geom_segment(data = uv.se, aes(x = lon, xend = lon + u/2.2, y = lat, yend = lat+v/2.2), 
+  #              arrow = arrow(angle = 20, length = unit(.2, "cm"), type = "open"))+
+  geom_sf(data = wio,fill = "lightgrey", col = "black")+
+  coord_sf(ylim = c(-12.5,-9.5), xlim = c(39.5, 51))+
+  scale_fill_gradientn(name = "Current",colours = oceColorsVelocity(120), 
+                       limits = c(0,1.6), breaks =seq(0.1,1.6,.3))+
+  theme_bw()+
+  theme(legend.position = "none",
+        legend.key.height = unit(1.4, "cm"), 
+        legend.background = element_blank(),
+        axis.text = element_text(size = 12, colour = 1),
+        axis.text.x = element_blank())+
+  scale_y_continuous(breaks = c(-12,-10))+
+  annotate(geom = "text", x = 39.4 ,y = -9.8, label = "a)" )+
+  labs(x = "", y = "")
+
+fig.fill = ggplot() +
+  metR::geom_contour_fill(data = uv.se, aes(x = lon, y = lat, z = vel), na.fill = TRUE, bins = 70) + 
+  # metR::geom_vector(data = uv.se, aes(x = lon, y = lat, dx = u, dy = v), 
+  #                   arrow.angle = 20, arrow.type = "open", arrow.length = .5, 
+  #                   pivot = 0,preserve.dir = TRUE, direction = "cw")+
+  geom_sf(data = wio,fill = "lightgrey", col = "black")+
+  coord_sf(ylim = c(-12.5,-9.5), xlim = c(39.5, 51))+
+  scale_fill_gradientn(name = "Current",colours = oceColorsVelocity(120), 
+                       limits = c(0,1.6), breaks =seq(0.1,1.6,.3))+
+  theme_bw()+
+  theme(legend.position = "none",
+        legend.key.height = unit(1.4, "cm"), 
+        legend.background = element_blank(),
+        axis.text = element_text(size = 12, colour = 1))+
+  scale_mag(max = 1.5, name = "Speed", max_size = .8)+
+  scale_y_continuous(breaks = c(-12,-10))+
+  annotate(geom = "text", x = 39.4 ,y = -9.8, label = "b)")+
+  labs(x = "", y = "")
+
+egg::ggarrange(fig.raster, fig.fill, nrow = 2)
+```
+
+The `geom_segment()` and `geom_contour_fill()` function both produce an elegant vector field that represent the speed and direction of surface current. However, when you wish to produce streamlines of surface current speed and direction, the two geoms are unable to derive that product. Thanks to -@metr for developing a powerful `geom_streamline()` function that handle that issue. The figure \@ref(fig:streamline) was created with `geom_streamline()` function to make path that are tangential to a vector field. The streamlines of surface current in figure \@ref(fig:streamline) are similar to massless that moves with the flow.
+
+```{r streamline, fig.align="center", fig.cap="Streamline showing the flow of surface current superimposed on the current velocity"}
+ggplot() +
+  metR::geom_contour_fill(data = uv.se, aes(x = lon, y = lat, z = vel), 
+                          na.fill = TRUE, bins = 70) + 
+  metR::geom_streamline(data = uv.se, 
+                        aes(x = lon, y = lat, dx = u, dy = v),
+                        L = 1.75, res = .9, n = 40, jitter = 4)+
+  geom_sf(data = wio,fill = "lightgrey", col = "black")+
+  coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+
+  scale_fill_gradientn(name = "Current",colours = oceColorsVelocity(120), 
+                       limits = c(0,1.6), breaks = seq(0.1,1.6,.3))+
+  theme_bw()+
+  theme(legend.position = "right",
+        legend.key.height = unit(1.4, "cm"), 
+        legend.background = element_blank(),
+        axis.text = element_text(size = 12, colour = 1))+
+  labs(x = "", y = "")
+```
+### Conclusion
+Many Oceanographic data are defined in a longitude--latitude grid and and though `geom_raster()` and `geom_segment()` plot these field well, but the function from **metR** package extend the use of ggplot to deal well with oceanographical data and produce graphics that meet the standard.  
+
+### References
+
+<!-- ```{r current-ggplot, fig.cap="", echo=FALSE} -->
+
+<!-- se.vector= ggplot()+ -->
+<!--   geom_raster(data = uv.se, aes(x = lon, y = lat, fill = vel), interpolate = TRUE)+ -->
+<!--   geom_segment(data = uv.se, aes(x = lon, xend = lon+u, y = lat, yend = lat+v),  -->
+<!--                size = 0.25, arrow = arrow(angle = 30, length = unit(1.5, "mm"), -->
+<!--                              type = "open", ends = "last")) + -->
+<!--   geom_sf(data = wio,fill = "lightgrey", col = "black")+ -->
+<!--   coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+ -->
+<!--   scale_fill_gradientn(name = "Current",colours = oceColorsVelocity(120),  -->
+<!--                        limits = c(0,1.6), breaks =seq(0.2,1.6,.3))+ -->
+<!--   labs(x = "", y = "")+ -->
+<!--   theme(legend.position = "right",  -->
+<!--         legend.background = element_blank()) -->
+<!-- ``` -->
+
+
+<!-- ```{r current-metr, fig.cap="", echo=FALSE} -->
+
+<!-- se.streamline = ggplot()+ -->
+<!--   geom_contour_fill(data = uv.se, aes(x = lon, y = lat, z = vel), na.fill = TRUE, bins = 80)+ -->
+<!--   geom_streamline(data = uv.se, aes(x = lon, y = lat, dx = u, dy = v, col = v), L = 2, res = 3)+ -->
+<!--   # geom_text_contour(data = uv.se, aes(x = lon, y = lat, z = vel), rotate = FALSE)+ -->
+<!--   geom_sf(data = wio,fill = "lightgrey", col = "black")+ -->
+<!--   coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+ -->
+<!--   scale_fill_gradientn(name = "m/s",colours = oceColorsVelocity(120),  -->
+<!--                        limits = c(0,1.6), breaks =seq(0.2,1.6,.3))+ -->
+<!--   labs(x = "", y = "")+ -->
+<!--   theme(legend.position = "right",  -->
+<!--         legend.background = element_blank()) -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- egg::ggarrange(se.vector, se.streamline, ncol = 1) -->
+<!-- ``` -->
+
+<!-- ## NE -->
+
+
+<!-- ```{r, echo=FALSE} -->
+<!-- drf.ne = drifter.current.gridded %>%filter(season == "NE") -->
+<!-- u.ne = interpBarnes(x = drf.ne$x, y = drf.ne$y, z = drf.ne$u) -->
+
+<!-- u.tb = data.frame(lon = u.ne$xg, u.ne$zg) %>% gather(key = "lata", value = "u", 2:dimension[2]) %>% mutate(lat = rep(u.ne$yg, each = dimension[1])) %>% select(lon,lat, u) %>% as.tibble() -->
+
+<!-- v.ne = interpBarnes(x = drf.ne$x, y = drf.ne$y, z = drf.ne$v) -->
+
+<!-- v.tb = data.frame(lon = v.ne$xg, v.ne$zg) %>% gather(key = "lata", value = "v", 2:dimension[2]) %>% mutate(lat = rep(v.ne$yg, each = dimension[1])) %>% select(lon,lat, v) %>% as.tibble() -->
+
+<!-- uv.ne = u.tb %>% bind_cols(v.tb %>% select(v)) %>% mutate(vel = sqrt(u^2+v^2)) -->
+
+
+<!-- ``` -->
+
+
+<!-- ```{r current-ggplot, fig.cap="", echo=FALSE} -->
+<!-- ne.vector = ggplot()+ -->
+<!--   geom_raster(data = uv.ne, aes(x = lon, y = lat, fill = vel), interpolate = TRUE)+ -->
+<!--   geom_segment(data = uv.ne, aes(x = lon, xend = lon+u, y = lat, yend = lat+v),  -->
+<!--                size = 0.25, arrow = arrow(angle = 30, length = unit(1.5, "mm"), -->
+<!--                              type = "open", ends = "last")) + -->
+<!--    geom_sf(data = wio,fill = "lightgrey", col = "black")+ -->
+<!--   coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+ -->
+<!--   scale_fill_gradientn(name = "Current",colours = oceColorsVelocity(120),  -->
+<!--                        limits = c(0,1.6), breaks =seq(0.2,1.6,.3))+ -->
+<!--   labs(x = "", y = "")+ -->
+<!--   theme(legend.position = "right", legend.background = element_blank()) -->
+<!-- ``` -->
+
+
+<!-- ```{r current-metr, fig.cap="", echo=FALSE} -->
+
+<!-- ne.streamline = ggplot()+ -->
+<!--   geom_contour_fill(data = uv.ne, aes(x = lon, y = lat, z = vel), na.fill = TRUE, bins = 80)+ -->
+<!--   geom_streamline(data = uv.ne, aes(x = lon, y = lat, dx = u, dy = v, col = v), L = 2,res = 1 )+ -->
+<!--   geom_sf(data = wio,fill = "lightgrey", col = "black")+ -->
+<!--   coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+ -->
+<!--   scale_fill_gradientn(name = "m/s",colours = oce.colorsVelocity(120),  -->
+<!--                        limits = c(0,1.6), breaks =seq(0.2,1.6,.3))+ -->
+<!--   labs(x = "", y = "")+ -->
+<!--   theme(legend.position = "right",  -->
+<!--         legend.background = element_blank()) -->
+<!-- ``` -->
+
+<!-- ```{r, echo=FALSE} -->
+<!-- egg::ggarrange(ne.vector, ne.streamline, ncol = 1) -->
+<!-- ``` -->
+

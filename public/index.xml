@@ -66,6 +66,15 @@ Designing graphic: Design graphics and typeset books</description>
     </item>
     
     <item>
+      <title>Plotting streamlines of surface current with ggplot2 and metR package</title>
+      <link>/03/20/2019/plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package/</link>
+      <pubDate>Wed, 20 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/03/20/2019/plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package/</guid>
+      <description>One major task for scientists in his their daily routine is to prepare compelling graphics for technical document, reports or manuscripts for publication. Graphics in form of figures carry the weight of the arguments. They need to be clear, attractive and convincing. according to [@], the difference between good and bad figures always lead into the difference between a highly influential or an obscure paper; a grant/contract won or lost; and a job interview gone well or poorly.</description>
+    </item>
+    
+    <item>
       <title>dygraphs for interactive time series oceanographical data</title>
       <link>/03/18/2019/interactive-time-series-of-in-situ-sea-surface-temperature-with-dygraphs-package/</link>
       <pubDate>Mon, 18 Mar 2019 00:00:00 +0000</pubDate>

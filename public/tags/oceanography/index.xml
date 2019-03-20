@@ -6,18 +6,18 @@
     <description>Recent content in Oceanography on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 23 Nov 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 20 Mar 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/oceanography/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Programming---an inevitable skills for scientists</title>
-      <link>/11/23/2018/programming-an-inevitable-skills/</link>
-      <pubDate>Fri, 23 Nov 2018 00:00:00 +0000</pubDate>
+      <title>Plotting streamlines of surface current with ggplot2 and metR package</title>
+      <link>/03/20/2019/plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package/</link>
+      <pubDate>Wed, 20 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>/11/23/2018/programming-an-inevitable-skills/</guid>
-      <description>Introduction In recent years, there&amp;rsquo;s been an admirable push to get more people to learn programming. But if I&amp;rsquo;ve never been exposed to programming, why should I invest all of the effort to learn? What&amp;rsquo;s in it for me? When I was confronted with data limitation challenge in spreadsheet [@brown], and the issue of repeating the same process over and over again, I decided to learn to program. I started learning R&amp;mdash; a statistical and graphical software [@james].</description>
+      <guid>/03/20/2019/plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package/</guid>
+      <description>One major task for scientists in his their daily routine is to prepare compelling graphics for technical document, reports or manuscripts for publication. Graphics in form of figures carry the weight of the arguments. They need to be clear, attractive and convincing. according to [@], the difference between good and bad figures always lead into the difference between a highly influential or an obscure paper; a grant/contract won or lost; and a job interview gone well or poorly.</description>
     </item>
     
   </channel>

@@ -1,0 +1,694 @@
+---
+title: Plotting streamlines of surface current with ggplot2 and metR package
+author: Masumbuko Semba
+date: '2019-03-20'
+slug: plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package
+categories:
+  - Information Technology
+  - Oceanography
+  - R
+  - Technical
+  - satellite
+tags:
+  - Drifter
+  - Indian Ocean
+  - Oceanography
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<p>One major task for scientists in his their daily routine is to prepare compelling graphics for technical document, reports or manuscripts for publication. Graphics in form of figures carry the weight of the arguments. They need to be clear, attractive and convincing. according to [@], the difference between good and bad figures always lead into the difference between a highly influential or an obscure paper; a grant/contract won or lost; and a job interview gone well or poorly.</p>
+<p>For the last ten years I have squeezed myself into preparing figures for scientific publications and have made throusands of figures. Honestly to say that over this period I have switched from one software to the other in the figure preparation pipeline. I made figures using Microsoft Excel, OriginPro, SPSS, Matlab, SigmaPlot, matplotlib in python, base R, ggplot2 in R and many others. However, my current preferred tool for making graphics is the ggplot2 package in R. However, looking on the spectrum over the last ten years and the constant switch from one software/tools to the other, I dont expect that I will continue using ggplot2 for the next ten years.</p>
+<p>One thing I have learned over the years is that automation should be the main skills for scientists. Automation serve time for data preparation, analysis and producing outputs. In this post I will take you through how to visualize vector field of surface current from drifter observation using the <em>ggplot2</em> package <span class="citation">(Wickham <a href="#ref-ggplot">2016</a>)</span>. I will further highlight the drawbacks of the default geom of ggplot2 and why it sometimes fail to produce elegant oceanographic plot. Last I will show you how to use altenative geoms from <strong>metR</strong> package <span class="citation">(Campitelli <a href="#ref-metr">2019</a>)</span> to make overcome the challenges inherited in <strong>ggplot2</strong> package and plot streamlines.</p>
+<pre class="r"><code>require(metR)
+require(tidyverse)
+require(lubridate)
+require(oce)
+require(ocedata)
+require(sf)</code></pre>
+<div id="dataset" class="section level2">
+<h2>Dataset</h2>
+<p>The drifter dataset contain surface current information linked to locations in the physical world. This spatial information help us to understand where the high speed current versus low speed current are found in the ocean. It is helpful to visualize this kind of data in the proper geospatial context i.e to show the data on a realistic map. I have filtered the data to cover the western part of the tropical indian ocean. I prepared and arrange drifter information in data frame—a rectangular collection of variables (columns) and observations (rows). The dataset contains observation of surface current world wide collected by the Global Drifter Program on all major oceans. Among the variables in the dataset are shown in table <a href="#tab:tab1">1</a> include:</p>
+<ul>
+<li>id: a unique number of drifter</li>
+<li>lon: longitude information</li>
+<li>lat: latitude information</li>
+<li>year, month, day, hour of the drifter records</li>
+<li>u: the zonal component of surface current</li>
+<li>v: the meridional component of the surface current <!-- + sst: the sea surface temperature information --> <!-- + season: whether the observation was collected during the northeast (NE) or southeast (SE) monsoon season --></li>
+</ul>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>A sample of drifter dataset
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Location
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Date Records
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+Current
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+id
+</th>
+<th style="text-align:center;">
+lon
+</th>
+<th style="text-align:center;">
+lat
+</th>
+<th style="text-align:center;">
+year
+</th>
+<th style="text-align:center;">
+month
+</th>
+<th style="text-align:center;">
+day
+</th>
+<th style="text-align:center;">
+hour
+</th>
+<th style="text-align:center;">
+u
+</th>
+<th style="text-align:center;">
+v
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+114807
+</td>
+<td style="text-align:center;width: 3cm; ">
+51.19
+</td>
+<td style="text-align:center;width: 3cm; ">
+-16.58
+</td>
+<td style="text-align:center;width: 3cm; ">
+2013
+</td>
+<td style="text-align:center;width: 3cm; ">
+6
+</td>
+<td style="text-align:center;width: 3cm; ">
+7
+</td>
+<td style="text-align:center;width: 3cm; ">
+0
+</td>
+<td style="text-align:center;width: 3cm; ">
+0.23
+</td>
+<td style="text-align:center;width: 3cm; ">
+0.19
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+63945810
+</td>
+<td style="text-align:center;width: 3cm; ">
+50.99
+</td>
+<td style="text-align:center;width: 3cm; ">
+-4.53
+</td>
+<td style="text-align:center;width: 3cm; ">
+2017
+</td>
+<td style="text-align:center;width: 3cm; ">
+12
+</td>
+<td style="text-align:center;width: 3cm; ">
+30
+</td>
+<td style="text-align:center;width: 3cm; ">
+18
+</td>
+<td style="text-align:center;width: 3cm; ">
+0.53
+</td>
+<td style="text-align:center;width: 3cm; ">
+0.52
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+64726990
+</td>
+<td style="text-align:center;width: 3cm; ">
+40.03
+</td>
+<td style="text-align:center;width: 3cm; ">
+-6.82
+</td>
+<td style="text-align:center;width: 3cm; ">
+2017
+</td>
+<td style="text-align:center;width: 3cm; ">
+7
+</td>
+<td style="text-align:center;width: 3cm; ">
+1
+</td>
+<td style="text-align:center;width: 3cm; ">
+18
+</td>
+<td style="text-align:center;width: 3cm; ">
+-0.64
+</td>
+<td style="text-align:center;width: 3cm; ">
+1.40
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+109535
+</td>
+<td style="text-align:center;width: 3cm; ">
+47.32
+</td>
+<td style="text-align:center;width: 3cm; ">
+-5.43
+</td>
+<td style="text-align:center;width: 3cm; ">
+2014
+</td>
+<td style="text-align:center;width: 3cm; ">
+11
+</td>
+<td style="text-align:center;width: 3cm; ">
+20
+</td>
+<td style="text-align:center;width: 3cm; ">
+18
+</td>
+<td style="text-align:center;width: 3cm; ">
+-0.13
+</td>
+<td style="text-align:center;width: 3cm; ">
+-0.26
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+9727912
+</td>
+<td style="text-align:center;width: 3cm; ">
+42.50
+</td>
+<td style="text-align:center;width: 3cm; ">
+-9.83
+</td>
+<td style="text-align:center;width: 3cm; ">
+1998
+</td>
+<td style="text-align:center;width: 3cm; ">
+10
+</td>
+<td style="text-align:center;width: 3cm; ">
+3
+</td>
+<td style="text-align:center;width: 3cm; ">
+6
+</td>
+<td style="text-align:center;width: 3cm; ">
+-0.08
+</td>
+<td style="text-align:center;width: 3cm; ">
+0.16
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+25006
+</td>
+<td style="text-align:center;width: 3cm; ">
+52.43
+</td>
+<td style="text-align:center;width: 3cm; ">
+-11.27
+</td>
+<td style="text-align:center;width: 3cm; ">
+2001
+</td>
+<td style="text-align:center;width: 3cm; ">
+8
+</td>
+<td style="text-align:center;width: 3cm; ">
+5
+</td>
+<td style="text-align:center;width: 3cm; ">
+12
+</td>
+<td style="text-align:center;width: 3cm; ">
+-0.27
+</td>
+<td style="text-align:center;width: 3cm; ">
+0.11
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+63356010
+</td>
+<td style="text-align:center;width: 3cm; ">
+45.10
+</td>
+<td style="text-align:center;width: 3cm; ">
+-6.74
+</td>
+<td style="text-align:center;width: 3cm; ">
+2017
+</td>
+<td style="text-align:center;width: 3cm; ">
+4
+</td>
+<td style="text-align:center;width: 3cm; ">
+16
+</td>
+<td style="text-align:center;width: 3cm; ">
+18
+</td>
+<td style="text-align:center;width: 3cm; ">
+0.64
+</td>
+<td style="text-align:center;width: 3cm; ">
+0.16
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+63816
+</td>
+<td style="text-align:center;width: 3cm; ">
+51.43
+</td>
+<td style="text-align:center;width: 3cm; ">
+-4.45
+</td>
+<td style="text-align:center;width: 3cm; ">
+2009
+</td>
+<td style="text-align:center;width: 3cm; ">
+10
+</td>
+<td style="text-align:center;width: 3cm; ">
+23
+</td>
+<td style="text-align:center;width: 3cm; ">
+12
+</td>
+<td style="text-align:center;width: 3cm; ">
+0.17
+</td>
+<td style="text-align:center;width: 3cm; ">
+0.31
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+45979
+</td>
+<td style="text-align:center;width: 3cm; ">
+44.52
+</td>
+<td style="text-align:center;width: 3cm; ">
+-12.50
+</td>
+<td style="text-align:center;width: 3cm; ">
+2005
+</td>
+<td style="text-align:center;width: 3cm; ">
+5
+</td>
+<td style="text-align:center;width: 3cm; ">
+14
+</td>
+<td style="text-align:center;width: 3cm; ">
+0
+</td>
+<td style="text-align:center;width: 3cm; ">
+-0.37
+</td>
+<td style="text-align:center;width: 3cm; ">
+-0.19
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+52953
+</td>
+<td style="text-align:center;width: 3cm; ">
+47.45
+</td>
+<td style="text-align:center;width: 3cm; ">
+-11.91
+</td>
+<td style="text-align:center;width: 3cm; ">
+2005
+</td>
+<td style="text-align:center;width: 3cm; ">
+1
+</td>
+<td style="text-align:center;width: 3cm; ">
+16
+</td>
+<td style="text-align:center;width: 3cm; ">
+12
+</td>
+<td style="text-align:center;width: 3cm; ">
+-0.09
+</td>
+<td style="text-align:center;width: 3cm; ">
+-0.11
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+63071
+</td>
+<td style="text-align:center;width: 3cm; ">
+50.12
+</td>
+<td style="text-align:center;width: 3cm; ">
+-4.17
+</td>
+<td style="text-align:center;width: 3cm; ">
+2008
+</td>
+<td style="text-align:center;width: 3cm; ">
+1
+</td>
+<td style="text-align:center;width: 3cm; ">
+10
+</td>
+<td style="text-align:center;width: 3cm; ">
+18
+</td>
+<td style="text-align:center;width: 3cm; ">
+0.15
+</td>
+<td style="text-align:center;width: 3cm; ">
+-0.13
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+61478290
+</td>
+<td style="text-align:center;width: 3cm; ">
+53.84
+</td>
+<td style="text-align:center;width: 3cm; ">
+-12.38
+</td>
+<td style="text-align:center;width: 3cm; ">
+2016
+</td>
+<td style="text-align:center;width: 3cm; ">
+1
+</td>
+<td style="text-align:center;width: 3cm; ">
+4
+</td>
+<td style="text-align:center;width: 3cm; ">
+18
+</td>
+<td style="text-align:center;width: 3cm; ">
+-0.32
+</td>
+<td style="text-align:center;width: 3cm; ">
+-0.03
+</td>
+</tr>
+</tbody>
+</table>
+<p>The drifter observations were randomly distributed within the area as shown in figure <a href="#fig:fig1">1</a> and requires binning—a process of making equal size grid in the area.</p>
+<pre class="r"><code>## convert drifter observation into simple features
+drifter.split.sf = drifter.split %&gt;% 
+  st_as_sf(coords = c(&quot;lon&quot;, &quot;lat&quot;)) %&gt;%
+  st_set_crs(4326)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig1"></span>
+<img src="/post/2019-03-20-plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package_files/figure-html/fig1-1.png" alt="The distribution of drifter observation within the area" width="672" />
+<p class="caption">
+Figure 1: The distribution of drifter observation within the area
+</p>
+</div>
+<p>To minimize biasness of sampling, the area was divided into equal size grids show in in figure <a href="#fig:fig2">2</a>.</p>
+<pre class="r"><code>## divide the tropical indian ocean region into grids
+drifter.grid = drifter.split.sf %&gt;% 
+  st_make_grid(n = c(70,60))%&gt;%
+  st_sf()</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig2"></span>
+<img src="/post/2019-03-20-plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package_files/figure-html/fig2-1.png" alt="Gridded area to fill drifter observations" width="672" />
+<p class="caption">
+Figure 2: Gridded area to fill drifter observations
+</p>
+</div>
+<p>Once the area was gridded, then the the mean value of U and V component and the number of observation were calculated in each grid cell.</p>
+<pre class="r"><code>drifter.split.sf.se = drifter.split.sf%&gt;% filter(season==&quot;SE&quot;)
+
+drifter.gridded = drifter.grid %&gt;% 
+  mutate(id = 1:n(), contained = lapply(st_contains(st_sf(geometry),drifter.split.sf.se),identity),
+         obs = sapply(contained, length),
+         u = sapply(contained, function(x) {median(drifter.split.sf.se[x,]$u, na.rm = TRUE)}),
+         v = sapply(contained, function(x) {median(drifter.split.sf.se[x,]$v, na.rm = TRUE)})) </code></pre>
+<p>Then convert the gridded drifter information into data frame</p>
+<pre class="r"><code>drifter.gridded = drifter.gridded %&gt;% select(obs, u, v) %&gt;% na.omit()
+
+## obtain the centroid coordinates from the grid as table
+coordinates = drifter.gridded %&gt;% 
+  st_centroid() %&gt;% 
+  st_coordinates() %&gt;% 
+  as_tibble() %&gt;% 
+  rename(x = X, y = Y)
+
+## remove the geometry from the simple feature of gridded drifter dataset
+st_geometry(drifter.gridded) = NULL
+
+## stitch together the extracted coordinates and drifter information int a single table for SE monsoon season
+current.gridded.se = coordinates %&gt;% 
+  bind_cols(drifter.gridded) %&gt;% 
+  mutate(season = &quot;SE&quot;)
+
+## bind the gridded table for SE and NE
+## Note that similar NE follow similar procedure, hence not shown in the post
+drifter.current.gridded = current.gridded.ne %&gt;% 
+  bind_rows(current.gridded.se)</code></pre>
+<p>After binning, we found that some grids lack the drifter information, therefore, these grids were filled with the U, V values using the Interpolation technique. The chunk below highlight the code for the process</p>
+<pre class="r"><code>## select grids for SE season only
+drf.se = drifter.current.gridded %&gt;%
+  filter(season == &quot;SE&quot;)
+
+## interpolate the U component
+u.se = interpBarnes(x = drf.se$x, y = drf.se$y, z = drf.se$u)
+
+## obtain dimension that determine the width (ncol) and length (nrow) for tranforming wide into long format table
+dimension = data.frame(lon = u.se$xg, u.se$zg) %&gt;% dim()
+
+## make a U component data table from interpolated matrix
+u.tb = data.frame(lon = u.se$xg, 
+                  u.se$zg) %&gt;% 
+  gather(key = &quot;lata&quot;, value = &quot;u&quot;, 2:dimension[2]) %&gt;% 
+  mutate(lat = rep(u.se$yg, each = dimension[1])) %&gt;% 
+  select(lon,lat, u) %&gt;% as.tibble()
+
+## interpolate the V component
+v.se = interpBarnes(x = drf.se$x, 
+                    y = drf.se$y, 
+                    z = drf.se$v)
+
+## make the V component data table from interpolated matrix
+v.tb = data.frame(lon = v.se$xg, v.se$zg) %&gt;% 
+  gather(key = &quot;lata&quot;, value = &quot;v&quot;, 2:dimension[2]) %&gt;% 
+  mutate(lat = rep(v.se$yg, each = dimension[1])) %&gt;% 
+  select(lon,lat, v) %&gt;% 
+  as.tibble()
+
+## stitch now the V component intot the U data table and compute the velocity
+uv.se = u.tb %&gt;% 
+  bind_cols(v.tb %&gt;% select(v)) %&gt;% 
+  mutate(vel = sqrt(u^2+v^2))</code></pre>
+<div id="visualising-vector-field" class="section level3">
+<h3>Visualising Vector field</h3>
+<p>Figure <a href="#fig:segment">3</a> was made with <strong>ggplot2</strong> package. The smoothed velocity grid was created with the <code>geom_raster()</code> function and the vector field showing the direction and speed superimposed on the current velocity was done with the <code>segment()</code> function. You notice that these geoms did a wonderful job and the figure is surface current speed and direction are clearly distinguished with the arrow and the length of the arrow. The code used to create figure <a href="#fig:segment">3</a> are shown in the chunk below.</p>
+<pre class="r"><code>ggplot() +
+  geom_raster(data = uv.se, aes(x = lon, y = lat, fill = vel), interpolate = TRUE)+
+  geom_segment(data = uv.se, aes(x = lon, xend = lon + u/1.2, y = lat, yend = lat+v/1.2), 
+               arrow = arrow(angle = 20, length = unit(.2, &quot;cm&quot;), type = &quot;open&quot;))+
+  geom_sf(data = wio,fill = &quot;lightgrey&quot;, col = &quot;black&quot;)+
+  coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+
+  scale_fill_gradientn(name = &quot;Speed\n(m/s)&quot;,colours = oceColorsVelocity(120), 
+                       limits = c(0,1.6), breaks =seq(0.1,1.6,.3))+
+  theme_bw()+
+  theme(legend.position = &quot;right&quot;,
+        legend.key.height = unit(1.4, &quot;cm&quot;), 
+        legend.background = element_blank(),
+        axis.text = element_text(size = 12, colour = 1))+
+  labs(x = &quot;&quot;, y = &quot;&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:segment"></span>
+<img src="/post/2019-03-20-plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package_files/figure-html/segment-1.png" alt="Vector field showing speed and direction of surface current created with **ggplot2** package" width="672" />
+<p class="caption">
+Figure 3: Vector field showing speed and direction of surface current created with <strong>ggplot2</strong> package
+</p>
+</div>
+<p>Figure <a href="#fig:vector">4</a> is similar to Figure <a href="#fig:segment">3</a> but created with different geoms. Unlike Figure <a href="#fig:segment">3</a> that was created with the <code>geom_raster()</code> and <code>geom_segment()</code> functions, Figure <a href="#fig:vector">4</a> was made using the <code>geom_contour_fill()</code> function for smoothed contour of current velocity and the vector field was made with <code>geom_vector()</code> function. You can see a very clear difference between Figure <a href="#fig:segment">3</a> and Figure <a href="#fig:vector">4</a>. In figure <a href="#fig:segment">3</a> only the current speed is (length) of the arrow differs but the head arrow remain the same for all the segments. But in figure <a href="#fig:vector">4</a>, the speed and direction are distinguished by the both the arrow and the head of the segment.</p>
+<pre class="r"><code>ggplot() +
+  metR::geom_contour_fill(data = uv.se, aes(x = lon, y = lat, z = vel), na.fill = TRUE, bins = 70) + 
+  metR::geom_vector(data = uv.se, aes(x = lon, y = lat, dx = u, dy = v), 
+                    arrow.angle = 30, arrow.type = &quot;open&quot;, arrow.length = .5, 
+                    pivot = 0,preserve.dir = TRUE, direction = &quot;ccw&quot;)+
+   geom_sf(data = wio,fill = &quot;lightgrey&quot;, col = &quot;black&quot;)+
+  coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+
+  scale_fill_gradientn(name = &quot;Speed\n(m/s)&quot;,colours = oceColorsVelocity(120), 
+                       limits = c(0,1.6), breaks =seq(0.1,1.6,.3))+
+  theme_bw()+
+  theme(legend.position = &quot;right&quot;,
+        legend.key.height = unit(1.2, &quot;cm&quot;), 
+        legend.background = element_blank(),
+        axis.text = element_text(size = 12, colour = 1))+
+  scale_mag(max = 1.5, name = &quot;Speed&quot;, max_size = 0.7)+
+  labs(x = &quot;&quot;, y = &quot;&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:vector"></span>
+<img src="/post/2019-03-20-plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package_files/figure-html/vector-1.png" alt="Vector field showing speed and direction made with **metR** package" width="672" />
+<p class="caption">
+Figure 4: Vector field showing speed and direction made with <strong>metR</strong> package
+</p>
+</div>
+<p>The artifacts of <code>geom_raster()</code> function when the argument <code>interpolate = TRUE</code> is applied is very visible (Figure <a href="#fig:smoothed">5</a>a). This artifact is easily handled with the function <code>geom_contour_fill()</code> from <strong>metR</strong> package, which produce a smoothed surface velocity (figure <a href="#fig:smoothed">5</a>b).</p>
+<div class="figure" style="text-align: center"><span id="fig:smoothed"></span>
+<img src="/post/2019-03-20-plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package_files/figure-html/smoothed-1.png" alt="Smoothed velocity using a) geom_raster() and b) geom_contour_fill() functions" width="672" />
+<p class="caption">
+Figure 5: Smoothed velocity using a) geom_raster() and b) geom_contour_fill() functions
+</p>
+</div>
+<p>The <code>geom_segment()</code> and <code>geom_contour_fill()</code> function both produce an elegant vector field that represent the speed and direction of surface current. However, when you wish to produce streamlines of surface current speed and direction, the two geoms are unable to derive that product. Thanks to <span class="citation">Campitelli (<a href="#ref-metr">2019</a>)</span> for developing a powerful <code>geom_streamline()</code> function that handle that issue. The figure <a href="#fig:streamline">6</a> was created with <code>geom_streamline()</code> function to make path that are tangential to a vector field. The streamlines of surface current in figure <a href="#fig:streamline">6</a> are similar to massless that moves with the flow.</p>
+<pre class="r"><code>ggplot() +
+  metR::geom_contour_fill(data = uv.se, aes(x = lon, y = lat, z = vel), 
+                          na.fill = TRUE, bins = 70) + 
+  metR::geom_streamline(data = uv.se, 
+                        aes(x = lon, y = lat, dx = u, dy = v),
+                        L = 1.75, res = .9, n = 40, jitter = 4)+
+  geom_sf(data = wio,fill = &quot;lightgrey&quot;, col = &quot;black&quot;)+
+  coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+
+  scale_fill_gradientn(name = &quot;Current&quot;,colours = oceColorsVelocity(120), 
+                       limits = c(0,1.6), breaks = seq(0.1,1.6,.3))+
+  theme_bw()+
+  theme(legend.position = &quot;right&quot;,
+        legend.key.height = unit(1.4, &quot;cm&quot;), 
+        legend.background = element_blank(),
+        axis.text = element_text(size = 12, colour = 1))+
+  labs(x = &quot;&quot;, y = &quot;&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:streamline"></span>
+<img src="/post/2019-03-20-plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package_files/figure-html/streamline-1.png" alt="Streamline showing the flow of surface current superimposed on the current velocity" width="672" />
+<p class="caption">
+Figure 6: Streamline showing the flow of surface current superimposed on the current velocity
+</p>
+</div>
+</div>
+<div id="conclusion" class="section level3">
+<h3>Conclusion</h3>
+<p>Many Oceanographic data are defined in a longitude–latitude grid and and though <code>geom_raster()</code> and <code>geom_segment()</code> plot these field well, but the function from <strong>metR</strong> package extend the use of ggplot to deal well with oceanographical data and produce graphics that meet the standard.</p>
+</div>
+<div id="references" class="section level3">
+<h3>References</h3>
+<!-- ```{r current-ggplot, fig.cap="", echo=FALSE} -->
+<!-- se.vector= ggplot()+ -->
+<!--   geom_raster(data = uv.se, aes(x = lon, y = lat, fill = vel), interpolate = TRUE)+ -->
+<!--   geom_segment(data = uv.se, aes(x = lon, xend = lon+u, y = lat, yend = lat+v),  -->
+<!--                size = 0.25, arrow = arrow(angle = 30, length = unit(1.5, "mm"), -->
+<!--                              type = "open", ends = "last")) + -->
+<!--   geom_sf(data = wio,fill = "lightgrey", col = "black")+ -->
+<!--   coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+ -->
+<!--   scale_fill_gradientn(name = "Current",colours = oceColorsVelocity(120),  -->
+<!--                        limits = c(0,1.6), breaks =seq(0.2,1.6,.3))+ -->
+<!--   labs(x = "", y = "")+ -->
+<!--   theme(legend.position = "right",  -->
+<!--         legend.background = element_blank()) -->
+<!-- ``` -->
+<!-- ```{r current-metr, fig.cap="", echo=FALSE} -->
+<!-- se.streamline = ggplot()+ -->
+<!--   geom_contour_fill(data = uv.se, aes(x = lon, y = lat, z = vel), na.fill = TRUE, bins = 80)+ -->
+<!--   geom_streamline(data = uv.se, aes(x = lon, y = lat, dx = u, dy = v, col = v), L = 2, res = 3)+ -->
+<!--   # geom_text_contour(data = uv.se, aes(x = lon, y = lat, z = vel), rotate = FALSE)+ -->
+<!--   geom_sf(data = wio,fill = "lightgrey", col = "black")+ -->
+<!--   coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+ -->
+<!--   scale_fill_gradientn(name = "m/s",colours = oceColorsVelocity(120),  -->
+<!--                        limits = c(0,1.6), breaks =seq(0.2,1.6,.3))+ -->
+<!--   labs(x = "", y = "")+ -->
+<!--   theme(legend.position = "right",  -->
+<!--         legend.background = element_blank()) -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- egg::ggarrange(se.vector, se.streamline, ncol = 1) -->
+<!-- ``` -->
+<!-- ## NE -->
+<!-- ```{r, echo=FALSE} -->
+<!-- drf.ne = drifter.current.gridded %>%filter(season == "NE") -->
+<!-- u.ne = interpBarnes(x = drf.ne$x, y = drf.ne$y, z = drf.ne$u) -->
+<!-- u.tb = data.frame(lon = u.ne$xg, u.ne$zg) %>% gather(key = "lata", value = "u", 2:dimension[2]) %>% mutate(lat = rep(u.ne$yg, each = dimension[1])) %>% select(lon,lat, u) %>% as.tibble() -->
+<!-- v.ne = interpBarnes(x = drf.ne$x, y = drf.ne$y, z = drf.ne$v) -->
+<!-- v.tb = data.frame(lon = v.ne$xg, v.ne$zg) %>% gather(key = "lata", value = "v", 2:dimension[2]) %>% mutate(lat = rep(v.ne$yg, each = dimension[1])) %>% select(lon,lat, v) %>% as.tibble() -->
+<!-- uv.ne = u.tb %>% bind_cols(v.tb %>% select(v)) %>% mutate(vel = sqrt(u^2+v^2)) -->
+<!-- ``` -->
+<!-- ```{r current-ggplot, fig.cap="", echo=FALSE} -->
+<!-- ne.vector = ggplot()+ -->
+<!--   geom_raster(data = uv.ne, aes(x = lon, y = lat, fill = vel), interpolate = TRUE)+ -->
+<!--   geom_segment(data = uv.ne, aes(x = lon, xend = lon+u, y = lat, yend = lat+v),  -->
+<!--                size = 0.25, arrow = arrow(angle = 30, length = unit(1.5, "mm"), -->
+<!--                              type = "open", ends = "last")) + -->
+<!--    geom_sf(data = wio,fill = "lightgrey", col = "black")+ -->
+<!--   coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+ -->
+<!--   scale_fill_gradientn(name = "Current",colours = oceColorsVelocity(120),  -->
+<!--                        limits = c(0,1.6), breaks =seq(0.2,1.6,.3))+ -->
+<!--   labs(x = "", y = "")+ -->
+<!--   theme(legend.position = "right", legend.background = element_blank()) -->
+<!-- ``` -->
+<!-- ```{r current-metr, fig.cap="", echo=FALSE} -->
+<!-- ne.streamline = ggplot()+ -->
+<!--   geom_contour_fill(data = uv.ne, aes(x = lon, y = lat, z = vel), na.fill = TRUE, bins = 80)+ -->
+<!--   geom_streamline(data = uv.ne, aes(x = lon, y = lat, dx = u, dy = v, col = v), L = 2,res = 1 )+ -->
+<!--   geom_sf(data = wio,fill = "lightgrey", col = "black")+ -->
+<!--   coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+ -->
+<!--   scale_fill_gradientn(name = "m/s",colours = oce.colorsVelocity(120),  -->
+<!--                        limits = c(0,1.6), breaks =seq(0.2,1.6,.3))+ -->
+<!--   labs(x = "", y = "")+ -->
+<!--   theme(legend.position = "right",  -->
+<!--         legend.background = element_blank()) -->
+<!-- ``` -->
+<!-- ```{r, echo=FALSE} -->
+<!-- egg::ggarrange(ne.vector, ne.streamline, ncol = 1) -->
+<!-- ``` -->
+<div id="refs" class="references">
+<div id="ref-metr">
+<p>Campitelli, Elio. 2019. <em>MetR: Tools for Easier Analysis of Meteorological Fields</em>. <a href="https://CRAN.R-project.org/package=metR" class="uri">https://CRAN.R-project.org/package=metR</a>.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org" class="uri">http://ggplot2.org</a>.</p>
+</div>
+</div>
+</div>
+</div>
