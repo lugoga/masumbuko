@@ -21,9 +21,9 @@ link-citations: yes
 <script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
 
 
-<p>One major task for scientists in his their daily routine is to prepare compelling graphics for technical document, reports or manuscripts for publication. Graphics in form of figures carry the weight of the arguments. They need to be clear, attractive and convincing. according to [@], the difference between good and bad figures always lead into the difference between a highly influential or an obscure paper; a grant/contract won or lost; and a job interview gone well or poorly.</p>
-<p>For the last ten years I have squeezed myself into preparing figures for scientific publications and have made throusands of figures. Honestly to say that over this period I have switched from one software to the other in the figure preparation pipeline. I made figures using Microsoft Excel, OriginPro, SPSS, Matlab, SigmaPlot, matplotlib in python, base R, ggplot2 in R and many others. However, my current preferred tool for making graphics is the ggplot2 package in R. However, looking on the spectrum over the last ten years and the constant switch from one software/tools to the other, I dont expect that I will continue using ggplot2 for the next ten years.</p>
-<p>One thing I have learned over the years is that automation should be the main skills for scientists. Automation serve time for data preparation, analysis and producing outputs. In this post I will take you through how to visualize vector field of surface current from drifter observation using the <em>ggplot2</em> package <span class="citation">(Wickham <a href="#ref-ggplot">2016</a>)</span>. I will further highlight the drawbacks of the default geom of ggplot2 and why it sometimes fail to produce elegant oceanographic plot. Last I will show you how to use altenative geoms from <strong>metR</strong> package <span class="citation">(Campitelli <a href="#ref-metr">2019</a>)</span> to make overcome the challenges inherited in <strong>ggplot2</strong> package and plot streamlines.</p>
+<p>One major task for scientists in their daily routine is to prepare graphics for technical document, reports or manuscripts for publication. Graphics in form of figures carry the weight of the arguments. They need to be clear, attractive and convincing. according to [@], the difference between good and bad figures always lead into the difference between a highly influential or an obscure paper; a grant/contract won or lost; and a job interview gone well or poorly.</p>
+<p>For the last ten years I have squeezed myself into preparing figures for scientific publications and have made throusands of figures. Honestly to say that over this period I have switched from one software to the other in figure preparation pipeline. I made figures using Microsoft Excel, OriginPro, SPSS, Matlab, SigmaPlot, matplotlib in python, base R, ggplot2 in R and many others. However, my current preferred tool for making graphics is the <strong>ggplot2</strong> package in R. However, looking on the spectrum over the last ten years and the constant switch from one software/tools to the other, I dont expect that I will continue using <strong>ggplot2</strong> for the next ten years.</p>
+<p>One thing I have learned over the years is that automation should be the main skills for scientists. Because automation serve time for prepare and analyse data. It also remove the barrier of repeative production of figures and statistical results. In this post I will show you how to visualize vector field of ocean surface current using the <em>ggplot2</em> package <span class="citation">(Wickham <a href="#ref-ggplot">2016</a>)</span>. I will further highlight the drawbacks of the default <em>geom</em> of <strong>ggplot2</strong> and why sometimes <strong>ggplot2</strong> functions fail to produce elegant oceanographic plots. Last I will illustrate the use of alternative <em>geoms</em> from <strong>metR</strong> package <span class="citation">(Campitelli <a href="#ref-metr">2019</a>)</span> to overcome the challenges inherited in <strong>ggplot2</strong> package.</p>
 <pre class="r"><code>require(metR)
 require(tidyverse)
 require(lubridate)
@@ -611,77 +611,34 @@ Figure 6: Streamline showing the flow of surface current superimposed on the cur
 </div>
 <div id="conclusion" class="section level3">
 <h3>Conclusion</h3>
-<p>Many Oceanographic data are defined in a longitude–latitude grid and and though <code>geom_raster()</code> and <code>geom_segment()</code> plot these field well, but the function from <strong>metR</strong> package extend the use of ggplot to deal well with oceanographical data and produce graphics that meet the standard.</p>
+<p>Many Oceanographic data are defined in a longitude–latitude grid and and though <code>geom_raster()</code> and <code>geom_segment()</code> plot these field well, but the function from <strong>metR</strong> package extend the use of ggplot to deal well with oceanographical data and produce graphics that meet the standard. The massless flow of surface current are much clear when stremline are used to plot the figure (figure <a href="#fig:massless">7</a>). The eddies within the Mozambique channel that were not visible using in vector fields (figure <a href="#fig:segment">3</a> &amp; <a href="#fig:vector">4</a>) are quite clear in figure <a href="#fig:massless">7</a>. The lines of codes used to make figure <a href="#fig:massless">7</a> are shown in the chunk below.</p>
+<pre class="r"><code>ggplot()+
+metR::geom_streamline(data = uv.se, 
+                        aes(x = lon, y = lat, dx = u, dy = v, 
+                            color = sqrt(..dx..^2 + ..dy..^2), 
+                            alpha = ..step..),
+                      L = 2, res = 2, n = 60, 
+                      arrow = NULL, lineend = &quot;round&quot;)+
+  geom_sf(data = wio,fill = &quot;lightgrey&quot;, col = &quot;black&quot;)+
+  coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+
+  scale_color_viridis_c(guide = &quot;none&quot;)+
+  scale_size(range = c(0.2, 1.5), guide = &quot;none&quot;) +
+  scale_alpha(guide = &quot;none&quot;) +
+  theme_bw()+
+  theme(legend.position = &quot;right&quot;,
+        legend.key.height = unit(1.4, &quot;cm&quot;), 
+        legend.background = element_blank(),
+        axis.text = element_text(size = 12, colour = 1))+  
+  labs(x = &quot;&quot;, y = &quot;&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:massless"></span>
+<img src="/post/2019-03-20-plotting-streamlines-of-surface-current-with-ggplot2-and-metr-package_files/figure-html/massless-1.png" alt="surface current flow from drifter observations" width="672" />
+<p class="caption">
+Figure 7: surface current flow from drifter observations
+</p>
 </div>
-<div id="references" class="section level3">
+</div>
+<div id="references" class="section level3 unnumbered">
 <h3>References</h3>
-<!-- ```{r current-ggplot, fig.cap="", echo=FALSE} -->
-<!-- se.vector= ggplot()+ -->
-<!--   geom_raster(data = uv.se, aes(x = lon, y = lat, fill = vel), interpolate = TRUE)+ -->
-<!--   geom_segment(data = uv.se, aes(x = lon, xend = lon+u, y = lat, yend = lat+v),  -->
-<!--                size = 0.25, arrow = arrow(angle = 30, length = unit(1.5, "mm"), -->
-<!--                              type = "open", ends = "last")) + -->
-<!--   geom_sf(data = wio,fill = "lightgrey", col = "black")+ -->
-<!--   coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+ -->
-<!--   scale_fill_gradientn(name = "Current",colours = oceColorsVelocity(120),  -->
-<!--                        limits = c(0,1.6), breaks =seq(0.2,1.6,.3))+ -->
-<!--   labs(x = "", y = "")+ -->
-<!--   theme(legend.position = "right",  -->
-<!--         legend.background = element_blank()) -->
-<!-- ``` -->
-<!-- ```{r current-metr, fig.cap="", echo=FALSE} -->
-<!-- se.streamline = ggplot()+ -->
-<!--   geom_contour_fill(data = uv.se, aes(x = lon, y = lat, z = vel), na.fill = TRUE, bins = 80)+ -->
-<!--   geom_streamline(data = uv.se, aes(x = lon, y = lat, dx = u, dy = v, col = v), L = 2, res = 3)+ -->
-<!--   # geom_text_contour(data = uv.se, aes(x = lon, y = lat, z = vel), rotate = FALSE)+ -->
-<!--   geom_sf(data = wio,fill = "lightgrey", col = "black")+ -->
-<!--   coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+ -->
-<!--   scale_fill_gradientn(name = "m/s",colours = oceColorsVelocity(120),  -->
-<!--                        limits = c(0,1.6), breaks =seq(0.2,1.6,.3))+ -->
-<!--   labs(x = "", y = "")+ -->
-<!--   theme(legend.position = "right",  -->
-<!--         legend.background = element_blank()) -->
-<!-- ``` -->
-<!-- ```{r} -->
-<!-- egg::ggarrange(se.vector, se.streamline, ncol = 1) -->
-<!-- ``` -->
-<!-- ## NE -->
-<!-- ```{r, echo=FALSE} -->
-<!-- drf.ne = drifter.current.gridded %>%filter(season == "NE") -->
-<!-- u.ne = interpBarnes(x = drf.ne$x, y = drf.ne$y, z = drf.ne$u) -->
-<!-- u.tb = data.frame(lon = u.ne$xg, u.ne$zg) %>% gather(key = "lata", value = "u", 2:dimension[2]) %>% mutate(lat = rep(u.ne$yg, each = dimension[1])) %>% select(lon,lat, u) %>% as.tibble() -->
-<!-- v.ne = interpBarnes(x = drf.ne$x, y = drf.ne$y, z = drf.ne$v) -->
-<!-- v.tb = data.frame(lon = v.ne$xg, v.ne$zg) %>% gather(key = "lata", value = "v", 2:dimension[2]) %>% mutate(lat = rep(v.ne$yg, each = dimension[1])) %>% select(lon,lat, v) %>% as.tibble() -->
-<!-- uv.ne = u.tb %>% bind_cols(v.tb %>% select(v)) %>% mutate(vel = sqrt(u^2+v^2)) -->
-<!-- ``` -->
-<!-- ```{r current-ggplot, fig.cap="", echo=FALSE} -->
-<!-- ne.vector = ggplot()+ -->
-<!--   geom_raster(data = uv.ne, aes(x = lon, y = lat, fill = vel), interpolate = TRUE)+ -->
-<!--   geom_segment(data = uv.ne, aes(x = lon, xend = lon+u, y = lat, yend = lat+v),  -->
-<!--                size = 0.25, arrow = arrow(angle = 30, length = unit(1.5, "mm"), -->
-<!--                              type = "open", ends = "last")) + -->
-<!--    geom_sf(data = wio,fill = "lightgrey", col = "black")+ -->
-<!--   coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+ -->
-<!--   scale_fill_gradientn(name = "Current",colours = oceColorsVelocity(120),  -->
-<!--                        limits = c(0,1.6), breaks =seq(0.2,1.6,.3))+ -->
-<!--   labs(x = "", y = "")+ -->
-<!--   theme(legend.position = "right", legend.background = element_blank()) -->
-<!-- ``` -->
-<!-- ```{r current-metr, fig.cap="", echo=FALSE} -->
-<!-- ne.streamline = ggplot()+ -->
-<!--   geom_contour_fill(data = uv.ne, aes(x = lon, y = lat, z = vel), na.fill = TRUE, bins = 80)+ -->
-<!--   geom_streamline(data = uv.ne, aes(x = lon, y = lat, dx = u, dy = v, col = v), L = 2,res = 1 )+ -->
-<!--   geom_sf(data = wio,fill = "lightgrey", col = "black")+ -->
-<!--   coord_sf(ylim = c(-15,-6), xlim = c(39, 52))+ -->
-<!--   scale_fill_gradientn(name = "m/s",colours = oce.colorsVelocity(120),  -->
-<!--                        limits = c(0,1.6), breaks =seq(0.2,1.6,.3))+ -->
-<!--   labs(x = "", y = "")+ -->
-<!--   theme(legend.position = "right",  -->
-<!--         legend.background = element_blank()) -->
-<!-- ``` -->
-<!-- ```{r, echo=FALSE} -->
-<!-- egg::ggarrange(ne.vector, ne.streamline, ncol = 1) -->
-<!-- ``` -->
 <div id="refs" class="references">
 <div id="ref-metr">
 <p>Campitelli, Elio. 2019. <em>MetR: Tools for Easier Analysis of Meteorological Fields</em>. <a href="https://CRAN.R-project.org/package=metR" class="uri">https://CRAN.R-project.org/package=metR</a>.</p>
