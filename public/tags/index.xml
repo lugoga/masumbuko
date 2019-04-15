@@ -50,7 +50,7 @@
     <item>
       <title>Aviso</title>
       <link>/tags/aviso/</link>
-      <pubDate>Wed, 07 Nov 2018 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/aviso/</guid>
       <description></description>
@@ -68,7 +68,7 @@
     <item>
       <title>Blogdown</title>
       <link>/tags/blogdown/</link>
-      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/blogdown/</guid>
       <description></description>
@@ -77,7 +77,7 @@
     <item>
       <title>Bookdown</title>
       <link>/tags/bookdown/</link>
-      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/bookdown/</guid>
       <description></description>
@@ -170,6 +170,15 @@
       <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/fluorescence/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Geostrophic Current</title>
+      <link>/tags/geostrophic-current/</link>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/geostrophic-current/</guid>
       <description></description>
     </item>
     
@@ -392,7 +401,7 @@
     <item>
       <title>Surface Current</title>
       <link>/tags/surface-current/</link>
-      <pubDate>Sun, 30 Sep 2018 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/surface-current/</guid>
       <description></description>

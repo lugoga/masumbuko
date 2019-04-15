@@ -1,0 +1,294 @@
+---
+title: Access, Download, Process and VIsualize sea surface height and geostrophic
+  current from AVISO in R
+author: Masumbuko Semba
+date: '2019-04-15'
+slug: access-download-process-and-visualize-sea-surface-height-and-geostrophic-current-from-aviso-in-r
+categories:
+  - Oceanography
+  - Information Technology
+  - satellite
+  - R
+tags:
+  - aviso
+  - blogdown
+  - bookdown
+  - surface current
+  - geostrophic current
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+
+<p><a href="https://semba-blog.netlify.com/11/07/2018/read-netcdf-file-with-in-r/">In this post</a> I explain how to read the NetCDF file of aviso in R. I also showed how to make plot of the processed sea surface height with <strong>ggplot2</strong> package <span class="citation">(Wickham <a href="#ref-ggplot">2016</a>)</span> and also animated a series of map with <strong>gganimate</strong> packages <span class="citation">(Pedersen and Robinson <a href="#ref-gganimate">2017</a>)</span>. However, the link that I used to obtain the data is no longer active and people find difficult to follow the instructions in the post. Therefore, in this post I show how to download the aviso data from the website into R <span class="citation">(Mendelssohn <a href="#ref-xtracto">2018</a>)</span>.</p>
+<pre class="r"><code>require(xtractomatic)
+require(lubridate)
+require(tidyverse)</code></pre>
+<p>R has powerful packages that can download data from ERDAPP server. Among the dataset that are public available are product of AVISO. You can use the <code>searchData()</code> function from <strong>xtractomatic</strong> package to search for a dataset name that you need <span class="citation">(Mendelssohn <a href="#ref-xtracto">2018</a>)</span>. For example the chunk below highlight how to search dataset name of daily products from ERDAPP server.</p>
+<pre class="r"><code># result  = searchData(&quot;varname:ssh&quot;)
+daily.dataset = searchData(&quot;datasetname:1day&quot;)</code></pre>
+<p>The file contains a lot of information, you can have a glimpse of the structure of the file with the <code>glimpse()</code> function from <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr">2018</a>)</span>. This gives a list of the datasetname of the 46 daily products.</p>
+<pre class="r"><code>daily.dataset %&gt;% glimpse() </code></pre>
+<pre><code>Observations: 19
+Variables: 46
+$ agssta1day               &lt;list&gt; [&quot;agssta1day&quot;, &quot;erdAGssta1day&quot;, &quot;SST...
+$ atssta1day               &lt;list&gt; [&quot;atssta1day&quot;, &quot;erdATssta1day&quot;, &quot;SST...
+$ erdG1ssta1day            &lt;list&gt; [&quot;erdG1ssta1day&quot;, &quot;erdG1ssta1day&quot;, &quot;...
+$ erdGAtfnt1day            &lt;list&gt; [&quot;erdGAtfnt1day&quot;, &quot;erdGAtfnt1day&quot;, &quot;...
+$ erdGRssta1day            &lt;list&gt; [&quot;erdGRssta1day&quot;, &quot;erdGRssta1day&quot;, &quot;...
+$ erdMBsstd1day            &lt;list&gt; [&quot;erdMBsstd1day&quot;, &quot;erdMBsstd1day&quot;, &quot;...
+$ erdMH1pp1day             &lt;list&gt; [&quot;erdMH1pp1day&quot;, &quot;erdMH1pp1day&quot;, &quot;Pr...
+$ erdMWchla1day            &lt;list&gt; [&quot;erdMWchla1day&quot;, &quot;erdMWchla1day&quot;, &quot;...
+$ erdMWpp1day              &lt;list&gt; [&quot;erdMWpp1day&quot;, &quot;erdMWpp1day&quot;, &quot;Prim...
+$ erdMWsstd1day            &lt;list&gt; [&quot;erdMWsstd1day&quot;, &quot;erdMWsstd1day&quot;, &quot;...
+$ erdQAstress1daycurl      &lt;list&gt; [&quot;erdQAstress1daycurl&quot;, &quot;erdQAstress...
+$ erdQAstress1daymodStress &lt;list&gt; [&quot;erdQAstress1daymodStress&quot;, &quot;erdQAs...
+$ erdQAstress1daytaux      &lt;list&gt; [&quot;erdQAstress1daytaux&quot;, &quot;erdQAstress...
+$ erdQAstress1daytauy      &lt;list&gt; [&quot;erdQAstress1daytauy&quot;, &quot;erdQAstress...
+$ erdQAstress1dayupwelling &lt;list&gt; [&quot;erdQAstress1dayupwelling&quot;, &quot;erdQAs...
+$ erdQAwind1dayx_wind      &lt;list&gt; [&quot;erdQAwind1dayx_wind&quot;, &quot;erdQAwind1d...
+$ erdQAwind1dayy_wind      &lt;list&gt; [&quot;erdQAwind1dayy_wind&quot;, &quot;erdQAwind1d...
+$ erdQAxwind1day           &lt;list&gt; [&quot;erdQAxwind1day&quot;, &quot;erdQAwind1day&quot;, ...
+$ erdQAywind1day           &lt;list&gt; [&quot;erdQAywind1day&quot;, &quot;erdQAwind1day&quot;, ...
+$ erdSHchla1day            &lt;list&gt; [&quot;erdSHchla1day&quot;, &quot;erdSHchla1day&quot;, &quot;...
+$ erdSW1chla1day           &lt;list&gt; [&quot;erdSW1chla1day&quot;, &quot;erdSW1chla1day&quot;,...
+$ erdTAssh1day             &lt;list&gt; [&quot;erdTAssh1day&quot;, &quot;erdTAssh1day&quot;, &quot;Se...
+$ erdTAugeo1day            &lt;list&gt; [&quot;erdTAugeo1day&quot;, &quot;erdTAgeo1day&quot;, &quot;U...
+$ erdTAvgeo1day            &lt;list&gt; [&quot;erdTAvgeo1day&quot;, &quot;erdTAgeo1day&quot;, &quot;V...
+$ erdVH3chla1day           &lt;list&gt; [&quot;erdVH3chla1day&quot;, &quot;erdVH3chla1day&quot;,...
+$ erdVH3k4901day           &lt;list&gt; [&quot;erdVH3k4901day&quot;, &quot;erdVH3k4901day&quot;,...
+$ erdVH3par1day            &lt;list&gt; [&quot;erdVH3par1day&quot;, &quot;erdVH3par1day&quot;, &quot;...
+$ erdVH3pic1day            &lt;list&gt; [&quot;erdVH3pic1day&quot;, &quot;erdVH3pic1day&quot;, &quot;...
+$ erdVH3poc1day            &lt;list&gt; [&quot;erdVH3poc1day&quot;, &quot;erdVH3poc1day&quot;, &quot;...
+$ erdVH3r6711day           &lt;list&gt; [&quot;erdVH3r6711day&quot;, &quot;erdVH3r6711day&quot;,...
+$ erdVHNchla1day           &lt;list&gt; [&quot;erdVHNchla1day&quot;, &quot;erdVHNchla1day&quot;,...
+$ gassta1day               &lt;list&gt; [&quot;gassta1day&quot;, &quot;erdGAssta1day&quot;, &quot;SST...
+$ jplMURSST41anom1day      &lt;list&gt; [&quot;jplMURSST41anom1day&quot;, &quot;jplMURSST41...
+$ mbchla1day               &lt;list&gt; [&quot;mbchla1day&quot;, &quot;erdMBchla1day&quot;, &quot;Chl...
+$ mhchla1day               &lt;list&gt; [&quot;mhchla1day&quot;, &quot;erdMH1chla1day&quot;, &quot;Ch...
+$ mhsstd1day               &lt;list&gt; [&quot;mhsstd1day&quot;, &quot;erdMH1sstd1day&quot;, &quot;SS...
+$ nodcPH2sstd1day          &lt;list&gt; [&quot;nodcPH2sstd1day&quot;, &quot;nodcPH2sstd1day...
+$ qnux101day               &lt;list&gt; [&quot;qnux101day&quot;, &quot;erdQSwind1day&quot;, &quot;Win...
+$ qscurl1day               &lt;list&gt; [&quot;qscurl1day&quot;, &quot;erdQSstress1day&quot;, &quot;W...
+$ qstaux1day               &lt;list&gt; [&quot;qstaux1day&quot;, &quot;erdQSstress1day&quot;, &quot;X...
+$ qstauy1day               &lt;list&gt; [&quot;qstauy1day&quot;, &quot;erdQSstress1day&quot;, &quot;Y...
+$ qstmod1day               &lt;list&gt; [&quot;qstmod1day&quot;, &quot;erdQSstress1day&quot;, &quot;W...
+$ qsumod1day               &lt;list&gt; [&quot;qsumod1day&quot;, &quot;erdQSdivmod1day&quot;, &quot;W...
+$ qsux101day               &lt;list&gt; [&quot;qsux101day&quot;, &quot;erdQSwind1day&quot;, &quot;X_W...
+$ qsuy101day               &lt;list&gt; [&quot;qsuy101day&quot;, &quot;erdQSwind1day&quot;, &quot;Y_W...
+$ tasshd1day               &lt;list&gt; [&quot;tasshd1day&quot;, &quot;erdTAssh1day&quot;, &quot;Sea ...</code></pre>
+<p>we can obtain:</p>
+<ul>
+<li>Sea Surface Height (erdTAssh1day),</li>
+<li>U-Geostrophic Currents (erdTAugeo1day) and</li>
+<li>V-Geostrophic Currents (erdTAvgeo1day).</li>
+</ul>
+<p>Once you have identified the datasetname of the daily product, you can use the <code>xtracto_3D()</code> function from <strong>xtractomatic</strong> package to download the file by specifying the geogrpahical extent and time bound of interest. For example, I am interested with the confluence where the South Equatorial Current splits and form the East African Coastal Current (EACC) and Mozambique Current (MC). I have defined the geographical extent of the area and the time bound in the chunk below.</p>
+<pre class="r"><code>lon.lim = c(39,50)
+lat.lim = c(-15,-7)
+time.lim = c(&quot;2010-12-20&quot;, &quot;2010-12-31&quot;)</code></pre>
+<p>Once we have the time geographical domain and the time bound, we can download the gridded sea surface height (ssh) and geostrophic zonal(U) and meridional(Z) currents. Let’s start with the zonal currents within the defined domain. We use the <code>xtracto_3D()</code> function and parse the arguments as shown in the code block below.</p>
+<pre class="r"><code>u = xtracto_3D(dtype = &quot;erdTAugeo1day&quot;,
+                                xpos = lon.lim, 
+                                ypos = lat.lim, 
+                                tpos = time.lim)</code></pre>
+<p>The downloaded <code>u</code> file is the list. We can explore the internal structure of the file with the <code>glimpse()</code> function to see the type of variables in the list file.</p>
+<pre class="r"><code>u %&gt;% glimpse()</code></pre>
+<pre><code>List of 7
+ $ data       : num [1:45, 1:33, 1:2] NA NA NA NA NA ...
+ $ varname    : chr &quot;u_current&quot;
+ $ datasetname: chr &quot;erdTAgeo1day&quot;
+ $ latitude   : num [1:33(1d)] -15 -14.8 -14.5 -14.2 -14 ...
+ $ longitude  : num [1:45(1d)] 39 39.2 39.5 39.7 40 ...
+ $ time       : POSIXlt[1:2], format: &quot;2010-12-22 12:00:00&quot; &quot;2010-12-29 12:00:00&quot;
+ $ altitude   : num 0</code></pre>
+<p>From this list file, we are only interested with four files, the <code>longitude</code>, <code>latitude</code>, <code>time</code> and the zonal currents. We can extract these files using the <code>$</code> sign operator.</p>
+<pre class="r"><code>lon = u$longitude
+lat = u$latitude
+time = u$time %&gt;%as.Date()
+u.data = u$data </code></pre>
+<p>The <code>longitude</code>, <code>latitude</code>, and <code>time</code> are vector and the zonal current is an array. We can look the dimension of these objects.</p>
+<pre class="r"><code>lon %&gt;% length(); lat %&gt;% length(); time %&gt;% length(); u.data %&gt;% dim()</code></pre>
+<pre><code>[1] 45</code></pre>
+<pre><code>[1] 33</code></pre>
+<pre><code>[1] 2</code></pre>
+<pre><code>[1] 45 33  2</code></pre>
+<p>We notice that there 45 longitude, 33 latitude, and 2 time difference and the u.data as an array of the longitude, latitude and time has the dimension of 45,35, and 2. Having this information, we can convert the array into data frame and combine them with the respective longitude, latitude and time. For demonstration purpose, I only use the first day of the time component. The chunk below show the lines of codes for the tranformation of the array into the data frame presented in table <a href="#tab:tab1">1</a></p>
+<pre class="r"><code>## obtain dimension
+dimension = data.frame(lon, u.data[,,1]) %&gt;% dim()
+
+## convert the array into data frame
+u.tb = data.frame(lon, u.data[,,1]) %&gt;% 
+  as_tibble() %&gt;% 
+  gather(key = &quot;lati&quot;, value = &quot;u&quot;, 2:dimension[2]) %&gt;% 
+  mutate(lat = rep(lat, each = dimension[1]), time = time[1]) %&gt;% 
+  select(lon,lat, time, u)</code></pre>
+<table>
+<caption><span id="tab:tab1">Table 1: </span>The table showing the randomly selected eight zonal geostrophic current</caption>
+<thead>
+<tr class="header">
+<th align="right">lon</th>
+<th align="right">lat</th>
+<th align="left">time</th>
+<th align="right">u</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">48.49663</td>
+<td align="right">-7.75</td>
+<td align="left">2010-12-22</td>
+<td align="right">-0.3193970</td>
+</tr>
+<tr class="even">
+<td align="right">46.99674</td>
+<td align="right">-8.00</td>
+<td align="left">2010-12-22</td>
+<td align="right">-0.1864640</td>
+</tr>
+<tr class="odd">
+<td align="right">40.24720</td>
+<td align="right">-7.75</td>
+<td align="left">2010-12-22</td>
+<td align="right">-0.0617215</td>
+</tr>
+<tr class="even">
+<td align="right">46.74675</td>
+<td align="right">-11.75</td>
+<td align="left">2010-12-22</td>
+<td align="right">-0.1066720</td>
+</tr>
+<tr class="odd">
+<td align="right">40.24720</td>
+<td align="right">-9.50</td>
+<td align="left">2010-12-22</td>
+<td align="right">-0.1541900</td>
+</tr>
+<tr class="even">
+<td align="right">40.24720</td>
+<td align="right">-9.00</td>
+<td align="left">2010-12-22</td>
+<td align="right">-0.0863635</td>
+</tr>
+<tr class="odd">
+<td align="right">39.24727</td>
+<td align="right">-9.75</td>
+<td align="left">2010-12-22</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="right">49.24658</td>
+<td align="right">-12.00</td>
+<td align="left">2010-12-22</td>
+<td align="right">NA</td>
+</tr>
+</tbody>
+</table>
+<p>We can use the same procedure we used to process the zonal compoent for the meridional component as shown in the code block below</p>
+<pre class="r"><code>v = xtracto_3D(dtype = &quot;erdTAvgeo1day&quot;,
+                                xpos = lon.lim, 
+                                ypos = lat.lim, 
+                                tpos = time.lim)</code></pre>
+<pre class="r"><code>lon = v$longitude
+lat = v$latitude
+time = v$time%&gt;%as.Date()
+v.data = v$data 
+
+v.tb = data.frame(lon, v.data[,,1]) %&gt;% 
+  as_tibble() %&gt;% 
+  gather(key = &quot;lati&quot;, value = &quot;v&quot;, 2:dimension[2]) %&gt;% 
+  mutate(lat = rep(lat, each = dimension[1]), time = time[1]) %&gt;% 
+  select(lon,lat, time, v)</code></pre>
+<p>Similarly, the sea surface height (ssh) is processed using the same approaches used to process the zonal and meridional components.</p>
+<pre class="r"><code>ssh = xtracto_3D(dtype = &quot;erdTAssh1day&quot;,
+                                xpos = lon.lim, 
+                                ypos = lat.lim, 
+                                tpos = time.lim)</code></pre>
+<pre class="r"><code>lon = ssh$longitude
+lat = ssh$latitude
+time = ssh$time%&gt;%as.Date()
+ssh.data = ssh$data 
+
+ssh.tb = data.frame(lon, ssh.data[,,1]) %&gt;% 
+  as_tibble() %&gt;% 
+  gather(key = &quot;lati&quot;, value = &quot;ssh&quot;, 2:dimension[2]) %&gt;% 
+  mutate(lat = rep(lat, each = dimension[1]), time = time[1]) %&gt;% 
+  select(lon,lat, time, ssh)
+
+ssh.in = oce::interpBarnes(x = ssh.tb$lon, y = ssh.tb$lat, z = ssh.tb$ssh)
+dimension = data.frame(lon = ssh.in$xg, ssh.in$zg) %&gt;% dim()
+
+ssh.in = data.frame(lon = ssh.in$xg, ssh.in$zg) %&gt;% 
+  as_tibble() %&gt;% 
+  gather(key = &quot;lati&quot;, value = &quot;ssh&quot;, 2:dimension[2]) %&gt;% 
+  mutate(lat = rep(ssh.in$yg, each = dimension[1]), time = time[1]) %&gt;% 
+  select(lon,lat, time, ssh)</code></pre>
+<p>Once we have data frames of zonal , meridional and ssh, we can stitch together to form a large data frame. The chunk below contains lines of code for binding the ssh, zonal (u) and meridional (v) currents.</p>
+<pre class="r"><code>aviso = ssh.tb %&gt;% 
+  bind_cols(u.tb %&gt;%select(u),
+            v.tb %&gt;% select(v))</code></pre>
+<div id="visualizing" class="section level2">
+<h2>Visualizing</h2>
+<p>Once the aviso data is tidy and arranged in data frame format, we can use the <strong>ggplot2</strong> functions to make maps that show the sea surface height as shown in figure <a href="#fig:ssh">1</a> that was created using the lines of code in the chunk below.</p>
+<pre class="r"><code>ssh.fig = ggplot()+
+  metR::geom_contour_fill(data = ssh.in, aes(x = lon, y = lat, z = ssh))+
+  metR::geom_contour2(data = ssh.in, aes(x = lon, y = lat, z = ssh))+
+  metR::geom_text_contour(data = ssh.in, aes(x = lon, y = lat, z = ssh), 
+                          parse = TRUE, check_overlap = TRUE, size = 3.2)+
+  geom_sf(data = spData::world, fill = &quot;grey60&quot;, col = &quot;grey20&quot;)+
+  coord_sf(xlim = c(39,49.5), ylim = c(-14.5,-8))+
+  theme(legend.position = &quot;none&quot;)+
+  labs(x = NULL, y = NULL)+
+  scale_fill_gradientn(name = &quot;ssh (m)&quot;,colours = oce::oceColors9A(120), na.value = &quot;white&quot;)+
+  scale_x_continuous(breaks = seq(39.5, 49.5, length.out = 4) %&gt;%round(1))+
+  scale_y_continuous(breaks = seq(-14,-8, 2))
+
+ssh.fig</code></pre>
+<div class="figure"><span id="fig:ssh"></span>
+<img src="/post/2019-04-15-access-download-process-and-visualize-sea-surface-height-and-geostrophic-current-from-aviso-in-r_files/figure-html/ssh-1.png" alt="Sea surface height as on 2010-10-22" width="672" />
+<p class="caption">
+Figure 1: Sea surface height as on 2010-10-22
+</p>
+</div>
+<p>We can also map the geostrophic currents speed and direction on top of the sea surface height as shown in figure <a href="#fig:vector">2</a>.</p>
+<pre class="r"><code>field.fig = ggplot()+
+  metR::geom_contour_fill(data = ssh.in, aes(x = lon, y = lat, z = ssh), bins = 120)+
+  metR::geom_vector(data = aviso, aes(x = lon, y = lat, dx = u, dy = v),
+                    arrow.angle = 25, arrow.length = .4, arrow.type = &quot;open&quot;)+
+  metR::scale_mag(max = .75, name = &quot;Speed&quot;, labels = &quot;.75 m/s&quot;)+
+    geom_sf(data = spData::world, fill = &quot;grey60&quot;, col = &quot;grey20&quot;)+
+  coord_sf(xlim = c(39,49.5), ylim = c(-14.5,-8))+
+  # theme(legend.position = &quot;none&quot;)+
+  labs(x = NULL, y = NULL)+
+  scale_fill_gradientn(name = &quot;ssh (m)&quot;,colours = oce::oceColors9A(120), na.value = &quot;white&quot;)+
+  scale_x_continuous(breaks = seq(39.5, 49.5, length.out = 4) %&gt;%round(1))+
+  scale_y_continuous(breaks = seq(-14,-8, 2))
+
+field.fig</code></pre>
+<div class="figure"><span id="fig:vector"></span>
+<img src="/post/2019-04-15-access-download-process-and-visualize-sea-surface-height-and-geostrophic-current-from-aviso-in-r_files/figure-html/vector-1.png" alt="geostrophic current overalid on the sea surface height" width="672" />
+<p class="caption">
+Figure 2: geostrophic current overalid on the sea surface height
+</p>
+</div>
+<pre class="r"><code># egg::ggarrange(ssh.fig, field.fig, nrow = 2)</code></pre>
+</div>
+<div id="reference" class="section level2 unnumbered">
+<h2>Reference</h2>
+<div id="refs" class="references">
+<div id="ref-xtracto">
+<p>Mendelssohn, Roy. 2018. <em>Xtractomatic: Accessing Environmental Data from Erd’s Erddap Server</em>. <a href="https://CRAN.R-project.org/package=xtractomatic" class="uri">https://CRAN.R-project.org/package=xtractomatic</a>.</p>
+</div>
+<div id="ref-gganimate">
+<p>Pedersen, Thomas Lin, and David Robinson. 2017. <em>Gganimate: A Grammar of Animated Graphics</em>. <a href="http://github.com/thomasp85/gganimate" class="uri">http://github.com/thomasp85/gganimate</a>.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org" class="uri">http://ggplot2.org</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr" class="uri">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+</div>
+</div>

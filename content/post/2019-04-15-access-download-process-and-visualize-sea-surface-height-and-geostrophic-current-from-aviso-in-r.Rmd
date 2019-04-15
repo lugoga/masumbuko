@@ -1,0 +1,230 @@
+---
+title: Access, Download, Process and VIsualize sea surface height and geostrophic
+  current from AVISO in R
+author: Masumbuko Semba
+date: '2019-04-15'
+slug: access-download-process-and-visualize-sea-surface-height-and-geostrophic-current-from-aviso-in-r
+categories:
+  - Oceanography
+  - Information Technology
+  - satellite
+  - R
+tags:
+  - aviso
+  - blogdown
+  - bookdown
+  - surface current
+  - geostrophic current
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
+```
+
+[In this post](https://semba-blog.netlify.com/11/07/2018/read-netcdf-file-with-in-r/) I explain how to read the NetCDF file of aviso in R. I also showed how to make plot of the processed sea surface height with **ggplot2** package [@ggplot] and also animated a series of map with **gganimate** packages [@gganimate]. However, the link that I used to obtain the data is no longer active and people find difficult to follow the instructions in the post. Therefore, in this post I show how to download the aviso data from the website into R [@xtracto]. 
+
+```{r}
+require(xtractomatic)
+require(lubridate)
+require(tidyverse)
+```
+
+R has powerful packages that can download data from ERDAPP server. Among the dataset that are public available are product of AVISO. You can use the `searchData()` function from **xtractomatic** package to search for a dataset name that you need [@xtracto]. For example the chunk below highlight how to search dataset name of daily products from ERDAPP server.
+
+```{r, echo=FALSE}
+load("e:/Data Manipulation/xtractomatic/aviso_response.RData")
+rm(list = setdiff(ls(), c("u", "v", "ssh", "daily.dataset")))
+```
+
+
+```{r, eval=FALSE}
+# result  = searchData("varname:ssh")
+daily.dataset = searchData("datasetname:1day")
+```
+
+The file contains a lot of information, you can have a glimpse of the structure of the file with the `glimpse()` function from **dplyr** package [@dplyr]. This gives a list of the  datasetname of the 46 daily products. 
+```{r}
+daily.dataset %>% glimpse() 
+```
+
+we can obtain: 
+
++ Sea Surface Height (erdTAssh1day), 
++ U-Geostrophic Currents (erdTAugeo1day) and 
++ V-Geostrophic Currents (erdTAvgeo1day).
+
+Once you have identified the datasetname of the daily product, you can use the `xtracto_3D()` function from **xtractomatic** package to download the file by specifying the geogrpahical extent and time bound of interest. For example, I am interested with the confluence where the South Equatorial Current splits and form the East African Coastal Current (EACC) and Mozambique Current (MC). I have defined the geographical extent of the area and the time bound in the chunk below.
+
+```{r}
+lon.lim = c(39,50)
+lat.lim = c(-15,-7)
+time.lim = c("2010-12-20", "2010-12-31")
+
+
+```
+
+Once we have the time geographical domain and the time bound, we can download the gridded sea surface height (ssh) and geostrophic zonal(U) and meridional(Z) currents. Let's start with the zonal currents within the defined domain. We use the `xtracto_3D()` function and parse the arguments as shown in the code block below.
+
+```{r, eval=FALSE}
+
+u = xtracto_3D(dtype = "erdTAugeo1day",
+                                xpos = lon.lim, 
+                                ypos = lat.lim, 
+                                tpos = time.lim)
+
+```
+
+The downloaded  `u` file is the list. We can explore the internal structure of the file with the `glimpse()` function to see the type of variables in the list file. 
+
+```{r}
+u %>% glimpse()
+```
+
+From this list file, we are only interested with four files, the `longitude`, `latitude`, `time` and the zonal currents. We can extract these files using the `$` sign operator.
+
+```{r}
+lon = u$longitude
+lat = u$latitude
+time = u$time %>%as.Date()
+u.data = u$data 
+```
+
+The `longitude`, `latitude`, and `time` are vector and the zonal current is an array. We can look the dimension of these objects.
+
+```{r}
+lon %>% length(); lat %>% length(); time %>% length(); u.data %>% dim()
+```
+We notice that there 45 longitude, 33 latitude, and 2 time difference and the u.data as an array of the longitude, latitude and time has the dimension of 45,35, and 2. Having this information, we can convert the array into data frame and combine them with the respective longitude, latitude and time. For demonstration purpose, I only use the first day of the time component. The chunk below show the lines of codes for the tranformation of the array into the data frame presented in table \@ref(tab:tab1)
+
+```{r}
+
+## obtain dimension
+dimension = data.frame(lon, u.data[,,1]) %>% dim()
+
+## convert the array into data frame
+u.tb = data.frame(lon, u.data[,,1]) %>% 
+  as_tibble() %>% 
+  gather(key = "lati", value = "u", 2:dimension[2]) %>% 
+  mutate(lat = rep(lat, each = dimension[1]), time = time[1]) %>% 
+  select(lon,lat, time, u)
+```
+
+```{r tab1, echo=FALSE}
+u.tb %>% sample_n(8) %>% knitr::kable(caption = "The table showing the randomly selected eight zonal geostrophic current")
+```
+
+We can use the same procedure we used to process the zonal compoent for the meridional component as  shown in the code block below
+```{r, eval=FALSE}
+v = xtracto_3D(dtype = "erdTAvgeo1day",
+                                xpos = lon.lim, 
+                                ypos = lat.lim, 
+                                tpos = time.lim)
+
+```
+
+
+```{r}
+lon = v$longitude
+lat = v$latitude
+time = v$time%>%as.Date()
+v.data = v$data 
+
+v.tb = data.frame(lon, v.data[,,1]) %>% 
+  as_tibble() %>% 
+  gather(key = "lati", value = "v", 2:dimension[2]) %>% 
+  mutate(lat = rep(lat, each = dimension[1]), time = time[1]) %>% 
+  select(lon,lat, time, v)
+```
+
+
+Similarly, the sea surface height (ssh) is processed using the same approaches used to process the zonal and meridional components.
+
+
+```{r, eval=FALSE}
+ssh = xtracto_3D(dtype = "erdTAssh1day",
+                                xpos = lon.lim, 
+                                ypos = lat.lim, 
+                                tpos = time.lim)
+
+```
+
+
+```{r}
+lon = ssh$longitude
+lat = ssh$latitude
+time = ssh$time%>%as.Date()
+ssh.data = ssh$data 
+
+ssh.tb = data.frame(lon, ssh.data[,,1]) %>% 
+  as_tibble() %>% 
+  gather(key = "lati", value = "ssh", 2:dimension[2]) %>% 
+  mutate(lat = rep(lat, each = dimension[1]), time = time[1]) %>% 
+  select(lon,lat, time, ssh)
+
+ssh.in = oce::interpBarnes(x = ssh.tb$lon, y = ssh.tb$lat, z = ssh.tb$ssh)
+dimension = data.frame(lon = ssh.in$xg, ssh.in$zg) %>% dim()
+
+ssh.in = data.frame(lon = ssh.in$xg, ssh.in$zg) %>% 
+  as_tibble() %>% 
+  gather(key = "lati", value = "ssh", 2:dimension[2]) %>% 
+  mutate(lat = rep(ssh.in$yg, each = dimension[1]), time = time[1]) %>% 
+  select(lon,lat, time, ssh)
+```
+
+Once we have data frames of zonal , meridional and ssh, we can stitch together to form a large data frame. The chunk below contains lines of code for binding the ssh, zonal (u) and meridional (v) currents.
+
+```{r}
+aviso = ssh.tb %>% 
+  bind_cols(u.tb %>%select(u),
+            v.tb %>% select(v))
+```
+
+## Visualizing
+
+Once the aviso data is tidy and arranged in data frame format, we can use the **ggplot2** functions to make maps that show the sea surface height as shown in figure \@ref(fig:ssh) that was created using the lines of code in the chunk below.
+
+```{r ssh, fig.cap="Sea surface height as on 2010-10-22"}
+ssh.fig = ggplot()+
+  metR::geom_contour_fill(data = ssh.in, aes(x = lon, y = lat, z = ssh))+
+  metR::geom_contour2(data = ssh.in, aes(x = lon, y = lat, z = ssh))+
+  metR::geom_text_contour(data = ssh.in, aes(x = lon, y = lat, z = ssh), 
+                          parse = TRUE, check_overlap = TRUE, size = 3.2)+
+  geom_sf(data = spData::world, fill = "grey60", col = "grey20")+
+  coord_sf(xlim = c(39,49.5), ylim = c(-14.5,-8))+
+  theme(legend.position = "none")+
+  labs(x = NULL, y = NULL)+
+  scale_fill_gradientn(name = "ssh (m)",colours = oce::oceColors9A(120), na.value = "white")+
+  scale_x_continuous(breaks = seq(39.5, 49.5, length.out = 4) %>%round(1))+
+  scale_y_continuous(breaks = seq(-14,-8, 2))
+
+ssh.fig
+
+```
+
+
+We can also map the geostrophic currents speed and direction on top of the sea surface height as shown in figure \@ref(fig:vector).
+
+```{r vector, fig.cap="geostrophic current overalid on the sea surface height"}
+field.fig = ggplot()+
+  metR::geom_contour_fill(data = ssh.in, aes(x = lon, y = lat, z = ssh), bins = 120)+
+  metR::geom_vector(data = aviso, aes(x = lon, y = lat, dx = u, dy = v),
+                    arrow.angle = 25, arrow.length = .4, arrow.type = "open")+
+  metR::scale_mag(max = .75, name = "Speed", labels = ".75 m/s")+
+    geom_sf(data = spData::world, fill = "grey60", col = "grey20")+
+  coord_sf(xlim = c(39,49.5), ylim = c(-14.5,-8))+
+  # theme(legend.position = "none")+
+  labs(x = NULL, y = NULL)+
+  scale_fill_gradientn(name = "ssh (m)",colours = oce::oceColors9A(120), na.value = "white")+
+  scale_x_continuous(breaks = seq(39.5, 49.5, length.out = 4) %>%round(1))+
+  scale_y_continuous(breaks = seq(-14,-8, 2))
+
+field.fig
+# egg::ggarrange(ssh.fig, field.fig, nrow = 2)
+```
+
+
+## Reference
