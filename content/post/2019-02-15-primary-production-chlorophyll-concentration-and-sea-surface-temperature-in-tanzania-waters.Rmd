@@ -110,6 +110,124 @@ contour(year, month,chl.array[,,j]%>%t() , add = T)
 
 ```
 
+I created a function that convert matrix from array to data frame. I first load the file that contains the function from the directory
+
+```{r, echo=FALSE}
+source("e:/Data Manipulation/semba_functions.R")
+```
+
+
+```{r, eval=FALSE}
+source("./Data Manipulation/semba_functions.R")
+```
+
+
+```{r}
+## load the function I created for converting
+month = 1:12
+year = 2003:2018
+
+chl.tb = list()
+for (j in 1:length(sites)){
+  
+chl.tb[[j]] = matrix_tb(x = month, y = year, data = chl.array[,,j]) %>%
+  rename(month = x, year = y) %>% mutate(site = sites[j])
+  
+}
+chl.tb = chl.tb %>% bind_rows()
+
+
+```
+
+```{r}
+
+mafia = ggplot()+
+  metR::geom_contour_fill(data = chl.tb %>% filter(site == "Mafia"),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c("February", "April", "June", "August", "October"))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = "Chl")+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = "right",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(mgm^{-3}),
+                               title.position = "top", 
+                               title.hjust = 0.5, 
+                               direction = "vertical",
+                               reverse = FALSE, 
+                               barwidth = unit(.4, "cm"),
+                               barheight = unit(4, "cm")))+
+  labs(x = "", y = "", title = "Mafia Channel")
+
+zanzibar = ggplot()+
+  metR::geom_contour_fill(data = chl.tb %>% filter(site == "Zanzibar"),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c("February", "April", "June", "August", "October"))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = "Chl")+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = "right",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(mgm^{-3}),
+                               title.position = "top", 
+                               title.hjust = 0.5, 
+                               direction = "vertical",
+                               reverse = FALSE, 
+                               barwidth = unit(.4, "cm"),
+                               barheight = unit(4, "cm")))+
+  labs(x = "", y = "", title = "Zanzibar Channel")
+
+pemba = ggplot()+
+  metR::geom_contour_fill(data = chl.tb %>% filter(site == "Pemba"),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c("February", "April", "June", "August", "October"))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = "Chl")+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = "right",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(mgm^{-3}),
+                               title.position = "top", 
+                               title.hjust = 0.5, 
+                               direction = "vertical",
+                               reverse = FALSE, 
+                               barwidth = unit(.4, "cm"),
+                               barheight = unit(4, "cm")))+
+  labs(x = "", y = "", title = "Pemba Channel")
+
+eez = ggplot()+
+  metR::geom_contour_fill(data = chl.tb %>% filter(site == "EEZ"),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c("February", "April", "June", "August", "October"))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = "Chl")+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = "right",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(mgm^{-3}),
+                               title.position = "top", 
+                               title.hjust = 0.5, 
+                               direction = "vertical",
+                               reverse = FALSE, 
+                               barwidth = unit(.4, "cm"),
+                               barheight = unit(4, "cm")))+
+  labs(x = "", y = "", title = "EEZ")
+  
+egg::ggarrange(mafia, zanzibar, pemba, eez, nrow = 2)
+```
+
 
 ### Primary productivity
 ```{r}
@@ -184,6 +302,112 @@ contour(year, month,pp.array[,,j]%>%t() , add = T)
 ```
 
 
+```{r}
+## load the function I created for converting
+month = 1:12
+year = 2003:2018
+
+pp.tb = list()
+for (j in 1:length(sites)){
+  
+pp.tb[[j]] = matrix_tb(x = month, y = year, data = pp.array[,,j]) %>%
+  rename(month = x, year = y) %>% mutate(site = sites[j])
+  
+}
+pp.tb = pp.tb %>% bind_rows()
+
+
+```
+
+```{r}
+
+mafia = ggplot()+
+  metR::geom_contour_fill(data = pp.tb %>% filter(site == "Mafia"),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c("February", "April", "June", "August", "October"))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = "Chl")+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = "right",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(Cm^{-3}~yr^{-1}),
+                               title.position = "top", 
+                               title.hjust = 0.5, 
+                               direction = "vertical",
+                               reverse = FALSE, 
+                               barwidth = unit(.4, "cm"),
+                               barheight = unit(4, "cm")))+
+  labs(x = "", y = "", title = "Mafia Channel")
+
+zanzibar = ggplot()+
+  metR::geom_contour_fill(data = pp.tb %>% filter(site == "Zanzibar"),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c("February", "April", "June", "August", "October"))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = "Chl")+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = "right",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(Cm^{-3}~yr^{-1}),
+                               title.position = "top", 
+                               title.hjust = 0.5, 
+                               direction = "vertical",
+                               reverse = FALSE, 
+                               barwidth = unit(.4, "cm"),
+                               barheight = unit(4, "cm")))+
+  labs(x = "", y = "", title = "Zanzibar Channel")
+
+pemba = ggplot()+
+  metR::geom_contour_fill(data = pp.tb %>% filter(site == "Pemba"),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c("February", "April", "June", "August", "October"))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = "Chl")+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = "right",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(Cm^{-3}~yr^{-1}),
+                               title.position = "top", 
+                               title.hjust = 0.5, 
+                               direction = "vertical",
+                               reverse = FALSE, 
+                               barwidth = unit(.4, "cm"),
+                               barheight = unit(4, "cm")))+
+  labs(x = "", y = "", title = "Pemba Channel")
+
+eez = ggplot()+
+  metR::geom_contour_fill(data = pp.tb %>% filter(site == "EEZ"),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c("February", "April", "June", "August", "October"))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = "Chl")+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = "right",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(Cm^{-3}~yr^{-1}),
+                               title.position = "top", 
+                               title.hjust = 0.5, 
+                               direction = "vertical",
+                               reverse = FALSE, 
+                               barwidth = unit(.4, "cm"),
+                               barheight = unit(4, "cm")))+
+  labs(x = "", y = "", title = "EEZ")
+  
+egg::ggarrange(mafia, zanzibar, pemba, eez, nrow = 2)
+```
+
 ### Temperature
 
 ```{r}
@@ -248,3 +472,109 @@ contour(year, month,sst.array[,,j]%>%t() , add = T)
 
 ```
 
+
+```{r}
+## load the function I created for converting
+month = 1:12
+year = 2003:2018
+
+sst.tb = list()
+for (j in 1:length(sites)){
+  
+sst.tb[[j]] = matrix_tb(x = month, y = year, data = sst.array[,,j]) %>%
+  rename(month = x, year = y) %>% mutate(site = sites[j])
+  
+}
+sst.tb = sst.tb %>% bind_rows()
+
+
+```
+
+```{r}
+
+mafia = ggplot()+
+  metR::geom_contour_fill(data = sst.tb %>% filter(site == "Mafia"),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c("February", "April", "June", "August", "October"))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = "Chl")+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = "right",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(degree*C),
+                               title.position = "top", 
+                               title.hjust = 0.5, 
+                               direction = "vertical",
+                               reverse = FALSE, 
+                               barwidth = unit(.4, "cm"),
+                               barheight = unit(4, "cm")))+
+  labs(x = "", y = "", title = "Mafia Channel")
+
+zanzibar = ggplot()+
+  metR::geom_contour_fill(data = sst.tb %>% filter(site == "Zanzibar"),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c("February", "April", "June", "August", "October"))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = "Chl")+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = "right",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(~degree*C),
+                               title.position = "top", 
+                               title.hjust = 0.5, 
+                               direction = "vertical",
+                               reverse = FALSE, 
+                               barwidth = unit(.4, "cm"),
+                               barheight = unit(4, "cm")))+
+  labs(x = "", y = "", title = "Zanzibar Channel")
+
+pemba = ggplot()+
+  metR::geom_contour_fill(data = sst.tb %>% filter(site == "Pemba"),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c("February", "April", "June", "August", "October"))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = "Chl")+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = "right",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(~degree*C),
+                               title.position = "top", 
+                               title.hjust = 0.5, 
+                               direction = "vertical",
+                               reverse = FALSE, 
+                               barwidth = unit(.4, "cm"),
+                               barheight = unit(4, "cm")))+
+  labs(x = "", y = "", title = "Pemba Channel")
+
+eez = ggplot()+
+  metR::geom_contour_fill(data = sst.tb %>% filter(site == "EEZ"),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c("February", "April", "June", "August", "October"))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = "Chl")+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = "right",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(~degree*C),
+                               title.position = "top", 
+                               title.hjust = 0.5, 
+                               direction = "vertical",
+                               reverse = FALSE, 
+                               barwidth = unit(.4, "cm"),
+                               barheight = unit(4, "cm")))+
+  labs(x = "", y = "", title = "EEZ")
+  
+egg::ggarrange(mafia, zanzibar, pemba, eez, nrow = 2)
+```

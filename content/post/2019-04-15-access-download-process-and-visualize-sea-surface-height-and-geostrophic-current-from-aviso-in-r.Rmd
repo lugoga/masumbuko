@@ -36,7 +36,7 @@ require(tidyverse)
 R has powerful packages that can download data from ERDAPP server. Among the dataset that are public available are product of AVISO. You can use the `searchData()` function from **xtractomatic** package to search for a dataset name that you need [@xtracto]. For example the chunk below highlight how to search dataset name of daily products from ERDAPP server.
 
 ```{r, echo=FALSE}
-load("e:/Data Manipulation/xtractomatic/aviso_response.RData")
+load("./aviso_response.RData")
 rm(list = setdiff(ls(), c("u", "v", "ssh", "daily.dataset")))
 ```
 
@@ -67,7 +67,7 @@ time.lim = c("2010-12-20", "2010-12-31")
 
 ```
 
-Once we have the time geographical domain and the time bound, we can download the gridded sea surface height (ssh) and geostrophic zonal(U) and meridional(Z) currents. Let's start with the zonal currents within the defined domain. We use the `xtracto_3D()` function and parse the arguments as shown in the code block below.
+We can now download the gridded sea surface height (ssh) and geostrophic zonal(U) and meridional(Z) currents within the geographical domain and the time bound defined. We starat with zonal currents. We use the `xtracto_3D()` function and parse the arguments as shown in the code block below.
 
 ```{r, eval=FALSE}
 

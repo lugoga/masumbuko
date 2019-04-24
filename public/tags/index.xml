@@ -6,73 +6,10 @@
     <description>Recent content in Tags on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 18 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 15 Apr 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>Adcp</title>
-      <link>/tags/adcp/</link>
-      <pubDate>Thu, 18 Oct 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/adcp/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Algoa</title>
-      <link>/tags/algoa/</link>
-      <pubDate>Sat, 09 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/algoa/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Argo</title>
-      <link>/tags/argo/</link>
-      <pubDate>Sat, 02 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/argo/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Ascat</title>
-      <link>/tags/ascat/</link>
-      <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/ascat/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Aviso</title>
-      <link>/tags/aviso/</link>
-      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/aviso/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Bathymetry</title>
-      <link>/tags/bathymetry/</link>
-      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/bathymetry/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Blogdown</title>
-      <link>/tags/blogdown/</link>
-      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/blogdown/</guid>
-      <description></description>
-    </item>
     
     <item>
       <title>Bookdown</title>
@@ -84,47 +21,38 @@
     </item>
     
     <item>
-      <title>Chlorophyll</title>
-      <link>/tags/chlorophyll/</link>
-      <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
+      <title>aviso</title>
+      <link>/tags/aviso/</link>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/chlorophyll/</guid>
+      <guid>/tags/aviso/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Chumbe Island</title>
-      <link>/tags/chumbe-island/</link>
-      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
+      <title>blogdown</title>
+      <link>/tags/blogdown/</link>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/chumbe-island/</guid>
+      <guid>/tags/blogdown/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Climate</title>
-      <link>/tags/climate/</link>
-      <pubDate>Fri, 08 Feb 2019 00:00:00 +0000</pubDate>
+      <title>geostrophic current</title>
+      <link>/tags/geostrophic-current/</link>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/climate/</guid>
+      <guid>/tags/geostrophic-current/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Ctd</title>
-      <link>/tags/ctd/</link>
-      <pubDate>Sun, 17 Mar 2019 00:00:00 +0000</pubDate>
+      <title>surface current</title>
+      <link>/tags/surface-current/</link>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/ctd/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Depth</title>
-      <link>/tags/depth/</link>
-      <pubDate>Sat, 02 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/depth/</guid>
+      <guid>/tags/surface-current/</guid>
       <description></description>
     </item>
     
@@ -138,137 +66,11 @@
     </item>
     
     <item>
-      <title>Eacc</title>
-      <link>/tags/eacc/</link>
-      <pubDate>Tue, 29 Jan 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/eacc/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>East Africa</title>
-      <link>/tags/east-africa/</link>
-      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/east-africa/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Etopo</title>
-      <link>/tags/etopo/</link>
-      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/etopo/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Fluorescence</title>
-      <link>/tags/fluorescence/</link>
-      <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/fluorescence/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Geostrophic Current</title>
-      <link>/tags/geostrophic-current/</link>
-      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/geostrophic-current/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Iioe 2</title>
-      <link>/tags/iioe-2/</link>
-      <pubDate>Mon, 15 Oct 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/iioe-2/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>Indian Ocean</title>
       <link>/tags/indian-ocean/</link>
       <pubDate>Wed, 20 Mar 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/indian-ocean/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Kimbiji</title>
-      <link>/tags/kimbiji/</link>
-      <pubDate>Sat, 09 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/kimbiji/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Mafia Channel</title>
-      <link>/tags/mafia-channel/</link>
-      <pubDate>Tue, 12 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/mafia-channel/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Mapping</title>
-      <link>/tags/mapping/</link>
-      <pubDate>Wed, 13 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/mapping/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Masumbuko Semba</title>
-      <link>/tags/masumbuko-semba/</link>
-      <pubDate>Tue, 19 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/masumbuko-semba/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Mld</title>
-      <link>/tags/mld/</link>
-      <pubDate>Sat, 09 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/mld/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Modis</title>
-      <link>/tags/modis/</link>
-      <pubDate>Thu, 20 Sep 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/modis/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Mtwara</title>
-      <link>/tags/mtwara/</link>
-      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/mtwara/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Oce</title>
-      <link>/tags/oce/</link>
-      <pubDate>Wed, 13 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/oce/</guid>
       <description></description>
     </item>
     
@@ -282,20 +84,29 @@
     </item>
     
     <item>
-      <title>Oxygen</title>
-      <link>/tags/oxygen/</link>
-      <pubDate>Sat, 09 Feb 2019 00:00:00 +0000</pubDate>
+      <title>Time Series</title>
+      <link>/tags/time-series/</link>
+      <pubDate>Mon, 18 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/oxygen/</guid>
+      <guid>/tags/time-series/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Pemba</title>
-      <link>/tags/pemba/</link>
-      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
+      <title>sea surface temperature</title>
+      <link>/tags/sea-surface-temperature/</link>
+      <pubDate>Mon, 18 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/pemba/</guid>
+      <guid>/tags/sea-surface-temperature/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>CTD</title>
+      <link>/tags/ctd/</link>
+      <pubDate>Sun, 17 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/ctd/</guid>
       <description></description>
     </item>
     
@@ -309,38 +120,38 @@
     </item>
     
     <item>
-      <title>Pressure</title>
-      <link>/tags/pressure/</link>
-      <pubDate>Tue, 12 Feb 2019 00:00:00 +0000</pubDate>
+      <title>Tanzania</title>
+      <link>/tags/tanzania/</link>
+      <pubDate>Sun, 17 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/pressure/</guid>
+      <guid>/tags/tanzania/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Primary Productivity</title>
-      <link>/tags/primary-productivity/</link>
-      <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
+      <title>Zanzibar</title>
+      <link>/tags/zanzibar/</link>
+      <pubDate>Sun, 17 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/primary-productivity/</guid>
+      <guid>/tags/zanzibar/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Quikscat</title>
-      <link>/tags/quikscat/</link>
-      <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
+      <title>Chumbe Island</title>
+      <link>/tags/chumbe-island/</link>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/quikscat/</guid>
+      <guid>/tags/chumbe-island/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>R</title>
-      <link>/tags/r/</link>
-      <pubDate>Fri, 23 Nov 2018 00:00:00 +0000</pubDate>
+      <title>RStudio</title>
+      <link>/tags/rstudio/</link>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/r/</guid>
+      <guid>/tags/rstudio/</guid>
       <description></description>
     </item>
     
@@ -354,65 +165,29 @@
     </item>
     
     <item>
-      <title>Rstudio</title>
-      <link>/tags/rstudio/</link>
+      <title>Unguja</title>
+      <link>/tags/unguja/</link>
       <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/rstudio/</guid>
+      <guid>/tags/unguja/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Rufiji River</title>
-      <link>/tags/rufiji-river/</link>
-      <pubDate>Thu, 04 Oct 2018 00:00:00 +0000</pubDate>
+      <title>East Africa</title>
+      <link>/tags/east-africa/</link>
+      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/rufiji-river/</guid>
+      <guid>/tags/east-africa/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Salinity</title>
-      <link>/tags/salinity/</link>
-      <pubDate>Sat, 02 Feb 2019 00:00:00 +0000</pubDate>
+      <title>Masumbuko Semba</title>
+      <link>/tags/masumbuko-semba/</link>
+      <pubDate>Tue, 19 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/salinity/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Satellite</title>
-      <link>/tags/satellite/</link>
-      <pubDate>Tue, 23 Oct 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/satellite/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Sea Surface Temperature</title>
-      <link>/tags/sea-surface-temperature/</link>
-      <pubDate>Mon, 18 Mar 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/sea-surface-temperature/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Surface Current</title>
-      <link>/tags/surface-current/</link>
-      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/surface-current/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Tanzania</title>
-      <link>/tags/tanzania/</link>
-      <pubDate>Sun, 17 Mar 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/tanzania/</guid>
+      <guid>/tags/masumbuko-semba/</guid>
       <description></description>
     </item>
     
@@ -426,25 +201,196 @@
     </item>
     
     <item>
-      <title>Time Series</title>
-      <link>/tags/time-series/</link>
-      <pubDate>Mon, 18 Mar 2019 00:00:00 +0000</pubDate>
+      <title>chlorophyll</title>
+      <link>/tags/chlorophyll/</link>
+      <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/time-series/</guid>
+      <guid>/tags/chlorophyll/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Unguja</title>
-      <link>/tags/unguja/</link>
-      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
+      <title>primary productivity</title>
+      <link>/tags/primary-productivity/</link>
+      <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/unguja/</guid>
+      <guid>/tags/primary-productivity/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Wind Direction</title>
+      <title>Bathymetry</title>
+      <link>/tags/bathymetry/</link>
+      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/bathymetry/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Mtwara</title>
+      <link>/tags/mtwara/</link>
+      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/mtwara/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Pemba</title>
+      <link>/tags/pemba/</link>
+      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/pemba/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>etopo</title>
+      <link>/tags/etopo/</link>
+      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/etopo/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>mapping</title>
+      <link>/tags/mapping/</link>
+      <pubDate>Wed, 13 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/mapping/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>oce</title>
+      <link>/tags/oce/</link>
+      <pubDate>Wed, 13 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/oce/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Mafia Channel</title>
+      <link>/tags/mafia-channel/</link>
+      <pubDate>Tue, 12 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/mafia-channel/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>pressure</title>
+      <link>/tags/pressure/</link>
+      <pubDate>Tue, 12 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/pressure/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Algoa</title>
+      <link>/tags/algoa/</link>
+      <pubDate>Sat, 09 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/algoa/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Kimbiji</title>
+      <link>/tags/kimbiji/</link>
+      <pubDate>Sat, 09 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/kimbiji/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>MLD</title>
+      <link>/tags/mld/</link>
+      <pubDate>Sat, 09 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/mld/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>oxygen</title>
+      <link>/tags/oxygen/</link>
+      <pubDate>Sat, 09 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/oxygen/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Climate</title>
+      <link>/tags/climate/</link>
+      <pubDate>Fri, 08 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/climate/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Argo</title>
+      <link>/tags/argo/</link>
+      <pubDate>Sat, 02 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/argo/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Depth</title>
+      <link>/tags/depth/</link>
+      <pubDate>Sat, 02 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/depth/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Salinity</title>
+      <link>/tags/salinity/</link>
+      <pubDate>Sat, 02 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/salinity/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>EACC</title>
+      <link>/tags/eacc/</link>
+      <pubDate>Tue, 29 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/eacc/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>R</title>
+      <link>/tags/r/</link>
+      <pubDate>Fri, 23 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/r/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Fluorescence</title>
+      <link>/tags/fluorescence/</link>
+      <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/fluorescence/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>wind direction</title>
       <link>/tags/wind-direction/</link>
       <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
       
@@ -453,7 +399,7 @@
     </item>
     
     <item>
-      <title>Wind Speed</title>
+      <title>wind speed</title>
       <link>/tags/wind-speed/</link>
       <pubDate>Mon, 29 Oct 2018 00:00:00 +0000</pubDate>
       
@@ -462,11 +408,65 @@
     </item>
     
     <item>
-      <title>Zanzibar</title>
-      <link>/tags/zanzibar/</link>
-      <pubDate>Sun, 17 Mar 2019 00:00:00 +0000</pubDate>
+      <title>Ascat</title>
+      <link>/tags/ascat/</link>
+      <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/zanzibar/</guid>
+      <guid>/tags/ascat/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>quikscat</title>
+      <link>/tags/quikscat/</link>
+      <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/quikscat/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Satellite</title>
+      <link>/tags/satellite/</link>
+      <pubDate>Tue, 23 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/satellite/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ADCP</title>
+      <link>/tags/adcp/</link>
+      <pubDate>Thu, 18 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/adcp/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>IIOE-2</title>
+      <link>/tags/iioe-2/</link>
+      <pubDate>Mon, 15 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/iioe-2/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Rufiji River</title>
+      <link>/tags/rufiji-river/</link>
+      <pubDate>Thu, 04 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/rufiji-river/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>MODIS</title>
+      <link>/tags/modis/</link>
+      <pubDate>Thu, 20 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/modis/</guid>
       <description></description>
     </item>
     

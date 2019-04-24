@@ -89,7 +89,7 @@ $ tasshd1day               &lt;list&gt; [&quot;tasshd1day&quot;, &quot;erdTAssh1
 <pre class="r"><code>lon.lim = c(39,50)
 lat.lim = c(-15,-7)
 time.lim = c(&quot;2010-12-20&quot;, &quot;2010-12-31&quot;)</code></pre>
-<p>Once we have the time geographical domain and the time bound, we can download the gridded sea surface height (ssh) and geostrophic zonal(U) and meridional(Z) currents. Let’s start with the zonal currents within the defined domain. We use the <code>xtracto_3D()</code> function and parse the arguments as shown in the code block below.</p>
+<p>We can now download the gridded sea surface height (ssh) and geostrophic zonal(U) and meridional(Z) currents within the geographical domain and the time bound defined. We starat with zonal currents. We use the <code>xtracto_3D()</code> function and parse the arguments as shown in the code block below.</p>
 <pre class="r"><code>u = xtracto_3D(dtype = &quot;erdTAugeo1day&quot;,
                                 xpos = lon.lim, 
                                 ypos = lat.lim, 

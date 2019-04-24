@@ -135,6 +135,106 @@ contour(year, month,chl.array[,,j]%&gt;%t() , add = T)
 Figure 3: Hovmoller diagram of chlorophyll concentration
 </p>
 </div>
+<p>I created a function that convert matrix from array to data frame. I first load the file that contains the function from the directory</p>
+<pre class="r"><code>source(&quot;./Data Manipulation/semba_functions.R&quot;)</code></pre>
+<pre class="r"><code>## load the function I created for converting
+month = 1:12
+year = 2003:2018
+
+chl.tb = list()
+for (j in 1:length(sites)){
+  
+chl.tb[[j]] = matrix_tb(x = month, y = year, data = chl.array[,,j]) %&gt;%
+  rename(month = x, year = y) %&gt;% mutate(site = sites[j])
+  
+}
+chl.tb = chl.tb %&gt;% bind_rows()</code></pre>
+<pre class="r"><code>mafia = ggplot()+
+  metR::geom_contour_fill(data = chl.tb %&gt;% filter(site == &quot;Mafia&quot;),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c(&quot;February&quot;, &quot;April&quot;, &quot;June&quot;, &quot;August&quot;, &quot;October&quot;))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = &quot;Chl&quot;)+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = &quot;right&quot;,
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(mgm^{-3}),
+                               title.position = &quot;top&quot;, 
+                               title.hjust = 0.5, 
+                               direction = &quot;vertical&quot;,
+                               reverse = FALSE, 
+                               barwidth = unit(.4, &quot;cm&quot;),
+                               barheight = unit(4, &quot;cm&quot;)))+
+  labs(x = &quot;&quot;, y = &quot;&quot;, title = &quot;Mafia Channel&quot;)
+
+zanzibar = ggplot()+
+  metR::geom_contour_fill(data = chl.tb %&gt;% filter(site == &quot;Zanzibar&quot;),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c(&quot;February&quot;, &quot;April&quot;, &quot;June&quot;, &quot;August&quot;, &quot;October&quot;))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = &quot;Chl&quot;)+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = &quot;right&quot;,
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(mgm^{-3}),
+                               title.position = &quot;top&quot;, 
+                               title.hjust = 0.5, 
+                               direction = &quot;vertical&quot;,
+                               reverse = FALSE, 
+                               barwidth = unit(.4, &quot;cm&quot;),
+                               barheight = unit(4, &quot;cm&quot;)))+
+  labs(x = &quot;&quot;, y = &quot;&quot;, title = &quot;Zanzibar Channel&quot;)
+
+pemba = ggplot()+
+  metR::geom_contour_fill(data = chl.tb %&gt;% filter(site == &quot;Pemba&quot;),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c(&quot;February&quot;, &quot;April&quot;, &quot;June&quot;, &quot;August&quot;, &quot;October&quot;))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = &quot;Chl&quot;)+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = &quot;right&quot;,
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(mgm^{-3}),
+                               title.position = &quot;top&quot;, 
+                               title.hjust = 0.5, 
+                               direction = &quot;vertical&quot;,
+                               reverse = FALSE, 
+                               barwidth = unit(.4, &quot;cm&quot;),
+                               barheight = unit(4, &quot;cm&quot;)))+
+  labs(x = &quot;&quot;, y = &quot;&quot;, title = &quot;Pemba Channel&quot;)
+
+eez = ggplot()+
+  metR::geom_contour_fill(data = chl.tb %&gt;% filter(site == &quot;EEZ&quot;),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c(&quot;February&quot;, &quot;April&quot;, &quot;June&quot;, &quot;August&quot;, &quot;October&quot;))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = &quot;Chl&quot;)+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = &quot;right&quot;,
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(mgm^{-3}),
+                               title.position = &quot;top&quot;, 
+                               title.hjust = 0.5, 
+                               direction = &quot;vertical&quot;,
+                               reverse = FALSE, 
+                               barwidth = unit(.4, &quot;cm&quot;),
+                               barheight = unit(4, &quot;cm&quot;)))+
+  labs(x = &quot;&quot;, y = &quot;&quot;, title = &quot;EEZ&quot;)
+  
+egg::ggarrange(mafia, zanzibar, pemba, eez, nrow = 2)</code></pre>
+<p><img src="/post/2019-02-15-primary-production-chlorophyll-concentration-and-sea-surface-temperature-in-tanzania-waters_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 <div id="primary-productivity" class="section level3">
 <h3>Primary productivity</h3>
@@ -200,6 +300,104 @@ contour(year, month,pp.array[,,j]%&gt;%t() , add = T)
 Figure 6: Hovmoller diagram of primary productivity
 </p>
 </div>
+<pre class="r"><code>## load the function I created for converting
+month = 1:12
+year = 2003:2018
+
+pp.tb = list()
+for (j in 1:length(sites)){
+  
+pp.tb[[j]] = matrix_tb(x = month, y = year, data = pp.array[,,j]) %&gt;%
+  rename(month = x, year = y) %&gt;% mutate(site = sites[j])
+  
+}
+pp.tb = pp.tb %&gt;% bind_rows()</code></pre>
+<pre class="r"><code>mafia = ggplot()+
+  metR::geom_contour_fill(data = pp.tb %&gt;% filter(site == &quot;Mafia&quot;),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c(&quot;February&quot;, &quot;April&quot;, &quot;June&quot;, &quot;August&quot;, &quot;October&quot;))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = &quot;Chl&quot;)+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = &quot;right&quot;,
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(Cm^{-3}~yr^{-1}),
+                               title.position = &quot;top&quot;, 
+                               title.hjust = 0.5, 
+                               direction = &quot;vertical&quot;,
+                               reverse = FALSE, 
+                               barwidth = unit(.4, &quot;cm&quot;),
+                               barheight = unit(4, &quot;cm&quot;)))+
+  labs(x = &quot;&quot;, y = &quot;&quot;, title = &quot;Mafia Channel&quot;)
+
+zanzibar = ggplot()+
+  metR::geom_contour_fill(data = pp.tb %&gt;% filter(site == &quot;Zanzibar&quot;),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c(&quot;February&quot;, &quot;April&quot;, &quot;June&quot;, &quot;August&quot;, &quot;October&quot;))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = &quot;Chl&quot;)+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = &quot;right&quot;,
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(Cm^{-3}~yr^{-1}),
+                               title.position = &quot;top&quot;, 
+                               title.hjust = 0.5, 
+                               direction = &quot;vertical&quot;,
+                               reverse = FALSE, 
+                               barwidth = unit(.4, &quot;cm&quot;),
+                               barheight = unit(4, &quot;cm&quot;)))+
+  labs(x = &quot;&quot;, y = &quot;&quot;, title = &quot;Zanzibar Channel&quot;)
+
+pemba = ggplot()+
+  metR::geom_contour_fill(data = pp.tb %&gt;% filter(site == &quot;Pemba&quot;),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c(&quot;February&quot;, &quot;April&quot;, &quot;June&quot;, &quot;August&quot;, &quot;October&quot;))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = &quot;Chl&quot;)+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = &quot;right&quot;,
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(Cm^{-3}~yr^{-1}),
+                               title.position = &quot;top&quot;, 
+                               title.hjust = 0.5, 
+                               direction = &quot;vertical&quot;,
+                               reverse = FALSE, 
+                               barwidth = unit(.4, &quot;cm&quot;),
+                               barheight = unit(4, &quot;cm&quot;)))+
+  labs(x = &quot;&quot;, y = &quot;&quot;, title = &quot;Pemba Channel&quot;)
+
+eez = ggplot()+
+  metR::geom_contour_fill(data = pp.tb %&gt;% filter(site == &quot;EEZ&quot;),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c(&quot;February&quot;, &quot;April&quot;, &quot;June&quot;, &quot;August&quot;, &quot;October&quot;))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = &quot;Chl&quot;)+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = &quot;right&quot;,
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(Cm^{-3}~yr^{-1}),
+                               title.position = &quot;top&quot;, 
+                               title.hjust = 0.5, 
+                               direction = &quot;vertical&quot;,
+                               reverse = FALSE, 
+                               barwidth = unit(.4, &quot;cm&quot;),
+                               barheight = unit(4, &quot;cm&quot;)))+
+  labs(x = &quot;&quot;, y = &quot;&quot;, title = &quot;EEZ&quot;)
+  
+egg::ggarrange(mafia, zanzibar, pemba, eez, nrow = 2)</code></pre>
+<p><img src="/post/2019-02-15-primary-production-chlorophyll-concentration-and-sea-surface-temperature-in-tanzania-waters_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
 </div>
 <div id="temperature" class="section level3">
 <h3>Temperature</h3>
@@ -257,4 +455,102 @@ contour(year, month,sst.array[,,j]%&gt;%t() , add = T)
 Figure 9: Hovmoller diagrams of sea surface temperature
 </p>
 </div>
+<pre class="r"><code>## load the function I created for converting
+month = 1:12
+year = 2003:2018
+
+sst.tb = list()
+for (j in 1:length(sites)){
+  
+sst.tb[[j]] = matrix_tb(x = month, y = year, data = sst.array[,,j]) %&gt;%
+  rename(month = x, year = y) %&gt;% mutate(site = sites[j])
+  
+}
+sst.tb = sst.tb %&gt;% bind_rows()</code></pre>
+<pre class="r"><code>mafia = ggplot()+
+  metR::geom_contour_fill(data = sst.tb %&gt;% filter(site == &quot;Mafia&quot;),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c(&quot;February&quot;, &quot;April&quot;, &quot;June&quot;, &quot;August&quot;, &quot;October&quot;))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = &quot;Chl&quot;)+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = &quot;right&quot;,
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(degree*C),
+                               title.position = &quot;top&quot;, 
+                               title.hjust = 0.5, 
+                               direction = &quot;vertical&quot;,
+                               reverse = FALSE, 
+                               barwidth = unit(.4, &quot;cm&quot;),
+                               barheight = unit(4, &quot;cm&quot;)))+
+  labs(x = &quot;&quot;, y = &quot;&quot;, title = &quot;Mafia Channel&quot;)
+
+zanzibar = ggplot()+
+  metR::geom_contour_fill(data = sst.tb %&gt;% filter(site == &quot;Zanzibar&quot;),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c(&quot;February&quot;, &quot;April&quot;, &quot;June&quot;, &quot;August&quot;, &quot;October&quot;))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = &quot;Chl&quot;)+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = &quot;right&quot;,
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(~degree*C),
+                               title.position = &quot;top&quot;, 
+                               title.hjust = 0.5, 
+                               direction = &quot;vertical&quot;,
+                               reverse = FALSE, 
+                               barwidth = unit(.4, &quot;cm&quot;),
+                               barheight = unit(4, &quot;cm&quot;)))+
+  labs(x = &quot;&quot;, y = &quot;&quot;, title = &quot;Zanzibar Channel&quot;)
+
+pemba = ggplot()+
+  metR::geom_contour_fill(data = sst.tb %&gt;% filter(site == &quot;Pemba&quot;),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c(&quot;February&quot;, &quot;April&quot;, &quot;June&quot;, &quot;August&quot;, &quot;October&quot;))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = &quot;Chl&quot;)+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = &quot;right&quot;,
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(~degree*C),
+                               title.position = &quot;top&quot;, 
+                               title.hjust = 0.5, 
+                               direction = &quot;vertical&quot;,
+                               reverse = FALSE, 
+                               barwidth = unit(.4, &quot;cm&quot;),
+                               barheight = unit(4, &quot;cm&quot;)))+
+  labs(x = &quot;&quot;, y = &quot;&quot;, title = &quot;Pemba Channel&quot;)
+
+eez = ggplot()+
+  metR::geom_contour_fill(data = sst.tb %&gt;% filter(site == &quot;EEZ&quot;),
+                          aes(x = year, y = month, z = value), na.fill = TRUE)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_reverse(breaks = seq(2,11,2), label = c(&quot;February&quot;, &quot;April&quot;, &quot;June&quot;, &quot;August&quot;, &quot;October&quot;))+
+  scale_x_continuous(breaks = seq(2004,2017,3))+
+  scale_fill_gradientn(colors = oce.colors9A(120), name = &quot;Chl&quot;)+
+  theme_bw() %+replace%
+  theme(axis.text = element_text(size = 12, colour = 1),
+        legend.position = &quot;right&quot;,
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 11))+
+  guides(fill = guide_colorbar(title = expression(~degree*C),
+                               title.position = &quot;top&quot;, 
+                               title.hjust = 0.5, 
+                               direction = &quot;vertical&quot;,
+                               reverse = FALSE, 
+                               barwidth = unit(.4, &quot;cm&quot;),
+                               barheight = unit(4, &quot;cm&quot;)))+
+  labs(x = &quot;&quot;, y = &quot;&quot;, title = &quot;EEZ&quot;)
+  
+egg::ggarrange(mafia, zanzibar, pemba, eez, nrow = 2)</code></pre>
+<p><img src="/post/2019-02-15-primary-production-chlorophyll-concentration-and-sea-surface-temperature-in-tanzania-waters_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 </div>
