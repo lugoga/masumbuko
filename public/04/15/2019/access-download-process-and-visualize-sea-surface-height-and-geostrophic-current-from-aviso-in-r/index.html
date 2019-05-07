@@ -290,7 +290,7 @@ ssh.in = data.frame(lon = ssh.in$xg, ssh.in$zg) %&gt;%
 <div id="visualizing" class="section level2">
 <h2>Visualizing</h2>
 <p>Once the aviso data is tidy and arranged in data frame format, we can use the <strong>ggplot2</strong> functions to make maps that show the sea surface height as shown in figure <a href="#fig:ssh">1</a> that was created using the lines of code in the chunk below.</p>
-<pre class="r"><code>ssh.fig = ggplot()+
+<pre class="r"><code>ggplot()+
   metR::geom_contour_fill(data = ssh.in, aes(x = lon, y = lat, z = ssh))+
   metR::geom_contour2(data = ssh.in, aes(x = lon, y = lat, z = ssh))+
   metR::geom_text_contour(data = ssh.in, aes(x = lon, y = lat, z = ssh), 
@@ -301,9 +301,12 @@ ssh.in = data.frame(lon = ssh.in$xg, ssh.in$zg) %&gt;%
   labs(x = NULL, y = NULL)+
   scale_fill_gradientn(name = &quot;ssh (m)&quot;,colours = oce::oceColors9A(120), na.value = &quot;white&quot;)+
   scale_x_continuous(breaks = seq(39.5, 49.5, length.out = 4) %&gt;%round(1))+
-  scale_y_continuous(breaks = seq(-14,-8, 2))
-
-ssh.fig</code></pre>
+  scale_y_continuous(breaks = seq(-14,-8, 2))+
+  guides(fill = guide_colorbar(title = &quot;Sea surface height (m)&quot;, 
+                               title.position = &quot;right&quot;, title.theme = element_text(angle = 90), 
+                               barwidth = 1.25, barheight = 10, draw.ulim = 1.2, draw.llim = 0.6))+
+  theme_bw()+
+  theme(axis.text = element_text(colour = 1, size = 11))</code></pre>
 <div class="figure"><span id="fig:ssh"></span>
 <img src="/post/2019-04-15-access-download-process-and-visualize-sea-surface-height-and-geostrophic-current-from-aviso-in-r_files/figure-html/ssh-1.png" alt="Sea surface height as on 2010-10-22" width="672" />
 <p class="caption">
@@ -311,7 +314,7 @@ Figure 1: Sea surface height as on 2010-10-22
 </p>
 </div>
 <p>We can also map the geostrophic currents speed and direction on top of the sea surface height as shown in figure <a href="#fig:vector">2</a>.</p>
-<pre class="r"><code>field.fig = ggplot()+
+<pre class="r"><code>ggplot()+
   metR::geom_contour_fill(data = ssh.in, aes(x = lon, y = lat, z = ssh), bins = 120)+
   metR::geom_vector(data = aviso, aes(x = lon, y = lat, dx = u, dy = v),
                     arrow.angle = 25, arrow.length = .4, arrow.type = &quot;open&quot;)+
@@ -322,31 +325,33 @@ Figure 1: Sea surface height as on 2010-10-22
   labs(x = NULL, y = NULL)+
   scale_fill_gradientn(name = &quot;ssh (m)&quot;,colours = oce::oceColors9A(120), na.value = &quot;white&quot;)+
   scale_x_continuous(breaks = seq(39.5, 49.5, length.out = 4) %&gt;%round(1))+
-  scale_y_continuous(breaks = seq(-14,-8, 2))
-
-field.fig</code></pre>
+  scale_y_continuous(breaks = seq(-14,-8, 2))+
+  guides(fill = guide_colorbar(title = &quot;Sea surface height (m)&quot;, 
+                               title.position = &quot;right&quot;, title.theme = element_text(angle = 90), 
+                               barwidth = 1.25, barheight = 10, draw.ulim = 1.2, draw.llim = 0.6))+
+  theme_bw()+
+  theme(axis.text = element_text(colour = 1, size = 11))</code></pre>
 <div class="figure"><span id="fig:vector"></span>
 <img src="/post/2019-04-15-access-download-process-and-visualize-sea-surface-height-and-geostrophic-current-from-aviso-in-r_files/figure-html/vector-1.png" alt="geostrophic current overalid on the sea surface height" width="672" />
 <p class="caption">
 Figure 2: geostrophic current overalid on the sea surface height
 </p>
 </div>
-<pre class="r"><code># egg::ggarrange(ssh.fig, field.fig, nrow = 2)</code></pre>
 </div>
 <div id="reference" class="section level2 unnumbered">
 <h2>Reference</h2>
 <div id="refs" class="references">
 <div id="ref-xtracto">
-<p>Mendelssohn, Roy. 2018. <em>Xtractomatic: Accessing Environmental Data from Erd’s Erddap Server</em>. <a href="https://CRAN.R-project.org/package=xtractomatic" class="uri">https://CRAN.R-project.org/package=xtractomatic</a>.</p>
+<p>Mendelssohn, Roy. 2018. <em>Xtractomatic: Accessing Environmental Data from Erd’s Erddap Server</em>. <a href="https://CRAN.R-project.org/package=xtractomatic">https://CRAN.R-project.org/package=xtractomatic</a>.</p>
 </div>
 <div id="ref-gganimate">
-<p>Pedersen, Thomas Lin, and David Robinson. 2017. <em>Gganimate: A Grammar of Animated Graphics</em>. <a href="http://github.com/thomasp85/gganimate" class="uri">http://github.com/thomasp85/gganimate</a>.</p>
+<p>Pedersen, Thomas Lin, and David Robinson. 2017. <em>Gganimate: A Grammar of Animated Graphics</em>. <a href="http://github.com/thomasp85/gganimate">http://github.com/thomasp85/gganimate</a>.</p>
 </div>
 <div id="ref-ggplot">
-<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org" class="uri">http://ggplot2.org</a>.</p>
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
 </div>
 <div id="ref-dplyr">
-<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr" class="uri">https://CRAN.R-project.org/package=dplyr</a>.</p>
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
 </div>
 </div>
 </div>

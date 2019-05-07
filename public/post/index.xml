@@ -6,10 +6,20 @@
     <description>Recent content in Posts on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 15 Apr 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 07 May 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Climatological monthly variation of precipitation in the Pemba Channel</title>
+      <link>/05/07/2019/climatological-monthly-variation-of-precipitation-in-the-pemba-channel/</link>
+      <pubDate>Tue, 07 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/05/07/2019/climatological-monthly-variation-of-precipitation-in-the-pemba-channel/</guid>
+      <description>require(metR)require(tidyverse)require(sf)require(lubridate)We load a file that contains several functions that extends the data manipulation in R. The file contains three main functions that we will use. These include
+matrix_tb: convert matrix into data frameFirstCap : Capitalize the first letter of the word. This is an extension of the toupper() and tolower()gridding_semba: used to interpolate irregular points into equal spaced regular gridssource(&amp;quot;e:/Data Manipulation/semba_functions.</description>
+    </item>
     
     <item>
       <title>Access, Download, Process and VIsualize sea surface height and geostrophic current from AVISO in R</title>

@@ -1,0 +1,165 @@
+---
+title: Climatological monthly variation of precipitation in the Pemba Channel
+author: Masumbuko Semba
+date: '2019-05-07'
+slug: climatological-monthly-variation-of-precipitation-in-the-pemba-channel
+categories:
+  - Technical
+  - Oceanography
+tags:
+  - precipitation
+  - rainfall
+  - Pemba Channel
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
+```
+
+
+```{r}
+require(metR)
+require(tidyverse)
+require(sf)
+require(lubridate)
+```
+
+We load a file that contains several functions that extends the data manipulation in R. The file contains three main functions that we will use. These include
+
++ `matrix_tb`: convert matrix into data frame
++ `FirstCap` : Capitalize the first letter of the word. This is an extension of the `toupper()` and `tolower()`
++ `gridding_semba`: used to interpolate irregular points into equal spaced regular grids
+
+```{r}
+source("e:/Data Manipulation/semba_functions.R")
+```
+
+```{r}
+
+africa = st_read("e:/GIS/Tanzania spatial data Bank/EAF14 Tanzania spatial datasets/africa/Spatial/AdmInfr/afcntry.shp")
+```
+
+```{r}
+rain.files = dir("e:/GIS/Tanzania spatial data Bank/climate monthly rainfall/clim.mean.monthly.asc/",
+                 pattern = ".asc", full.names = TRUE)
+
+```
+
+```{r}
+
+rain.tb = list()
+
+for (i in 1:length(rain.files)){
+  
+rain = raster::raster(rain.files[i])
+
+rain.tb[[i]] = rain %>% raster::as.data.frame(xy = TRUE) %>% 
+  as_tibble()%>%
+  rename(lon = 1, lat = 2, rain = 3)%>% 
+  filter(lon >37 & lon < 42 & lat >= -8 & lat <= -4) %>%mutate(month = rain.files[i]) %>%
+  separate(month, c("a", "b", "c", "d", "e", "f"), sep = "/") %>% select(-c(a,b,c,d,e)) %>%
+  separate(f, c("month", "b"), sep = "_") %>% select(-b) %>%
+  mutate(month = FirstCap(month))
+}
+
+
+```
+
+```{r}
+rain.tb = rain.tb %>% bind_rows()
+
+rain.tb = rain.tb %>% mutate(miezi = month,
+                             miezi = replace(miezi, miezi == "April", 7),
+                             miezi = replace(miezi, miezi == "August", 11),
+                             miezi = replace(miezi, miezi == "December", 3),
+                             miezi = replace(miezi, miezi == "February", 5),
+                             miezi = replace(miezi, miezi == "January", 4),
+                             miezi = replace(miezi, miezi == "July", 10),
+                             miezi = replace(miezi, miezi == "June", 9),
+                             miezi = replace(miezi, miezi == "March", 6),
+                             miezi = replace(miezi, miezi == "May", 8),
+                             miezi = replace(miezi, miezi == "November", 2),
+                             miezi = replace(miezi, miezi == "October", 1),
+                             miezi = replace(miezi, miezi == "September", 12),
+                             miezi = miezi %>% as.double())
+
+```
+
+
+```{r rain-apr, fig.cap=" climatological rainfall of April in areas around the Pemba channel", fig.keep="high" }
+
+  ggplot()+
+  # geom_raster(aes(lon, lat, fill = rain), interpolate = F)+
+  metR::geom_contour_fill(data = rain.tb %>% filter(month == "April"),
+                          aes(lon, lat, z = rain), na.fill = TRUE, bins = 80)+
+  metR::geom_contour2(data = rain.tb %>% filter(month == "April"), 
+                      aes(lon, lat, z = rain))+
+  metR::geom_text_contour(data = rain.tb %>% filter(month == "April"), 
+                          aes(lon, lat, z = rain), size = 3, check_overlap = TRUE, parse = TRUE, rotate = FALSE)+
+  scale_fill_gradientn(colors = oce::oce.colorsViridis(120), breaks = seq(50,250,50))+
+  scale_x_continuous(breaks = seq(38.9, 39.8,.3), labels = LonLabel(seq(38.9, 39.8,.3)))+
+  scale_y_continuous(breaks = seq(-5.8,-4.4, 0.4), labels = LatLabel(seq(-5.8,-4.4, 0.4)))+
+  geom_sf(data = africa, fill = "grey70", col = "black", linetype = 1)+
+  coord_sf(xlim = c(38.7, 40), ylim = c(-6.0,-4.2), expand = FALSE)+
+  guides(fill = guide_colorbar(title.position = "right",title.theme = element_text(angle = 90), 
+                               barwidth = 1.25, barheight = 8, title = "Precipitation (mm)", ticks = FALSE))+
+  theme_bw()+
+  theme(axis.text = element_text(colour = 1, size = 12))+
+  labs(x = NULL, y = NULL, subtitle = "APRIL")+
+  ggspatial::annotation_scale(location = "br", height = unit(3, "mm") )+
+  ggspatial::annotation_north_arrow(location = "tr", width = unit(7.5, "mm"), height = unit(8, "mm"))
+
+```
+
+```{r rain-unsmoothed, fig.cap=" monthly climatological rainfall around the Pemba channel", fig.keep="high"}
+
+ggplot()+
+  geom_raster(data = rain.tb, aes(x = lat, y = miezi, fill = rain))+
+  scale_y_continuous(breaks = 1:12, 
+                     labels = seq(dmy(011018), dmy(120919), 
+                                  by = "month") %>% month(label = T, abbr = T))+
+  scale_fill_gradientn(colours = oce::oce.colors9A(120))+
+  coord_flip(expand = FALSE)+
+  guides(fill = guide_colorbar(title.position = "right",title.theme = element_text(angle = 90), 
+                               barwidth = 1.25, barheight = 8, title = "Precipitation (mm)", ticks = FALSE))+
+  theme_bw()+
+  theme(axis.text = element_text(colour = 1, size = 12))+
+  labs(x = NULL, y = NULL, subtitle = "APRIL")
+```
+
+```{r rain-smoothed, fig.cap="smoothed monthly climatological rainfall around the Pemba channel", fig.keep="high"}
+## grid the rain data to equal spaced
+rain.tb.gridded = oce::interpBarnes(x = rain.tb$miezi, 
+                                    y = rain.tb$lat, 
+                                    z = rain.tb$rain, 
+                                    xg = range(rain.tb$miezi) %>% pretty(20), 
+                                    yg = range(rain.tb$lat) %>% pretty(20))
+
+## use the matrix_tb function to convert the array into data frame
+rain.tb.df = matrix_tb(x = rain.tb.gridded$xg, 
+                       y = rain.tb.gridded$yg, 
+                       data = rain.tb.gridded$zg)
+
+## visualizing the rain variation over months
+ggplot()+
+  geom_contour_fill(data = rain.tb.df, aes(x = x, y = y, z = value), na.fill = TRUE, bins = 120)+
+  geom_contour2(data = rain.tb.df, aes(x = x, y = y, z = value))+
+  geom_text_contour(data = rain.tb.df, aes(x = x, y = y, z = value))+
+  scale_fill_gradientn(colours = oce::oce.colors9A(120))+
+  scale_y_continuous(breaks = seq(-7.5, -4.5, 1), labels = LatLabel(seq(-7.5, -4.5, 1)))+
+  scale_x_continuous(breaks = 1:12, 
+                     labels = seq(dmy(011018), dmy(120919), 
+                                  by = "month") %>% month(label = T, abbr = T))+
+  coord_cartesian(expand = FALSE)+
+  guides(fill = guide_colorbar(title.position = "right",title.theme = element_text(angle = 90), 
+                               barwidth = 1.25, barheight = 8, title = "Precipitation (mm)", ticks = FALSE))+
+  theme_bw()+
+  theme(axis.text = element_text(colour = 1, size = 12))+
+  labs(x = NULL, y = NULL, subtitle = "APRIL")
+
+```
+
