@@ -12,13 +12,12 @@
     
     
     <item>
-      <title>Climatological monthly variation of precipitation in the Pemba Channel</title>
+      <title>Mapping Global Climatological Annual precipitation with ggplot and metR package in R</title>
       <link>/05/07/2019/climatological-monthly-variation-of-precipitation-in-the-pemba-channel/</link>
       <pubDate>Tue, 07 May 2019 00:00:00 +0000</pubDate>
       
       <guid>/05/07/2019/climatological-monthly-variation-of-precipitation-in-the-pemba-channel/</guid>
-      <description>require(metR)require(tidyverse)require(sf)require(lubridate)We load a file that contains several functions that extends the data manipulation in R. The file contains three main functions that we will use. These include
-matrix_tb: convert matrix into data frameFirstCap : Capitalize the first letter of the word. This is an extension of the toupper() and tolower()gridding_semba: used to interpolate irregular points into equal spaced regular gridssource(&amp;quot;e:/Data Manipulation/semba_functions.</description>
+      <description>IntroductionI recently came across a map showing the climatological annual distribution of rainfall shown in figure 1. I was fascinated with the visual appeal of this map. The map clearly convey the message with clarity, simplicity and visual appeal, which spark my thinking and paused for a moment to figure out how could I make a similar plot like figure 1, which was made in MATLAB in R?</description>
     </item>
     
   </channel>

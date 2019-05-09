@@ -1,5 +1,5 @@
 ---
-title: Climatological monthly variation of precipitation in the Pemba Channel
+title: Mapping Global Climatological Annual precipitation with ggplot and metR package in R
 author: Masumbuko Semba
 date: '2019-05-07'
 slug: climatological-monthly-variation-of-precipitation-in-the-pemba-channel
@@ -15,134 +15,382 @@ bibliography: [blog.bib]
 link-citations: yes
 ---
 
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
 
 
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>I recently came across a map showing the climatological annual distribution of rainfall shown in figure <a href="#fig:fig1">1</a>. I was fascinated with the visual appeal of this map. The map clearly convey the message with clarity, simplicity and visual appeal, which spark my thinking and paused for a moment to figure out how could I make a similar plot like figure <a href="#fig:fig1">1</a>, which was made in MATLAB in R?.</p>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2019-05-07-climatological-monthly-variation-of-precipitation-in-the-pemba-channel_files/figure-html/fig1-1.png" alt="Climatological annual mean precipitation (mm/day) for 1979-2010" width="672" />
+<p class="caption">
+Figure 1: Climatological annual mean precipitation (mm/day) for 1979-2010
+</p>
+</div>
+<p>For those who are unfamiliar with R or who have a broad experience of working with MATLAB, R has two major paradigms for producing plots. The first is the <em>base graphics</em> system—the sequence of functions bundled with R that are part of the graphics package, which is core and install automatically when you install the software. The second paradigm is the <strong>ggplot2</strong> package, written and maintained by <span class="citation">(<a href="#ref-ggplot">2016</a>)</span>, which use the <em>the grammar of graphics</em> approach to make maps and plots. The <strong>ggplot2</strong> is specifically designed to work with data stored in tabular format like the data frame or tibble.</p>
+<p>One thing that I always like the <strong>ggplot2</strong> package approach is that the plots are made by adding layer on top of the previous layer. Therefore, this post is not focusing on anything oceanographic, but on a little trick on making a map that get the message across with the clarity, simplicity and visual appeal. We intend to use R to make map similar to figure <a href="#fig:fig1">1</a>, which was made in MATLAB.</p>
+</div>
+<div id="handling-data" class="section level2">
+<h2>Handling data</h2>
+<p>Before you start working on the visual part of any visualization, you acctully need data. The data is what makes a visualization interesting. For this post we use the Global Precipitation Climatology Project (GPCP) Monthly Analysis Product, which was accessed from <a href="https://www.ncei.noaa.gov/data/global-precipitation-climatology-project-gpcp-monthly/access/">this link</a>. Further information about the dataset can obtained from NOAA website through this <a href="https://www.ncdc.noaa.gov/cdr/atmospheric/precipitation-gpcp-monthly">link</a>. In addition to precipitation dataset, we need the shapefile data that show the continents of the global.</p>
+</div>
+<div id="required-packages" class="section level2">
+<h2>Required packages</h2>
+<p>Obviously, we need to load the <strong>tidyverse</strong> <span class="citation">(Wickham <a href="#ref-tidyverse">2017</a>)</span> together with the <strong>metR</strong> <span class="citation">(Campitelli <a href="#ref-metr">2019</a>)</span>, <strong>sf</strong> <span class="citation">(Pebesma <a href="#ref-sf">2018</a>)</span> and <strong>lubridate</strong> <span class="citation">(Grolemund and Wickham <a href="#ref-lubridate">2011</a>)</span> package. note that I’m using the latest version of these package.</p>
 <pre class="r"><code>require(metR)
 require(tidyverse)
 require(sf)
-require(lubridate)</code></pre>
-<p>We load a file that contains several functions that extends the data manipulation in R. The file contains three main functions that we will use. These include</p>
+require(lubridate)
+require(ncdf4)</code></pre>
+<p>If you are new to netCDF files, they can be a little overwhelming. We can use the <code>ncdump::NetCDF()</code> function to obtain information about the NetCDF file in a convinient form. From table <a href="#tab:tab1">1</a>, we notice that the precipitation dataset has four variables <code>time</code>, <code>lat</code>, <code>lon</code>, and <code>precip</code>. The length of each of these variables are presented in table <a href="#tab:tab2">2</a>.</p>
+<pre class="r"><code>meta = ncdump::NetCDF(&quot;./precip.mon.mean.nc&quot;)
+
+meta$variable %&gt;% select(name, units, longname) %&gt;% knitr::kable(caption = &quot;Variables present in the precipitation dataset&quot;)</code></pre>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Variables present in the precipitation dataset
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Variable
+</th>
+<th style="text-align:left;">
+Units
+</th>
+<th style="text-align:left;">
+Long name
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 8cm; ">
+time_bnds
+</td>
+<td style="text-align:left;width: 8cm; ">
+days since 1800-01-01 00:00:00 0:00
+</td>
+<td style="text-align:left;width: 8cm; ">
+time_bnds
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 8cm; ">
+lat_bnds
+</td>
+<td style="text-align:left;width: 8cm; ">
+degrees_north
+</td>
+<td style="text-align:left;width: 8cm; ">
+lat_bnds
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 8cm; ">
+lon_bnds
+</td>
+<td style="text-align:left;width: 8cm; ">
+degrees_east
+</td>
+<td style="text-align:left;width: 8cm; ">
+lon_bnds
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 8cm; ">
+precip
+</td>
+<td style="text-align:left;width: 8cm; ">
+mm/day
+</td>
+<td style="text-align:left;width: 8cm; ">
+Average Monthly Rate of Precipitation
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>meta$dimension %&gt;% select(name, len,) %&gt;% slice(1:3) %&gt;% 
+  kableExtra::kable(format = &quot;html&quot;,caption = &quot;Dimensions of the variable in the precipitation dataset &quot;,
+                    col.names = c(&quot;Variable name&quot;, &quot;length&quot;)) %&gt;%
+   kableExtra::column_spec(column = 1:2, width = &quot;5cm&quot;)</code></pre>
+<table>
+<caption>
+<span id="tab:tab2">Table 2: </span>Dimensions of the variable in the precipitation dataset
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Variable name
+</th>
+<th style="text-align:right;">
+length
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+lat
+</td>
+<td style="text-align:right;width: 5cm; ">
+72
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+lon
+</td>
+<td style="text-align:right;width: 5cm; ">
+144
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+time
+</td>
+<td style="text-align:right;width: 5cm; ">
+483
+</td>
+</tr>
+</tbody>
+</table>
+<p>Once we have the information about the file, We can then use the <code>nc_open()</code> function from <strong>ncdf4</strong> package <span class="citation">(Pierce <a href="#ref-ncdf4">2017</a>)</span> to read netCDF file.</p>
+<pre class="r"><code>trmm = nc_open(&quot;e:/Data Manipulation/trmm_precipitation/precip.mon.mean.nc&quot;)</code></pre>
+<p>Then call <code>ncvar_get</code> to read the data from a variable in the file. The time is in julian format and since we know the begin time, we can convert the the original time to julian and the add it to the julian day. Once we have the time in the right format, we convert them into gregorian calendar. The <strong>insol</strong> package <span class="citation">(Corripio <a href="#ref-insol">2014</a>)</span> provide the functions for date conversion from <em>julian</em> to <em>gregorian.</em></p>
+<pre class="r"><code>lon= ncdf4::ncvar_get(trmm, &quot;lon&quot;)
+data = ncdf4::ncvar_get(trmm, &quot;precip&quot;)
+lat= ncdf4::ncvar_get(trmm, &quot;lat&quot;)
+t= ncdf4::ncvar_get(trmm, &quot;time&quot;)
+
+## convert the original date to julian and add the julian day
+time = insol::JD(lubridate::ymd(&quot;18000101&quot;, tz = &quot;&quot;))+t
+
+## convert julian to gregorian date
+date = insol::JD(time, inverse = TRUE) %&gt;% as.Date()</code></pre>
+<p>We can check the length and dimension of the variables using the <code>length()</code> and <code>dim()</code> functions. We notice that there 144 spacing of longitude and 72 spacing of latitude for over 483 months between 1978-12-31 an 2019-02-28</p>
+<pre class="r"><code>length(lon); length(lat);length(date);dim(data)</code></pre>
+<pre><code>[1] 144</code></pre>
+<pre><code>[1] 72</code></pre>
+<pre><code>[1] 483</code></pre>
+<pre><code>[1] 144  72 483</code></pre>
+</div>
+<div id="formatting-data" class="section level2">
+<h2>Formatting data</h2>
+<p>Different visualization tools use different data formats, and the structure you use varies by the story you want to tell. Most people are used to working with data in Excel and <strong>ggplot2</strong> capitalize on this idea of working with data structured in tabular format like Excell. unfortunate, the precipitation dataset downloaded as netcdf format. That means to make use of this dataset, we ought to convert the data from the original format to <strong>ggplot2</strong>–readable. R has bunch of tools to assist with that. However, I created several function to smooth to process that extends the data manipulation in R. The file contains three main functions that we will use. These include</p>
 <ul>
 <li><code>matrix_tb</code>: convert matrix into data frame</li>
 <li><code>FirstCap</code> : Capitalize the first letter of the word. This is an extension of the <code>toupper()</code> and <code>tolower()</code></li>
-<li><code>gridding_semba</code>: used to interpolate irregular points into equal spaced regular grids</li>
+<li><code>gridding_semba</code>: used to interpolate irregular points into equal spaced regular grids. The extended functions in R can be load with the <code>source()</code> function.</li>
 </ul>
-<pre class="r"><code>source(&quot;e:/Data Manipulation/semba_functions.R&quot;)</code></pre>
-<pre class="r"><code>africa = st_read(&quot;e:/GIS/Tanzania spatial data Bank/EAF14 Tanzania spatial datasets/africa/Spatial/AdmInfr/afcntry.shp&quot;)</code></pre>
-<pre><code>Reading layer `afcntry&#39; from data source `e:\GIS\Tanzania spatial data Bank\EAF14 Tanzania spatial datasets\africa\Spatial\AdmInfr\afcntry.shp&#39; using driver `ESRI Shapefile&#39;
-Simple feature collection with 59 features and 7 fields
-geometry type:  MULTIPOLYGON
-dimension:      XY
-bbox:           xmin: -25.35875 ymin: -34.83983 xmax: 57.80085 ymax: 37.34962
-epsg (SRID):    4326
-proj4string:    +proj=longlat +datum=WGS84 +no_defs</code></pre>
-<pre class="r"><code>rain.files = dir(&quot;e:/GIS/Tanzania spatial data Bank/climate monthly rainfall/clim.mean.monthly.asc/&quot;,
-                 pattern = &quot;.asc&quot;, full.names = TRUE)</code></pre>
-<pre class="r"><code>rain.tb = list()
+<pre class="r"><code>source(&quot;./semba_functions.R&quot;)</code></pre>
+<p>We then convert the matrix in array representing precipitation for each month into a data frame and store them in the list file.</p>
+<pre class="r"><code>trmm.tb = list()
 
-for (i in 1:length(rain.files)){
+for (n in seq_along(date)){
+trmm.tb[[n]] = matrix_tb(lon, lat, data[,,n])%&gt;% 
+  mutate(date = date[n]) %&gt;% 
+  select(date, lon = x, lat = y, rain = value)
   
-rain = raster::raster(rain.files[i])
-
-rain.tb[[i]] = rain %&gt;% raster::as.data.frame(xy = TRUE) %&gt;% 
-  as_tibble()%&gt;%
-  rename(lon = 1, lat = 2, rain = 3)%&gt;% 
-  filter(lon &gt;37 &amp; lon &lt; 42 &amp; lat &gt;= -8 &amp; lat &lt;= -4) %&gt;%mutate(month = rain.files[i]) %&gt;%
-  separate(month, c(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;e&quot;, &quot;f&quot;), sep = &quot;/&quot;) %&gt;% select(-c(a,b,c,d,e)) %&gt;%
-  separate(f, c(&quot;month&quot;, &quot;b&quot;), sep = &quot;_&quot;) %&gt;% select(-b) %&gt;%
-  mutate(month = FirstCap(month))
 }</code></pre>
-<pre class="r"><code>rain.tb = rain.tb %&gt;% bind_rows()
-
-rain.tb = rain.tb %&gt;% mutate(miezi = month,
-                             miezi = replace(miezi, miezi == &quot;April&quot;, 7),
-                             miezi = replace(miezi, miezi == &quot;August&quot;, 11),
-                             miezi = replace(miezi, miezi == &quot;December&quot;, 3),
-                             miezi = replace(miezi, miezi == &quot;February&quot;, 5),
-                             miezi = replace(miezi, miezi == &quot;January&quot;, 4),
-                             miezi = replace(miezi, miezi == &quot;July&quot;, 10),
-                             miezi = replace(miezi, miezi == &quot;June&quot;, 9),
-                             miezi = replace(miezi, miezi == &quot;March&quot;, 6),
-                             miezi = replace(miezi, miezi == &quot;May&quot;, 8),
-                             miezi = replace(miezi, miezi == &quot;November&quot;, 2),
-                             miezi = replace(miezi, miezi == &quot;October&quot;, 1),
-                             miezi = replace(miezi, miezi == &quot;September&quot;, 12),
-                             miezi = miezi %&gt;% as.double())</code></pre>
-<pre class="r"><code>  ggplot()+
-  # geom_raster(aes(lon, lat, fill = rain), interpolate = F)+
-  metR::geom_contour_fill(data = rain.tb %&gt;% filter(month == &quot;April&quot;),
-                          aes(lon, lat, z = rain), na.fill = TRUE, bins = 80)+
-  metR::geom_contour2(data = rain.tb %&gt;% filter(month == &quot;April&quot;), 
-                      aes(lon, lat, z = rain))+
-  metR::geom_text_contour(data = rain.tb %&gt;% filter(month == &quot;April&quot;), 
-                          aes(lon, lat, z = rain), size = 3, check_overlap = TRUE, parse = TRUE, rotate = FALSE)+
-  scale_fill_gradientn(colors = oce::oce.colorsViridis(120), breaks = seq(50,250,50))+
-  scale_x_continuous(breaks = seq(38.9, 39.8,.3), labels = LonLabel(seq(38.9, 39.8,.3)))+
-  scale_y_continuous(breaks = seq(-5.8,-4.4, 0.4), labels = LatLabel(seq(-5.8,-4.4, 0.4)))+
-  geom_sf(data = africa, fill = &quot;grey70&quot;, col = &quot;black&quot;, linetype = 1)+
-  coord_sf(xlim = c(38.7, 40), ylim = c(-6.0,-4.2), expand = FALSE)+
-  guides(fill = guide_colorbar(title.position = &quot;right&quot;,title.theme = element_text(angle = 90), 
-                               barwidth = 1.25, barheight = 8, title = &quot;Precipitation (mm)&quot;, ticks = FALSE))+
-  theme_bw()+
-  theme(axis.text = element_text(colour = 1, size = 12))+
-  labs(x = NULL, y = NULL, subtitle = &quot;APRIL&quot;)+
-  ggspatial::annotation_scale(location = &quot;br&quot;, height = unit(3, &quot;mm&quot;) )+
-  ggspatial::annotation_north_arrow(location = &quot;tr&quot;, width = unit(7.5, &quot;mm&quot;), height = unit(8, &quot;mm&quot;))</code></pre>
-<div class="figure"><span id="fig:rain-apr"></span>
-<img src="/post/2019-05-07-climatological-monthly-variation-of-precipitation-in-the-pemba-channel_files/figure-html/rain-apr-1.png" alt=" climatological rainfall of April in areas around the Pemba channel" width="672" />
-<p class="caption">
-Figure 1:  climatological rainfall of April in areas around the Pemba channel
-</p>
+<p>Then we unlist the data frame and arrange them in rows and convert the longitude format from 0–360 to -180 to 180 degrees as shown in table <a href="#tab:tab3">3</a>.</p>
+<pre class="r"><code>trmm.tb = trmm.tb %&gt;% 
+  bind_rows() %&gt;% 
+  mutate(lon = lon-180)</code></pre>
+<table>
+<caption>
+<span id="tab:tab3">Table 3: </span>Sample of precipitation dataset arranged in data frame converted from array of matrix
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:right;">
+Longitude
+</th>
+<th style="text-align:right;">
+Latitude
+</th>
+<th style="text-align:right;">
+Rainfall
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1980-06-30
+</td>
+<td style="text-align:right;width: 3cm; ">
+-128.75
+</td>
+<td style="text-align:right;width: 3cm; ">
+-46.25
+</td>
+<td style="text-align:right;width: 3cm; ">
+2.5504365
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1983-06-30
+</td>
+<td style="text-align:right;width: 3cm; ">
+173.75
+</td>
+<td style="text-align:right;width: 3cm; ">
+18.75
+</td>
+<td style="text-align:right;width: 3cm; ">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1989-05-31
+</td>
+<td style="text-align:right;width: 3cm; ">
+-88.75
+</td>
+<td style="text-align:right;width: 3cm; ">
+-23.75
+</td>
+<td style="text-align:right;width: 3cm; ">
+0.9252222
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1996-09-30
+</td>
+<td style="text-align:right;width: 3cm; ">
+-18.75
+</td>
+<td style="text-align:right;width: 3cm; ">
+21.25
+</td>
+<td style="text-align:right;width: 3cm; ">
+1.7275815
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+2007-03-31
+</td>
+<td style="text-align:right;width: 3cm; ">
+103.75
+</td>
+<td style="text-align:right;width: 3cm; ">
+-26.25
+</td>
+<td style="text-align:right;width: 3cm; ">
+0.0406960
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+2008-06-30
+</td>
+<td style="text-align:right;width: 3cm; ">
+-41.25
+</td>
+<td style="text-align:right;width: 3cm; ">
+11.25
+</td>
+<td style="text-align:right;width: 3cm; ">
+6.3572717
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+2017-04-30
+</td>
+<td style="text-align:right;width: 3cm; ">
+41.25
+</td>
+<td style="text-align:right;width: 3cm; ">
+-23.75
+</td>
+<td style="text-align:right;width: 3cm; ">
+10.5849819
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+2018-03-31
+</td>
+<td style="text-align:right;width: 3cm; ">
+-13.75
+</td>
+<td style="text-align:right;width: 3cm; ">
+-73.75
+</td>
+<td style="text-align:right;width: 3cm; ">
+0.9551287
+</td>
+</tr>
+</tbody>
+</table>
+<p>To obtain the global climatological annual precipitation value, we used <code>group_by()</code> and <code>summarise()</code> functions from <strong>dplyr</strong> <span class="citation">(Wickham et al. <a href="#ref-dplyr">2018</a>)</span> package as highlighted in the chunk block below</p>
+<pre class="r"><code>trmm.tb.climatology = trmm.tb %&gt;% 
+  group_by(lon,lat) %&gt;% 
+  summarise(rain.mean = mean(rain, na.rm = TRUE)) %&gt;% 
+  ungroup()</code></pre>
+<p>Once we have the precipiation data set computed and arranged in the data frame, we import the shapefile of the continent boundary with <code>st_read()</code> function from <strong>sf</strong> package</p>
+<pre class="r"><code>world = st_read(&quot;./afcntry.shp&quot;)</code></pre>
 </div>
+<div id="plotting-with-ggplot2" class="section level2">
+<h2>Plotting with ggplot2</h2>
+<p>Once we have the rain data in data frame, we can use the ggplot2 and metR functions to map the distribution of rain over the global as figure <a href="#fig:fig1">1</a>. First we plot the precipitation as filled contour with <code>metR::geom_contour_fill()</code> and add the continent shapefile with the <code>geom_sf()</code> function. Then, add other layers to make the map visually appealing. The chunk below highlight the code that was used to make figure <a href="#fig:trmm-clim">2</a></p>
 <pre class="r"><code>ggplot()+
-  geom_raster(data = rain.tb, aes(x = lat, y = miezi, fill = rain))+
-  scale_y_continuous(breaks = 1:12, 
-                     labels = seq(dmy(011018), dmy(120919), 
-                                  by = &quot;month&quot;) %&gt;% month(label = T, abbr = T))+
-  scale_fill_gradientn(colours = oce::oce.colors9A(120))+
-  coord_flip(expand = FALSE)+
-  guides(fill = guide_colorbar(title.position = &quot;right&quot;,title.theme = element_text(angle = 90), 
-                               barwidth = 1.25, barheight = 8, title = &quot;Precipitation (mm)&quot;, ticks = FALSE))+
+  geom_contour_fill(data = trmm.tb.climatology %&gt;% filter(lat &gt; -62 &amp; lat &lt; 62), 
+                    aes(x = lon, y = lat, z = rain.mean), bins = 12)+
+  scale_fill_gradientn(colors = oce::oceColorsVorticity(120), limits = c(0.5,10), breaks =seq(0,11,1.5))+
+  geom_sf(data = spData::world, fill = NA, col = 1)+
+  coord_sf(expand = FALSE, xlim = c(-175,175), ylim = c(-61,61))+
+  scale_x_continuous(breaks = seq(-150,150,50))+
+  scale_y_continuous(breaks = seq(-60,60,30))+
+  guides(fill = guide_legend(title = &quot;mean rainfall (mm/day)&quot;, 
+                             keyheight = 1.55,
+                             title.position = &quot;right&quot;,
+                             title.theme = element_text(angle = 90, size = 12)))+
   theme_bw()+
-  theme(axis.text = element_text(colour = 1, size = 12))+
-  labs(x = NULL, y = NULL, subtitle = &quot;APRIL&quot;)</code></pre>
-<div class="figure"><span id="fig:rain-unsmoothed"></span>
-<img src="/post/2019-05-07-climatological-monthly-variation-of-precipitation-in-the-pemba-channel_files/figure-html/rain-unsmoothed-1.png" alt=" monthly climatological rainfall around the Pemba channel" width="672" />
+  theme(axis.text = element_text(size = 11, colour = 1))+
+  labs(x = NULL, y = NULL)</code></pre>
+<div class="figure"><span id="fig:trmm-clim"></span>
+<img src="/post/2019-05-07-climatological-monthly-variation-of-precipitation-in-the-pemba-channel_files/figure-html/trmm-clim-1.png" alt="Climatological annual mean precipitation (mm/day) for 1979-2010" width="672" />
 <p class="caption">
-Figure 2:  monthly climatological rainfall around the Pemba channel
+Figure 2: Climatological annual mean precipitation (mm/day) for 1979-2010
 </p>
 </div>
-<pre class="r"><code>## grid the rain data to equal spaced
-rain.tb.gridded = oce::interpBarnes(x = rain.tb$miezi, 
-                                    y = rain.tb$lat, 
-                                    z = rain.tb$rain, 
-                                    xg = range(rain.tb$miezi) %&gt;% pretty(20), 
-                                    yg = range(rain.tb$lat) %&gt;% pretty(20))
-
-## use the matrix_tb function to convert the array into data frame
-rain.tb.df = matrix_tb(x = rain.tb.gridded$xg, 
-                       y = rain.tb.gridded$yg, 
-                       data = rain.tb.gridded$zg)
-
-## visualizing the rain variation over months
-ggplot()+
-  geom_contour_fill(data = rain.tb.df, aes(x = x, y = y, z = value), na.fill = TRUE, bins = 120)+
-  geom_contour2(data = rain.tb.df, aes(x = x, y = y, z = value))+
-  geom_text_contour(data = rain.tb.df, aes(x = x, y = y, z = value))+
-  scale_fill_gradientn(colours = oce::oce.colors9A(120))+
-  scale_y_continuous(breaks = seq(-7.5, -4.5, 1), labels = LatLabel(seq(-7.5, -4.5, 1)))+
-  scale_x_continuous(breaks = 1:12, 
-                     labels = seq(dmy(011018), dmy(120919), 
-                                  by = &quot;month&quot;) %&gt;% month(label = T, abbr = T))+
-  coord_cartesian(expand = FALSE)+
-  guides(fill = guide_colorbar(title.position = &quot;right&quot;,title.theme = element_text(angle = 90), 
-                               barwidth = 1.25, barheight = 8, title = &quot;Precipitation (mm)&quot;, ticks = FALSE))+
-  theme_bw()+
-  theme(axis.text = element_text(colour = 1, size = 12))+
-  labs(x = NULL, y = NULL, subtitle = &quot;APRIL&quot;)</code></pre>
-<div class="figure"><span id="fig:rain-smoothed"></span>
-<img src="/post/2019-05-07-climatological-monthly-variation-of-precipitation-in-the-pemba-channel_files/figure-html/rain-smoothed-1.png" alt="smoothed monthly climatological rainfall around the Pemba channel" width="672" />
-<p class="caption">
-Figure 3: smoothed monthly climatological rainfall around the Pemba channel
-</p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-metr">
+<p>Campitelli, Elio. 2019. <em>MetR: Tools for Easier Analysis of Meteorological Fields</em>. <a href="https://CRAN.R-project.org/package=metR">https://CRAN.R-project.org/package=metR</a>.</p>
+</div>
+<div id="ref-insol">
+<p>Corripio, Javier G. 2014. <em>Insol: Solar Radiation</em>. <a href="https://CRAN.R-project.org/package=insol">https://CRAN.R-project.org/package=insol</a>.</p>
+</div>
+<div id="ref-lubridate">
+<p>Grolemund, Garrett, and Hadley Wickham. 2011. “Dates and Times Made Easy with lubridate.” <em>Journal of Statistical Software</em> 40 (3): 1–25. <a href="http://www.jstatsoft.org/v40/i03/">http://www.jstatsoft.org/v40/i03/</a>.</p>
+</div>
+<div id="ref-sf">
+<p>Pebesma, Edzer. 2018. <em>Sf: Simple Features for R</em>. <a href="https://CRAN.R-project.org/package=sf">https://CRAN.R-project.org/package=sf</a>.</p>
+</div>
+<div id="ref-ncdf4">
+<p>Pierce, David. 2017. <em>Ncdf4: Interface to Unidata netCDF (Version 4 or Earlier) Format Data Files</em>. <a href="https://CRAN.R-project.org/package=ncdf4">https://CRAN.R-project.org/package=ncdf4</a>.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>———. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+</div>
 </div>

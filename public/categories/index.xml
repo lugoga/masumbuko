@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Masumbuko Semba&#39;s Blog</title>
+    <title>Categories on Masumbuko Semba&#39;s Blog</title>
     <link>/categories/</link>
-    <description>Recent content on Masumbuko Semba&#39;s Blog</description>
+    <description>Recent content in Categories on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 07 May 2019 00:00:00 +0000</lastBuildDate>
@@ -12,12 +12,84 @@
     
     
     <item>
-      <title>Drifter-derived seasonal climatology of Sea surface temperature in the Tropical Indian Ocean</title>
-      <link>/09/30/2018/sea-surface-temperature-from-drifter/</link>
-      <pubDate>Sun, 30 Sep 2018 00:00:00 +0000</pubDate>
+      <title></title>
+      <link>/categories/</link>
+      <pubDate>Tue, 07 May 2019 00:00:00 +0000</pubDate>
       
-      <guid>/09/30/2018/sea-surface-temperature-from-drifter/</guid>
-      <description>The study of sea surface temperature (SST) is one of the cornerstone of oceanography. It has applications not only in physics (Bader &amp;amp; Latif, 2003), chemistry (Corrège, 2006) and the earth’s sciences, but in subjects as diverse as biology and economics. SST plays an important role in our quantitative understanding of coastal habitats and species distribution in our global oceans (Grémillet et al., 2008; Müller-Karger, Walsh, Evans, &amp;amp; Meyers, 1991).</description>
+      <guid>/categories/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Oceanography</title>
+      <link>/categories/oceanography/</link>
+      <pubDate>Tue, 07 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/oceanography/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Technical</title>
+      <link>/categories/technical/</link>
+      <pubDate>Tue, 07 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/technical/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Information Technology</title>
+      <link>/categories/information-technology/</link>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/information-technology/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>R</title>
+      <link>/categories/r/</link>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/r/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>satellite</title>
+      <link>/categories/satellite/</link>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/satellite/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>MODIS</title>
+      <link>/categories/modis/</link>
+      <pubDate>Mon, 18 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/modis/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Statistics</title>
+      <link>/categories/statistics/</link>
+      <pubDate>Mon, 18 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/statistics/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Tool</title>
+      <link>/categories/tool/</link>
+      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/tool/</guid>
+      <description></description>
     </item>
     
   </channel>
