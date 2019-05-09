@@ -259,7 +259,7 @@ trmm.tb[[n]] = matrix_tb(lon, lat, data[,,n])%&gt;%
 <p>Then we unlist the data frame and arrange them in rows and convert the longitude format from 0–360 to -180 to 180 degrees as shown in table <a href="#tab:tab3">3</a>.</p>
 <pre class="r"><code>trmm.tb = trmm.tb %&gt;% 
   bind_rows() %&gt;% 
-  mutate(lon = lon-180)</code></pre>
+  mutate(lon = lon)</code></pre>
 <table>
 <caption>
 <span id="tab:tab3">Table 3: </span>Sample of precipitation dataset arranged in data frame converted from array of matrix
@@ -283,114 +283,114 @@ Rainfall
 <tbody>
 <tr>
 <td style="text-align:left;width: 3cm; ">
-1980-06-30
+1991-03-31
 </td>
 <td style="text-align:right;width: 3cm; ">
--128.75
+28.75
 </td>
 <td style="text-align:right;width: 3cm; ">
--46.25
+8.75
 </td>
 <td style="text-align:right;width: 3cm; ">
-2.5504365
+2.2924082
 </td>
 </tr>
 <tr>
 <td style="text-align:left;width: 3cm; ">
-1983-06-30
+1994-11-30
 </td>
 <td style="text-align:right;width: 3cm; ">
-173.75
+91.25
 </td>
 <td style="text-align:right;width: 3cm; ">
-18.75
+-63.75
 </td>
 <td style="text-align:right;width: 3cm; ">
-0.0000000
+1.4881935
 </td>
 </tr>
 <tr>
 <td style="text-align:left;width: 3cm; ">
-1989-05-31
+1996-10-31
 </td>
 <td style="text-align:right;width: 3cm; ">
--88.75
+158.75
 </td>
 <td style="text-align:right;width: 3cm; ">
--23.75
+-66.25
 </td>
 <td style="text-align:right;width: 3cm; ">
-0.9252222
+0.7802227
 </td>
 </tr>
 <tr>
 <td style="text-align:left;width: 3cm; ">
-1996-09-30
+1997-11-30
 </td>
 <td style="text-align:right;width: 3cm; ">
--18.75
+236.25
 </td>
 <td style="text-align:right;width: 3cm; ">
-21.25
+88.75
 </td>
 <td style="text-align:right;width: 3cm; ">
-1.7275815
+0.3195865
 </td>
 </tr>
 <tr>
 <td style="text-align:left;width: 3cm; ">
-2007-03-31
+2003-10-31
 </td>
 <td style="text-align:right;width: 3cm; ">
-103.75
+3.75
 </td>
 <td style="text-align:right;width: 3cm; ">
--26.25
+-36.25
 </td>
 <td style="text-align:right;width: 3cm; ">
-0.0406960
+1.6928258
 </td>
 </tr>
 <tr>
 <td style="text-align:left;width: 3cm; ">
-2008-06-30
+2008-11-30
 </td>
 <td style="text-align:right;width: 3cm; ">
--41.25
+223.75
+</td>
+<td style="text-align:right;width: 3cm; ">
+-21.25
+</td>
+<td style="text-align:right;width: 3cm; ">
+3.0226760
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+2010-06-30
+</td>
+<td style="text-align:right;width: 3cm; ">
+358.75
+</td>
+<td style="text-align:right;width: 3cm; ">
+36.25
+</td>
+<td style="text-align:right;width: 3cm; ">
+0.0739706
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+2018-01-31
 </td>
 <td style="text-align:right;width: 3cm; ">
 11.25
 </td>
 <td style="text-align:right;width: 3cm; ">
-6.3572717
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-2017-04-30
+76.25
 </td>
 <td style="text-align:right;width: 3cm; ">
-41.25
-</td>
-<td style="text-align:right;width: 3cm; ">
--23.75
-</td>
-<td style="text-align:right;width: 3cm; ">
-10.5849819
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-2018-03-31
-</td>
-<td style="text-align:right;width: 3cm; ">
--13.75
-</td>
-<td style="text-align:right;width: 3cm; ">
--73.75
-</td>
-<td style="text-align:right;width: 3cm; ">
-0.9551287
+4.0491910
 </td>
 </tr>
 </tbody>
@@ -410,9 +410,9 @@ Rainfall
   geom_contour_fill(data = trmm.tb.climatology %&gt;% filter(lat &gt; -62 &amp; lat &lt; 62), 
                     aes(x = lon, y = lat, z = rain.mean), bins = 12)+
   scale_fill_gradientn(colors = oce::oceColorsVorticity(120), limits = c(0.5,10), breaks =seq(0,11,1.5))+
-  geom_sf(data = spData::world, fill = NA, col = 1)+
-  coord_sf(expand = FALSE, xlim = c(-175,175), ylim = c(-61,61))+
-  scale_x_continuous(breaks = seq(-150,150,50))+
+  geom_sf(data = spData::world, fill = NA, col = NA)+
+  coord_sf(expand = FALSE, xlim = c(10,358), ylim = c(-61,61))+
+  # scale_x_continuous(breaks = seq(-150,150,50))+
   scale_y_continuous(breaks = seq(-60,60,30))+
   guides(fill = guide_legend(title = &quot;mean rainfall (mm/day)&quot;, 
                              keyheight = 1.55,
@@ -427,6 +427,10 @@ Rainfall
 Figure 2: Climatological annual mean precipitation (mm/day) for 1979-2010
 </p>
 </div>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>We have seen that combining the function from <strong>metR</strong> package with gfunctions from <strong>gplot2</strong> package, we are able to make maps that show the distribution of precipitation around the global. From figure <a href="#fig:trmm-clim">2</a>, we notice that the regions that receive high rainfall are those close to the equator.</p>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>

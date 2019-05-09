@@ -158,7 +158,7 @@ Then we unlist the data frame and arrange them in rows and convert the longitude
 ```{r }
 trmm.tb = trmm.tb %>% 
   bind_rows() %>% 
-  mutate(lon = lon-180)
+  mutate(lon = lon)
 
 
 ```
@@ -199,9 +199,9 @@ ggplot()+
   geom_contour_fill(data = trmm.tb.climatology %>% filter(lat > -62 & lat < 62), 
                     aes(x = lon, y = lat, z = rain.mean), bins = 12)+
   scale_fill_gradientn(colors = oce::oceColorsVorticity(120), limits = c(0.5,10), breaks =seq(0,11,1.5))+
-  geom_sf(data = spData::world, fill = NA, col = 1)+
-  coord_sf(expand = FALSE, xlim = c(-175,175), ylim = c(-61,61))+
-  scale_x_continuous(breaks = seq(-150,150,50))+
+  geom_sf(data = spData::world, fill = NA, col = NA)+
+  coord_sf(expand = FALSE, xlim = c(10,358), ylim = c(-61,61))+
+  # scale_x_continuous(breaks = seq(-150,150,50))+
   scale_y_continuous(breaks = seq(-60,60,30))+
   guides(fill = guide_legend(title = "mean rainfall (mm/day)", 
                              keyheight = 1.55,
@@ -212,6 +212,9 @@ ggplot()+
   labs(x = NULL, y = NULL)
   
 ```
+
+## Conclusion
+We have seen that combining the function from **metR** package with gfunctions from **gplot2** package, we are able to make maps that show the distribution of precipitation around the global. From figure \@ref(fig:trmm-clim), we notice that the regions that receive high rainfall are those close to the equator. 
 
 ## References
 
