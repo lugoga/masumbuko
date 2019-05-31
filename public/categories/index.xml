@@ -6,7 +6,7 @@
     <description>Recent content in Categories on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 07 May 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 31 May 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,18 +14,36 @@
     <item>
       <title></title>
       <link>/categories/</link>
-      <pubDate>Tue, 07 May 2019 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 31 May 2019 00:00:00 +0000</pubDate>
       
       <guid>/categories/</guid>
       <description></description>
     </item>
     
     <item>
+      <title>MODIS</title>
+      <link>/categories/modis/</link>
+      <pubDate>Fri, 31 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/modis/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Oceanography</title>
       <link>/categories/oceanography/</link>
-      <pubDate>Tue, 07 May 2019 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 31 May 2019 00:00:00 +0000</pubDate>
       
       <guid>/categories/oceanography/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>R</title>
+      <link>/categories/r/</link>
+      <pubDate>Fri, 31 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/r/</guid>
       <description></description>
     </item>
     
@@ -48,29 +66,11 @@
     </item>
     
     <item>
-      <title>R</title>
-      <link>/categories/r/</link>
-      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/categories/r/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>satellite</title>
       <link>/categories/satellite/</link>
       <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
       <guid>/categories/satellite/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>MODIS</title>
-      <link>/categories/modis/</link>
-      <pubDate>Mon, 18 Mar 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/categories/modis/</guid>
       <description></description>
     </item>
     

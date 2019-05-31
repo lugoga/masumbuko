@@ -66,6 +66,15 @@ Designing graphic: Design graphics and typeset books</description>
     </item>
     
     <item>
+      <title>Forecasting chlorophyll value in the Pemba channel with the prophet package in R</title>
+      <link>/05/31/2019/forecasting-chlorophyll-value-in-the-pemba-channel-with-the-prophet-package-in-r/</link>
+      <pubDate>Fri, 31 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/05/31/2019/forecasting-chlorophyll-value-in-the-pemba-channel-with-the-prophet-package-in-r/</guid>
+      <description>introductionTime series analysis comprises methods for predicting the future based on the historical in order to extract meaningful statistics and other characteristics of the data. In other words, time series forecasting is the use of a model to predict future values based on previously observed values. Time series are widely used for non-stationary data, like economic, weather, stock price, and retail sales in this post.</description>
+    </item>
+    
+    <item>
       <title>Mapping Global Climatological Annual precipitation with ggplot and metR package in R</title>
       <link>/05/07/2019/climatological-monthly-variation-of-precipitation-in-the-pemba-channel/</link>
       <pubDate>Tue, 07 May 2019 00:00:00 +0000</pubDate>

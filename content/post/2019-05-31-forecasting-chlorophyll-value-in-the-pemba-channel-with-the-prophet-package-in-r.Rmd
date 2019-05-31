@@ -1,0 +1,184 @@
+---
+title: Forecasting chlorophyll value in the Pemba channel with the prophet package
+  in R
+author: Masumbuko Semba
+date: '2019-05-31'
+slug: forecasting-chlorophyll-value-in-the-pemba-channel-with-the-prophet-package-in-r
+categories:
+  - Oceanography
+  - MODIS
+  - R
+tags:
+  - Oceanography
+  - Indian Ocean
+  - chlorophyll
+  - Pemba Channel
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
+```
+
+## introduction
+
+Time series analysis comprises methods for predicting the future based on the historical in order to extract meaningful statistics and other characteristics of the data. In other words, time series forecasting is the use of a model to predict future values based on previously observed values. Time series are widely used for non-stationary data, like economic, weather, stock price, and retail sales in this post. Scientists all over the globe are also working to predict the future increase of environmenal variables like surface current, wind speed and direction, sea surface temperature and marine productivity. In this post I demonstrate how ot predict chlorophyll concentration in the Pemba channel using **prophet** package developed by Sean Taylor and Ben Letham -@prophet.
+
+Let’s get started by loading the package we need to import the data, analyse and plotting:
+
+```{r, message=FALSE, warning=FALSE}
+require(tidyverse)
+require(lubridate)
+require(magrittr)
+require(prophet)
+```
+
+```{r, echo=FALSE}
+## additional functions
+source("e:/Data Manipulation/semba_functions.R")
+```
+
+
+```{r, echo=FALSE}
+## load the data
+load("e:/bookdown/spatil_r/modis_pemba.RData")
+```
+
+
+```{r, echo=FALSE}
+## work internalyy to accomplish the tibble conversion
+
+## preallocate object
+sst.tb = list()
+chl.tb = list()
+
+## loop sst
+for (i in 1:length(sst$time)){
+  
+  sst.tb[[i]] = matrix_tb(x = sst$longitude, 
+                          y = sst$latitude, 
+                          data = sst$data[,,i]) %>% 
+    mutate(time = sst$time[i] %>%as.Date()) %>%  
+    select(date = time,lon = x, lat = y, sst = value) 
+}
+
+## loop chl
+for (j in 1:length(chl$time)){
+  chl.tb[[j]] = matrix_tb(x = chl$longitude, 
+                          y = chl$latitude, 
+                          data = chl$data[,,j]) %>% 
+    mutate(time = chl$time[j] %>%as.Date()) %>% 
+    select(date = time,lon = x, lat = y, chl = value) 
+}
+## unlist the listed sst and chl files
+sst.tb = sst.tb %>% bind_rows(sst.tb)
+chl.tb = chl.tb %>% bind_rows(chl.tb)
+
+
+```
+
+##  Data
+We use a time series of chlorophyll concentration at the Pemba Channel, Tanzania. We extracted these data using the `xtracto_3D()` function from *xtractomatic* package [@xtracto]. The `.csv` format of this file is available [here](). First we import the data into our workspace:
+
+```{r, eval=FALSE}
+chl.tb = read_csv("./chl_tb.csv")
+
+```
+
+The file contain four variables described as:
+
++ `date` the month of records
++ `longitude` the eastings geographical coordinates values
++ `latitude` the northings geographical cooridnates values
++ `chlorophyll` the value of chlorophyll measured at that location and time
+
+```{r tab1399, echo=FALSE}
+chl.tb %>% sample_n(10) %>% 
+  kableExtra::kable(format = "html", digits = 2, align = "c",
+                    caption = "Randomly selected twelve observations of thedataset",
+                    col.names = c("Date", "Longitude", "Latitude", "Chlorophyll (mg/m3)")) %>%
+  kableExtra::column_spec(column = 2:3, width = "3cm") %>%
+  kableExtra::column_spec(column = 4, width = "5cm") %>%
+  kableExtra::add_header_above(c("", "Geographical coordinates" = 2,  ""))
+  
+```
+
+## Data processing
+This step includes removing longitude and latitude value from the dataset and aggregate chlorophyll-value  by date with function from **tidyverse** [@tidyverse]. The average chlorophyll concentration was computed and rename the variables to `ds` for date and date time and `y` for a variable containing the values to match the data frame format that is compartible with the **prophet** package [@prophet].
+
+```{r}
+chl.mean = chl.tb %>% 
+  group_by(date) %>% 
+  summarise(chl = mean(chl, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  rename(ds = date, y = chl)
+```
+
+## Forecasting
+Once we have organized the data frame in the format that **prophet** package understand, We can fit the data frame of into the model. 
+```{r}
+m = prophet(df = chl.mean, 
+            weekly.seasonality=TRUE, 
+            daily.seasonality=TRUE)
+```
+
+We then used the fitted model to create a data frame of the future. For this case we want to predict chlorophyll value for the next ten years, therefore we specify the number of periods to 120 and the frequency to `month`. The `make_future_dataframe()` function takes the model object and a number of periods to forecast and produce a suitable dataframe, but also include the historical dates.
+
+```{r}
+future = make_future_dataframe(m = m, 
+                               periods = 120, 
+                               freq = "month")
+```
+
+now you have created a future time and have the historical trend, we can predict the value of chlorophyll for pemba channel for the coming years with the `predict()` function. It output `future.chl` data frame object with column `yhat` containing the predicted values (table \@ref(tab:tab1398). It has other columns for uncertainity and seasonal components. 
+
+```{r}
+future.chl = predict(m, future)
+
+```
+
+```{r tab1398, echo=FALSE}
+
+future.chl %>% 
+  select(ds, trend, trend_lower, trend_upper, yhat, yhat_lower, yhat_upper)%>% 
+  sample_n(10) %>% 
+  kableExtra::kable(format = "html", digits = 2, align = "c",
+                    caption = "Randomly selected twelve observations of the predicted chlorophyll dataset") %>%
+  kableExtra::column_spec(column = 2:7, width = "2.5cm") %>%
+  kableExtra::add_header_above(c("", "Historical value" = 3,  "Predicted value" = 3))
+  
+```
+
+## Visualize the forecasted values
+The generic plot() function can be ussed to plot the predicted chlorophyll value. Note that the model must be supplied in as the first argument and the predicted as the second argument. The nice things is that it uses the **ggplot2** framework of *grammar of graphics* to make this plot.  Hence, we can take full control of the rich function of **ggplot2** [@ggplot], to customize the plot as seen in figure \@ref(fig:fig1301).
+
+```{r fig1301, fig.cap="Predicted time series of chlorophyll concentration in the Pemba Channel"}
+
+plot(m,future.chl) +
+  # theme_bw()+
+  theme(axis.text = element_text(size = 12), axis.title = element_text(size = 14))+
+  scale_y_continuous(breaks = seq(0.1, 0.6, 0.1))+
+  labs(x = NULL, y = expression(Chlorophyll~concentration~(mgm^{-3})))
+  
+```
+
+We can visualize the components of predicted chlorophyll value shown in figure \@ref(fig:fig1302) with the `prophet_plot_components()` function:
+
+```{r, fig1302, fig.cap="Time series of historical and predicted chlorophyll values decomposed into yearly, week, day and hours trends"}
+prophet_plot_components(m = m, fcst = future.chl) 
+```
+
+We can make an interactive plot of the predicted and historical concentration of chlorophyll as in figure \@ref(fig:fig1303)  with the `dyplot.prophet()` function written as;
+
+```{r, fig1303, fig.cap="Interactive plot showing the historical and predicted chlorophyll-value"}
+dyplot.prophet(x = m, fcst = future.chl,uncertainty = TRUE )
+```
+
+## conclusion
+We have seen that with few command line of function from **prophet** package, we can automatically forecast time series data based on additive models where non-linear trends are unfit. The package works well with time series from the Western Indian Ocean where there is strong effects of monsoon seasons caused by trande winds. 
+
+
+## Reference
