@@ -6,10 +6,19 @@
     <description>Recent content in Posts on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 31 May 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 17 Jun 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Things I learned in TAFIRI R Workshop 2019</title>
+      <link>/06/17/2019/things-i-learned-in-tafiri-r-workshop-2019/</link>
+      <pubDate>Mon, 17 Jun 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/06/17/2019/things-i-learned-in-tafiri-r-workshop-2019/</guid>
+      <description>IntroductionWe had a three days workshop on using R for analtyical framework from 12th to 14th July, 2019 at the headquarter of Tanzania Fisheries Reseach Institute (TAFIRI), Dar es Salaam. The workshop was a follow up of similar training conducted in July, 2018. Though the focus of the workshop relied on the base R syntax that does not allow you to express succinctly the coding with pipping, I can honestly say it was one of the most interesting and educational training.</description>
+    </item>
     
     <item>
       <title>Forecasting chlorophyll value in the Pemba channel with the prophet package in R</title>

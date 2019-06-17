@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.55.2" />
+
+
+<title>Things I learned in TAFIRI R Workshop 2019 - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Things I learned in TAFIRI R Workshop 2019 - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">7 min read</span>
+    
+
+    <h1 class="article-title">Things I learned in TAFIRI R Workshop 2019</h1>
+
+    
+    <span class="article-date">2019/06/17</span>
+    
+
+    <div class="article-content">
+      
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>We had a three days workshop on using R for analtyical framework from 12<sup>th</sup> to 14<sup>th</sup> July, 2019 at the headquarter of Tanzania Fisheries Reseach Institute (TAFIRI), Dar es Salaam. The workshop was a follow up of similar training conducted in July, 2018. Though the focus of the workshop relied on the base R syntax that does not allow you to express succinctly the coding with pipping, I can honestly say it was one of the most interesting and educational training.</p>
+<p>The training exposed us to some useful packages that I was not aware of and I have come back with a long list of ideas which I want to get using right away! I have just listed the package in this post and a briefly description that tells you the functions offered in the package and what they can do to streamline your coding in R.</p>
+<ul>
+<li><p><code>agricolae</code>— a package for <em>Statistical Procedures for Agricultural Research</em> developed by Felipe de Mendiburu <span class="citation">(<a href="#ref-agricolae">2019</a>)</span>. Agricolae offers extensive functionality on experimental design especially for agricultural and plant breeding experiments, which can also be useful for other purposes. It supports planning of lattice, Alpha, Cyclic, Complete Block, Latin Square, Graeco-Latin Squares, augmented block, factorial, split and strip plot designs. There are also various analysis facilities for experimental data, e.g. treatment comparison procedures and several non-parametric tests comparison, biodiversity indexes and consensus cluster</p></li>
+<li><p><code>car</code>— Developed by Sanford Weisberg <span class="citation">(<a href="#ref-car">2019</a>)</span>, which provide additional functions for regression analysis</p></li>
+<li><p><code>caret</code>— A packaged developed by Max Kuhn <span class="citation">(<a href="#ref-caret">2019</a>)</span>, provide various functins for training and plotting classification and regression models.</p></li>
+<li><p><code>FSA</code>— A package developed and maintained by Derek Ogle, Powell Wheeler and Dinno Alexis <span class="citation">(<a href="#ref-fsa">2019</a>)</span> that offers different methods for fish stock assessment.</p></li>
+<li><p><code>GGally</code>— is an add–on package to <strong>ggplot2</strong> developed by Barret Schoerke <span class="citation">(<a href="#ref-ggally">2018</a>)</span> with contributions from many others. It provide functions that extends the plotting capability of <strong>ggplot2</strong>, which include</p>
+<ol style="list-style-type: lower-roman">
+<li>pairwise plot matrix,</li>
+<li>a two group pairwise plot matrix,</li>
+<li>a parallel coordinates plot,</li>
+<li>a survival plot, and</li>
+<li>several functions to plot networks</li>
+</ol></li>
+<li><p><code>lme4</code>— the package fit linear and generalized linear mixed-effects models <span class="citation">(Bates et al. <a href="#ref-lme">2015</a>)</span>. The models and their components are represented using S4 classes and methods. The core computational algorithms are implemented using the ‘Eigen’ C++ library for numerical linear algebra and ‘RcppEigen’ “glue”.</p></li>
+<li><p><code>MKmisc</code>— The package contains several functions for statistical data analysis; e.g. for sample size and power calculations, computation of confidence intervals and tests, and generation of similarity matrices <span class="citation">(Kohl <a href="#ref-mkmisc">2019</a>)</span>.</p></li>
+<li><p><code>MuMIn</code>— This package was deveoped and is maintained by Kamil Bartoń <span class="citation">(<a href="#ref-mkmisc">2019</a>)</span> has tools for performing model selection and model averaging. Automated model selection through subsetting the maximum model, with optional constraints for model inclusion. Model parameter and prediction averaging based on model weights derived from information criteria AICc and alike) or custom model weighting schemes</p></li>
+<li><p><code>pROC</code>— missing in the library. reinstall</p></li>
+<li><p><code>pwr</code>— The package has tool to perform basic power analysis <span class="citation">(Champely <a href="#ref-pwr">2018</a>)</span>.</p></li>
+<li><p><code>userfriendlyscience</code>— Gjalt-Jorn and his collegues <span class="citation">(<a href="#ref-userfriend">2017</a>)</span> developed this package and pack it with functions that are customize to people who are familiar with SPSS two goals. It also has functions that are more user friendly to relatively novice users. The package also conveniently houses a number of additional functions that are intended to increase the quality of methodology and statistics in psychology, not by offering technical solutions, but by shifting perspectives, for example towards reasoning based on sampling distributions as opposed to on point estimates.</p></li>
+<li><p><code>visreg</code>— Patrick Breheny and Woodrow Burchett <span class="citation">(<a href="#ref-visreg">2017</a>)</span> developed this package to provides a convenient interface for constructing plots to visualize the fit of regression models arising from a model algorithems in R (‘lm’, ‘glm’, ‘coxph’, ‘rlm’, ‘gam’, ‘locfit’, ‘lmer’, ‘randomForest’, etc.</p></li>
+<li><p><code>DescTools</code>— Andri Signorell and his team <span class="citation">(<a href="#ref-desctools">2019</a>)</span> deveoped this package that has a collection of miscellaneous basic statistic functions and convenience wrappers for efficiently describing data. The author’s intention was to create a toolbox, which facilitates the (notoriously time consuming) first descriptive tasks in data analysis, consisting of calculating descriptive statistics, drawing graphical summaries and reporting the results. The package contains furthermore functions to produce documents using MS Word (or PowerPoint) and functions to import data from Excel. Many of the included functions can be found scattered in other packages and other sources written partly by Titans of R. The reason for collecting them here, was primarily to have them consolidated in ONE instead of dozens of packages (which themselves might depend on other packages which are not needed at all), and to provide a common and consistent interface as far as function and arguments naming, NA handling, recycling rules etc. are concerned. Google style guides were used as naming rules (in absence of convincing alternatives). The ‘camel style’ was consequently applied to functions borrowed from contributed R packages as well descripe</p></li>
+</ul>
+<p>We also worked through the exercise with some of my favourite packages to accomplish the tasks and assignments in R projects. These packages include:</p>
+<ul>
+<li><p><code>ggplot2</code>— A core function of the <strong>tidyverse</strong><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> ecosystem developed by Hadley Wickham <span class="citation">(<a href="#ref-ggplot">2016</a>)</span>. Its a popular visulization tools that uses a <em>Grammar of Graphics</em> framework. It provide tools that you add layers on top one another and create complex plots.</p></li>
+<li><p><code>sf</code>— Edzer Pebesma and his team developed this package <span class="citation">(<a href="#ref-sf">2018</a>)</span>, which Support for simple features, a standardized way to encode spatial vector data. Binds to ‘GDAL’ for reading and writing data, to ‘GEOS’ for geometrical operations, and to ‘PROJ’ for projection conversions and datum transformations</p></li>
+<li><p><code>maps</code>— This package as its name tell, it display maps–contain tools for displaying spatial data in R. It was orignally written by Richard Becker and Allan Wilks <span class="citation">(<a href="#ref-maps">2018</a>)</span>, but more people have contributed to its maturity.</p></li>
+<li><p><code>maptools</code>— Roger Bivand and other <span class="citation">(<a href="#ref-maptools">2017</a>)</span> developed this package, which contains set of tools for manipulating geographic data. It includes binary access to ‘GSHHG’ shoreline files. The package also provides interface wrappers for exchanging spatial objects with packages such as ‘PBSmapping’, ‘spatstat’, ‘maps’, ‘RArcInfo’, and others.</p></li>
+<li><p><code>ggmap</code>— David Kahle and others <span class="citation">(<a href="#ref-ggmap">2013</a>)</span> developed this package to extend the capability of <strong>ggplot2</strong> package. The package host several functions that enable to overlay spatial data and models on top of static maps from various map sercies—Google Maps and Stamen Maps).</p></li>
+<li><p><code>tmap</code>— This package offers tools to visualize geographical data <span class="citation">(Tennekes <a href="#ref-tmap">2018</a>)</span>. This package offers a flexible, layer-based, and easy to use approach to create thematic maps, such as choropleths and bubble maps.</p></li>
+<li><p><code>leaflet</code>— Create and customize interactive maps using the ‘Leaflet’JavaScript library and the ’htmlwidgets’ package. These maps can be used directly from the R console, from ‘RStudio viewer’, in Shiny applications and R Markdown documents <span class="citation">(Cheng, Karambelkar, and Xie <a href="#ref-leaflet">2018</a>)</span>
+documents.</p></li>
+<li><p><code>spData</code>— Roger Bivand and others <span class="citation">(<a href="#ref-spdata">2019</a>)</span> developed this package, which contains several spatial datasets.</p></li>
+<li><p><code>mapshot/mapview</code>—Time Appelhand and collegeues <span class="citation">(<a href="#ref-mapview">2019</a>)</span> develope this package for interactive visualization of geographical data.</p></li>
+</ul>
+</div>
+<div id="references" class="section level3 unnumbered">
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-desctools">
+<p>al., Andri Signorell et mult. 2019. <em>DescTools: Tools for Descriptive Statistics</em>. <a href="https://cran.r-project.org/package=DescTools">https://cran.r-project.org/package=DescTools</a>.</p>
+</div>
+<div id="ref-mapview">
+<p>Appelhans, Tim, Florian Detsch, Christoph Reudenbach, and Stefan Woellauer. 2019. <em>Mapview: Interactive Viewing of Spatial Data in R</em>. <a href="https://CRAN.R-project.org/package=mapview">https://CRAN.R-project.org/package=mapview</a>.</p>
+</div>
+<div id="ref-lme">
+<p>Bates, Douglas, Martin Mächler, Ben Bolker, and Steve Walker. 2015. “Fitting Linear Mixed-Effects Models Using lme4.” <em>Journal of Statistical Software</em> 67 (1): 1–48. <a href="https://doi.org/10.18637/jss.v067.i01">https://doi.org/10.18637/jss.v067.i01</a>.</p>
+</div>
+<div id="ref-maptools">
+<p>Bivand, Roger, and Nicholas Lewin-Koh. 2017. <em>Maptools: Tools for Reading and Handling Spatial Objects</em>. <a href="https://CRAN.R-project.org/package=maptools">https://CRAN.R-project.org/package=maptools</a>.</p>
+</div>
+<div id="ref-spdata">
+<p>Bivand, Roger, Jakub Nowosad, and Robin Lovelace. 2019. <em>SpData: Datasets for Spatial Analysis</em>. <a href="https://CRAN.R-project.org/package=spData">https://CRAN.R-project.org/package=spData</a>.</p>
+</div>
+<div id="ref-visreg">
+<p>Breheny, Patrick, and Woodrow Burchett. 2017. “Visualization of Regression Models Using Visreg.” <em>The R Journal</em> 9 (2): 56–71.</p>
+</div>
+<div id="ref-pwr">
+<p>Champely, Stephane. 2018. <em>Pwr: Basic Functions for Power Analysis</em>. <a href="https://CRAN.R-project.org/package=pwr">https://CRAN.R-project.org/package=pwr</a>.</p>
+</div>
+<div id="ref-leaflet">
+<p>Cheng, Joe, Bhaskar Karambelkar, and Yihui Xie. 2018. <em>Leaflet: Create Interactive Web Maps with the Javascript ’Leaflet’ Library</em>. <a href="https://CRAN.R-project.org/package=leaflet">https://CRAN.R-project.org/package=leaflet</a>.</p>
+</div>
+<div id="ref-agricolae">
+<p>de Mendiburu, Felipe. 2019. <em>Agricolae: Statistical Procedures for Agricultural Research</em>. <a href="https://CRAN.R-project.org/package=agricolae">https://CRAN.R-project.org/package=agricolae</a>.</p>
+</div>
+<div id="ref-car">
+<p>Fox, John, and Sanford Weisberg. 2019. <em>An R Companion to Applied Regression</em>. Third. Thousand Oaks CA: Sage. <a href="https://socialsciences.mcmaster.ca/jfox/Books/Companion/">https://socialsciences.mcmaster.ca/jfox/Books/Companion/</a>.</p>
+</div>
+<div id="ref-caret">
+<p>Jed Wing, Max Kuhn. Contributions from, Steve Weston, Andre Williams, Chris Keefer, Allan Engelhardt, Tony Cooper, Zachary Mayer, et al. 2019. <em>Caret: Classification and Regression Training</em>. <a href="https://CRAN.R-project.org/package=caret">https://CRAN.R-project.org/package=caret</a>.</p>
+</div>
+<div id="ref-ggmap">
+<p>Kahle, David, and Hadley Wickham. 2013. “Ggmap: Spatial Visualization with Ggplot2.” <em>The R Journal</em> 5 (1): 144–61. <a href="https://journal.r-project.org/archive/2013-1/kahle-wickham.pdf">https://journal.r-project.org/archive/2013-1/kahle-wickham.pdf</a>.</p>
+</div>
+<div id="ref-mkmisc">
+<p>Kohl, Matthias. 2019. <em>MKmisc: Miscellaneous Functions from M. Kohl</em>. <a href="http://www.stamats.de">http://www.stamats.de</a>.</p>
+</div>
+<div id="ref-fsa">
+<p>Ogle, Derek H., Powell Wheeler, and Alexis Dinno. 2019. <em>FSA: Fisheries Stock Analysis</em>. <a href="https://github.com/droglenc/FSA">https://github.com/droglenc/FSA</a>.</p>
+</div>
+<div id="ref-sf">
+<p>Pebesma, Edzer. 2018. <em>Sf: Simple Features for R</em>. <a href="https://CRAN.R-project.org/package=sf">https://CRAN.R-project.org/package=sf</a>.</p>
+</div>
+<div id="ref-userfriend">
+<p>Peters, Gjalt-Jorn Ygram. 2017. “Diamond Plots: A Tutorial to Introduce a Visualisation Tool That Facilitates Interpretation and Comparison of Multiple Sample Estimates While Respecting Their Inaccuracy.” <em>PsyArXiv</em>. <a href="https://psyarxiv.com/fzh6c">https://psyarxiv.com/fzh6c</a>.</p>
+</div>
+<div id="ref-maps">
+<p>Richard A. Becker, Original S code by, Allan R. Wilks. R version by Ray Brownrigg. Enhancements by Thomas P Minka, and Alex Deckmyn. 2018. <em>Maps: Draw Geographical Maps</em>. <a href="https://CRAN.R-project.org/package=maps">https://CRAN.R-project.org/package=maps</a>.</p>
+</div>
+<div id="ref-ggally">
+<p>Schloerke, Barret, Jason Crowley, Di Cook, Francois Briatte, Moritz Marbach, Edwin Thoen, Amos Elberg, and Joseph Larmarange. 2018. <em>GGally: Extension to ’Ggplot2’</em>. <a href="https://CRAN.R-project.org/package=GGally">https://CRAN.R-project.org/package=GGally</a>.</p>
+</div>
+<div id="ref-tmap">
+<p>Tennekes, Martijn. 2018. “tmap: Thematic Maps in R.” <em>Journal of Statistical Software</em> 84 (6): 1–39. <a href="https://doi.org/10.18637/jss.v084.i06">https://doi.org/10.18637/jss.v084.i06</a>.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
+</div>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>a set of packages that work in harmony for importing, tidying, manipulating, modeling visualize data.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+    
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+
