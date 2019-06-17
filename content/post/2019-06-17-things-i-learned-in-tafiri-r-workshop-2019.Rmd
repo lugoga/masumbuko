@@ -7,6 +7,7 @@ categories:
   - Information Technology
 tags:
   - R
+  - Training
 
 bibliography: [blog.bib]
 # csl: apa.csl
@@ -77,5 +78,8 @@ We  also worked through the exercise with some of my favourite packages to accom
 + `spData`--- Roger Bivand and others [-@spdata] developed this package, which contains several spatial datasets. 
 
 + `mapshot/mapview`---Time Appelhand and colleageues [-@mapview] developed this package for interactive visualization of geographical data. 
+
+### Final Words
+A huge thank you for instructor Jimena Golcher, Jessica Rick, and Jesse Alston  for their generous presentations about so many relevant topics. I also thank for the Dr. Ismael Kimirei for facilitating the workshop and make it possible. And final thanks goes to the R trainees.
 
 ### References

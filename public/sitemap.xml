@@ -75,6 +75,12 @@
   </url>
   
   <url>
+    <loc>/tags/training/</loc>
+    <lastmod>2019-06-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/05/31/2019/forecasting-chlorophyll-value-in-the-pemba-channel-with-the-prophet-package-in-r/</loc>
     <lastmod>2019-05-31T00:00:00+00:00</lastmod>
   </url>
@@ -92,13 +98,13 @@
   </url>
   
   <url>
-    <loc>/tags/oceanography/</loc>
+    <loc>/categories/oceanography/</loc>
     <lastmod>2019-05-31T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/oceanography/</loc>
+    <loc>/tags/oceanography/</loc>
     <lastmod>2019-05-31T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
