@@ -19,16 +19,16 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "
 ```
 
 ### Introduction
-We had a three days workshop on using R for analtyical framework from 12^th^ to 14^th^ July, 2019 at the headquarter of Tanzania Fisheries Reseach Institute (TAFIRI), Dar es Salaam. The workshop was a follow up of similar training conducted in July, 2018. Though the focus of the workshop relied on the base R syntax that does not allow you to express succinctly the coding with pipping, I can honestly say it was one of the most interesting and educational training. 
+We had a three days workshop on using R for analytical framework from 12^th^ to 14^th^ July, 2019 at the headquarter of Tanzania Fisheries Reseach Institute (TAFIRI), Dar es Salaam. The workshop was a follow up of similar training conducted in July, 2018. Though the focus of the workshop relied on the base R syntax that does not allow you to express succinctly the coding with pipping, I can honestly say it was one of the most interesting and educational training. 
 
-The training exposed us to some useful packages that I was not aware of and I have come back with a long list of ideas which I want to get using right away! I have just listed the package in this post and a briefly description that tells you the functions offered in the package and what they can do to streamline your coding in R. 
+The training exposed us to some useful packages that I was not aware of and I have come back with a long list of ideas which I want to get using right away! I have just listed the package in this post and described them briefly of some functions in the package to glimpse their flavors to streamline your coding in R. 
 
 
 + `agricolae`--- a package for *Statistical Procedures for Agricultural Research* developed by Felipe de Mendiburu [-@agricolae]. Agricolae offers extensive functionality on experimental design especially for agricultural and plant breeding experiments, which can also be useful for other purposes. It supports planning of lattice, Alpha, Cyclic, Complete Block, Latin Square, Graeco-Latin Squares, augmented block, factorial, split and strip plot designs. There are also various analysis facilities for experimental data, e.g. treatment comparison procedures and several non-parametric tests comparison, biodiversity indexes and consensus cluster
 
 + `car`--- Developed by Sanford Weisberg [-@car], which provide additional functions for regression analysis
 
-+ `caret`--- A packaged developed by Max Kuhn [-@caret], provide various functins for training and plotting classification and regression models.
++ `caret`--- A packaged developed by Max Kuhn [-@caret], provide various functions for training and plotting classification and regression models.
 
 + `FSA`--- A package developed and maintained by Derek Ogle, Powell Wheeler and Dinno Alexis [-@fsa] that offers different methods for fish stock assessment. 
 
@@ -45,7 +45,7 @@ The training exposed us to some useful packages that I was not aware of and I ha
 
 + `MKmisc`--- The package contains several functions for statistical data analysis; e.g. for sample size and power calculations, computation of confidence intervals and tests, and generation of similarity matrices [@mkmisc].
 
-+ `MuMIn`--- This package was deveoped and is maintained by Kamil Bartoń [-@mkmisc] has tools for performing model selection and model averaging. Automated model selection through subsetting the maximum model, with optional constraints for model inclusion. Model parameter and prediction averaging based on model weights derived from information criteria AICc and alike) or custom model weighting schemes
++ `MuMIn`--- This package was developed and is maintained by Kamil Bartoń [-@mkmisc] has tools for performing model selection and model averaging. Automated model selection through subsetting the maximum model, with optional constraints for model inclusion. Model parameter and prediction averaging based on model weights derived from information criteria AICc and alike) or custom model weighting schemes
 
 + `pROC`--- missing in the library. reinstall
 
@@ -53,13 +53,13 @@ The training exposed us to some useful packages that I was not aware of and I ha
 
 + `userfriendlyscience`--- Gjalt-Jorn and his collegues [-@userfriend] developed this package and pack it with functions that are customize to people who are familiar with SPSS two goals. It also has functions that are more user   friendly to relatively novice users. The package also conveniently houses a number of additional functions that are intended to increase the quality of methodology and statistics in psychology, not by offering technical solutions, but by shifting perspectives, for example towards reasoning based on sampling distributions as opposed to on point estimates.
 
-+ `visreg`--- Patrick Breheny and Woodrow Burchett [-@visreg] developed this package to provides a convenient interface for constructing plots to visualize the fit of regression models arising from a model algorithems in R ('lm', 'glm', 'coxph', 'rlm', 'gam', 'locfit', 'lmer', 'randomForest', etc.
++ `visreg`--- Patrick Breheny and Woodrow Burchett [-@visreg] developed this package to provides a convenient interface for constructing plots to visualize the fit of regression models arising from a model algorithms in R ('lm', 'glm', 'coxph', 'rlm', 'gam', 'locfit', 'lmer', 'randomForest', etc.
 
-+ `DescTools`---  Andri Signorell and his team [-@desctools] deveoped this package that has a collection of miscellaneous basic statistic functions and convenience wrappers for efficiently describing data. The author's intention was to create a toolbox, which facilitates the (notoriously time consuming) first descriptive tasks in data analysis, consisting of calculating descriptive statistics, drawing graphical summaries and reporting the results. The package contains furthermore functions to produce documents using MS Word (or PowerPoint) and functions to import data from Excel. Many of the included functions can be found scattered in other packages and other sources written partly by Titans of R. The reason for collecting them here, was primarily to have them consolidated in ONE instead of dozens of packages (which themselves might depend on other packages which are not needed at all), and to provide a common and consistent interface as far as function and arguments naming, NA handling, recycling rules etc. are concerned. Google style guides were used as naming rules (in absence of convincing alternatives). The 'camel style' was consequently applied to functions borrowed from contributed R packages as well descripe
++ `DescTools`---  Andri Signorell and his team [-@desctools] developed this package that has a collection of miscellaneous basic statistic functions and convenience wrappers for efficiently describing data. The author's intention was to create a toolbox, which facilitates the (notoriously time consuming) first descriptive tasks in data analysis, consisting of calculating descriptive statistics, drawing graphical summaries and reporting the results. The package contains furthermore functions to produce documents using MS Word (or PowerPoint) and functions to import data from Excel. Many of the included functions can be found scattered in other packages and other sources written partly by Titans of R. The reason for collecting them here, was primarily to have them consolidated in ONE instead of dozens of packages (which themselves might depend on other packages which are not needed at all), and to provide a common and consistent interface as far as function and arguments naming, NA handling, recycling rules etc. are concerned. Google style guides were used as naming rules (in absence of convincing alternatives). The 'camel style' was consequently applied to functions borrowed from contributed R packages.
 
 We  also worked through the exercise with some of my favourite packages to accomplish the tasks and assignments in R projects. These packages include:
 
-+ `ggplot2`--- A core function of the **tidyverse**^[a set of packages that work in harmony for importing, tidying, manipulating, modeling visualize data.] ecosystem developed by Hadley Wickham [-@ggplot]. Its a popular visulization tools that uses a *Grammar of Graphics* framework. It provide tools that you add layers on top one another and create complex plots. 
++ `ggplot2`--- A core function of the **tidyverse**^[a set of packages that work in harmony for importing, tidying, manipulating, modeling visualize data.] ecosystem developed by Hadley Wickham [-@ggplot]. Its a popular visualization tools that uses a *Grammar of Graphics* framework. It provide tools that you add layers on top one another and create complex plots. 
 
 + `sf`--- Edzer Pebesma and his team developed this package [-@sf], which Support for simple features, a standardized way to   encode spatial vector data. Binds to 'GDAL' for reading and writing data, to 'GEOS' for geometrical operations, and to 'PROJ' for projection conversions and datum transformations
 
@@ -76,6 +76,6 @@ We  also worked through the exercise with some of my favourite packages to accom
 
 + `spData`--- Roger Bivand and others [-@spdata] developed this package, which contains several spatial datasets. 
 
-+ `mapshot/mapview`---Time Appelhand and collegeues [-@mapview] develope this package for interactive visualization of geographical data. 
++ `mapshot/mapview`---Time Appelhand and colleageues [-@mapview] developed this package for interactive visualization of geographical data. 
 
 ### References
