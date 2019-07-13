@@ -256,10 +256,7 @@ osx
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>rdown = rdown %&gt;% 
-  as_tibble() %&gt;% 
-  mutate(month = lubridate::month(date, abbr = TRUE, label = TRUE))</code></pre>
-<p>To have a glimpse of the R version download, we first ask the question, Are R downloads differs over time and operating system? To address this question, we need first to remove downloads that does contain information of the operating system from the dataset. Then we group the dowloads based on the month and create a sequence of time spaning from January to December and make it repeat based on the frequency of the operating systems. The chunk below illustrate the code of lines used to prepare the data to answer the question asked above.</p>
+<p>To have a glimpse of the R version download, we first ask the question, <em>Are R downloads differs over time and operating system?</em> To address this question, we need first to remove downloads that does contain information of the operating system from the dataset. Then we group the dowloads based on the month and create a sequence of time spaning from January to December and make it repeat based on the frequency of the operating systems. The chunk below illustrate the code of lines used to prepare the data to answer the question asked above.</p>
 <pre class="r"><code>rdown.group = rdown %&gt;% 
   filter(os != &quot;NA&quot;) %&gt;% 
   group_by(month, os) %&gt;% count() %&gt;% 
@@ -298,7 +295,7 @@ Figure 1: Variation of R downloads from different operating systems over a perio
 <pre class="r"><code>ggplot(data = rdown.os, 
        aes(x = &quot;&quot;, y = percentage, fill = os))+
   geom_bar(stat = &quot;identity&quot;)+
-  coord_polar(&quot;y&quot;, start = 0) +
+  coord_polar(&quot;y&quot;, start = 200) +
   geom_text(aes(y = lab.pos, label = paste(percentage,&quot;%&quot;, sep = &quot;&quot;)), col = &quot;white&quot;) +
   theme_void() +
   scale_fill_brewer(palette = &quot;Dark2&quot;)</code></pre>
@@ -313,7 +310,7 @@ A donut chart is lighter version of pie chart with a hole at the center. Categor
 <pre class="r"><code>ggplot(data = rdown.os, 
        aes(x = 2, y = percentage, fill = os))+
   geom_bar(stat = &quot;identity&quot;)+
-  coord_polar(&quot;y&quot;, start = 0) +
+  coord_polar(&quot;y&quot;, start = 200) +
   geom_text(aes(y = lab.pos, label = paste(percentage,&quot;%&quot;, sep = &quot;&quot;)), col = &quot;white&quot;) +
   theme_void() +
   scale_fill_brewer(palette = &quot;Dark2&quot;)+
@@ -325,8 +322,8 @@ Figure 3: Donut chart
 </p>
 </div>
 </div>
-<div id="referebces" class="section level3 unnumbered">
-<h3>Referebces</h3>
+<div id="references" class="section level3 unnumbered">
+<h3>References</h3>
 <div id="refs" class="references">
 <div id="ref-cranlog">
 <p>Csárdi, Gábor. 2019. <em>Cranlogs: Download Logs from the ’Rstudio’ ’Cran’ Mirror</em>. <a href="https://CRAN.R-project.org/package=cranlogs">https://CRAN.R-project.org/package=cranlogs</a>.</p>
