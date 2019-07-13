@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Semba on Masumbuko Semba&#39;s Blog</title>
+    <link>/tags/semba/</link>
+    <description>Recent content in Semba on Masumbuko Semba&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 12 Jul 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/semba/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Pie chart and Donut plot with ggplot2</title>
+      <link>/07/12/2019/pie-chart-and-donut-plot-with-ggplot2/</link>
+      <pubDate>Fri, 12 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/07/12/2019/pie-chart-and-donut-plot-with-ggplot2/</guid>
+      <description>Introductionggplot2 developed by Hadley Wickham (2016) provide powerful functions that enable people to plot high quality graphs in R.This package has many functions for creating plots among them are pies and donut charts. Pie charts are widely used for showing proportions of mutually–exclusive categories. A pie chart is a circular graphic divided into slices to illustrate numerical proportion of the categorial variable. In a pie chart, the length of each slice is equivalent to the counts or proportion of that slice.</description>
+    </item>
+    
+  </channel>
+</rss>

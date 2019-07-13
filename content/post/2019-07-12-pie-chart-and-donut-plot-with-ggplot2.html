@@ -1,0 +1,270 @@
+---
+title: Pie chart and Donut plot with ggplot2
+author: Masumbuko Semba
+date: '2019-07-12'
+slug: pie-chart-and-donut-plot-with-ggplot2
+categories: []
+tags: [ggplot,pie,donut,Semba]
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p><strong>ggplot2</strong> developed by Hadley Wickham <span class="citation">(<a href="#ref-ggplot">2016</a>)</span> provide powerful functions that enable people to plot high quality graphs in R.This package has many functions for creating plots among them are pies and donut charts. Pie charts are widely used for showing proportions of mutually–exclusive categories. A pie chart is a circular graphic divided into slices to illustrate numerical proportion of the categorial variable. In a pie chart, the length of each slice is equivalent to the counts or proportion of that slice.</p>
+<pre class="r"><code>require(tidyverse)</code></pre>
+</div>
+<div id="data" class="section level3">
+<h3>Data</h3>
+<p>A pie chart need a series of data representing counts or proportions of different groups. For this post we use the package <strong>cranlogs</strong> to download daily logs of different R version from the Rstudio CRAN Mirror <span class="citation">(Csárdi <a href="#ref-cranlog">2019</a>)</span>. We obtained all R downloads made in 2018.</p>
+<pre class="r"><code>rdown = cranlogs::cran_downloads(packages = &quot;R&quot;, 
+                                 from = &quot;2018-01-01&quot;, 
+                                 to = &quot;2018-12-31&quot;)</code></pre>
+The downloaded file contains four variables as shown in Table <a href="#tab:tab1">1</a>. We can now use any of these variables to make a pie plot.
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Ten random observations of R downloads
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+Date
+</th>
+<th style="text-align:center;">
+Version
+</th>
+<th style="text-align:center;">
+OS
+</th>
+<th style="text-align:center;">
+Count
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+2018-02-28
+</td>
+<td style="text-align:center;width: 3cm; ">
+3.4.1
+</td>
+<td style="text-align:center;width: 3cm; ">
+src
+</td>
+<td style="text-align:center;width: 3cm; ">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+2018-02-12
+</td>
+<td style="text-align:center;width: 3cm; ">
+3.3.2
+</td>
+<td style="text-align:center;width: 3cm; ">
+win
+</td>
+<td style="text-align:center;width: 3cm; ">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+2018-07-05
+</td>
+<td style="text-align:center;width: 3cm; ">
+3.4.0
+</td>
+<td style="text-align:center;width: 3cm; ">
+src
+</td>
+<td style="text-align:center;width: 3cm; ">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+2018-08-12
+</td>
+<td style="text-align:center;width: 3cm; ">
+3.4.1
+</td>
+<td style="text-align:center;width: 3cm; ">
+osx
+</td>
+<td style="text-align:center;width: 3cm; ">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+2018-05-25
+</td>
+<td style="text-align:center;width: 3cm; ">
+2.11.0
+</td>
+<td style="text-align:center;width: 3cm; ">
+src
+</td>
+<td style="text-align:center;width: 3cm; ">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+2018-12-26
+</td>
+<td style="text-align:center;width: 3cm; ">
+3.3.0
+</td>
+<td style="text-align:center;width: 3cm; ">
+src
+</td>
+<td style="text-align:center;width: 3cm; ">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+2018-06-27
+</td>
+<td style="text-align:center;width: 3cm; ">
+3.4.1
+</td>
+<td style="text-align:center;width: 3cm; ">
+win
+</td>
+<td style="text-align:center;width: 3cm; ">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+2018-05-02
+</td>
+<td style="text-align:center;width: 3cm; ">
+latest
+</td>
+<td style="text-align:center;width: 3cm; ">
+osx
+</td>
+<td style="text-align:center;width: 3cm; ">
+61
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+2018-04-30
+</td>
+<td style="text-align:center;width: 3cm; ">
+3.4.4
+</td>
+<td style="text-align:center;width: 3cm; ">
+win
+</td>
+<td style="text-align:center;width: 3cm; ">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+2018-02-15
+</td>
+<td style="text-align:center;width: 3cm; ">
+3.4.0
+</td>
+<td style="text-align:center;width: 3cm; ">
+osx
+</td>
+<td style="text-align:center;width: 3cm; ">
+3
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>rdown = rdown %&gt;% 
+  as_tibble() %&gt;% 
+  mutate(month = lubridate::month(date, abbr = TRUE, label = TRUE))</code></pre>
+<p>To have a glimpse of the R version download, we first ask the question, Are R downloads differs over time and operating system? To address this question, we need first to remove downloads that does contain information of the operating system from the dataset. Then we group the dowloads based on the month and create a sequence of time spaning from January to December and make it repeat based on the frequency of the operating systems. The chunk below illustrate the code of lines used to prepare the data to answer the question asked above.</p>
+<pre class="r"><code>rdown.group = rdown %&gt;% 
+  filter(os != &quot;NA&quot;) %&gt;% 
+  group_by(month, os) %&gt;% count() %&gt;% 
+  ungroup() %&gt;% 
+  mutate(date = seq(lubridate::dmy(010118), lubridate::dmy(11218), 
+                    by = &quot;month&quot;) %&gt;% rep(each = 3))</code></pre>
+<p>When we plotted the computed of variation, we notice that the dowloads from the three operating system varies over time, with the minimum nmber in January that reaches maximum in November. The pattern of variation is almost similar over the period with the minimum downloads observed in windows operating system (Figure <a href="#fig:fig1">1</a>)</p>
+<pre class="r"><code>  ggplot(data = rdown.group, 
+         aes(x = date, y = n, col = os))+
+    geom_path(size = 1.2) + 
+    scale_x_date(date_breaks = &quot;1 month&quot;, date_labels = &quot;%b&quot;) + 
+    scale_color_discrete(name = &quot;Operating\nSystem&quot;)+
+    scale_y_continuous(breaks = seq(100,1000,100)) +
+    labs(x = NULL, y = &quot;Frequency of Downloads&quot;)+
+    theme(legend.key = element_blank(), legend.key.width = unit(1.4, &quot;cm&quot;), legend.key.height = unit(0.45, &quot;cm&quot;),
+          legend.text = element_text(size = 11), legend.position = c(.12,.8))</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2019-07-12-pie-chart-and-donut-plot-with-ggplot2_files/figure-html/fig1-1.png" alt="Variation of R downloads from different operating systems over a period of twelve months " width="672" />
+<p class="caption">
+Figure 1: Variation of R downloads from different operating systems over a period of twelve months
+</p>
+</div>
+<p>To make a pie chart, we will first compute the percentage of each operating system. Once we have the percentage, we create the label position value using the <code>cumsum()</code> function as <code>cumsum(percentage)-0.5*percentage)</code>.and arrange the os in descending order. Note the order in the chunk, you must <code>ungroup()</code> before you arrange the <code>os</code> and then mutate the percentage and position of the labels.</p>
+<pre class="r"><code>rdown.os = rdown %&gt;% 
+  filter(os != &quot;NA&quot;) %&gt;% 
+  group_by(os) %&gt;% 
+  count() %&gt;% 
+  ungroup()%&gt;% 
+  arrange(desc(os)) %&gt;%
+  mutate(percentage = round(n/sum(n),4)*100,
+         lab.pos = cumsum(percentage)-.5*percentage)</code></pre>
+</div>
+<div id="pie-chart" class="section level3">
+<h3>Pie Chart</h3>
+<p>We then plot the pie chart with <code>geom_bar()</code> and then convert the bar into pie with the <code>coord_polar()</code> function. The code block below was used to make a pie chart shown in figure <a href="#fig:fig2">2</a></p>
+<pre class="r"><code>ggplot(data = rdown.os, 
+       aes(x = &quot;&quot;, y = percentage, fill = os))+
+  geom_bar(stat = &quot;identity&quot;)+
+  coord_polar(&quot;y&quot;, start = 0) +
+  geom_text(aes(y = lab.pos, label = paste(percentage,&quot;%&quot;, sep = &quot;&quot;)), col = &quot;white&quot;) +
+  theme_void() +
+  scale_fill_brewer(palette = &quot;Dark2&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig2"></span>
+<img src="/post/2019-07-12-pie-chart-and-donut-plot-with-ggplot2_files/figure-html/fig2-1.png" alt="Pie chart" width="672" />
+<p class="caption">
+Figure 2: Pie chart
+</p>
+</div>
+<p>###Donut chart
+A donut chart is lighter version of pie chart with a hole at the center. Categorical data are often be better understood in donut chart rather than in a pie chart. Like a pie chart, a donut chart is made from <code>geom_bar()</code> and <code>coord_polar()</code>. But, unlike the pie chart, to make a donut plot we must specify the x = 2 in <code>aes()</code> and add the <code>xlim()</code> as code in chunk below show that was used to plot figure <a href="#fig:fig3">3</a>.</p>
+<pre class="r"><code>ggplot(data = rdown.os, 
+       aes(x = 2, y = percentage, fill = os))+
+  geom_bar(stat = &quot;identity&quot;)+
+  coord_polar(&quot;y&quot;, start = 0) +
+  geom_text(aes(y = lab.pos, label = paste(percentage,&quot;%&quot;, sep = &quot;&quot;)), col = &quot;white&quot;) +
+  theme_void() +
+  scale_fill_brewer(palette = &quot;Dark2&quot;)+
+  xlim(.2,2.5)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig3"></span>
+<img src="/post/2019-07-12-pie-chart-and-donut-plot-with-ggplot2_files/figure-html/fig3-1.png" alt="Donut chart" width="672" />
+<p class="caption">
+Figure 3: Donut chart
+</p>
+</div>
+</div>
+<div id="referebces" class="section level3 unnumbered">
+<h3>Referebces</h3>
+<div id="refs" class="references">
+<div id="ref-cranlog">
+<p>Csárdi, Gábor. 2019. <em>Cranlogs: Download Logs from the ’Rstudio’ ’Cran’ Mirror</em>. <a href="https://CRAN.R-project.org/package=cranlogs">https://CRAN.R-project.org/package=cranlogs</a>.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
+</div>
+</div>
+</div>
