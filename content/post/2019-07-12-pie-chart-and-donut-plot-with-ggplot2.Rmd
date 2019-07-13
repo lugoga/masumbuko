@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "
 ```
 
 ### Introduction
-**ggplot2** developed by Hadley Wickham [-@ggplot] provide powerful functions that enable people to plot high quality graphs in R.This package has many functions for creating plots among them are pies and donut charts. Pie charts are widely used for showing proportions of mutually--exclusive categories. A pie chart is a circular graphic divided into slices to illustrate numerical proportion of the categorial variable. In a pie chart, the length of each slice is equivalent to the counts or proportion of that slice. 
+**ggplot2** packaged for R developed by Hadley Wickham [-@ggplot] provides powerful functions for plotting high quality graphs in R.This package has many functions for creating plots among them are pies and donut charts. Pie charts are widely used for showing proportions of mutually--exclusive categories. A pie chart is a circular graphic divided into slices to illustrate numerical proportion of the categorial variable. In a pie chart, the length of each slice is equivalent to the counts or proportion of that slice. 
 
 ```{r}
 require(tidyverse)

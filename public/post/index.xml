@@ -17,7 +17,7 @@
       <pubDate>Fri, 12 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>/07/12/2019/pie-chart-and-donut-plot-with-ggplot2/</guid>
-      <description>Introductionggplot2 developed by Hadley Wickham (2016) provide powerful functions that enable people to plot high quality graphs in R.This package has many functions for creating plots among them are pies and donut charts. Pie charts are widely used for showing proportions of mutually–exclusive categories. A pie chart is a circular graphic divided into slices to illustrate numerical proportion of the categorial variable. In a pie chart, the length of each slice is equivalent to the counts or proportion of that slice.</description>
+      <description>Introductionggplot2 packaged for R developed by Hadley Wickham (2016) provides powerful functions for plotting high quality graphs in R.This package has many functions for creating plots among them are pies and donut charts. Pie charts are widely used for showing proportions of mutually–exclusive categories. A pie chart is a circular graphic divided into slices to illustrate numerical proportion of the categorial variable. In a pie chart, the length of each slice is equivalent to the counts or proportion of that slice.</description>
     </item>
     
     <item>
