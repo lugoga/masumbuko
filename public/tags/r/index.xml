@@ -6,10 +6,19 @@
     <description>Recent content in R on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 17 Jun 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 09 Aug 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Forecasting time series data with R</title>
+      <link>/08/09/2019/forecasting-time-series-data-with-r/</link>
+      <pubDate>Fri, 09 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/08/09/2019/forecasting-time-series-data-with-r/</guid>
+      <description>introductionIn this post I illustrate how to predict the future using the historical data. Time series analysis comprises methods for predicting the future based on the historical in order to extract meaningful statistics and other characteristics of the data. In other words, time series forecasting is the use of a model to predict future values based on previously observed values.</description>
+    </item>
     
     <item>
       <title>Things I learned in TAFIRI R Workshop 2019</title>

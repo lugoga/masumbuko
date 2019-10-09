@@ -6,10 +6,29 @@
     <description>Recent content in Posts on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 12 Jul 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 02 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Mapping with leaflets</title>
+      <link>/10/02/2019/mapping-with-leaflets/</link>
+      <pubDate>Wed, 02 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/10/02/2019/mapping-with-leaflets/</guid>
+      <description>Information of useful are found in this link and read this for spatial modelling
+require(leaflet)## Loading required package: leafletrequire(RColorBrewer)## Loading required package: RColorBrewerrequire(tidyverse)## Loading required package: tidyverse## -- Attaching packages --------------------------------- tidyverse 1.2.1 --## v ggplot2 3.2.1 v purrr 0.3.2## v tibble 2.1.3 v dplyr 0.8.3## v tidyr 1.0.0 v stringr 1.4.0## v readr 1.</description>
+    </item>
+    
+    <item>
+      <title>Forecasting time series data with R</title>
+      <link>/08/09/2019/forecasting-time-series-data-with-r/</link>
+      <pubDate>Fri, 09 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/08/09/2019/forecasting-time-series-data-with-r/</guid>
+      <description>introductionIn this post I illustrate how to predict the future using the historical data. Time series analysis comprises methods for predicting the future based on the historical in order to extract meaningful statistics and other characteristics of the data. In other words, time series forecasting is the use of a model to predict future values based on previously observed values.</description>
+    </item>
     
     <item>
       <title>Pie chart and Donut plot with ggplot2</title>

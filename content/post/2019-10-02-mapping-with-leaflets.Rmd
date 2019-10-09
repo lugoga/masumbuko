@@ -1,0 +1,56 @@
+---
+title: Mapping with leaflets
+author: Masumbuko Semba
+date: '2019-10-02'
+slug: mapping-with-leaflets
+categories: []
+tags: []
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Information of useful are found in this [link](https://cfss.uchicago.edu/notes/leaflet/) and read [this](http://www.econ.uiuc.edu/~lab/workshop/Spatial_in_R.html) for spatial modelling
+
+```{r}
+require(leaflet)
+require(RColorBrewer)
+require(tidyverse)
+
+```
+
+```{r}
+wo = spData::world
+```
+
+```{r}
+leaflet(data = wo) %>% 
+  addPolygons(stroke = FALSE, fillOpacity = 0.5, smoothFactor = .5) %>% 
+  addTiles()
+```
+
+The colorQuantile function of the leaflet package maps values of the data to colors following a palette. In this case I’ve specified a palette of Oranges and Reds, for more palettes you can access the help file for RColorBrewer: ?RColorBrewer.
+```{r}
+
+qpal<-colorQuantile("OrRd", wo$pop, n=5) 
+```
+
+Once the color is defined, we can use this color code to map the distribution of population in the world
+```{r}
+
+
+leaflet(data = wo)%>%
+  setView(lng = 29.618994, lat = 0, zoom = 3) %>% 
+  addPolygons(stroke = FALSE, fillOpacity = 0.7, smoothFactor = .9, color = ~qpal(pop)) %>% 
+  addTiles()  %>%
+  addLegend(pal = qpal,
+            values = ~pop,
+            opacity = 0.7,
+            title = "world's Population",
+            position = "bottomright")
+
+
+```
+
