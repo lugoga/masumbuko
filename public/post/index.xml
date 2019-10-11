@@ -22,6 +22,15 @@ require(leaflet)## Loading required package: leafletrequire(RColorBrewer)## L
     </item>
     
     <item>
+      <title>Get familiar with R Markdown</title>
+      <link>/08/21/2019/get-familiar-with-r-markdown/</link>
+      <pubDate>Wed, 21 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/08/21/2019/get-familiar-with-r-markdown/</guid>
+      <description>Get familiar with R MarkdownOne of the key task of scientist is communicate your analysis and result to the different group of people.The typical data analysis workflow looks like this: you go out and collect data and you organize it in a file or spreadsheet or database. Then interact with R using scripts to run some analyses, perhaps saving some intermediate results along the way or maybe always working on the raw data.</description>
+    </item>
+    
+    <item>
       <title>Forecasting time series data with R</title>
       <link>/08/09/2019/forecasting-time-series-data-with-r/</link>
       <pubDate>Fri, 09 Aug 2019 00:00:00 +0000</pubDate>
