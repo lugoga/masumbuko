@@ -22,7 +22,7 @@ require(leaflet)## Loading required package: leafletrequire(RColorBrewer)## L
     </item>
     
     <item>
-      <title>Get familiar with R Markdown</title>
+      <title>Get familiar with rmarkdown</title>
       <link>/08/21/2019/get-familiar-with-r-markdown/</link>
       <pubDate>Wed, 21 Aug 2019 00:00:00 +0000</pubDate>
       

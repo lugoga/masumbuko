@@ -1,5 +1,5 @@
 ---
-title: Get familiar with R Markdown
+title: Get familiar with rmarkdown
 author: Masumbuko Semba
 date: '2019-08-21'
 slug: get-familiar-with-r-markdown
