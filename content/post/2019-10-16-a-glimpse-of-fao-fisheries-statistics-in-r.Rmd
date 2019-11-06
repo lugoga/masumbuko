@@ -1,0 +1,307 @@
+---
+title: A glimpse of FAO' fisheries statistics in R
+author: Masumbuko Semba
+date: '2019-10-16'
+slug: a-glimpse-of-fao-fisheries-statistics-in-r
+categories:
+  - R
+  - Statistics
+tags:
+  - fisheries
+  - FAO
+  - Semba
+  - Masumbuko Semba
+  - Tanzania
+  - blogdown
+bibliography: [blog.bib]
+csl: elsevier.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center")
+
+load("fish_landings.RData")
+```
+
+# Introduction
+The [OpenFisheries.org project](http://www.openfisheries.org) created an open web platform aimed to advance the practice of data science in fisheries. The project has managed to consolidate global fisheries dataset that can be accessed and retrieved using modern analytics. The OpenFisheries.org flagship project is the Global Fisheries REST API forms the backbone of fisheries data science, enabling reproducible analytics in  R [@rlanguage], Python or any other language.
+
+The capture fisheries data for [OpenFisheries](http://www.openfisheries.org) landings API comes from the UN Food and Agriculture Organization. Karthik Ram, Carl Boettiger and Andrew Dyck developed **rfisheries** package [@rfisheries] that allows anyone familiar with R programming access FAO’s Fisheries and Aquaculture statistics. As I was writing this post, the package can only retrieve capture annual fish landing catches from 1950-2015. In this post I illustrate how to use the **rfisheries** package to get fisheries data. This can be useful, especially for anyone interested with comparing capture fisheries from multiple countries over a certain period. 
+
+To make use of functions available in the **rfisheries** package, we need to load it into the workspace. This is possible if the package has already installed in the machine. Otherwise we need to install the development version of the package as shown in the code below; 
+
+```{r, eval=FALSE}
+if (!require("devtools")) install.packages("devtools")
+devtools::install_github("ropensci/rfisheries")
+```
+
+We then load the packages that we use to access the data, manipulate and visualize the results. The **rfisheries** interact with the API and fetch the data based on the query provided. The **tidyverse** contains packages that help us to manipulate, analyse and even visualize the fisheries statistics in a consistency manner [@tidyverse]. 
+
+```{r, message=FALSE, warning=FALSE}
+require(tidyverse)
+require(rfisheries)
+```
+
+
+# Global Total Fisheries landing
+Fisheries landings can be obtained with `of_landings()` function. Without parsing argument in the function, the results is the time series of annual total catches that span from 1950 to the up to date. The chunk below show the code that extracted global annual catch of capture fisheries reported. 
+
+```{r, eval=FALSE}
+annual.landings = rfisheries::of_landings()
+
+```
+
+I have trimmed the data frame to show only the first and last five rows (Table \@ref(tab:tab1))
+
+```{r tab1, echo=FALSE}
+annual.landings %>% slice(1:5,62:66) %>% spread(key = "year", value = "catch") %>%
+  kableExtra::kable(format = "html", align = "c",
+                    caption = "Global Annual Total Capture Fisheries Catches") %>%
+  kableExtra::column_spec(column = 1:10, width = "3cm") %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"), full_width = T, font_size = 15)
+```
+
+<br></br>
+We can visualize tha pattern of capture fisheries over time. Figure \@ref(fig:global) clearly indicate that the landing from capture fisheries has been increasing exponentially from less than 30MT in 1950 to over 90 MT in 1990 and since then the annual catches slightly oscilate around that 90MT 
+
+```{r global, fig.cap="Global Annual Total Capture Fisheries Catches", echo=FALSE, fig.height = 3.5, fig.width = 7.5, warning=FALSE}
+ggplot() +
+  geom_line(data = annual.landings, aes(x = year, y = catch/1000000))+
+  labs(x = "", y = "Catches (MT)")+
+  theme(panel.grid.minor = element_blank())+
+  scale_x_continuous(breaks = seq(1955,2015,10))+
+  # scale_y_continuous(limits = c(0,100), breaks = seq(10,100,20))+
+  hrbrthemes::theme_modern_rc()
+```
+
+## Country's Total Landings
+Sometimes global landings may not suit the questions you want to answer, for instance you may be interested to compare the annual totat catches for multiple countries. To obtain the catches for a country of interest you must specify the argument `country`. Be aware that only the `iso3c` is accepted. the `iso3c` codes are three-letter that identify and represent represent countries, dependent territories, and special areas of geographical interest. If you cant figure out the country code, you can simply run `of_country_codes()' to obtain the list of countries with their respective codes.
+
+```{r, eval=FALSE}
+coundry.codes = of_country_codes()
+```
+
+A list of ten sampled International Organization for Standardization (ISO) codes are shown in table \@ref(tab:tab2)
+
+```{r tab2, echo=FALSE}
+coundry.codes %>% sample_n(10) %>% 
+  kableExtra::kable(format = "html", col.names = c("Country", "code"), align = "l",
+                    caption = " International Organization for Standardization (ISO) country code") %>%
+  kableExtra::column_spec(column = 1:2, width = "5.5cm")%>%
+  kableExtra::  kable_styling(bootstrap_options = c("striped", "hover"), font_size = 15) 
+```
+
+<br></br>
+Once we know the codes we can fetch the annual landing catches for the country of interest, for instance, we are interested to obtain the annual catches landed over the available period. the chunk below highlight the code that was used to access the total catches in Tanzania shown in figure \@ref(fig:fig2).
+
+```{r, eval=FALSE}
+annual.landings.tza = rfisheries::of_landings(country = "TZA")
+
+```
+
+```{r fig2, fig.cap="Annual capture fish landing in Tanzania Mainland", echo=FALSE, fig.height = 3.5, fig.width = 7.5}
+ggplot() +
+  geom_line(data = annual.landings.tza, aes(x = year, y = catch))+
+  labs(x = "", y = "Catches (T)")+
+  theme(panel.grid.minor = element_blank())+
+  scale_y_continuous( breaks = seq(20000,180000,40000))+
+  scale_x_continuous(breaks = seq(1955,2015,10))+
+  see::theme_blackboard()
+```
+
+## Landings from multiple countries. 
+Our interest is to compare the total landings from the WIO region, unfortunate, the `of_landings()` function does not allow us to query more than one at a time. To overcome this package limitation, we have to expand the process with other function available in R. And because the landing search is based on the country code, we first create a tibble that has a country code and their corresponding names [@tibble]
+
+```{r}
+wio.countries = tibble(code = c("KEN", "TZA", "EAZ", "SYC", "ZAF", "MOZ", 
+                                "SOM", "MUS", "MYT", "MDG"),
+                       name = c("Kenya", "Tanzania", "Zanzibar", "Seychelles",
+                                "South Africa",   "Mozambique", "Somalia", 
+                                "Mauritius", "Mayotte", "Madagascar"))
+```
+
+We then iterate the process that search and download the landing of each country as the data. To chain the process, we make a `landings.wio.list` as a container that will store the download files. This is important because each iteration feeds into this list file. If you are unfamiliar with looping in R, please consult the relevant resources that guides on how you can use `for` loop to iterate processes. 
+
+```{r, eval=FALSE}
+landings.wio.list = list()
+
+for (catches in 1:nrow(wio.countries)){
+  landings.wio.list[[catches]] = rfisheries::of_landings(country = wio.countries$code[catches]) %>% 
+    rename(code = country) %>% 
+    mutate(name = wio.countries$name[catches])
+}
+
+```
+
+The loop output a list files with multiple data frames of total catches for each country selected in the region. To expand our analysis and visualize the catch,  we need to make a single data frame that contains all countries' total landing from a list file. **dplyr** package has a nifty `bind_row()` function that does the work [@dplyr] with a single line of code highlighted below;
+
+```{r}
+landings.wio.tb = landings.wio.list %>% bind_rows()
+```
+
+Once we have the data in the right format, we can visualize. The first I wanted to understand is how the catches varied among these countries in 2015 as seen. With few lines of code I was able to understand that Somalia reported the least catch and South Africa nailed the list with the highest catch in 2015 (Table \@ref(tab:tab3)). Here is the code that generated table \@ref(tab:tab3).
+
+```{r tab3, echo=FALSE}
+
+landings.wio.tb %>% 
+  sample_n(10) %>%
+  arrange(catch)%>% 
+  kableExtra::kable(format = "html", col.names = c("Year", "Catch", "Code", "Country"), 
+                    align = "l",  caption = "Country Total Annual Landings") %>%
+  kableExtra::column_spec(column = 1:4, width = "3cm")%>%
+  kableExtra::  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F, font_size = 15) 
+```
+
+<br></br>
+Comparing catches of all countries over the period , We notice that the higher catch landings from South Africa masks catches from other countries in the region (Figure \@ref(fig:fig3)). 
+
+```{r fig3, fig.cap="Annual total catch of ten selected countries in the WIO region", fig.height = 3.5, fig.width = 7.5}
+
+ ggplot() +
+  geom_line(data = landings.wio.tb, 
+            aes(x = year, y = catch/1000, col = name))+
+  labs(x = "", y = "Catches (T)")+
+  # theme(panel.grid.minor = element_blank(), legend.key = element_blank())+
+  # scale_y_continuous(limits = c(0,100), breaks = seq(10,100,20))+
+  scale_x_continuous(breaks = seq(1955,2015,20))+
+  # scale_color_discrete(name = "Countries")+
+  see::scale_color_material_d(name = "Countries")+
+  see::theme_blackboard()
+
+
+```
+
+To make the plot visible and standout for each country, I decided to switch to multiple plots and make the landing scale free for each country. This make it easier to see the trends of fisheries landings separately for each country (Figure \@ref(fig:fig4))
+
+```{r fig4, fig.cap="WIO region Capture Fisheries", echo=FALSE, fig.width=7.5}
+ggplot() +
+  geom_line(data = landings.wio.tb %>% 
+              filter(name !=  "Somalia"), 
+            aes(x = year, y = catch, col = name))+
+  labs(x = "", y = "Catches (T)")+
+  theme(panel.grid.minor = element_blank(), legend.position = "none")+
+  # scale_y_continuous(limits = c(0,100), breaks = seq(10,100,20))+
+  scale_x_continuous(breaks = seq(1955,2015,30))+
+  see::scale_color_material_d(name = "Countries")+
+  see::theme_blackboard()+
+  facet_wrap(~name, scales = "free_y")
+```
+
+I notice that the landing pattern differs from each country. While all other countries shows a dwindling trends, of interest is the increasing positive trend of landings in Mayotte (Figure \@ref(fig:fig4)). South Africa, Madagascar and Mauritius have the highest landings as shown in figure \@ref(fig:fig5)
+
+```{r fig5, fig.cap="The three countries with the highest catches in WIO region", echo=FALSE, fig.height = 2.5, fig.width = 7.5}
+
+ggplot() +
+  geom_line(data = landings.wio.tb %>% 
+              filter(name %in%  c("South Africa","Madagascar","Mauritius") ), 
+            aes(x = year, y = catch/1000000, col = name))+
+  labs(x = "", y = "Catches (MT)")+
+  theme(panel.grid.minor = element_blank(), legend.position = "none")+
+  # scale_y_continuous(limits = c(0,100), breaks = seq(10,100,20))+
+  scale_x_continuous(breaks = seq(1955,2015,30))+
+  facet_wrap(~name, scales = "free_y")+
+  see::scale_color_material_d(name = "Countries")+
+  see::theme_blackboard()
+```
+
+## Species landed
+The **rfisheries** package has a `of_species_code()` function that enable retrieving catches of particular species. Although the species name are given in either scientific or english name, you can only query the database using the species codes. To obtain the species code simply run a chunk below;
+```{r, eval=FALSE}
+species = rfisheries::of_species_codes()
+```
+
+This gives a total of `r nrow(species)` species. Going through this data frame looking for a instance species of tuna is tedious. But the `filter()` from **dplyr** package [@dplyr] only work if you can use the full variable content. But in my cases though I need to filter based on partial matches. In this case, we need a function that will evaluate regular expressions on strings and return boolean values. Whenever the statement is TRUE the row will be filtered. Fortunate, the **stringr** [@stringr] package has a `str_detect()` function that can do a partial match. However, it is important to remember that R is case sensitive. I used `str_detect()` below to pick tuna species name and drop other species as the code below illustrates;
+
+```{r}
+
+tuna = species %>% 
+  filter(str_detect(english_name %>% tolower(), pattern = "tuna"))
+```
+
+And obtain tuna and tuna--like species shown in table \@ref(tab:tab4)
+```{r tab4, echo=FALSE}
+tuna %>% 
+  select(-isscaap) %>%
+  kableExtra::kable(format = "html",
+                    col.names = c("Scientific Name", "Taxonomical Code", "Species Code", "English name"), 
+                    align = c("l", "c", "c", "r"),  
+                    caption = "Scientific, English Name and code of Tuna and Tuna like Species") %>%
+  kableExtra::column_spec(column = 1, width = "5cm") %>%
+  kableExtra::column_spec(column = 2:4, width = "5cm") %>%
+  kableExtra::  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F, font_size = 15) 
+```
+
+<br></br>
+Once the code for species are known, we can now retrieve total annual catches for that particular species. However, notice that `of_landings()` only accept species code an neither the scientific name nor the english name is acceptable. The chunk below was used to extract annual catches of Yellowfin tuna shown in figure \@ref(fig:fig6)). 
+
+```{r, eval=FALSE}
+yellow.fin.tuna = rfisheries::of_landings(species = "YFT")
+```
+
+```{r fig6, warning=FALSE, fig.cap="The globall annual catches of Yellowfin tuna", echo=FALSE, fig.height = 3.5, fig.width = 7.5}
+
+ggplot() +
+  geom_line(data = yellow.fin.tuna, 
+            aes(x = year, y = catch))+
+  labs(x = "", y = "Catches (T)")+
+  theme(panel.grid.minor = element_blank(), legend.position = "none")+
+  # see::theme_abyss()+
+  scale_x_continuous(breaks = seq(1955,2015,10))+
+  hrbrthemes::theme_modern_rc()
+```
+
+If we are interested to compare catches of multiple tuna around the world, then we must download the long--term catches data for each tuna species. With a total of 16 species that is simple and we can easily do it manually. However, that task is hard and may introduce error if you have many species to deal with. That is where looping becomes handy in programming. In this case, we use a `for()` loop to extract tuna and tuna like catches for all sixteen species shown in table \@ref(tab:tab4). First we create a `tuna_like_tuna` list file as a preoccupied contain to store the data frame that has catch for each species of tuna. We also notice that `Thunnus spp` is vaque and the API can not recognize. Hence we need to clean the Tuna species dataset by removing missing species 
+
+```{r, eval=FALSE}
+## clean the dataset by removing species missing in the FAO database
+tuna.clean = tuna %>% 
+  filter(scientific_name != "Thunnus spp")%>% 
+  filter(scientific_name != "Thunnini")
+
+## create a dummy list file
+tuna_like_tuna = list()
+
+## loop through the species
+for (j in 1:nrow(tuna.clean)){
+  tuna_like_tuna[[j]] = rfisheries::of_landings(species = tuna.clean$a3_code[j]) %>%
+    mutate(scientific_name = tuna$scientific_name[j], 
+           english_name = tuna.clean$english_name[j])
+}
+
+## ubind the data frame from the list
+tuna_like_tuna_df = tuna_like_tuna %>% bind_rows()
+
+```
+
+
+```{r, echo=FALSE}
+## ubind the data frame from the list
+tuna_like_tuna_df = tuna_like_tuna %>% bind_rows()
+```
+
+Once the tuna and tuna like species catches are downloaded and in the tidy format, we can use the power of **ggplot2** package to visualize catch trend of these species as shown in figure \@ref(fig:fig7).
+
+```{r fig7, fig.cap="Trends of Global Annual total catch of Tuna and tuna like Species", echo=FALSE, fig.width=7.5}
+
+
+
+ggplot() +
+  geom_line(data = tuna_like_tuna_df, 
+            aes(x = year, y = catch, col = english_name))+
+  labs(x = "", y = "Catches (T)")+
+  theme(panel.grid.minor = element_blank(), legend.position = "none")+
+  # scale_y_continuous(limits = c(0,100), breaks = seq(10,100,20))+
+  scale_x_continuous(breaks = seq(1955,2015,50))+
+  facet_wrap(~english_name, scales = "free_y", nrow = 4)+
+  see::theme_blackboard(legend.position = "none")
+
+```
+
+
+## Final thought
+Though the **rfisheries** package does well to obtain the catch landing both by country and species, it only offer an opportunity to query either by species or country alone. It never allow you to query multiple variables i.e you can not fetch data like catches of certain tuna species. I hope this drawback of this package will be addressed in the future releases.
+
+## References
+

@@ -1,0 +1,765 @@
+---
+title: A glimpse of FAO' fisheries statistics in R
+author: Masumbuko Semba
+date: '2019-10-16'
+slug: a-glimpse-of-fao-fisheries-statistics-in-r
+categories:
+  - R
+  - Statistics
+tags:
+  - fisheries
+  - FAO
+  - Semba
+  - Masumbuko Semba
+  - Tanzania
+  - blogdown
+bibliography: [blog.bib]
+csl: elsevier.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The <a href="http://www.openfisheries.org">OpenFisheries.org project</a> created an open web platform aimed to advance the practice of data science in fisheries. The project has managed to consolidate global fisheries dataset that can be accessed and retrieved using modern analytics. The OpenFisheries.org flagship project is the Global Fisheries REST API forms the backbone of fisheries data science, enabling reproducible analytics in R <span class="citation">(R Core Team, <a href="#ref-rlanguage">2019</a>)</span>, Python or any other language.</p>
+<p>The capture fisheries data for <a href="http://www.openfisheries.org">OpenFisheries</a> landings API comes from the UN Food and Agriculture Organization. Karthik Ram, Carl Boettiger and Andrew Dyck developed <strong>rfisheries</strong> package <span class="citation">(Ram et al., <a href="#ref-rfisheries">2016</a>)</span> that allows anyone familiar with R programming access FAO’s Fisheries and Aquaculture statistics. As I was writing this post, the package can only retrieve capture annual fish landing catches from 1950-2015. In this post I illustrate how to use the <strong>rfisheries</strong> package to get fisheries data. This can be useful, especially for anyone interested with comparing capture fisheries from multiple countries over a certain period.</p>
+<p>To make use of functions available in the <strong>rfisheries</strong> package, we need to load it into the workspace. This is possible if the package has already installed in the machine. Otherwise we need to install the development version of the package as shown in the code below;</p>
+<pre class="r"><code>if (!require(&quot;devtools&quot;)) install.packages(&quot;devtools&quot;)
+devtools::install_github(&quot;ropensci/rfisheries&quot;)</code></pre>
+<p>We then load the packages that we use to access the data, manipulate and visualize the results. The <strong>rfisheries</strong> interact with the API and fetch the data based on the query provided. The <strong>tidyverse</strong> contains packages that help us to manipulate, analyse and even visualize the fisheries statistics in a consistency manner <span class="citation">(Wickham, <a href="#ref-tidyverse">2017</a>)</span>.</p>
+<pre class="r"><code>require(tidyverse)
+require(rfisheries)</code></pre>
+</div>
+<div id="global-total-fisheries-landing" class="section level1">
+<h1>Global Total Fisheries landing</h1>
+<p>Fisheries landings can be obtained with <code>of_landings()</code> function. Without parsing argument in the function, the results is the time series of annual total catches that span from 1950 to the up to date. The chunk below show the code that extracted global annual catch of capture fisheries reported.</p>
+<pre class="r"><code>annual.landings = rfisheries::of_landings()</code></pre>
+<p>I have trimmed the data frame to show only the first and last five rows (Table <a href="#tab:tab1">1</a>)</p>
+<table class="table table-striped table-hover" style="font-size: 15px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:tab1">Table 1: </span>Global Annual Total Capture Fisheries Catches
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+1950
+</th>
+<th style="text-align:center;">
+1951
+</th>
+<th style="text-align:center;">
+1952
+</th>
+<th style="text-align:center;">
+1953
+</th>
+<th style="text-align:center;">
+1954
+</th>
+<th style="text-align:center;">
+2011
+</th>
+<th style="text-align:center;">
+2012
+</th>
+<th style="text-align:center;">
+2013
+</th>
+<th style="text-align:center;">
+2014
+</th>
+<th style="text-align:center;">
+2015
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+19727413
+</td>
+<td style="text-align:center;width: 3cm; ">
+22322503
+</td>
+<td style="text-align:center;width: 3cm; ">
+23992129
+</td>
+<td style="text-align:center;width: 3cm; ">
+24280658
+</td>
+<td style="text-align:center;width: 3cm; ">
+26255749
+</td>
+<td style="text-align:center;width: 3cm; ">
+92459929
+</td>
+<td style="text-align:center;width: 3cm; ">
+89784576
+</td>
+<td style="text-align:center;width: 3cm; ">
+91588095
+</td>
+<td style="text-align:center;width: 3cm; ">
+92030328
+</td>
+<td style="text-align:center;width: 3cm; ">
+92588168
+</td>
+</tr>
+</tbody>
+</table>
+<p><br></br>
+We can visualize tha pattern of capture fisheries over time. Figure <a href="#fig:global">1</a> clearly indicate that the landing from capture fisheries has been increasing exponentially from less than 30MT in 1950 to over 90 MT in 1990 and since then the annual catches slightly oscilate around that 90MT</p>
+<div class="figure" style="text-align: center"><span id="fig:global"></span>
+<img src="/post/2019-10-16-a-glimpse-of-fao-fisheries-statistics-in-r_files/figure-html/global-1.png" alt="Global Annual Total Capture Fisheries Catches" width="720" />
+<p class="caption">
+Figure 1: Global Annual Total Capture Fisheries Catches
+</p>
+</div>
+<div id="countrys-total-landings" class="section level2">
+<h2>Country’s Total Landings</h2>
+<p>Sometimes global landings may not suit the questions you want to answer, for instance you may be interested to compare the annual totat catches for multiple countries. To obtain the catches for a country of interest you must specify the argument <code>country</code>. Be aware that only the <code>iso3c</code> is accepted. the <code>iso3c</code> codes are three-letter that identify and represent represent countries, dependent territories, and special areas of geographical interest. If you cant figure out the country code, you can simply run `of_country_codes()’ to obtain the list of countries with their respective codes.</p>
+<pre class="r"><code>coundry.codes = of_country_codes()</code></pre>
+<p>A list of ten sampled International Organization for Standardization (ISO) codes are shown in table <a href="#tab:tab2">2</a></p>
+<table class="table table-striped table-hover" style="font-size: 15px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:tab2">Table 2: </span> International Organization for Standardization (ISO) country code
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Country
+</th>
+<th style="text-align:left;">
+code
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 5.5cm; ">
+Albania
+</td>
+<td style="text-align:left;width: 5.5cm; ">
+ALB
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5.5cm; ">
+St. Pierre and Miquelon
+</td>
+<td style="text-align:left;width: 5.5cm; ">
+SPM
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5.5cm; ">
+Nigeria
+</td>
+<td style="text-align:left;width: 5.5cm; ">
+NGA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5.5cm; ">
+Bahamas
+</td>
+<td style="text-align:left;width: 5.5cm; ">
+BHS
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5.5cm; ">
+Luxembourg
+</td>
+<td style="text-align:left;width: 5.5cm; ">
+LUX
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5.5cm; ">
+South Africa
+</td>
+<td style="text-align:left;width: 5.5cm; ">
+ZAF
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5.5cm; ">
+Lao People’s Dem. Rep. 
+</td>
+<td style="text-align:left;width: 5.5cm; ">
+LAO
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5.5cm; ">
+Falkland Is.(Malvinas)
+</td>
+<td style="text-align:left;width: 5.5cm; ">
+FLK
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5.5cm; ">
+Côte d’Ivoire
+</td>
+<td style="text-align:left;width: 5.5cm; ">
+CIV
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5.5cm; ">
+Cape Verde
+</td>
+<td style="text-align:left;width: 5.5cm; ">
+CPV
+</td>
+</tr>
+</tbody>
+</table>
+<p><br></br>
+Once we know the codes we can fetch the annual landing catches for the country of interest, for instance, we are interested to obtain the annual catches landed over the available period. the chunk below highlight the code that was used to access the total catches in Tanzania shown in figure <a href="#fig:fig2">2</a>.</p>
+<pre class="r"><code>annual.landings.tza = rfisheries::of_landings(country = &quot;TZA&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig2"></span>
+<img src="/post/2019-10-16-a-glimpse-of-fao-fisheries-statistics-in-r_files/figure-html/fig2-1.png" alt="Annual capture fish landing in Tanzania Mainland" width="720" />
+<p class="caption">
+Figure 2: Annual capture fish landing in Tanzania Mainland
+</p>
+</div>
+</div>
+<div id="landings-from-multiple-countries." class="section level2">
+<h2>Landings from multiple countries.</h2>
+<p>Our interest is to compare the total landings from the WIO region, unfortunate, the <code>of_landings()</code> function does not allow us to query more than one at a time. To overcome this package limitation, we have to expand the process with other function available in R. And because the landing search is based on the country code, we first create a tibble that has a country code and their corresponding names <span class="citation">(Müller and Wickham, <a href="#ref-tibble">2018</a>)</span></p>
+<pre class="r"><code>wio.countries = tibble(code = c(&quot;KEN&quot;, &quot;TZA&quot;, &quot;EAZ&quot;, &quot;SYC&quot;, &quot;ZAF&quot;, &quot;MOZ&quot;, 
+                                &quot;SOM&quot;, &quot;MUS&quot;, &quot;MYT&quot;, &quot;MDG&quot;),
+                       name = c(&quot;Kenya&quot;, &quot;Tanzania&quot;, &quot;Zanzibar&quot;, &quot;Seychelles&quot;,
+                                &quot;South Africa&quot;,   &quot;Mozambique&quot;, &quot;Somalia&quot;, 
+                                &quot;Mauritius&quot;, &quot;Mayotte&quot;, &quot;Madagascar&quot;))</code></pre>
+<p>We then iterate the process that search and download the landing of each country as the data. To chain the process, we make a <code>landings.wio.list</code> as a container that will store the download files. This is important because each iteration feeds into this list file. If you are unfamiliar with looping in R, please consult the relevant resources that guides on how you can use <code>for</code> loop to iterate processes.</p>
+<pre class="r"><code>landings.wio.list = list()
+
+for (catches in 1:nrow(wio.countries)){
+  landings.wio.list[[catches]] = rfisheries::of_landings(country = wio.countries$code[catches]) %&gt;% 
+    rename(code = country) %&gt;% 
+    mutate(name = wio.countries$name[catches])
+}</code></pre>
+<p>The loop output a list files with multiple data frames of total catches for each country selected in the region. To expand our analysis and visualize the catch, we need to make a single data frame that contains all countries’ total landing from a list file. <strong>dplyr</strong> package has a nifty <code>bind_row()</code> function that does the work <span class="citation">(Wickham et al., <a href="#ref-dplyr">2018</a>)</span> with a single line of code highlighted below;</p>
+<pre class="r"><code>landings.wio.tb = landings.wio.list %&gt;% bind_rows()</code></pre>
+<p>Once we have the data in the right format, we can visualize. The first I wanted to understand is how the catches varied among these countries in 2015 as seen. With few lines of code I was able to understand that Somalia reported the least catch and South Africa nailed the list with the highest catch in 2015 (Table <a href="#tab:tab3">3</a>). Here is the code that generated table <a href="#tab:tab3">3</a>.</p>
+<table class="table table-striped table-hover" style="font-size: 15px; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:tab3">Table 3: </span>Country Total Annual Landings
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Year
+</th>
+<th style="text-align:left;">
+Catch
+</th>
+<th style="text-align:left;">
+Code
+</th>
+<th style="text-align:left;">
+Country
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1969
+</td>
+<td style="text-align:left;width: 3cm; ">
+800
+</td>
+<td style="text-align:left;width: 3cm; ">
+MYT
+</td>
+<td style="text-align:left;width: 3cm; ">
+Mayotte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1976
+</td>
+<td style="text-align:left;width: 3cm; ">
+5477
+</td>
+<td style="text-align:left;width: 3cm; ">
+MYT
+</td>
+<td style="text-align:left;width: 3cm; ">
+Mayotte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1960
+</td>
+<td style="text-align:left;width: 3cm; ">
+9366
+</td>
+<td style="text-align:left;width: 3cm; ">
+EAZ
+</td>
+<td style="text-align:left;width: 3cm; ">
+Zanzibar
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1968
+</td>
+<td style="text-align:left;width: 3cm; ">
+16578
+</td>
+<td style="text-align:left;width: 3cm; ">
+TZA
+</td>
+<td style="text-align:left;width: 3cm; ">
+Tanzania
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1984
+</td>
+<td style="text-align:left;width: 3cm; ">
+17251
+</td>
+<td style="text-align:left;width: 3cm; ">
+MYT
+</td>
+<td style="text-align:left;width: 3cm; ">
+Mayotte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1955
+</td>
+<td style="text-align:left;width: 3cm; ">
+47183
+</td>
+<td style="text-align:left;width: 3cm; ">
+SYC
+</td>
+<td style="text-align:left;width: 3cm; ">
+Seychelles
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1960
+</td>
+<td style="text-align:left;width: 3cm; ">
+62832
+</td>
+<td style="text-align:left;width: 3cm; ">
+SYC
+</td>
+<td style="text-align:left;width: 3cm; ">
+Seychelles
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+2002
+</td>
+<td style="text-align:left;width: 3cm; ">
+68134
+</td>
+<td style="text-align:left;width: 3cm; ">
+MDG
+</td>
+<td style="text-align:left;width: 3cm; ">
+Madagascar
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+2003
+</td>
+<td style="text-align:left;width: 3cm; ">
+326993
+</td>
+<td style="text-align:left;width: 3cm; ">
+SYC
+</td>
+<td style="text-align:left;width: 3cm; ">
+Seychelles
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+1992
+</td>
+<td style="text-align:left;width: 3cm; ">
+3878960
+</td>
+<td style="text-align:left;width: 3cm; ">
+ZAF
+</td>
+<td style="text-align:left;width: 3cm; ">
+South Africa
+</td>
+</tr>
+</tbody>
+</table>
+<p><br></br>
+Comparing catches of all countries over the period , We notice that the higher catch landings from South Africa masks catches from other countries in the region (Figure <a href="#fig:fig3">3</a>).</p>
+<pre class="r"><code> ggplot() +
+  geom_line(data = landings.wio.tb, 
+            aes(x = year, y = catch/1000, col = name))+
+  labs(x = &quot;&quot;, y = &quot;Catches (T)&quot;)+
+  # theme(panel.grid.minor = element_blank(), legend.key = element_blank())+
+  # scale_y_continuous(limits = c(0,100), breaks = seq(10,100,20))+
+  scale_x_continuous(breaks = seq(1955,2015,20))+
+  # scale_color_discrete(name = &quot;Countries&quot;)+
+  see::scale_color_material_d(name = &quot;Countries&quot;)+
+  see::theme_blackboard()</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig3"></span>
+<img src="/post/2019-10-16-a-glimpse-of-fao-fisheries-statistics-in-r_files/figure-html/fig3-1.png" alt="Annual total catch of ten selected countries in the WIO region" width="720" />
+<p class="caption">
+Figure 3: Annual total catch of ten selected countries in the WIO region
+</p>
+</div>
+<p>To make the plot visible and standout for each country, I decided to switch to multiple plots and make the landing scale free for each country. This make it easier to see the trends of fisheries landings separately for each country (Figure <a href="#fig:fig4">4</a>)</p>
+<div class="figure" style="text-align: center"><span id="fig:fig4"></span>
+<img src="/post/2019-10-16-a-glimpse-of-fao-fisheries-statistics-in-r_files/figure-html/fig4-1.png" alt="WIO region Capture Fisheries" width="720" />
+<p class="caption">
+Figure 4: WIO region Capture Fisheries
+</p>
+</div>
+<p>I notice that the landing pattern differs from each country. While all other countries shows a dwindling trends, of interest is the increasing positive trend of landings in Mayotte (Figure <a href="#fig:fig4">4</a>). South Africa, Madagascar and Mauritius have the highest landings as shown in figure <a href="#fig:fig5">5</a></p>
+<div class="figure" style="text-align: center"><span id="fig:fig5"></span>
+<img src="/post/2019-10-16-a-glimpse-of-fao-fisheries-statistics-in-r_files/figure-html/fig5-1.png" alt="The three countries with the highest catches in WIO region" width="720" />
+<p class="caption">
+Figure 5: The three countries with the highest catches in WIO region
+</p>
+</div>
+</div>
+<div id="species-landed" class="section level2">
+<h2>Species landed</h2>
+<p>The <strong>rfisheries</strong> package has a <code>of_species_code()</code> function that enable retrieving catches of particular species. Although the species name are given in either scientific or english name, you can only query the database using the species codes. To obtain the species code simply run a chunk below;</p>
+<pre class="r"><code>species = rfisheries::of_species_codes()</code></pre>
+<p>This gives a total of 11562 species. Going through this data frame looking for a instance species of tuna is tedious. But the <code>filter()</code> from <strong>dplyr</strong> package <span class="citation">(Wickham et al., <a href="#ref-dplyr">2018</a>)</span> only work if you can use the full variable content. But in my cases though I need to filter based on partial matches. In this case, we need a function that will evaluate regular expressions on strings and return boolean values. Whenever the statement is TRUE the row will be filtered. Fortunate, the <strong>stringr</strong> <span class="citation">(Wickham, <a href="#ref-stringr">2019</a>)</span> package has a <code>str_detect()</code> function that can do a partial match. However, it is important to remember that R is case sensitive. I used <code>str_detect()</code> below to pick tuna species name and drop other species as the code below illustrates;</p>
+<pre class="r"><code>tuna = species %&gt;% 
+  filter(str_detect(english_name %&gt;% tolower(), pattern = &quot;tuna&quot;))</code></pre>
+And obtain tuna and tuna–like species shown in table <a href="#tab:tab4">4</a>
+<table class="table table-striped table-hover" style="font-size: 15px; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:tab4">Table 4: </span>Scientific, English Name and code of Tuna and Tuna like Species
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Scientific Name
+</th>
+<th style="text-align:center;">
+Taxonomical Code
+</th>
+<th style="text-align:center;">
+Species Code
+</th>
+<th style="text-align:right;">
+English name
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Gymnosarda unicolor
+</td>
+<td style="text-align:center;width: 5cm; ">
+1750101202
+</td>
+<td style="text-align:center;width: 5cm; ">
+DOT
+</td>
+<td style="text-align:right;width: 5cm; ">
+Dogtooth tuna
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Auxis thazard
+</td>
+<td style="text-align:center;width: 5cm; ">
+1750102301
+</td>
+<td style="text-align:center;width: 5cm; ">
+FRI
+</td>
+<td style="text-align:right;width: 5cm; ">
+Frigate tuna
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Auxis rochei
+</td>
+<td style="text-align:center;width: 5cm; ">
+1750102303
+</td>
+<td style="text-align:center;width: 5cm; ">
+BLT
+</td>
+<td style="text-align:right;width: 5cm; ">
+Bullet tuna
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Auxis thazard, A. rochei
+</td>
+<td style="text-align:center;width: 5cm; ">
+17501023XX018
+</td>
+<td style="text-align:center;width: 5cm; ">
+FRZ
+</td>
+<td style="text-align:right;width: 5cm; ">
+Frigate and bullet tunas
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Katsuwonus pelamis
+</td>
+<td style="text-align:center;width: 5cm; ">
+1750102501
+</td>
+<td style="text-align:center;width: 5cm; ">
+SKJ
+</td>
+<td style="text-align:right;width: 5cm; ">
+Skipjack tuna
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Thunnus thynnus
+</td>
+<td style="text-align:center;width: 5cm; ">
+1750102601
+</td>
+<td style="text-align:center;width: 5cm; ">
+BFT
+</td>
+<td style="text-align:right;width: 5cm; ">
+Atlantic bluefin tuna
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Thunnus orientalis
+</td>
+<td style="text-align:center;width: 5cm; ">
+1750102602
+</td>
+<td style="text-align:center;width: 5cm; ">
+PBF
+</td>
+<td style="text-align:right;width: 5cm; ">
+Pacific bluefin tuna
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Thunnus tonggol
+</td>
+<td style="text-align:center;width: 5cm; ">
+1750102603
+</td>
+<td style="text-align:center;width: 5cm; ">
+LOT
+</td>
+<td style="text-align:right;width: 5cm; ">
+Longtail tuna
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Thunnus atlanticus
+</td>
+<td style="text-align:center;width: 5cm; ">
+1750102604
+</td>
+<td style="text-align:center;width: 5cm; ">
+BLF
+</td>
+<td style="text-align:right;width: 5cm; ">
+Blackfin tuna
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Thunnus maccoyii
+</td>
+<td style="text-align:center;width: 5cm; ">
+1750102608
+</td>
+<td style="text-align:center;width: 5cm; ">
+SBF
+</td>
+<td style="text-align:right;width: 5cm; ">
+Southern bluefin tuna
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Thunnus albacares
+</td>
+<td style="text-align:center;width: 5cm; ">
+1750102610
+</td>
+<td style="text-align:center;width: 5cm; ">
+YFT
+</td>
+<td style="text-align:right;width: 5cm; ">
+Yellowfin tuna
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Thunnus obesus
+</td>
+<td style="text-align:center;width: 5cm; ">
+1750102612
+</td>
+<td style="text-align:center;width: 5cm; ">
+BET
+</td>
+<td style="text-align:right;width: 5cm; ">
+Bigeye tuna
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Thunnus spp
+</td>
+<td style="text-align:center;width: 5cm; ">
+17501026XX
+</td>
+<td style="text-align:center;width: 5cm; ">
+TUS
+</td>
+<td style="text-align:right;width: 5cm; ">
+True tunas nei
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Allothunnus fallai
+</td>
+<td style="text-align:center;width: 5cm; ">
+1750102701
+</td>
+<td style="text-align:center;width: 5cm; ">
+SLT
+</td>
+<td style="text-align:right;width: 5cm; ">
+Slender tuna
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Thunnini
+</td>
+<td style="text-align:center;width: 5cm; ">
+17501XXXXX043
+</td>
+<td style="text-align:center;width: 5cm; ">
+TUN
+</td>
+<td style="text-align:right;width: 5cm; ">
+Tunas nei
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 5cm; ">
+Scombroidei
+</td>
+<td style="text-align:center;width: 5cm; ">
+175XXXXXXX
+</td>
+<td style="text-align:center;width: 5cm; ">
+TUX
+</td>
+<td style="text-align:right;width: 5cm; ">
+Tuna-like fishes nei
+</td>
+</tr>
+</tbody>
+</table>
+<p><br></br>
+Once the code for species are known, we can now retrieve total annual catches for that particular species. However, notice that <code>of_landings()</code> only accept species code an neither the scientific name nor the english name is acceptable. The chunk below was used to extract annual catches of Yellowfin tuna shown in figure <a href="#fig:fig6">6</a>).</p>
+<pre class="r"><code>yellow.fin.tuna = rfisheries::of_landings(species = &quot;YFT&quot;)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig6"></span>
+<img src="/post/2019-10-16-a-glimpse-of-fao-fisheries-statistics-in-r_files/figure-html/fig6-1.png" alt="The globall annual catches of Yellowfin tuna" width="720" />
+<p class="caption">
+Figure 6: The globall annual catches of Yellowfin tuna
+</p>
+</div>
+<p>If we are interested to compare catches of multiple tuna around the world, then we must download the long–term catches data for each tuna species. With a total of 16 species that is simple and we can easily do it manually. However, that task is hard and may introduce error if you have many species to deal with. That is where looping becomes handy in programming. In this case, we use a <code>for()</code> loop to extract tuna and tuna like catches for all sixteen species shown in table <a href="#tab:tab4">4</a>. First we create a <code>tuna_like_tuna</code> list file as a preoccupied contain to store the data frame that has catch for each species of tuna. We also notice that <code>Thunnus spp</code> is vaque and the API can not recognize. Hence we need to clean the Tuna species dataset by removing missing species</p>
+<pre class="r"><code>## clean the dataset by removing species missing in the FAO database
+tuna.clean = tuna %&gt;% 
+  filter(scientific_name != &quot;Thunnus spp&quot;)%&gt;% 
+  filter(scientific_name != &quot;Thunnini&quot;)
+
+## create a dummy list file
+tuna_like_tuna = list()
+
+## loop through the species
+for (j in 1:nrow(tuna.clean)){
+  tuna_like_tuna[[j]] = rfisheries::of_landings(species = tuna.clean$a3_code[j]) %&gt;%
+    mutate(scientific_name = tuna$scientific_name[j], 
+           english_name = tuna.clean$english_name[j])
+}
+
+## ubind the data frame from the list
+tuna_like_tuna_df = tuna_like_tuna %&gt;% bind_rows()</code></pre>
+<p>Once the tuna and tuna like species catches are downloaded and in the tidy format, we can use the power of <strong>ggplot2</strong> package to visualize catch trend of these species as shown in figure <a href="#fig:fig7">7</a>.</p>
+<div class="figure" style="text-align: center"><span id="fig:fig7"></span>
+<img src="/post/2019-10-16-a-glimpse-of-fao-fisheries-statistics-in-r_files/figure-html/fig7-1.png" alt="Trends of Global Annual total catch of Tuna and tuna like Species" width="720" />
+<p class="caption">
+Figure 7: Trends of Global Annual total catch of Tuna and tuna like Species
+</p>
+</div>
+</div>
+<div id="final-thought" class="section level2">
+<h2>Final thought</h2>
+<p>Though the <strong>rfisheries</strong> package does well to obtain the catch landing both by country and species, it only offer an opportunity to query either by species or country alone. It never allow you to query multiple variables i.e you can not fetch data like catches of certain tuna species. I hope this drawback of this package will be addressed in the future releases.</p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-tibble">
+<p>Müller, K., Wickham, H., 2018. Tibble: Simple data frames.</p>
+</div>
+<div id="ref-rfisheries">
+<p>Ram, K., Boettiger, C., Dyck, A., 2016. Rfisheries: Programmatic interface to the ’openfisheries.org’ api.</p>
+</div>
+<div id="ref-rlanguage">
+<p>R Core Team, 2019. R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria.</p>
+</div>
+<div id="ref-stringr">
+<p>Wickham, H., 2019. Stringr: Simple, consistent wrappers for common string operations.</p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, H., 2017. Tidyverse: Easily install and load the ’tidyverse’.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, H., François, R., Henry, L., Müller, K., 2018. Dplyr: A grammar of data manipulation.</p>
+</div>
+</div>
+</div>
+</div>

@@ -102,6 +102,42 @@
     </item>
     
     <item>
+      <title>FAO</title>
+      <link>/tags/fao/</link>
+      <pubDate>Wed, 16 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/fao/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Tanzania</title>
+      <link>/tags/tanzania/</link>
+      <pubDate>Wed, 16 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/tanzania/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>blogdown</title>
+      <link>/tags/blogdown/</link>
+      <pubDate>Wed, 16 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/blogdown/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>fisheries</title>
+      <link>/tags/fisheries/</link>
+      <pubDate>Wed, 16 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/fisheries/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Forecasting</title>
       <link>/tags/forecasting/</link>
       <pubDate>Fri, 09 Aug 2019 00:00:00 +0000</pubDate>
@@ -210,29 +246,20 @@
     </item>
     
     <item>
+      <title>Bookdown</title>
+      <link>/tags/bookdown/</link>
+      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/bookdown/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>aviso</title>
       <link>/tags/aviso/</link>
       <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/aviso/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>blogdown</title>
-      <link>/tags/blogdown/</link>
-      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/blogdown/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>bookdown</title>
-      <link>/tags/bookdown/</link>
-      <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/bookdown/</guid>
       <description></description>
     </item>
     
@@ -278,15 +305,6 @@
       <pubDate>Sun, 17 Mar 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/ctd/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Tanzania</title>
-      <link>/tags/tanzania/</link>
-      <pubDate>Sun, 17 Mar 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/tanzania/</guid>
       <description></description>
     </item>
     

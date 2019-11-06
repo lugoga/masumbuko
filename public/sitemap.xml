@@ -114,6 +114,41 @@
   </url>
   
   <url>
+    <loc>/10/16/2019/a-glimpse-of-fao-fisheries-statistics-in-r/</loc>
+    <lastmod>2019-10-16T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/fao/</loc>
+    <lastmod>2019-10-16T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/categories/statistics/</loc>
+    <lastmod>2019-10-16T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/tanzania/</loc>
+    <lastmod>2019-10-16T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/blogdown/</loc>
+    <lastmod>2019-10-16T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/fisheries/</loc>
+    <lastmod>2019-10-16T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/10/02/2019/mapping-with-leaflets/</loc>
     <lastmod>2019-10-02T00:00:00+00:00</lastmod>
   </url>
@@ -275,19 +310,13 @@
   </url>
   
   <url>
-    <loc>/tags/aviso/</loc>
-    <lastmod>2019-04-15T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/blogdown/</loc>
-    <lastmod>2019-04-15T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/tags/bookdown/</loc>
+    <lastmod>2019-04-15T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/aviso/</loc>
     <lastmod>2019-04-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
@@ -322,12 +351,6 @@
   </url>
   
   <url>
-    <loc>/categories/statistics/</loc>
-    <lastmod>2019-03-18T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/03/18/2019/interactive-time-series-of-in-situ-sea-surface-temperature-with-dygraphs-package/</loc>
     <lastmod>2019-03-18T00:00:00+00:00</lastmod>
   </url>
@@ -347,12 +370,6 @@
   <url>
     <loc>/03/17/2019/interactive-map-with-leaflet/</loc>
     <lastmod>2019-03-17T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/tanzania/</loc>
-    <lastmod>2019-03-17T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>

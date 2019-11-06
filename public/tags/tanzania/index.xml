@@ -6,10 +6,19 @@
     <description>Recent content in Tanzania on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 17 Mar 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 16 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/tanzania/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>A glimpse of FAO&#39; fisheries statistics in R</title>
+      <link>/10/16/2019/a-glimpse-of-fao-fisheries-statistics-in-r/</link>
+      <pubDate>Wed, 16 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/10/16/2019/a-glimpse-of-fao-fisheries-statistics-in-r/</guid>
+      <description>IntroductionThe OpenFisheries.org project created an open web platform aimed to advance the practice of data science in fisheries. The project has managed to consolidate global fisheries dataset that can be accessed and retrieved using modern analytics. The OpenFisheries.org flagship project is the Global Fisheries REST API forms the backbone of fisheries data science, enabling reproducible analytics in R (R Core Team, 2019), Python or any other language.</description>
+    </item>
     
     <item>
       <title>Interactive map with leaflet</title>
