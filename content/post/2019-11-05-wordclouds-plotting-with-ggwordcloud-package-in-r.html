@@ -1,0 +1,124 @@
+---
+title: Wordclouds plotting with ggwordcloud package in R
+author: Masumbuko Semba
+date: '2019-11-05'
+slug: wordclouds-plotting-with-ggwordcloud-package-in-r
+categories: []
+tags:
+  - wordcloud
+  - ggwordcloud
+  - R
+  - RStudio
+  - Masumbuko Semba
+  - Semba
+  - Data science
+  - programming
+  - coding
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+
+<p><a href="http://127.0.0.1:4321/10/29/2019/creating-wordcloud-in-r/">In the previous post</a>, we saw how to make wordcloud graphic using the <strong>wordcloud</strong> package. In this post we extend the ability of R to make wordcloud graphic, but rather than using the base R function for plotting,I will show how to use <strong>ggplot2</strong> framework.</p>
+<p><span class="citation">Le Pennec and Slowikowski (<a href="#ref-ggwordcloud">2019</a>)</span> developed a <strong>gwordcloud</strong> package, which extend the capability of <strong>ggplot2</strong> package <span class="citation">(Wickham <a href="#ref-ggplot">2016</a>)</span> of making cloud text. With the <code>geom_text_wordcloud()</code> function, <strong>gwordcloud</strong> made making wordcloud plot easy with <strong>ggplot2</strong> package. The <code>geom_text_wordcloud()</code> function allows to grow the cloud according to a shape and stay within a mask. The size <code>aesthetic</code> is used either to control the font size or the printed area of the words. <strong>ggwordcloud</strong> also supports arbitrary text rotation. The faceting scheme of <strong>ggplot2</strong> can also be used.</p>
+<div id="packages" class="section level2">
+<h2>packages</h2>
+<p>You need functions from various package. You must have these package installed in your machine. To install these package you use the <code>install.packages()</code> function as illustrated in the chunk below;</p>
+<pre class="r"><code>install.packages(&quot;tm&quot;)  # for text mining
+install.packages(&quot;SnowballC&quot;) # for text stemming
+install.packages(&quot;wordcloud&quot;) # word-cloud generator 
+install.packages(&quot;RColorBrewer&quot;) # color palettes
+install.packages(&quot;ggwordcloud&quot;)</code></pre>
+<p>once you have installed these package, you can now load them to make the functions accessible for the task</p>
+<pre class="r"><code>require(&quot;tm&quot;)
+require(&quot;SnowballC&quot;)
+require(&quot;wordcloud&quot;)
+require(&quot;RColorBrewer&quot;)
+require(tidyverse)
+require(magrittr)
+require(ggwordcloud)</code></pre>
+</div>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>You need a text file that store the word you need for visualization. For this post I’m going to process the <em>“I have a dream speech” from “Martin Luther King”</em> but you can use any text you want. Since the document is online, I used the <code>read_table()</code> function from <strong>readr</strong> package.</p>
+<pre class="r"><code>dream = read_table(file = &quot;http://www.sthda.com/sthda/RDoc/example-files/martin-luther-king-i-have-a-dream-speech.txt&quot;, 
+                   skip_empty_rows = TRUE,
+                   progress = TRUE, 
+                   comment = &quot;&quot; )</code></pre>
+<p>Then create a vector source of the text document we downloaded from the internet and transform it to a structure called <em>corpus</em> using <code>vectorSource()</code> and <code>Corpus()</code> function from the <em>tm</em> package <span class="citation">(Feinerer, Hornik, and Meyer <a href="#ref-tm">2008</a>)</span>.</p>
+<pre class="r"><code># Load the data as a corpus
+# docs = Corpus(VectorSource(dream))
+
+dream.corpus = dream  %&gt;% 
+  tm::VectorSource()%&gt;% 
+  tm::Corpus()</code></pre>
+<p>Once the corpus file is create, the <code>inspect()</code> function from <strong>tm</strong> package is used to show detailed information on a corpus document.</p>
+<pre class="r"><code>dream.corpus %&gt;% inspect()</code></pre>
+<p>after converting to <em>corpus</em> dataset, we notice that some data cleaning is required. It appears from the earlier data inspection that there are many English words that we need to trim them off and retain only meaningful words. Remove words that include;</p>
+<ul>
+<li>Numerical digits (0–9)</li>
+<li>Stop words, which are common English words like <em>a</em> and <em>the</em>. If you do not remove from the dataset, they dominate the word cloud over the meaningful words</li>
+<li>remove punctuation and extra white space</li>
+</ul>
+<p>The whole process is chained using the <code>%&gt;%</code> operator from <strong>magritr</strong> package</p>
+<pre class="r"><code>dream.corpus.clean =  dream.corpus %&gt;% 
+  tm_map(FUN = content_transformer(tolower)) %&gt;% # Convert the text to lower case
+  tm_map(FUN = removeNumbers) %&gt;% # Remove numbers
+  tm_map(removeWords, stopwords(&quot;english&quot;)) %&gt;% # Remove english common stopwords
+  tm_map(removeWords, c(&quot;will&quot;, &quot;let&quot;, &quot;ring&quot;)) %&gt;%   # Remove words 
+  tm_map(removePunctuation) %&gt;%   # Remove punctuations
+  tm_map(stripWhitespace)   # Eliminate extra white spaces</code></pre>
+<pre class="r"><code>dream.corpus.clean %&gt;% tm::inspect()</code></pre>
+</div>
+<div id="build-a-word-frequency-table" class="section level2">
+<h2>Build a word frequency table</h2>
+<p>Once we have a clean, the function <code>TermDocumentMatrix()</code> from <strong>tm</strong> package <span class="citation">(Feinerer, Hornik, and Meyer <a href="#ref-tm">2008</a>)</span> was used to make a matrix. Once the matrix is created is converted to data frame with <code>as.data.frame()</code> and pull the rownames into a data frame with the <code>rownames_to column()</code> function from <strong>tibble</strong> package <span class="citation">(Müller and Wickham <a href="#ref-tibble">2018</a>)</span>. And finalize the wrangling with the <code>rename()</code> and <code>arrange()</code> function from <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr">2018</a>)</span>.</p>
+<pre class="r"><code>dream.corpus.clean.tb=  dream.corpus.clean %&gt;% 
+  tm::TermDocumentMatrix() %&gt;% 
+  as.matrix() %&gt;% as.data.frame() %&gt;% 
+  tibble::rownames_to_column() %&gt;%
+  dplyr::rename(word = 1, freq = 2) %&gt;%
+  dplyr::arrange(desc(freq))</code></pre>
+<pre class="r"><code>ggplot(data = dream.corpus.clean.tb, 
+       aes(label = word, size = freq, col = as.character(freq))) + 
+  geom_text_wordcloud(rm_outside = TRUE, max_steps = 1,
+                      grid_size = 1, eccentricity = .9)+
+  scale_size_area(max_size = 14)+
+  scale_color_brewer(palette = &quot;Paired&quot;, direction = -1)+
+  theme_void()</code></pre>
+<p><img src="/post/2019-11-05-wordclouds-plotting-with-ggwordcloud-package-in-r_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>The words can be rotated by setting the angle aesthetic. For instance, one can use a rotation of 90 degrees for a random subset of 40 % of the words:</p>
+<pre class="r"><code> dream.corpus.clean.tb = dream.corpus.clean.tb %&gt;%
+   mutate(angle = 90 * sample(c(0, 1), n(), replace = TRUE, prob = c(60, 40)))
+
+ggplot(data = dream.corpus.clean.tb, 
+       aes(label = word, size = freq, angle = angle, col = as.character(freq))) + 
+  geom_text_wordcloud(rm_outside = TRUE, max_steps = 1,
+                      grid_size = 1, eccentricity = .9)+
+  scale_size_area(max_size = 14)+
+  scale_color_brewer(palette = &quot;Paired&quot;, direction = -1)+
+  theme_void()</code></pre>
+<p><img src="/post/2019-11-05-wordclouds-plotting-with-ggwordcloud-package-in-r_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-tm">
+<p>Feinerer, Ingo, Kurt Hornik, and David Meyer. 2008. “Text Mining Infrastructure in R.” <em>Journal of Statistical Software</em> 25 (5): 1–54. <a href="http://www.jstatsoft.org/v25/i05/">http://www.jstatsoft.org/v25/i05/</a>.</p>
+</div>
+<div id="ref-ggwordcloud">
+<p>Le Pennec, Erwan, and Kamil Slowikowski. 2019. <em>Ggwordcloud: A Word Cloud Geom for ’Ggplot2’</em>. <a href="https://CRAN.R-project.org/package=ggwordcloud">https://CRAN.R-project.org/package=ggwordcloud</a>.</p>
+</div>
+<div id="ref-tibble">
+<p>Müller, Kirill, and Hadley Wickham. 2018. <em>Tibble: Simple Data Frames</em>. <a href="https://CRAN.R-project.org/package=tibble">https://CRAN.R-project.org/package=tibble</a>.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+</div>
+</div>

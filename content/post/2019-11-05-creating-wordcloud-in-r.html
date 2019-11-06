@@ -1,0 +1,113 @@
+---
+title: Creating wordcloud with wordcloud package in R
+author: Masumbuko Semba
+date: '2019-10-29'
+slug: creating-wordcloud-in-r
+categories:
+  - R
+tags:
+  - wordcloud
+  - R
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+
+<p>Google describe a wordclous as an image composed of words used in a particular text or subject, in which the size of each word indicates its frequency or importance. The words that appear more often are also the ones stand as bigger and bolder in wordcloud graphic. You can create a word cloud, also referred as text cloud or tag cloud, which is a visual representation of text data.</p>
+<p>The procedure of creating word clouds is very simple in R if you know the different steps to execute. <span class="citation">Feinerer, Hornik, and Meyer (<a href="#ref-tm">2008</a>)</span> developed a text mining package (<strong>tm</strong>) to analyze texts and <span class="citation">Fellows (<a href="#ref-wordcloud">2018</a>)</span> created a package to quickly visualize the keywords as a word cloud in R package. In this article, I’ll demonstrate how analyse text and plot word clouds in R.</p>
+<div id="why-you-would-use-word-clouds" class="section level2">
+<h2>Why You Would Use word clouds ?</h2>
+<p>Wordcloud is used in various field including;</p>
+<ul>
+<li>Researchers : for reporting qualitative data</li>
+<li>Marketers : for highlighting the needs and pain points of customers</li>
+<li>Educators : to support essential issues</li>
+<li>Politicians and journalists</li>
+<li>social media sites : to collect, analyze and share user sentiments</li>
+</ul>
+</div>
+<div id="packages" class="section level2">
+<h2>packages</h2>
+<p>You need functions from various package. You must have these package installed in your machine. To install these package you use the <code>install.packages()</code> function as illustrated in the chunk below;</p>
+<pre class="r"><code>install.packages(&quot;tm&quot;)  # for text mining
+install.packages(&quot;SnowballC&quot;) # for text stemming
+install.packages(&quot;wordcloud&quot;) # word-cloud generator 
+install.packages(&quot;RColorBrewer&quot;) # color palettes</code></pre>
+<p>once you have installed these package, you can now load them to make the functions accessible for the task</p>
+<pre class="r"><code>require(&quot;tm&quot;)
+require(&quot;SnowballC&quot;)
+require(&quot;wordcloud&quot;)
+require(&quot;RColorBrewer&quot;)
+require(tidyverse)
+require(magrittr)</code></pre>
+</div>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>You need a text file with word that you need to make plot. For this post I process the <em>“I have a dream speech” from “Martin Luther King”</em> but you can use any text you want. Since the document is online, I used the <code>read_table()</code> function from <strong>readr</strong> package.</p>
+<pre class="r"><code>dream = read_table(file = &quot;http://www.sthda.com/sthda/RDoc/example-files/martin-luther-king-i-have-a-dream-speech.txt&quot;, 
+                   skip_empty_rows = TRUE,
+                   progress = TRUE, 
+                   comment = &quot;&quot; )</code></pre>
+<p>Then create a vector source of the text document we downloaded from the internet and transform it to corpus using <code>vectorSource()</code> and <code>Corpus()</code> function from the <em>tm</em> package <span class="citation">(Feinerer, Hornik, and Meyer <a href="#ref-tm">2008</a>)</span>.</p>
+<pre class="r"><code># Load the data as a corpus
+# docs = Corpus(VectorSource(dream))
+
+dream.corpus = dream  %&gt;% 
+  tm::VectorSource()%&gt;% 
+  tm::Corpus()</code></pre>
+<p>Once the corpus file is create, the <code>inspect()</code> function from <strong>tm</strong> package is used to show detailed information on a corpus document.</p>
+<pre class="r"><code>dream.corpus %&gt;% inspect()</code></pre>
+<p>after converting to <em>corpus</em> dataset, we notice that some data cleaning is required. It appears from the earlier data inspection that there are many English words that we need to trim them off and retain only meaningful words. Remove words that include;</p>
+<ul>
+<li>Numerical digits (0–9)</li>
+<li>Stop words, which are common English words like <em>a</em> and <em>the</em>. If you do not remove from the dataset, they will dominate the word cloud over the meaningful words</li>
+<li>remove punctuation and extra white space</li>
+</ul>
+<p>The whole process is chained using the <code>%&gt;%</code> operator from <strong>magritr</strong> package <span class="citation">(Bache and Wickham <a href="#ref-magrittr">2014</a>)</span></p>
+<pre class="r"><code>dream.corpus.clean =  dream.corpus %&gt;% 
+  tm_map(FUN = content_transformer(tolower)) %&gt;% # Convert the text to lower case
+  tm_map(FUN = removeNumbers) %&gt;% # Remove numbers
+  tm_map(removeWords, stopwords(&quot;english&quot;)) %&gt;% # Remove english common stopwords
+  tm_map(removeWords, c(&quot;will&quot;, &quot;let&quot;, &quot;ring&quot;)) %&gt;%   # Remove words 
+  tm_map(removePunctuation) %&gt;%   # Remove punctuations
+  tm_map(stripWhitespace)   # Eliminate extra white spaces</code></pre>
+<pre class="r"><code>dream.corpus.clean %&gt;% tm::inspect()</code></pre>
+</div>
+<div id="build-a-word-frequency-table" class="section level2">
+<h2>Build a word frequency table</h2>
+<p>Once we have a clean, the function <code>TermDocumentMatrix()</code> from <strong>tm</strong> package <span class="citation">(Feinerer, Hornik, and Meyer <a href="#ref-tm">2008</a>)</span> was used to make a matrix. Once the matrix is created is converted to data frame with <code>as.data.frame()</code> and pull the rownames into a data frame with the <code>rownames_to column()</code> function from <strong>tibble</strong> package <span class="citation">(Müller and Wickham <a href="#ref-tibble">2018</a>)</span>. And finalize the wrangling with the <code>rename()</code> and <code>arrange()</code> function from <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr">2018</a>)</span>.</p>
+<pre class="r"><code>dream.corpus.clean.tb=  dream.corpus.clean %&gt;% 
+  tm::TermDocumentMatrix() %&gt;% 
+  as.matrix() %&gt;% as.data.frame() %&gt;% 
+  tibble::rownames_to_column() %&gt;%
+  dplyr::rename(word = 1, freq = 2) %&gt;%
+  dplyr::arrange(desc(freq))</code></pre>
+<p>Once the data is the right format, We plot the wordcloud with the wordcloud() function from <strong>wordcloud</strong> package <span class="citation">(Fellows <a href="#ref-wordcloud">2018</a>)</span>.</p>
+<pre class="r"><code>dream.corpus.clean.tb %$% 
+  wordcloud::wordcloud(words = word, freq = freq,min.freq = 1, max.words = 200,
+                       random.order = FALSE, rot.per = 0.35, colors = brewer.pal(8, &quot;Dark2&quot;))</code></pre>
+<p><img src="/post/2019-11-05-creating-wordcloud-in-r_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+Visualize the wordcloud graphic we get some key insights—The word freedom stands out compare to other words in the speech of Martin Luther King Junior on his speach of <em>I have a dream</em></p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-magrittr">
+<p>Bache, Stefan Milton, and Hadley Wickham. 2014. <em>Magrittr: A Forward-Pipe Operator for R</em>. <a href="https://CRAN.R-project.org/package=magrittr">https://CRAN.R-project.org/package=magrittr</a>.</p>
+</div>
+<div id="ref-tm">
+<p>Feinerer, Ingo, Kurt Hornik, and David Meyer. 2008. “Text Mining Infrastructure in R.” <em>Journal of Statistical Software</em> 25 (5): 1–54. <a href="http://www.jstatsoft.org/v25/i05/">http://www.jstatsoft.org/v25/i05/</a>.</p>
+</div>
+<div id="ref-wordcloud">
+<p>Fellows, Ian. 2018. <em>Wordcloud: Word Clouds</em>. <a href="https://CRAN.R-project.org/package=wordcloud">https://CRAN.R-project.org/package=wordcloud</a>.</p>
+</div>
+<div id="ref-tibble">
+<p>Müller, Kirill, and Hadley Wickham. 2018. <em>Tibble: Simple Data Frames</em>. <a href="https://CRAN.R-project.org/package=tibble">https://CRAN.R-project.org/package=tibble</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+</div>
+</div>

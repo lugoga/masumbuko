@@ -6,10 +6,19 @@
     <description>Recent content in R on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 31 May 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 29 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Creating wordcloud with wordcloud package in R</title>
+      <link>/10/29/2019/creating-wordcloud-in-r/</link>
+      <pubDate>Tue, 29 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/10/29/2019/creating-wordcloud-in-r/</guid>
+      <description>Google describe a wordclous as an image composed of words used in a particular text or subject, in which the size of each word indicates its frequency or importance. The words that appear more often are also the ones stand as bigger and bolder in wordcloud graphic. You can create a word cloud, also referred as text cloud or tag cloud, which is a visual representation of text data.</description>
+    </item>
     
     <item>
       <title>Forecasting chlorophyll value in the Pemba channel with the prophet package in R</title>

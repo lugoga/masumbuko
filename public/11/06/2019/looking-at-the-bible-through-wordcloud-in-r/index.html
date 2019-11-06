@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.55.2" />
+
+
+<title>Looking at the Bible through wordcloud in R - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Looking at the Bible through wordcloud in R - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">7 min read</span>
+    
+
+    <h1 class="article-title">Looking at the Bible through wordcloud in R</h1>
+
+    
+    <span class="article-date">2019/11/06</span>
+    
+
+    <div class="article-content">
+      
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>A word cloud is a visual representation of word, with more frequent word appear large and bold and less frequency small. In other words the more often a word occurs within a body of text, the larger it appears in the word cloud. This allows you to see immediately which words are most prominent and maybe most important. This state–of–the–art data analysis is widely refered to as <em>text data mining</em> and other call it <em>text analytics</em>. Text mining is the process of deriving high-quality information from text. High-quality information is typically derived through the devising of patterns and trends through means such as statistical pattern learning. In this post I illustrate steps you need to create a wordcloud with the text from the Bible!</p>
+<p>In this post I analyse text from the last Book in Old Testament called <em>Malachi</em>. Briefly, the word <em>Malachi</em> is hebrew, which means <em>my messenger</em> in English. After many years of exile, the Israel return to their land and expected to enjoy the unlimited blessing of God. This did not prove to be so, and as a result people began to doubt whether God really cared for them. Malachi, the prophet replied that the fault was on their side, not God. They had, by their sins, created barriers that hindered the flow and enjoyment of God’s love.</p>
+</div>
+<div id="packages" class="section level2">
+<h2>Packages</h2>
+<p>We need to load the packages of some function that we are going to use in this post, the package can be loaded using either <code>library()</code> or <code>require()</code> function. I prefer the <code>require()</code> function and is the one I used to load the package as highlighted in the chunk below;</p>
+<pre class="r"><code>require(tm)
+require(RColorBrewer)
+require(tidyverse)
+require(magrittr)
+require(ggwordcloud)</code></pre>
+</div>
+<div id="text-data" class="section level2">
+<h2>Text Data</h2>
+<p><span class="citation">Coene (<a href="#ref-sacred">2019</a>)</span> developed a <strong>sacred</strong> package that bundle the whole King James Version bible. This bible contains all 66 books and each verse is structured in a row. We can obtain this bible with the line of code below</p>
+<pre class="r"><code>scripture = sacred::king_james_version</code></pre>
+The bible comes as a data frame with four column shown in table <a href="#tab:tab1">1</a>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Sample of the ten verse from various books in the Holy King James Version Bible
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Number
+</th>
+<th style="text-align:left;">
+Book
+</th>
+<th style="text-align:left;">
+Chapter
+</th>
+<th style="text-align:left;">
+Verse
+</th>
+<th style="text-align:left;">
+Text
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+43
+</td>
+<td style="text-align:left;width: 2cm; ">
+JOH
+</td>
+<td style="text-align:left;width: 2cm; ">
+10
+</td>
+<td style="text-align:left;width: 2cm; ">
+2
+</td>
+<td style="text-align:left;">
+But he that entereth in by the door is the shepherd of the sheep.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+44
+</td>
+<td style="text-align:left;width: 2cm; ">
+ACT
+</td>
+<td style="text-align:left;width: 2cm; ">
+28
+</td>
+<td style="text-align:left;width: 2cm; ">
+21
+</td>
+<td style="text-align:left;">
+And they said unto him, We neither received letters out of Judaea concerning thee, neither any of the brethren that came shewed or spake any harm of thee.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+55
+</td>
+<td style="text-align:left;width: 2cm; ">
+TI2
+</td>
+<td style="text-align:left;width: 2cm; ">
+24
+</td>
+<td style="text-align:left;width: 2cm; ">
+6
+</td>
+<td style="text-align:left;">
+For I am now ready to be offered, and the time of my departure is at hand.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+38
+</td>
+<td style="text-align:left;width: 2cm; ">
+ZAC
+</td>
+<td style="text-align:left;width: 2cm; ">
+13
+</td>
+<td style="text-align:left;width: 2cm; ">
+3
+</td>
+<td style="text-align:left;">
+And it shall come to pass, that when any shall yet prophesy, then his father and his mother that begat him shall say unto him, Thou shalt not live; for thou speakest lies in the name of the LORD: and his father and his mother that begat him shall thrust him through when he prophesieth.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+43
+</td>
+<td style="text-align:left;width: 2cm; ">
+JOH
+</td>
+<td style="text-align:left;width: 2cm; ">
+4
+</td>
+<td style="text-align:left;width: 2cm; ">
+25
+</td>
+<td style="text-align:left;">
+The woman saith unto him, I know that Messias cometh, which is called Christ: when he is come, he will tell us all things.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+24
+</td>
+<td style="text-align:left;width: 2cm; ">
+JER
+</td>
+<td style="text-align:left;width: 2cm; ">
+51
+</td>
+<td style="text-align:left;width: 2cm; ">
+58
+</td>
+<td style="text-align:left;">
+Thus saith the LORD of hosts; The broad walls of Babylon shall be utterly broken, and her high gates shall be burned with fire; and the people shall labour in vain, and the folk in the fire, and they shall be weary.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+19
+</td>
+<td style="text-align:left;width: 2cm; ">
+PSA
+</td>
+<td style="text-align:left;width: 2cm; ">
+38
+</td>
+<td style="text-align:left;width: 2cm; ">
+11
+</td>
+<td style="text-align:left;">
+My lovers and my friends stand aloof from my sore; and my kinsmen stand afar off.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+24
+</td>
+<td style="text-align:left;width: 2cm; ">
+JER
+</td>
+<td style="text-align:left;width: 2cm; ">
+37
+</td>
+<td style="text-align:left;width: 2cm; ">
+5
+</td>
+<td style="text-align:left;">
+Then Pharaoh’s army was come forth out of Egypt: and when the Chaldeans that besieged Jerusalem heard tidings of them, they departed from Jerusalem.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+47
+</td>
+<td style="text-align:left;width: 2cm; ">
+CO2
+</td>
+<td style="text-align:left;width: 2cm; ">
+23
+</td>
+<td style="text-align:left;width: 2cm; ">
+16
+</td>
+<td style="text-align:left;">
+Nevertheless when it shall turn to the Lord, the vail shall be taken away.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+58
+</td>
+<td style="text-align:left;width: 2cm; ">
+HEB
+</td>
+<td style="text-align:left;width: 2cm; ">
+1
+</td>
+<td style="text-align:left;width: 2cm; ">
+3
+</td>
+<td style="text-align:left;">
+Who being the brightness of his glory, and the express image of his person, and upholding all things by the word of his power, when he had by himself purged our sins, sat down on the right hand of the Majesty on high.
+</td>
+</tr>
+</tbody>
+</table>
+<p>Because our interest is to analyse the text in the KJV, I only pick the text from the <em>Malachi</em>, you can pick any book by using a <code>filter()</code> function from <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr">2018</a>)</span>. I have noticed that the proceeding function works well with tibble format document rather than the vector. So please avoid selecting the column using the <code>$</code> operator. You may end up getting error and fail to recognize the cause of this failure.</p>
+<pre class="r"><code>malachi = scripture %&gt;% 
+  filter(book == &quot;mal&quot;)%&gt;% 
+  select(text)</code></pre>
+<p>Because the text mining package we are going to use like to work in the document that are structured as <code>corpus</code>, we ought to convert the text document into the <code>corpus</code> format. The chunk below show the code for transforming the text document into corpus;</p>
+<pre class="r"><code>malachi.corpus = malachi %&gt;% 
+  tm::VectorSource() %&gt;% 
+  tm::VCorpus()</code></pre>
+<p>Once the corpus document is create, it was further cleaned and neaty by replacing special characters to space with <code>tm_map()</code> function , for example, you can replace any special characters from the text like “/”, “@” and “|” with space:</p>
+<pre class="r"><code>toSpace = content_transformer(function (x , pattern ) 
+  gsub(pattern, &quot; &quot;, x))
+
+malachi.corpus = malachi.corpus %&gt;% 
+  tm_map(toSpace, &quot;/&quot;) %&gt;%
+  tm_map(toSpace, &quot; &quot;) %&gt;%
+  tm_map(toSpace, &quot;\\|&quot;)</code></pre>
+<p>We can then further clean and make the document neaty by removing stopwords and change all words to small letters. The chunk below highlight lines of code used to clean and remove stopwords in the Malachi Book of the Bible.</p>
+<pre class="r"><code>malachi.corpus =  malachi.corpus %&gt;% 
+  tm_map(FUN = content_transformer(tolower)) %&gt;% # Convert the text to lower case
+  tm_map(FUN = removeNumbers) %&gt;% # Remove numbers
+  tm_map(removeWords, stopwords(&quot;english&quot;)) %&gt;% # Remove english common stopwords
+  tm_map(removeWords, c(&quot;ye&quot;, &quot;O&quot;, &quot;unto&quot;, &quot;yet&quot;, &quot;thee&quot;, &quot;wherein&quot;, &quot;neither&quot;, &quot;shall&quot;, 
+                        &quot;saith&quot;, &quot;host&quot;, &quot;will&quot;, &quot;offer&quot;, &quot;say&quot;)) %&gt;%   # Remove words
+  tm_map(removePunctuation) %&gt;%   # Remove punctuations
+  tm_map(stripWhitespace)   #
+
+# malachi.corpus %&gt;% inspect()</code></pre>
+<p>Once the document is clean, it the right time to compute the frequency of each word. We can achive this with the <code>TermDocumentMatrix()</code> function from the <strong>tm</strong>package. Then the document is changed from corpus format to matrix and to data.frame. Because the rownames—the word is embbed as rownames, we transform them into a column with the <code>rownames_to_column()</code> function from <strong>tibble</strong> package <span class="citation">(Müller and Wickham <a href="#ref-tibble">2018</a>)</span> and change the columns names with meaningful ones.</p>
+<pre class="r"><code>malachi.corpus.tb=  malachi.corpus %&gt;% 
+  tm::TermDocumentMatrix(control = list(removeNumbers = TRUE,
+                                        stopwords = TRUE,
+                                        stemming = TRUE)) %&gt;% 
+  as.matrix() %&gt;% as.data.frame() %&gt;% 
+  tibble::rownames_to_column() %&gt;%
+  dplyr::rename(word = 1, freq = 2) %&gt;%
+  dplyr::arrange(desc(freq))</code></pre>
+<p>Figure <a href="#fig:fig1">1</a> is word cloud of the entire Book of Malachi created using the chunk below. Note that that using the frequency value only makes the word horizontal.</p>
+<pre class="r"><code>ggplot(data = malachi.corpus.tb, 
+       aes(label = word, size = freq, col = as.character(freq))) + 
+  geom_text_wordcloud(rm_outside = TRUE, max_steps = 1,
+                      grid_size = 1, eccentricity = .9)+
+  scale_size_area(max_size = 20)+
+  scale_color_brewer(palette = &quot;Paired&quot;, direction = -1)+
+  theme_void()</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2019-11-06-looking-at-the-bible-through-wordcloud-in-r_files/figure-html/fig1-1.png" alt="Wordcloud graphics of the entire Malachi Book from King James Version Bible" width="672" />
+<p class="caption">
+Figure 1: Wordcloud graphics of the entire Malachi Book from King James Version Bible
+</p>
+</div>
+<p>However, if you want the word to rotate, you should parse an argument of the <code>angle</code> in the <code>aes()</code> and supply a column that contain the angle. For this case we compute the angle that will rotate 90 degrees for a random subset of 40 % of the words’ The chunk codes for computing the angle is shown below;</p>
+<pre class="r"><code> malachi.corpus.tb = malachi.corpus.tb %&gt;%
+   mutate(angle = 90 * sample(c(0, 1), n(), replace = TRUE, prob = c(60, 40)))</code></pre>
+<p>Figure <a href="#fig:fig2">2</a> is the wordcloud of Malachi book with some rotated at 90 degree. Figure <a href="#fig:fig2">2</a> was generated with the lines of code in the chunk below;</p>
+<pre class="r"><code>ggplot(data = malachi.corpus.tb, 
+       aes(label = word, size = freq, angle = angle, col = as.character(freq))) + 
+  geom_text_wordcloud(rm_outside = TRUE, max_steps = 1,
+                      grid_size = 1, eccentricity = .9)+
+  scale_size_area(max_size = 20)+
+  scale_color_brewer(palette = &quot;Paired&quot;, direction = -1)+
+  theme_void()</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2019-11-06-looking-at-the-bible-through-wordcloud-in-r_files/figure-html/fig2-1.png" alt="Wordcloud graphics with rotation of the entire Malachi Book from King James Version Bible" width="672" />
+<p class="caption">
+Figure 2: Wordcloud graphics with rotation of the entire Malachi Book from King James Version Bible
+</p>
+</div>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-sacred">
+<p>Coene, John. 2019. <em>Sacred: Set of Sacred Texts Bible Data in Tidy Format</em>. <a href="http://sacred.john-coene.com">http://sacred.john-coene.com</a>.</p>
+</div>
+<div id="ref-tibble">
+<p>Müller, Kirill, and Hadley Wickham. 2018. <em>Tibble: Simple Data Frames</em>. <a href="https://CRAN.R-project.org/package=tibble">https://CRAN.R-project.org/package=tibble</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

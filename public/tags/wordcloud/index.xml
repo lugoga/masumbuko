@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>wordcloud on Masumbuko Semba&#39;s Blog</title>
+    <link>/tags/wordcloud/</link>
+    <description>Recent content in wordcloud on Masumbuko Semba&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 06 Nov 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/wordcloud/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Looking at the Bible through wordcloud in R</title>
+      <link>/11/06/2019/looking-at-the-bible-through-wordcloud-in-r/</link>
+      <pubDate>Wed, 06 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/11/06/2019/looking-at-the-bible-through-wordcloud-in-r/</guid>
+      <description>IntroductionA word cloud is a visual representation of word, with more frequent word appear large and bold and less frequency small. In other words the more often a word occurs within a body of text, the larger it appears in the word cloud. This allows you to see immediately which words are most prominent and maybe most important. This state–of–the–art data analysis is widely refered to as text data mining and other call it text analytics.</description>
+    </item>
+    
+    <item>
+      <title>Wordclouds plotting with ggwordcloud package in R</title>
+      <link>/11/05/2019/wordclouds-plotting-with-ggwordcloud-package-in-r/</link>
+      <pubDate>Tue, 05 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/11/05/2019/wordclouds-plotting-with-ggwordcloud-package-in-r/</guid>
+      <description>In the previous post, we saw how to make wordcloud graphic using the wordcloud package. In this post we extend the ability of R to make wordcloud graphic, but rather than using the base R function for plotting,I will show how to use ggplot2 framework.
+Le Pennec and Slowikowski (2019) developed a gwordcloud package, which extend the capability of ggplot2 package (Wickham 2016) of making cloud text. With the geom_text_wordcloud() function, gwordcloud made making wordcloud plot easy with ggplot2 package.</description>
+    </item>
+    
+    <item>
+      <title>Creating wordcloud with wordcloud package in R</title>
+      <link>/10/29/2019/creating-wordcloud-in-r/</link>
+      <pubDate>Tue, 29 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/10/29/2019/creating-wordcloud-in-r/</guid>
+      <description>Google describe a wordclous as an image composed of words used in a particular text or subject, in which the size of each word indicates its frequency or importance. The words that appear more often are also the ones stand as bigger and bolder in wordcloud graphic. You can create a word cloud, also referred as text cloud or tag cloud, which is a visual representation of text data.</description>
+    </item>
+    
+  </channel>
+</rss>

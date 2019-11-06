@@ -8,11 +8,26 @@ tags: []
 ---
 
 
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 ```
 
 Information of useful are found in this [link](https://cfss.uchicago.edu/notes/leaflet/) and read [this](http://www.econ.uiuc.edu/~lab/workshop/Spatial_in_R.html) for spatial modelling
+
+[Leaflet](https://rstudio.github.io/leaflet/) is one of the most popular open-source JavaScript libraries for interactive maps in R.
+One of my favorite packages for interactive plotting  package (Cheng, Karambelkar, and Xie 2018Cheng, Joe, Bhaskar Karambelkar, and Yihui Xie. 2018. Leaflet: Create Interactive Web Maps with the Javascript ’Leaflet’ Library. https://CRAN.R-project.org/package=leaflet.). This package allows you to create interactive maps very similar to the maps you see on Google maps. As the background, it pulls in tiles from a collection of tiles at different zoom levels, allowing you to zoom in and out and pan around the resulting map.
+
+You can create a leaflet map using data that’s in an sf class, which we covered in the “Map” section. For example, you can use the following code to read in the data, convert it to an sf object by specifying the columns with geographical information, and set projection information using the st_sf function:
+
+```{r}
+
+library("sf")
+
+# fl_accidents %<>% 
+#   st_as_sf(coords = c("longitud", "latitude")) %>% 
+#   st_sf(crs = 4326)
+```
 
 ```{r}
 require(leaflet)
@@ -25,11 +40,64 @@ require(tidyverse)
 wo = spData::world
 ```
 
+Now you can create the map with the data. The code should look similar to ggplot2 code for plotting, although notice that it uses a pipe operator (%>%) rather than a plus sign (+) to add on the layers. The leaflet call creates a leaflet object, and the addTiles function adds in the background tiles. You can add markers showing the location of each accident using the addMarkers call, specifying the dataset to use with the data parameter:
+
 ```{r}
 leaflet(data = wo) %>% 
   addPolygons(stroke = FALSE, fillOpacity = 0.5, smoothFactor = .5) %>% 
   addTiles()
 ```
+
+The result is an interactive map, with a marker at the location of each accident. Try using the plus and minus buttons to zoom in and out, and click on the map to pan around the map.
+
+There is a lot you can do to make the map more interesting. For example, you can add another layer to the map with the track of Hurricane Irma. You can read that track in from a shapefile using st_read, as described in the “Map” section, transforming the projection to map the projection of the accident data using `st_transform`
+```{r}
+irma_track <- st_read("data/al112017_best_track", 
+                      layer = "al112017_lin") %>% 
+  st_transform(crs = 4326)
+```
+
+This spatial object is a type known as a “polyline”, so you can add it to the leaflet map with a layer called with addPolylines. In this example, I’ve made the line red with the option color = "red". The leaflet plot will automatically zoom to fit the data you’re plotting—since the hurricane started in the tropics and went past Florida, its range is much larger than Florida. To have the leaflet plot still open zoomed in to Florida, you can use the fitBounds call to specify the opening view of the map. Finally, with the call popup = ~ date, we’re specifying that the each marker should show the date of the accident when you click on it.
+
+```{r}
+leaflet() %>% 
+  addTiles() %>%
+  fitBounds(lng1 = -88, lng2 = -80, lat1 = 24.5, lat2 = 31.5) %>% 
+  addMarkers(data = fl_accidents,
+             popup = ~ date) %>% 
+  addPolylines(data = irma_track, color = "red")
+```
+
+
+The “pop-ups” for the markers can be developed to be pretty fancy. You can use paste to paste together elements from the data with other words to create nice labels. You can also format these, using HTML formating.
+
+Try this out in the following code. After you run this, the leaflet map should have pop-ups that give both the date and the number of the fatalities, on separate lines (the <br> creates a line break). First, add a column to fl_accidents called popup, with the full (HTML formatted) text you want to include in the labels. Then, in the addMarkers call, specify that this column should be used for the pop-up with popup = ~ popup.
+```{r}
+fl_accidents %<>% 
+  mutate(popup = paste("<b>Date:</b>", date, 
+                       "<br/>",
+                       "<b># fatalities:</b>", fatals))
+
+leaflet() %>% 
+  addTiles() %>%
+  fitBounds(lng1 = -88, lng2 = -80, lat1 = 24.5, lat2 = 31.5) %>% 
+  addMarkers(data = fl_accidents,
+             popup = ~ popup) %>% 
+  addPolylines(data = irma_track, color = "red")
+```
+  
+  
+*************************
+Below is a sortable list of countries by number of Internet users,for 2017. Internet users are defined as persons who accessed the Internet in the last 12 months from any device, including mobile phones.[Note 1] Percentage is the percentage of a country's population that are Internet users. Estimates are derived from either household surveys or from Internet subscription data
+```{r}
+internet.users = readxl::read_excel("e:/Data Manipulation/internet_users2017.xlsx")
+```
+
+```{r}
+
+internet.users2017 = htmltab::htmltab(doc = "https://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users", which = 5)
+```
+
 
 The colorQuantile function of the leaflet package maps values of the data to colors following a palette. In this case I’ve specified a palette of Oranges and Reds, for more palettes you can access the help file for RColorBrewer: ?RColorBrewer.
 ```{r}
@@ -52,5 +120,111 @@ leaflet(data = wo)%>%
             position = "bottomright")
 
 
+```
+
+
+```{r}
+mwanza.sec = htmltab::htmltab("https://onlinesys.necta.go.tz/results/2019/acsee/results/s0333.htm",
+                              which = 1) %>%
+  as_tibble()
+
+extrafont::loadfonts(device = "win")
+windowsFonts()
+
+ggplot(data = mwanza.sec %>% filter(DIV %in% c("0","I","II","III", "IV")), 
+       aes(x = DIV, fill = SEX)) + 
+  geom_bar(position=position_dodge()) +
+  hrbrthemes::theme_ipsum_pub(base_family = "sans", base_size = 12) +
+  scale_x_discrete(limits = c("I","II","III", "IV", "0"))+
+  scale_y_continuous(breaks = seq(30,120,30))+
+  labs(title = "Four Six National Examination Results", subtitle = "Female performed better than male in all divisions", y = "Number of Candidate")
+
+```
+
+```{r}
+matokeo = list()
+necta.code = paste("s0", 104:110, sep = "")
+
+for (val in 1:length(necta.code)){
+  
+  tag = paste("https://onlinesys.necta.go.tz/results/2019/acsee/results/",necta.code[val],".htm", sep = "")
+  matokeo[[val]] = htmltab::htmltab(tag, which = 1)
+   next()
+  
+  # next()
+  
+}
+```
+
+```{r}
+lugulu = htmltab::htmltab("https://matokeo.necta.go.tz/psle/results/shl_ps1302195.htm", which = 2)
+lugulu.tb = lugulu %>% tibble::as_tibble()
+
+lugulu.clean = lugulu %>% 
+  separate(col = "SUBJECTS", into = c("Kiswahili","English", "Maarifa","Hisabati","Science", "grade"), sep = "," ) %>%
+  separate(col = "grade", into = c("Grade Name", "Daraja"), sep = "-")
+```
+
+```{r}
+ggplot(data = lugulu.clean, 
+       aes(x = Daraja, fill = SEX)) + 
+  geom_bar(position=position_dodge()) +
+  hrbrthemes::theme_ipsum_pub(base_family = "sans", base_size = 12) +
+  # scale_x_discrete(limits = c("I","II","III", "IV", "0"))+
+  # scale_y_continuous(breaks = seq(30,120,30))+
+  labs(title = "Four Six National Examination Results", subtitle = "Female performed better than male in all divisions", y = "Number of Candidate")
+```
+
+```{r}
+kwimba = read_table("e:/kwimba_shule.txt") %>% 
+  separate(col = "School", into = c("Shule", "namba"), sep = " -")%>%
+  separate(col = "namba", into = c("a", "namba"), sep = " ")%>%
+  mutate(namba = tolower(namba)) %>%
+  separate(col = "Shule", into = c("Jina", "c", "b"), sep = " ")  %>%
+  select(-c(a,b,c))
+```
+
+```{r}
+kwimba.shule = list()
+for (shule in 1:nrow(kwimba)){
+  
+    tag = paste("https://matokeo.necta.go.tz/psle/results/shl_",kwimba$namba[shule], ".htm", sep = "")
+  
+  kwimba.shule[[shule]] = htmltab::htmltab(tag, which = 2) %>% 
+    mutate(School = kwimba$Jina[shule])%>% 
+    tibble::as_tibble()  %>% 
+  separate(col = "SUBJECTS", into = c("Kiswahili","English", "Maarifa","Hisabati","Science", "grade"), sep = "," ) %>%
+  separate(col = "grade", into = c("Grade Name", "Daraja"), sep = "-") %>%
+    select(School, SEX, Daraja)
+}
+  
+
+kwimba.shule.tb = kwimba.shule %>% bind_rows()%>% 
+  mutate(Daraja = replace(Daraja, Daraja == " X", "Absent"))
+
+kwimba.shule.tb  %>% 
+  group_by(School, SEX, Daraja) %>% count() %>% 
+  arrange(desc(n)) %>% spread(key = "SEX", value = "n")
+
+ggplot(data = kwimba.shule.tb, 
+       aes(x = Daraja, fill = SEX)) + 
+  geom_bar(position=position_dodge()) +
+  hrbrthemes::theme_ipsum_pub(base_family = "sans", base_size = 12) +
+  # scale_x_discrete(limits = c("I","II","III", "IV", "0"))+
+  # scale_y_continuous(breaks = seq(30,120,30))+
+  labs(title = "Primary School Examination Results for 2019", subtitle = "Female performed better than male in all divisions", y = "Number of Candidate")
+```
+```
+```{r}
+require(reticulate)
+```
+
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib ma
+
+pd.read_table("e:/kuguru.txt")
 ```
 

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.55.2" />
+
+
+<title>Creating wordcloud in R - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Creating wordcloud in R - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">4 min read</span>
+    
+
+    <h1 class="article-title">Creating wordcloud in R</h1>
+
+    
+    <span class="article-date">2019/11/05</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p>Text mining methods allow us to highlight the most frequently used keywords in a paragraph of texts. One can create a word cloud, also referred as text cloud or tag cloud, which is a visual representation of text data.</p>
+<p>The procedure of creating word clouds is very simple in R if you know the different steps to execute. The text mining package (tm) and the word cloud generator package (wordcloud) are available in R for helping us to analyze texts and to quickly visualize the keywords as a word cloud.</p>
+<blockquote>
+<p>In this article, we’ll describe, step by step, how to generate word clouds using the R software.</p>
+</blockquote>
+<div id="who-is-using-word-clouds" class="section level2">
+<h2>Who is using word clouds ?</h2>
+<ul>
+<li>Researchers : for reporting qualitative data</li>
+<li>Marketers : for highlighting the needs and pain points of customers</li>
+<li>Educators : to support essential issues</li>
+<li>Politicians and journalists</li>
+<li>social media sites : to collect, analyze and share user sentiments</li>
+</ul>
+</div>
+<div id="the-5-main-steps-to-create-word-clouds-in-r" class="section level2">
+<h2>The 5 main steps to create word clouds in R</h2>
+</div>
+<div id="packages" class="section level2">
+<h2>packages</h2>
+<p>You need functions from various package. You must have these package installed in your machine. To install these package you use the <code>install.packages()</code> function as illustrated in the chunk below;</p>
+<pre class="r"><code>install.packages(&quot;tm&quot;)  # for text mining
+install.packages(&quot;SnowballC&quot;) # for text stemming
+install.packages(&quot;wordcloud&quot;) # word-cloud generator 
+install.packages(&quot;RColorBrewer&quot;) # color palettes</code></pre>
+<p>once you have installed these package, you can now load them to make the functions accessible for the task</p>
+<pre class="r"><code>require(&quot;tm&quot;)
+require(&quot;SnowballC&quot;)
+require(&quot;wordcloud&quot;)
+require(&quot;RColorBrewer&quot;)
+require(tidyverse)
+require(magrittr)</code></pre>
+</div>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>You need a text file with word that you need to make plot. For this post I process the <em>“I have a dream speech” from “Martin Luther King”</em> but you can use any text you want. Since the document is online, I used the <code>read_table()</code> function from <strong>readr</strong> package.</p>
+<pre class="r"><code>dream = read_table(file = &quot;http://www.sthda.com/sthda/RDoc/example-files/martin-luther-king-i-have-a-dream-speech.txt&quot;, 
+                   skip_empty_rows = TRUE,
+                   progress = TRUE, 
+                   comment = &quot;&quot; )</code></pre>
+<p>Then create a vector source of the text document we downloaded from the internet and transform it to corpus using <code>vectorSource()</code> and <code>Corpus()</code> function from the <em>tm</em> package <span class="citation">[@tm]</span>.</p>
+<pre class="r"><code># Load the data as a corpus
+# docs = Corpus(VectorSource(dream))
+
+dream.corpus = dream  %&gt;% 
+  tm::VectorSource()%&gt;% 
+  tm::Corpus()</code></pre>
+<p>Once the corpus file is create, the <code>inspect()</code> function from <strong>tm</strong> package is used to showdetailed information on a corpus document.</p>
+<pre class="r"><code>dream.corpus %&gt;% inspect()</code></pre>
+<p>after converting to <em>corpus</em> dataset, we notice that some data cleaning is required. It appears from the earlier data inspection that there are many English words that we need to trim them off and retain only meaningful words. Remove words that include;</p>
+<ul>
+<li>Numerical digits (0–9)</li>
+<li>Stop words, which are common English words like <em>a</em> and <em>the</em>. If you do not remove from the dataset, they will dominate the word cloud over the meaninful words</li>
+<li>remove punctuation and extra white space</li>
+</ul>
+<p>The whole process is chained using the <code>%&gt;%</code> operator from <strong>magritr</strong> package</p>
+<pre class="r"><code>dream.corpus.clean =  dream.corpus %&gt;% 
+  tm_map(FUN = content_transformer(tolower)) %&gt;% # Convert the text to lower case
+  tm_map(FUN = removeNumbers) %&gt;% # Remove numbers
+  tm_map(removeWords, stopwords(&quot;english&quot;)) %&gt;% # Remove english common stopwords
+  tm_map(removeWords, c(&quot;will&quot;, &quot;let&quot;, &quot;ring&quot;)) %&gt;%   # Remove words 
+  tm_map(removePunctuation) %&gt;%   # Remove punctuations
+  tm_map(stripWhitespace)   # Eliminate extra white spaces</code></pre>
+<pre class="r"><code>dream.corpus.clean %&gt;% tm::inspect()</code></pre>
+</div>
+<div id="build-a-term-document-matrix" class="section level2">
+<h2>Build a term-document matrix</h2>
+<p>Once we have a clean
+Document matrix is a table containing the frequency of the words. Column names are words and row names are documents. The function <code>TermDocumentMatrix()</code> from text mining package. Once the matrix is created is converted to data frame with <code>as.data.frame()</code> and pull the rownames into a data frame with the <code>rownames_to column()</code> function from <strong>tibble</strong> package. And finnaly finalize the wrangling with the <code>rename()</code> and <code>arrange()</code> function from <strong>dplyr</strong> package.</p>
+<pre class="r"><code>dream.corpus.clean.tb=  dream.corpus.clean %&gt;% 
+  tm::TermDocumentMatrix() %&gt;% 
+  as.matrix() %&gt;% as.data.frame() %&gt;% 
+  tibble::rownames_to_column() %&gt;%
+  dplyr::rename(word = 1, freq = 2) %&gt;%
+  dplyr::arrange(desc(freq))</code></pre>
+<p>We can then generate the word cloud</p>
+<pre class="r"><code>dream.corpus.clean.tb %$% 
+  wordcloud::wordcloud(words = word, freq = freq,min.freq = 1, max.words = 200,
+                       random.order = FALSE, rot.per = 0.35, colors = brewer.pal(8, &quot;Dark2&quot;))</code></pre>
+<p><img src="/post/2019-11-05-creating-wordcloud-in-r_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+Visualize the wordcloud graphic we get some key insights—The word freedom stands out compare to other words in the speach of Martin Luther King Junior on his speach of <em>I have a dream</em></p>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

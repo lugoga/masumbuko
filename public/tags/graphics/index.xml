@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>graphics on Masumbuko Semba&#39;s Blog</title>
+    <link>/tags/graphics/</link>
+    <description>Recent content in graphics on Masumbuko Semba&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 06 Nov 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/graphics/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Looking at the Bible through wordcloud in R</title>
+      <link>/11/06/2019/looking-at-the-bible-through-wordcloud-in-r/</link>
+      <pubDate>Wed, 06 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/11/06/2019/looking-at-the-bible-through-wordcloud-in-r/</guid>
+      <description>IntroductionA word cloud is a visual representation of word, with more frequent word appear large and bold and less frequency small. In other words the more often a word occurs within a body of text, the larger it appears in the word cloud. This allows you to see immediately which words are most prominent and maybe most important. This state–of–the–art data analysis is widely refered to as text data mining and other call it text analytics.</description>
+    </item>
+    
+  </channel>
+</rss>

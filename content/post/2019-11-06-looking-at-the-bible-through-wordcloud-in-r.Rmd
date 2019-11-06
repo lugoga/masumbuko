@@ -1,0 +1,150 @@
+---
+title: Looking at the Bible through wordcloud in R
+author: Masumbuko Semba
+date: '2019-11-06'
+slug: looking-at-the-bible-through-wordcloud-in-r
+categories: []
+tags:
+  - wordcloud
+  - programming
+  - graphics
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+## Introduction
+A word cloud is a visual representation of word, with more frequent word appear large and bold and less frequency small. In other words the more often a word occurs within a body of text, the larger it appears in the word cloud. This allows you to see immediately which words are most prominent and maybe most important. This state--of--the--art data analysis is widely refered to as *text data mining* and other call it *text analytics*.  Text mining is the process of deriving high-quality information from text. High-quality information is typically derived through the devising of patterns and trends through means such as statistical pattern learning. In this post I illustrate steps you need to create a wordcloud with the text from the Bible!
+
+In this post I analyse text from the last Book in Old Testament called *Malachi*. Briefly, the word *Malachi* is hebrew, which means *my messenger* in English. After many years of exile, the Israel return to their land and expected to enjoy the unlimited blessing of God. This did not prove to be so, and as a result people began to doubt whether God really cared for them. Malachi, the prophet replied that the fault was on their side, not God. They had, by their sins, created barriers that hindered the flow and enjoyment of God's love. 
+
+## Packages
+We need to load the packages of some function that we are going to use in this post, the package can be loaded using either `library()` or `require()` function. I prefer the `require()` function and is the one I used to load the package as highlighted in the chunk below;
+
+```{r}
+require(tm)
+require(RColorBrewer)
+require(tidyverse)
+require(magrittr)
+require(ggwordcloud)
+```
+
+## Text Data
+@sacred developed a **sacred** package that bundle the whole King James Version bible. This bible contains all 66 books and each verse is structured in a row. We can obtain this bible with the line of code below
+
+```{r}
+scripture = sacred::king_james_version
+
+```
+
+The bible comes as a data frame with four column shown in table \@ref(tab:tab1)
+```{r tab1, echo=FALSE}
+scripture %>% 
+  sample_n(size = 10) %>% 
+  mutate(book = toupper(book)) %>%
+  kableExtra::kable(format = "html", col.names = c("Number", "Book", "Chapter", "Verse", "Text"), caption = "Sample of the ten verse from various books in the Holy King James Version Bible", align = "l") %>%
+  kableExtra::column_spec(column = 1:4, width = "2cm")
+```
+
+Because our interest is to analyse the text in the KJV, I only pick the text from the *Malachi*, you can pick any book by using a `filter()` function from **dplyr** package [@dplyr]. I have noticed that the proceeding function works well with tibble format document rather than the vector. So please avoid selecting the column using the `$` operator. You may end up getting error and fail to recognize the cause of this failure. 
+
+```{r}
+
+malachi = scripture %>% 
+  filter(book == "mal")%>% 
+  select(text)
+```
+
+Because the text mining package we are going to use like to work in the document that are structured as `corpus`, we ought to convert the text document into the `corpus` format. The chunk below show the code for transforming the text document into corpus;
+```{r}
+malachi.corpus = malachi %>% 
+  tm::VectorSource() %>% 
+  tm::VCorpus()
+```
+
+
+Once the corpus document is create, it was further cleaned and neaty by replacing special characters to space with `tm_map()` function , for example, you can replace any special characters from the text like “/”, “@” and “|” with space:
+
+```{r}
+toSpace = content_transformer(function (x , pattern ) 
+  gsub(pattern, " ", x))
+
+malachi.corpus = malachi.corpus %>% 
+  tm_map(toSpace, "/") %>%
+  tm_map(toSpace, " ") %>%
+  tm_map(toSpace, "\\|")
+```
+
+We can then further clean and make the document neaty by removing stopwords and change all words to small letters. The chunk below highlight lines of code used to clean and remove stopwords in the Malachi Book of the Bible.
+
+```{r}
+malachi.corpus =  malachi.corpus %>% 
+  tm_map(FUN = content_transformer(tolower)) %>% # Convert the text to lower case
+  tm_map(FUN = removeNumbers) %>% # Remove numbers
+  tm_map(removeWords, stopwords("english")) %>% # Remove english common stopwords
+  tm_map(removeWords, c("ye", "O", "unto", "yet", "thee", "wherein", "neither", "shall", 
+                        "saith", "host", "will", "offer", "say")) %>%   # Remove words
+  tm_map(removePunctuation) %>%   # Remove punctuations
+  tm_map(stripWhitespace)   #
+
+# malachi.corpus %>% inspect()
+```
+
+Once the document is clean, it the right time to compute the frequency of each word. We can achive this with the `TermDocumentMatrix()` function from the **tm**package. Then the document is changed from corpus format to matrix and to data.frame. Because the rownames---the word is embbed as rownames, we transform them into a column with the `rownames_to_column()` function from **tibble** package [@tibble] and change the columns names with meaningful ones. 
+
+```{r}
+
+malachi.corpus.tb=  malachi.corpus %>% 
+  tm::TermDocumentMatrix(control = list(removeNumbers = TRUE,
+                                        stopwords = TRUE,
+                                        stemming = TRUE)) %>% 
+  as.matrix() %>% as.data.frame() %>% 
+  tibble::rownames_to_column() %>%
+  dplyr::rename(word = 1, freq = 2) %>%
+  dplyr::arrange(desc(freq))
+
+```
+
+
+Figure \@ref(fig:fig1) is  word cloud of the entire Book of Malachi created using the chunk below. Note that that using the frequency value only makes the word horizontal.
+
+```{r fig1, fig.cap="Wordcloud graphics of the entire Malachi Book from King James Version Bible"}
+
+ggplot(data = malachi.corpus.tb, 
+       aes(label = word, size = freq, col = as.character(freq))) + 
+  geom_text_wordcloud(rm_outside = TRUE, max_steps = 1,
+                      grid_size = 1, eccentricity = .9)+
+  scale_size_area(max_size = 20)+
+  scale_color_brewer(palette = "Paired", direction = -1)+
+  theme_void()
+  
+```
+
+However, if you want the word to rotate, you should parse an argument of the `angle` in the `aes()` and supply a column that contain the angle. For this case we compute the angle that will rotate 90 degrees for a random subset of 40 % of the words' The chunk codes for computing the angle is shown below;
+
+```{r}
+ malachi.corpus.tb = malachi.corpus.tb %>%
+   mutate(angle = 90 * sample(c(0, 1), n(), replace = TRUE, prob = c(60, 40)))
+```
+
+Figure \@ref(fig:fig2) is the wordcloud of Malachi book with some rotated at 90 degree. Figure \@ref(fig:fig2) was generated with the lines of code in the chunk below;
+
+```{r fig2, fig.cap="Wordcloud graphics with rotation of the entire Malachi Book from King James Version Bible"}
+
+ggplot(data = malachi.corpus.tb, 
+       aes(label = word, size = freq, angle = angle, col = as.character(freq))) + 
+  geom_text_wordcloud(rm_outside = TRUE, max_steps = 1,
+                      grid_size = 1, eccentricity = .9)+
+  scale_size_area(max_size = 20)+
+  scale_color_brewer(palette = "Paired", direction = -1)+
+  theme_void()
+
+
+```
+
+## References
