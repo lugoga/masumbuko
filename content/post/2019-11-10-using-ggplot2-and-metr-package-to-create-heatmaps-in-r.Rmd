@@ -26,9 +26,57 @@ require(oce)
 require(lubridate)
 ```
 
+## Study area
+This study was conducted in the coastal waters of Tanzania within the Pemba Channel. The study area lays between longitude 39° 6’ and 39° 20’ E and latitude 4° 45’ S and 5° 7’ S (Figure \@ref(fig:stuay-area)).  Three transects were sampled, including: Mwaboza to the north, Vyeru at the center and Sahare to the south.  The study area was selected because to its high small pelagic fishery, which is presumed to be linked with the occurrence of upwelling-that supplies cooler and nutrient rich water to the Pemba system favoring increased phytoplankton biomass along the area. 
+
+```{r stuay-area, fig.cap="A Map showing the area extent that MODIS data where acquireed" ,fig.height=4.5, fig.width=5, echo=FALSE, fig.keep='high', dev='svg'}
+
+africa = sf::read_sf("E:/GIS/Tanzania spatial data Bank/EAF14 Tanzania spatial datasets/africa/Spatial/AdmInfr/afcntry.shp")
+tanga = africa %>% sf::st_crop(xmin = 36.8, xmax = 41, ymin = -8, ymax = -2)
+
+
+
+map = ggplot()+
+  geom_sf(data = tanga, fill = "#FAEBD7", col = "darkblue")+
+  coord_sf(xlim = c(39.05, 39.6), ylim = c(-5.2, -4.6))+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = "#6ECFF6"),
+        panel.grid = element_line(colour = NA),
+        axis.text = element_text(size = 11))+
+  metR::scale_x_longitude(breaks = seq(39.10, 39.58, .15))+
+  metR::scale_y_latitude(breaks = seq(-5.3, -4.7, .15) %>% round(2))+
+  labs(x = NULL, y = NULL)+
+  annotate(geom = "text", x = 39.35, y = -5.3, label = "Pemba \nChannel")+
+  ggspatial::annotation_scale(location = "br")+
+  ggspatial::annotation_north_arrow(location = "tr", 
+                                    height = unit(2.5, "lines"), 
+                                    width = unit(1.2, "lines"))
+
+
+world = spData::world
+aoi = data.frame(lon = c(39., 39.6, 39.6, 39, 39), 
+                 lat = c(-5.2, -5.2, -4.6, -4.6, -5.2))
+
+inset = ggplot()+
+  geom_sf(data = tanga, fill = "#FAEBD7", col = "darkblue")+
+  # coord_sf(xlim = c(37, 43), ylim = c(-12,-2))+
+  geom_path(data = aoi, aes(x = lon, y = lat), size = 1, col = "red")+
+  theme_bw()+
+  theme(plot.background = element_blank(),
+        panel.background = element_rect(fill = "#6ECFF6"),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(), panel.grid = element_line(colour = NA)) +
+  coord_sf(xlim = c(38.8,40), ylim = c(-5.5,-4.2)) +
+  labs(x = NULL, y = NULL)
+
+cowplot::ggdraw()+
+  cowplot::draw_plot(plot = map, x = 0, y = 0, width = 1, height = 1, scale = 1)+
+  cowplot::draw_plot(plot = inset, x = .52, y = .48, width = .35,height = .35)
+
+```
 
 ## load and tidy the dataset
-
+Once we have defined the study area and map it, we need to load the data into the session. The chunk below shows lines of code used to plot this map.  We used the function `read_csv
 
 
 ```{r}
@@ -79,7 +127,7 @@ pemba.pp = pp %>% filter(site == "Pemba")
 ## Visualization
 Now we have tied the dataset in the right structure, we can start exploring the data. The first thing that comes to my mind is to draw a line plot that show primary production over the twelve months as shown in figure \@ref(fig:fig2)
 
-```{r fig2, warning=FALSE, fig.width=7.5, fig.height=4, fig.cap="Multiple lines showing monthly primary productiviey variation"}
+```{r fig2,dev="svg", fig.keep='high', warning=FALSE, fig.width=7.5, fig.height=4, fig.cap="Multiple lines showing monthly primary productiviey variation"}
 ggplot(data = pemba.pp, 
        aes(x = month, y = pp, col = year %>% as.character()))+ 
   geom_line() +
@@ -93,7 +141,7 @@ ggplot(data = pemba.pp,
 
 Notice the clustering of lines! It is difficult to grasp anything in the figure \@ref(fig:fig2). Alternative, we can use the `facet_wrap` to make multiple plot for each year showing the variation of primary productivity over a period of twelve months as shown in figure \@ref(fig:fig3).
 
-```{r fig3, fig.cap="Multiple plots of primary productivity over a year."}
+```{r fig3, fig.keep='high', fig.cap="Multiple plots of primary productivity over a year.",dev="svg"}
 ggplot(data = pemba.pp, 
        aes(x = month, y = pp))+ 
   geom_line() +
@@ -108,7 +156,7 @@ ggplot(data = pemba.pp,
 
 This plot is better, but yet, it would be good to have in one figure. This information can visualized better when plotted as heatmap using `geom_raster()` from **ggplot2** [@ggplot]. The lines of codes used to generate heatmap shown in figure \@ref(fig:heatmap) are highlighted in code chunk below;
 
-```{r heatmap, fig.cap="Heatmap plotted with ggplot2 package"}
+```{r heatmap, fig.keep='high', fig.cap="Heatmap plotted with ggplot2 package",dev="svg"}
 
 ggplot() +
   geom_raster(data = pemba.pp, aes(y = month, x = year, fill = pp))+
@@ -130,7 +178,7 @@ ggplot() +
 
 We have figure \@ref(fig:heatmap) created with `geom_raster()` function and plot nice the heatmap, but looks pixilated. This function works better if you have data points with high density. But if we want to creat polygon of contour commonly refered as filled contour, then `geom_raster()` would not allow us to do that, and **ggplot2** lack a function that can do that job. Fortunate, Elio Campitelli -@metr developed **metR** package that has some nifty geom to extend the capability of **ggplot2**. One of these geom is the `geom_fill_contour()`, which make some manipulation of the data to ensure all contours are closed. Figure \@ref(fig:heatmap-metr) was generated using the chunk below;
 
-```{r heatmap-metr, fig.cap="filled contour heatmap generated with metR package"}
+```{r heatmap-metr, fig.keep='high', fig.cap="filled contour heatmap generated with metR package",dev="svg"}
 ggplot() +
   metR::geom_contour_fill(data = pemba.pp, aes(y = month, x = year, z = pp), bins = 12, na.fill = TRUE)+
   scale_x_continuous(breaks = seq(2004,2019,2))+
