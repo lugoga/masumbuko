@@ -156,7 +156,7 @@ ggplot(data = pemba.pp,
 
 This plot is better, but yet, it would be good to have in one figure. This information can visualized better when plotted as heatmap using `geom_raster()` from **ggplot2** [@ggplot]. The lines of codes used to generate heatmap shown in figure \@ref(fig:heatmap) are highlighted in code chunk below;
 
-```{r heatmap, fig.keep='high', fig.cap="Heatmap plotted with ggplot2 package",dev="svg"}
+```{r heatmap,  fig.cap="Heatmap plotted with ggplot2 package",fig.keep='high'}
 
 ggplot() +
   geom_raster(data = pemba.pp, aes(y = month, x = year, fill = pp))+
@@ -173,7 +173,8 @@ ggplot() +
                                reverse = T, 
                                barwidth = unit(.4, "cm"),
                                barheight = unit(8, "cm")))+
-  scale_fill_viridis_c(na.value = NA, direction = 1)
+  scale_fill_viridis_c(na.value = NA, direction = 1)+
+  labs(x = "", y = "")
 ```
 
 We have figure \@ref(fig:heatmap) created with `geom_raster()` function and plot nice the heatmap, but looks pixilated. This function works better if you have data points with high density. But if we want to creat polygon of contour commonly refered as filled contour, then `geom_raster()` would not allow us to do that, and **ggplot2** lack a function that can do that job. Fortunate, Elio Campitelli -@metr developed **metR** package that has some nifty geom to extend the capability of **ggplot2**. One of these geom is the `geom_fill_contour()`, which make some manipulation of the data to ensure all contours are closed. Figure \@ref(fig:heatmap-metr) was generated using the chunk below;
