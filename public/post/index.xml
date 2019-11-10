@@ -6,10 +6,19 @@
     <description>Recent content in Posts on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 06 Nov 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 10 Nov 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Using ggplot2 and metR package to create heatmaps in R</title>
+      <link>/11/10/2019/using-ggplot2-and-metr-package-to-create-heatmaps-in-r/</link>
+      <pubDate>Sun, 10 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/11/10/2019/using-ggplot2-and-metr-package-to-create-heatmaps-in-r/</guid>
+      <description>Programming language R is a favored environment for working with data. And tidyverse has become a ubiquitous ecosystem that—Most R users use it’s tools for daily routine (Wickham and Wickham 2017). One of the package of tidyverse is the ggplot2, which use the Grammar of Graphics to make plots. You can visually explore any data in the same way as you think with ggplot2.</description>
+    </item>
     
     <item>
       <title>Looking at the Bible through wordcloud in R</title>
