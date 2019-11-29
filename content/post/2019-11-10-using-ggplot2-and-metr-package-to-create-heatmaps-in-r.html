@@ -34,7 +34,7 @@ link-citations: yes
 <script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
 
 
-<p>Programming language R is a favored environment for working with data. And tidyverse has become a ubiquitous ecosystem that—Most R users use it’s tools for daily routine <span class="citation">(Wickham and Wickham <a href="#ref-wickham2017package">2017</a>)</span>. One of the package of <em>tidyverse</em> is the <strong>ggplot2</strong>, which use the <em>Grammar of Graphics</em> to make plots. You can visually explore any data in the same way as you think with <strong>ggplot2</strong>. In this post, I will show you the advantages of using heatmap to visualize data in <strong>ggplot2</strong>. One important feature of heatmap is the intensity of color in a 2–dimension that that contains X and Y and Z variables. This is very useful when you want to show a general view of your variables.</p>
+<p>Programming language R is a favored environment for working with data. And tidyverse has become a ubiquitous ecosystem that—Most R users use it’s tools for daily routine <span class="citation">(Wickham <a href="#ref-wickham2017package">2017</a>)</span>. One of the package of <em>tidyverse</em> is the <strong>ggplot2</strong>, which use the <em>Grammar of Graphics</em> to make plots. You can visually explore any data in the same way as you think with <strong>ggplot2</strong>. In this post, I will show you the advantages of using heatmap to visualize data in <strong>ggplot2</strong>. One important feature of heatmap is the intensity of color in a 2–dimension that that contains X and Y and Z variables. This is very useful when you want to show a general view of your variables.</p>
 <div id="load-the-packages" class="section level2">
 <h2>load the packages</h2>
 <p>We first load some packages that we will depend on their function in this post. These packages includes;</p>
@@ -55,7 +55,9 @@ Figure 1: A Map showing the area extent that MODIS data where acquireed
 <div id="load-and-tidy-the-dataset" class="section level2">
 <h2>load and tidy the dataset</h2>
 <p>Once we have defined the study area and map it, we need to load the data into the session. The chunk below shows lines of code used to plot this map. We used the function `read_csv</p>
-<pre class="r"><code>files = dir(&quot;./extracted/&quot;, pattern = &quot;pp_&quot;, full.names = TRUE, include.dirs = TRUE, recursive = T)
+<pre class="r"><code>files = dir(&quot;./extracted/&quot;, pattern = &quot;pp_&quot;, full.names = TRUE, 
+            include.dirs = TRUE, recursive = T)
+
 sites = c(&quot;EEZ&quot;, &quot;Mafia&quot;, &quot;Pemba&quot;, &quot;Zanzibar&quot;)</code></pre>
 </div>
 <div id="primary-productivity" class="section level2">
@@ -145,7 +147,9 @@ Figure 5: Heatmap plotted with ggplot2 package
 </div>
 <p>We have figure <a href="#fig:heatmap">5</a> created with <code>geom_raster()</code> function and plot nice the heatmap, but looks pixilated. This function works better if you have data points with high density. But if we want to creat polygon of contour commonly refered as filled contour, then <code>geom_raster()</code> would not allow us to do that, and <strong>ggplot2</strong> lack a function that can do that job. Fortunate, Elio Campitelli <span class="citation">(<a href="#ref-metr">2019</a>)</span> developed <strong>metR</strong> package that has some nifty geom to extend the capability of <strong>ggplot2</strong>. One of these geom is the <code>geom_fill_contour()</code>, which make some manipulation of the data to ensure all contours are closed. Figure <a href="#fig:heatmap-metr">6</a> was generated using the chunk below;</p>
 <pre class="r"><code>ggplot() +
-  metR::geom_contour_fill(data = pemba.pp, aes(y = month, x = year, z = pp), bins = 12, na.fill = TRUE)+
+  metR::geom_contour_fill(data = pemba.pp, 
+                          aes(y = month, x = year, z = pp), 
+                          bins = 12, na.fill = TRUE)+
   scale_x_continuous(breaks = seq(2004,2019,2))+
   scale_y_reverse(breaks = seq(1,12,1),
                      labels = c(&quot;Jan&quot;,&quot;Feb&quot;, &quot;Mar&quot;,&quot;Apr&quot;, &quot;May&quot;,&quot;Jun&quot;, 
@@ -181,11 +185,11 @@ Figure 6: filled contour heatmap generated with metR package
 <div id="ref-ggplot">
 <p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
 </div>
+<div id="ref-wickham2017package">
+<p>———. 2017. “Package Tidyverse.” <em>Easily Install and Load the ‘Tidyverse</em>.</p>
+</div>
 <div id="ref-dplyr">
 <p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
-</div>
-<div id="ref-wickham2017package">
-<p>Wickham, Hadley, and Maintainer Hadley Wickham. 2017. “Package Tidyverse.” <em>Easily Install and Load the ‘Tidyverse</em>.</p>
 </div>
 </div>
 </div>

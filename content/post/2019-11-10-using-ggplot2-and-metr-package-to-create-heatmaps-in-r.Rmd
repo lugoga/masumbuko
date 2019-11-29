@@ -15,7 +15,7 @@ link-citations: yes
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
-Programming language R is a favored environment for working with data. And tidyverse has become a ubiquitous ecosystem that---Most R users use it's tools for daily routine [@wickham2017package]. One of the package of *tidyverse* is the **ggplot2**, which use the *Grammar of Graphics* to make plots. You can visually explore any data in the same way as you think with **ggplot2**. In this post, I will show you the advantages of using heatmap to visualize data in **ggplot2**.  One important feature of heatmap is the intensity of color in a 2--dimension that that contains X and Y and Z variables. This is very useful when you want to show a general view of your variables.
+Programming language R is a favored environment for working with data. And tidyverse has become a ubiquitous ecosystem that---Most R users use it's tools for daily routine [@wickham2017package]. One of the package of *tidyverse* is the **ggplot2**, which use the *Grammar of Graphics* to make plots. You can visually explore any data in the same way as you think with **ggplot2**. In this post, I will show you the advantages of using heatmap to visualize data in **ggplot2**. One important feature of heatmap is the intensity of color in a 2--dimension that that contains X and Y and Z variables. This is very useful when you want to show a general view of your variables.
 
 ## load the packages
 We first load some packages that we will depend on their function in this post. These packages includes;
@@ -80,7 +80,9 @@ Once we have defined the study area and map it, we need to load the data into th
 
 
 ```{r}
-files = dir("./extracted/", pattern = "pp_", full.names = TRUE, include.dirs = TRUE, recursive = T)
+files = dir("./extracted/", pattern = "pp_", full.names = TRUE, 
+            include.dirs = TRUE, recursive = T)
+
 sites = c("EEZ", "Mafia", "Pemba", "Zanzibar")
 
 ```
@@ -128,6 +130,7 @@ pemba.pp = pp %>% filter(site == "Pemba")
 Now we have tied the dataset in the right structure, we can start exploring the data. The first thing that comes to my mind is to draw a line plot that show primary production over the twelve months as shown in figure \@ref(fig:fig2)
 
 ```{r fig2,dev="svg", fig.keep='high', warning=FALSE, fig.width=7.5, fig.height=4, fig.cap="Multiple lines showing monthly primary productiviey variation"}
+
 ggplot(data = pemba.pp, 
        aes(x = month, y = pp, col = year %>% as.character()))+ 
   geom_line() +
@@ -142,6 +145,7 @@ ggplot(data = pemba.pp,
 Notice the clustering of lines! It is difficult to grasp anything in the figure \@ref(fig:fig2). Alternative, we can use the `facet_wrap` to make multiple plot for each year showing the variation of primary productivity over a period of twelve months as shown in figure \@ref(fig:fig3).
 
 ```{r fig3, fig.keep='high', fig.cap="Multiple plots of primary productivity over a year.",dev="svg"}
+
 ggplot(data = pemba.pp, 
        aes(x = month, y = pp))+ 
   geom_line() +
@@ -181,7 +185,9 @@ We have figure \@ref(fig:heatmap) created with `geom_raster()` function and plot
 
 ```{r heatmap-metr, fig.keep='high', fig.cap="filled contour heatmap generated with metR package",dev="svg"}
 ggplot() +
-  metR::geom_contour_fill(data = pemba.pp, aes(y = month, x = year, z = pp), bins = 12, na.fill = TRUE)+
+  metR::geom_contour_fill(data = pemba.pp, 
+                          aes(y = month, x = year, z = pp), 
+                          bins = 12, na.fill = TRUE)+
   scale_x_continuous(breaks = seq(2004,2019,2))+
   scale_y_reverse(breaks = seq(1,12,1),
                      labels = c("Jan","Feb", "Mar","Apr", "May","Jun", 
@@ -201,6 +207,8 @@ ggplot() +
 
 ## Conclusion
 In this post we have seen the power of choosing the right figure to present the data. We saw how to make draw change of primary productivity over a period of twelve month. The line plot  in figure \@ref(fig:fig2) and \@ref(fig:fig3) showed the same patterns of high high primary production between June and September. Similar pattern was also clear with heatmap (Figure \@ref(fig:heatmap) and \@ref(fig:heatmap-metr). However, unlike line plots in figure figure \@ref(fig:fig2) and \@ref(fig:fig3), heatmap plots in figure heatmap (Figure \@ref(fig:heatmap) and \@ref(fig:heatmap-metr) showed the high productivity month and how these months expand or shrink over the study period.
+
+
 
 
 ## References

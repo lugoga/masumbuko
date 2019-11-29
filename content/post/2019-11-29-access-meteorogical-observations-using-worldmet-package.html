@@ -1,0 +1,79 @@
+---
+title: Access meteorogical observations using worldmet package
+author: Masumbuko Semba
+date: '2019-11-29'
+slug: access-meteorogical-observations-using-worldmet-package
+categories:
+  - Met
+tags:
+  - R
+  - tidyverse
+  - Semba
+  - Masumbuko Semba
+  - Data science
+---
+
+
+
+<p><code>worldmet</code> provides an easy way to access data from the NOAA Integrated Surface Database (ISD). The ISD contains detailed surface meteorological data from around the world for over 35,000 locations. See also the map.</p>
+<p>The package outputs (typically hourly meteorological data) work very well with the openair package.</p>
+<p>Installation
+Installation of worldmet from GitHub is easy using the devtools package.</p>
+<pre class="r"><code>require(devtools)
+install_github(&#39;davidcarslaw/worldmet&#39;)</code></pre>
+<pre class="r"><code>require(worldmet)</code></pre>
+<pre><code>## Loading required package: worldmet</code></pre>
+<pre class="r"><code>require(dplyr)</code></pre>
+<pre><code>## Loading required package: dplyr</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<div id="brief-examples" class="section level2">
+<h2>Brief examples</h2>
+<p>To search for meteorological sites the user can search by the name or partial name of the site in upper or lower case. The getMeta function will return all site names that match the search string. The most important information returned is the code, which can then be supplied to the importNOAA function that downloads the data.</p>
+<p>For example, to search for site “arusha”:</p>
+<pre class="r"><code>worldmet::getMeta(site = &quot;arusha&quot;)</code></pre>
+<pre><code>## # A tibble: 1 x 13
+##   USAF  WBAN  STATION CTRY  ST    CALL  latitude longitude `ELEV(M)` BEGIN     
+##   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;date&gt;    
+## 1 6378~ 99999 ARUSHA  TZ    &lt;NA&gt;  HTAR     -3.37      36.6     1387. 1960-01-11
+## # ... with 3 more variables: END &lt;date&gt;, code &lt;chr&gt;, dist &lt;lgl&gt;</code></pre>
+<p>Often we have a latitude / longitude of interest. A search can be made based on supplied decimal coordinates and the top n nearest sites are returned. The map shows the location searched by the user (red dot) and markers showing the nearest meteorological stations. Click on a station marker to obtain the code and other basic information.</p>
+<pre class="r"><code>near.dar = worldmet::getMeta(lat = -6.8, lon = 39.3)</code></pre>
+<p>But we are only interested with meteorogilcal stations that are within the coastal areas of tanzania</p>
+<pre class="r"><code>tz.stations = near.dar %&gt;% filter(CTRY == &quot;TZ&quot;)</code></pre>
+<p>To obtain the data of the particular station, the user must supply a code id for that stations and year or years of interest. For example, to download hourly data for Mwalimu Nyerere Internationla Airport for 2018 (code 638940-99999) use the code in the chunk below:</p>
+<pre class="r"><code>dar.data = worldmet::importNOAA(code = &quot;638940-99999&quot;, year = 2018)</code></pre>
+<p>You can have a glimpse of some variables that are in the dataset using the glimpse function</p>
+<pre class="r"><code>dar.data %&gt;% glimpse()</code></pre>
+<pre><code>## Observations: 8,759
+## Variables: 23
+## $ date        &lt;dttm&gt; 2018-01-01 00:00:00, 2018-01-01 01:00:00, 2018-01-01 0...
+## $ usaf        &lt;chr&gt; &quot;638940&quot;, &quot;638940&quot;, &quot;638940&quot;, &quot;638940&quot;, &quot;638940&quot;, &quot;6389...
+## $ wban        &lt;chr&gt; &quot;99999&quot;, &quot;99999&quot;, &quot;99999&quot;, &quot;99999&quot;, &quot;99999&quot;, &quot;99999&quot;, &quot;...
+## $ code        &lt;chr&gt; &quot;638940-99999&quot;, &quot;638940-99999&quot;, &quot;638940-99999&quot;, &quot;638940...
+## $ station     &lt;chr&gt; &quot;MWALIMU JULIUS K NYERERE INTL&quot;, &quot;MWALIMU JULIUS K NYER...
+## $ lat         &lt;dbl&gt; -6.8725, -6.8780, NA, -6.8725, -6.8780, -6.8780, -6.872...
+## $ lon         &lt;dbl&gt; 39.2015, 39.2030, NA, 39.2015, 39.2030, 39.2030, 39.201...
+## $ elev        &lt;dbl&gt; 55, 55, NA, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55,...
+## $ wd          &lt;dbl&gt; 20, 10, NA, 340, 330, 10, 350, 360, 330, 330, 10, 30, 2...
+## $ ws          &lt;dbl&gt; 4.6, 5.1, NA, 3.6, 2.6, 6.2, 4.6, 6.2, 5.1, 4.6, 5.7, 6...
+## $ ceil_hgt    &lt;dbl&gt; 22000.0, 457.0, NA, 11228.5, NA, NA, 514.0, 518.0, 549....
+## $ visibility  &lt;dbl&gt; 30000, NA, NA, 30000, NA, NA, 30000, NA, NA, 30000, NA,...
+## $ air_temp    &lt;dbl&gt; 26.90, 27.00, NA, 26.75, 27.00, 28.00, 28.75, 29.00, 30...
+## $ dew_point   &lt;dbl&gt; 23.90, 24.00, NA, 24.10, 24.00, 24.00, 24.75, 25.00, 25...
+## $ atmos_pres  &lt;dbl&gt; 1009.1, NA, NA, 1009.5, NA, NA, 1011.6, NA, NA, 1010.3,...
+## $ RH          &lt;dbl&gt; 83.68019, 83.69015, NA, 85.46089, 83.69015, 78.92251, 7...
+## $ cl_1        &lt;dbl&gt; 3.5, 2.0, NA, 1.5, 4.0, 2.0, 4.0, 4.0, 4.0, 6.5, 4.0, 4...
+## $ cl_1_height &lt;dbl&gt; 453.5, 366.0, NA, 363.0, 427.0, 488.0, 484.0, 488.0, 51...
+## $ cl_2        &lt;dbl&gt; NA, 4.0, NA, 3.5, NA, NA, 6.5, 7.0, 7.0, NA, NA, NA, NA...
+## $ cl_2_height &lt;dbl&gt; NA, 457.0, NA, 453.5, NA, NA, 514.0, 518.0, 549.0, NA, ...
+## $ cl_3        &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
+## $ cl_3_height &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
+## $ cl          &lt;dbl&gt; 3.5, 4.0, NA, 3.5, 4.0, 2.0, 6.5, 7.0, 7.0, 6.5, 4.0, 4...</code></pre>
+</div>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Data science on Masumbuko Semba&#39;s Blog</title>
-    <link>/tags/data-science/</link>
-    <description>Recent content in Data science on Masumbuko Semba&#39;s Blog</description>
+    <title>Met on Masumbuko Semba&#39;s Blog</title>
+    <link>/categories/met/</link>
+    <description>Recent content in Met on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Fri, 29 Nov 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/data-science/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/met/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -21,16 +21,6 @@
 The package outputs (typically hourly meteorological data) work very well with the openair package.
 InstallationInstallation of worldmet from GitHub is easy using the devtools package.
 require(devtools)install_github(&amp;#39;davidcarslaw/worldmet&amp;#39;)require(worldmet)## Loading required package: worldmetrequire(dplyr)## Loading required package: dplyr## ## Attaching package: &amp;#39;dplyr&amp;#39;## The following objects are masked from &amp;#39;package:stats&amp;#39;:## ## filter, lag## The following objects are masked from &amp;#39;package:base&amp;#39;:## ## intersect, setdiff, setequal, unionBrief examplesTo search for meteorological sites the user can search by the name or partial name of the site in upper or lower case.</description>
-    </item>
-    
-    <item>
-      <title>Wordclouds plotting with ggwordcloud package in R</title>
-      <link>/11/05/2019/wordclouds-plotting-with-ggwordcloud-package-in-r/</link>
-      <pubDate>Tue, 05 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/11/05/2019/wordclouds-plotting-with-ggwordcloud-package-in-r/</guid>
-      <description>In the previous post, we saw how to make wordcloud graphic using the wordcloud package. In this post we extend the ability of R to make wordcloud graphic, but rather than using the base R function for plotting,I will show how to use ggplot2 framework.
-Le Pennec and Slowikowski (2019) developed a gwordcloud package, which extend the capability of ggplot2 package (Wickham 2016) of making cloud text. With the geom_text_wordcloud() function, gwordcloud made making wordcloud plot easy with ggplot2 package.</description>
     </item>
     
   </channel>

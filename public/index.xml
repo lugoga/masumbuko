@@ -6,10 +6,22 @@
     <description>Recent content on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 10 Nov 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 29 Nov 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Access meteorogical observations using worldmet package</title>
+      <link>/11/29/2019/access-meteorogical-observations-using-worldmet-package/</link>
+      <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/11/29/2019/access-meteorogical-observations-using-worldmet-package/</guid>
+      <description>worldmet provides an easy way to access data from the NOAA Integrated Surface Database (ISD). The ISD contains detailed surface meteorological data from around the world for over 35,000 locations. See also the map.
+The package outputs (typically hourly meteorological data) work very well with the openair package.
+InstallationInstallation of worldmet from GitHub is easy using the devtools package.
+require(devtools)install_github(&amp;#39;davidcarslaw/worldmet&amp;#39;)require(worldmet)## Loading required package: worldmetrequire(dplyr)## Loading required package: dplyr## ## Attaching package: &amp;#39;dplyr&amp;#39;## The following objects are masked from &amp;#39;package:stats&amp;#39;:## ## filter, lag## The following objects are masked from &amp;#39;package:base&amp;#39;:## ## intersect, setdiff, setequal, unionBrief examplesTo search for meteorological sites the user can search by the name or partial name of the site in upper or lower case.</description>
+    </item>
     
     <item>
       <title>Using ggplot2 and metR package to create heatmaps in R</title>
@@ -17,7 +29,7 @@
       <pubDate>Sun, 10 Nov 2019 00:00:00 +0000</pubDate>
       
       <guid>/11/10/2019/using-ggplot2-and-metr-package-to-create-heatmaps-in-r/</guid>
-      <description>Programming language R is a favored environment for working with data. And tidyverse has become a ubiquitous ecosystem that—Most R users use it’s tools for daily routine (Wickham and Wickham 2017). One of the package of tidyverse is the ggplot2, which use the Grammar of Graphics to make plots. You can visually explore any data in the same way as you think with ggplot2.</description>
+      <description>Programming language R is a favored environment for working with data. And tidyverse has become a ubiquitous ecosystem that—Most R users use it’s tools for daily routine (Wickham 2017). One of the package of tidyverse is the ggplot2, which use the Grammar of Graphics to make plots. You can visually explore any data in the same way as you think with ggplot2.</description>
     </item>
     
     <item>
