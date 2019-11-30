@@ -17,10 +17,7 @@
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
       <guid>/11/29/2019/access-meteorogical-observations-using-worldmet-package/</guid>
-      <description>worldmet provides an easy way to access data from the NOAA Integrated Surface Database (ISD). The ISD contains detailed surface meteorological data from around the world for over 35,000 locations. See also the map.
-The package outputs (typically hourly meteorological data) work very well with the openair package.
-InstallationInstallation of worldmet from GitHub is easy using the devtools package.
-require(devtools)install_github(&amp;#39;davidcarslaw/worldmet&amp;#39;)require(worldmet)## Loading required package: worldmetrequire(dplyr)## Loading required package: dplyr## ## Attaching package: &amp;#39;dplyr&amp;#39;## The following objects are masked from &amp;#39;package:stats&amp;#39;:## ## filter, lag## The following objects are masked from &amp;#39;package:base&amp;#39;:## ## intersect, setdiff, setequal, unionBrief examplesTo search for meteorological sites the user can search by the name or partial name of the site in upper or lower case.</description>
+      <description>David Carslaw (2019) developed R package worldmet, which provides an easy way to access world meteorological data from from the Integrated Surface Database of National Oceanic and Atmospheric Administration (NOAA). The Integrated Surface Database (ISD) consists of global hourly and synoptic observations compiled from numerous sources into a single common ASCII format and common data model.</description>
     </item>
     
   </channel>

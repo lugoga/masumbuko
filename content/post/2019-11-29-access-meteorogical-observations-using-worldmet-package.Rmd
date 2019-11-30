@@ -11,57 +11,89 @@ tags:
   - Semba
   - Masumbuko Semba
   - Data science
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
 
-`worldmet` provides an easy way to access data from the NOAA Integrated Surface Database (ISD). The ISD contains detailed surface meteorological data from around the world for over 35,000 locations. See also the map.
 
-The package outputs (typically hourly meteorological data) work very well with the openair package.
+David Carslaw -@david developed R package **worldmet**,  which provides an easy way to access world meteorological data from from the [Integrated Surface Database](https://www.ncdc.noaa.gov/isd) of National Oceanic and Atmospheric Administration (NOAA). The Integrated Surface Database (ISD) consists of global hourly and synoptic observations compiled from numerous sources into a single common ASCII format and common data model. 
 
-Installation
-Installation of worldmet from GitHub is easy using the devtools package.
+The database includes over 35,000 stations from around the world, with some stations with data from 1901. We know that ISD is a global database, but the spatial coverage of the stations varies from region to region. The good geographical coverage is evident in North America, Europe, Australia, and parts of Asia. Coverage in the Northern Hemisphere is better than the Southern Hemisphere, and the overall period of record is currently 1901 to present. Some stations have over 50 years of continuous reporting during the latter half of that time period. However, many stations have "breaks" in the period of record (e.g., 40 years of data may be spread over a 70-year period).
+
+##Installation
+To use the package we first need to install it in the local machine. Installation of worldmet from GitHub is easy using the `install_github()` from **devtools** package [@devtools]. The chunk below highlight codes for installation of **worldmet** package.
 
 ```{r, eval=FALSE}
 require(devtools)
 install_github('davidcarslaw/worldmet')
 ```
 
+For us to use the functions in **worldmet**, we need to load it into the workspace. We also load the **tidyverse** package as the chunk below shows. 
 ```{r}
 require(worldmet)
 require(dplyr)
 ```
 
 
-## Brief examples
-To search for meteorological sites the user can search by the name or partial name of the site in upper or lower case. The getMeta function will return all site names that match the search string. The most important information returned is the code, which can then be supplied to the importNOAA function that downloads the data.
-
-For example, to search for site "arusha":
+Once we have installed and loaded the package into the session, we can now use the functions of the package. To search for meteorological sites, one must search by the name or partial name of the site in upper or lower case. The `getMeta` function will return all site names that match the search string. The most important information returned is the code, which can then be supplied to the `importNOAA` function that downloads the data. For example, to search for site "Arusha":
 
 ```{r}
 worldmet::getMeta(site = "arusha")
 ```
 
 
-Often we have a latitude / longitude of interest. A search can be made based on supplied decimal coordinates and the top n nearest sites are returned. The map shows the location searched by the user (red dot) and markers showing the nearest meteorological stations. Click on a station marker to obtain the code and other basic information.
+Often we have a geographical positions---latitude longitude of interest. With coordinate formatted in decimal degree, we can search for stations that are near to the location. For example running this code: `worldmet::getMeta(lat = -6.8, lon = 39.3)` will display a map, which shows the location searched by the user (red dot) and markers showing the nearest meteorological stations. Since the map is an interactive, you can simply click on a station marker to obtain the attribute information of the station.
+
+```{r, echo=FALSE }
+worldmet::getMeta(lat = -6.8, lon = 39.3)
+```
+
+## Meteorological stations along coastal areas
+The Meteorological stations in Tanzania are monitored by the Tanzania Meteorological Administration (TMA) and has several stations across the country. However, our interest is to get  a list of the available stations within the coastal areas of Tanzania. 
 
 ```{r}
 near.dar = worldmet::getMeta(lat = -6.8, lon = 39.3)
 ```
 
-But we are only interested with meteorogilcal stations that are within the coastal areas of tanzania
-```{r}
-tz.stations = near.dar %>% filter(CTRY == "TZ")
+```{r, echo=FALSE}
+load("dar_met.RData")
+```
+
+But we are only interested with meteorological stations that are within the coastal areas of Tanzania
+```{r, eval=FALSE}
+tz.coastal.stations = near.dar %>% filter(CTRY == "TZ")
 ```
 
 To obtain the data of the particular station, the user must supply a code id for that stations  and year or years of interest. For example, to download hourly data for Mwalimu Nyerere Internationla Airport for 2018 (code 638940-99999) use the code in the chunk below:
 
-```{r}
+```{r, eval=FALSE}
 dar.data = worldmet::importNOAA(code = "638940-99999", year = 2018)
 ```
 
 You can have a glimpse of some variables that are in the dataset using the glimpse function
 
-```{r}
+```{r, eval=FALSE}
 dar.data %>% glimpse()
 ```
+
+If you are interested with rainfall data, they you must parse an argument `precip = TRUE` in the `worldmet::importNOAA()` function. This return the precipitation data along with the other variables. The chunk below highlight the code for obtaining both air temperature and precipitation from a site in Dar es Salaam. The sample of the data is shown in table \@ref(tab:tab1)
+
+```{r, eval=FALSE}
+dar.temp.rain = worldmet::importNOAA(code = "638940-99999", year = 2015:2018, precip = TRUE, hourly = TRUE)
+```
+
+```{r tab1, echo=FALSE}
+dar.temp.rain %>%
+  data.table::data.table() %>% 
+  select(Date = date,air_temp, precip_6, precip_12, precip)%>%  
+  na.omit() %>% 
+  DT::datatable(rownames = FALSE, caption = "Sample of Hourly temperature and precipitation observation at Mwalimu Julius Nyerere International Aiport", filter = "bottom", autoHideNavigation = FALSE, colnames = c("Air temperature" = 2, "6hour rain" = 3, "12hour rain" = 4, "24hour rain" = 5), extensions = 'Buttons', options = list(dom = 'Bfrtip', buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
+```
+
+## Cited references
 
