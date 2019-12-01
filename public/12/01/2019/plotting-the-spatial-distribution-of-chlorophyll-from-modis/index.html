@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.55.2" />
+
+
+<title>plotting the Spatial distribution of Chlorophyll in Mafia Channel from MODIS - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="plotting the Spatial distribution of Chlorophyll in Mafia Channel from MODIS - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">8 min read</span>
+    
+
+    <h1 class="article-title">plotting the Spatial distribution of Chlorophyll in Mafia Channel from MODIS</h1>
+
+    
+    <span class="article-date">2019/12/01</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p>Making graphics and maps is one of the important skills for oceanographers and marine scientists. Maps are often used by scientists to locate areas of interest—where the study being presented was conducted. Thus ability to make maps that convey the message in a simple manner form an important first impression for readers. Despite this, software tools for producing high-quality maps are non-trivial to use.</p>
+<p>In this post I illustrate how some key lines of code for access, download and map the spatial distribution of chlorophyll-a concentration within the Rufiji-Mafia Channel using a combination of packages in the R environment. You load the packages as the chunk below shows, if are not installed in your machine, you can simply install them from CRAN</p>
+<pre class="r"><code>the.packages = c(&quot;oceanmap&quot;, &quot;raster&quot;, 
+                 &quot;ncdf4&quot;, &quot;tidyverse&quot;)
+
+install.packages(the.packages)</code></pre>
+<p>Then you load them in your working session</p>
+<pre class="r"><code>require(oceanmap)
+require(raster)
+require(ncdf4)
+require(tidyverse)</code></pre>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>I used the chlorophyll-<em>a</em> dataset from MODIS. You can easily extract and download level 3 chlorophyll and sea surface temperature data of the area of interest from <a href="https://oceancolor.gsfc.nasa.gov/l3/">NASA ocean color</a>. Once you have downloaded the dataset and saved them in working directory of your local machine. The data is in the netCDF format as an array of five variables. But we are only interested with three variables describe below;</p>
+<ul>
+<li><strong>longitude</strong>; degree east also called eastings</li>
+<li><strong>latitude</strong>; degree north also called northings</li>
+<li><strong>chl_oc3</strong>; Chlorophyll-a concentration in sea water as measured by the MODIS sensor mapped in grid of longitude and latitude. The cell without chl-a values are assigned a missing value of -32767 and</li>
+</ul>
+<p>You simply read this files with the <code>nc_open()</code> function from the <strong>ncdf4</strong> package <span class="citation">(Pierce <a href="#ref-ncdf4">2017</a>)</span></p>
+<pre class="r"><code>chl = ncdf4::nc_open(&quot;./Chl-a/M2012092-2012121.vw.all_products.MYO.median.01apr12-30apr12.1368530290.data.nc&quot;)</code></pre>
+<p>Scientist in R community are familiar with <strong>ncdf4</strong> package and often use its function to import and extract variables from netCDF files <span class="citation">(Pierce <a href="#ref-ncdf4">2017</a>)</span>. For instance many would read the variables embedded in the file using the <code>ncvar_get()</code> function. However, in this post I switched to <strong>oceanmap</strong> package because it offers some simple but powerful functions to work high dimension data <span class="citation">(Bauer <a href="#ref-oceanmap">2019</a>)</span>. For example, I used <code>nc2raster()</code> function to convert the <code>ncdf4-object</code> to a Raster object, setting the time variable as layer name. This chunk below shows;</p>
+<pre class="r"><code>## for display the code only, but never run
+chl.dat.raster = chl %&gt;%
+    oceanmap::nc2raster(varname = &quot;chl_oc3&quot;,
+                       t = 1, 
+                       lonname=&quot;longitude&quot;, 
+                       latname=&quot;latitude&quot;, 
+                       date=T, layer = 1)</code></pre>
+<p>Once we have the raster object, we can check its geographical extent with <code>chl.dat.raster %&gt;% raster::extent()</code> command;</p>
+<pre class="r"><code>chl.dat.raster %&gt;% raster::extent()</code></pre>
+<pre><code>class      : Extent 
+xmin       : 38 
+xmax       : 42.99595 
+ymin       : -12.9955 
+ymax       : -2.999101 </code></pre>
+<p>We notice that the raster object lies in longitude between 38°E38 and <code>rmetR::LonLabel(43)</code> and latitude 12°S and 3°S. This extent cover the entire coastal area of Tanzania. Because our interest is in Rufiji–Mafia Channel, we need to chop only the cell that fall within this area. I used the <code>extent()</code> function from raster to chop only the area. In order to do this, I first create the extent layer using the maximum and minimum values of longitude and latitude and assign it as <code>rufiji.extent</code>. I used used this extent layer to crop the large raster layer and assign it a name as <code>chl.mafia</code></p>
+<pre class="r"><code>## create chopping object
+rufiji.extent = raster::extent(39.3, 40.0, -8.0,-7.5)
+## chop the raster object
+chl.mafia = raster::crop(x = chl.dat.raster, y = rufiji.extent) </code></pre>
+<p>We can have a glimpse of the cropped raster object of Rufiji–Mafia Channel</p>
+<pre class="r"><code>chl.mafia</code></pre>
+<pre><code>class      : RasterLayer 
+dimensions : 112, 156, 17472  (nrow, ncol, ncell)
+resolution : 0.004492763, 0.004494785  (x, y)
+extent     : 39.29841, 39.99928, -8.001797, -7.498381  (xmin, xmax, ymin, ymax)
+crs        : +proj=longlat +ellps=WGS84 
+source     : memory
+names      : X2012043010 
+values     : 0.07688248, 30.65916  (min, max)</code></pre>
+<p>We notice that the value of chlorophyll-a range from 0.07688248 to 30.65916 mgm<sup>-3</sup>. The range is quite big and the maximum value is usual higher in poor coastal water like Rufiji. Based on local knowledge, this channel is one of the most productive marine habitats in the Western Indian Ocean Region, however, its values hardly exceed 3 mgm<sup>-3</sup>. Therefore, we need to remove extremely higher values. I used the <code>clamp()</code> function from <strong>raster</strong> package <span class="citation">(Hijmans <a href="#ref-raster">2017</a>)</span> to assign values to a minimum and maximum value. That is, all values below the lower clamp value and above the upper clamp value become NA (or the lower/upper value if useValue=TRUE)</p>
+<pre class="r"><code>##
+#chl.mafia[chl.mafia &gt; 3.1] = NaN
+
+chl.mafia = chl.mafia %&gt;% 
+  raster::clamp(upper = 3.1, # lower clamp value
+                lower = 0.1,  # upper clamp value
+                usevalues = FALSE # force value to NA
+                )
+chl.mafia</code></pre>
+<pre><code>class      : RasterLayer 
+dimensions : 112, 156, 17472  (nrow, ncol, ncell)
+resolution : 0.004492763, 0.004494785  (x, y)
+extent     : 39.29841, 39.99928, -8.001797, -7.498381  (xmin, xmax, ymin, ymax)
+crs        : +proj=longlat +ellps=WGS84 
+source     : memory
+names      : X2012043010 
+values     : 0.1, 3.1  (min, max)</code></pre>
+</div>
+<div id="mapping-chl-a" class="section level2">
+<h2>Mapping chl-a</h2>
+<p>So far, you’ve learned the tools to get your data into R , transform and format in a convenient structure for analysis. However, visualize this data can help us better understand the spatial distribution of chl-a in this channel. R has several tools that can turn data into plots. But my focus in this post is to map chl-a using <strong>oceanmap</strong> <span class="citation">(Bauer <a href="#ref-oceanmap">2019</a>)</span> package and <strong>ggplot2</strong> package <span class="citation">(Wickham <a href="#ref-ggplot">2016</a>)</span>. <strong>oceanmap</strong> package has <code>v()</code> function that is used to plot 2D oceanographic data. For this case we use this function to map the spatial distribution of chlorophyll-a in the Rufiji–Mafia channel (Figure <a href="#fig:fig1"><strong>??</strong></a>).</p>
+<pre class="r"><code>oceanmap::v(obj = chl.mafia, cbpos = &quot;b&quot;, pal = &quot;jet&quot;,
+            cb.xlab = expression(&quot;Chlorophyll-a (mg m&quot;^-3*&quot;)&quot;), bwd = 0.01, grid = F, 
+            # Save = T, plotname = &quot;rufiji_mafia_chl&quot;, fileformat = &quot;png&quot;, width = 10, height = 5, 
+            replace.na = F, axeslabels = FALSE)</code></pre>
+<p>You can also use <strong>ggplot2</strong> package, that use the grammar of graphics, to make lot similar to those made with <strong>oceanmap</strong> package. For instance, the chunk below shows codes from <strong>ggplot</strong> used to generate figure <a href="#fig:fig2">1</a>.</p>
+<pre class="r"><code>chl.mafia.df = chl.mafia %&gt;% 
+  raster::as.data.frame(xy = TRUE) %&gt;% rename(lon = x, lat = y, chl = 3)
+
+ggplot() + 
+  geom_raster(data = chl.mafia.df, aes(x = lon,  y = lat, fill = chl))+
+  geom_sf(data = bongo, fill = &quot;grey80&quot;, col = &quot;black&quot;)+
+  coord_sf(xlim = c(39.29841, 39.99928), c(-8.001797, -7.498381))+
+  scale_fill_gradientn(colours = oce::oce.colorsJet(120), na.value = &quot;white&quot;, breaks = seq(0,3.2,0.5))+
+  metR::scale_x_longitude(ticks = .2) + 
+  metR::scale_y_latitude(breaks = c(-7.92, -7.80, -7.68, -7.56))+
+  guides(fill = guide_colorbar(title = expression(Chlorophyll-a~(mg~m^{-3})),
+                               title.position = &quot;right&quot;,
+                               title.theme = element_text(angle = 90), 
+                               barwidth = unit(.5, &quot;cm&quot;),barheight = unit(7.5, &quot;cm&quot;),title.hjust = .5))+
+  theme_bw()</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2019-12-01-plotting-the-spatial-distribution-of-chlorophyll-from-modis_files/figure-html/fig2-1.png" alt="The Spatial distribution of chl-a in the Rufiji-Mafia channel mapped with the ggplot2 package" width="672" />
+<p class="caption">
+Figure 1: The Spatial distribution of chl-a in the Rufiji-Mafia channel mapped with the ggplot2 package
+</p>
+</div>
+<p>There are big difference of the chl-values processed with the <code>nc2raster()</code> function from <strong>oceanmap</strong> package (figure <a href="#fig:fig2">1</a>) compared to those manipulated with <strong>ncdf4</strong> package (figure <a href="#fig:fig3">2</a>) and <strong>raster</strong> package (Figure <a href="#fig:fig4">3</a>). I will explain this differences in the comming posts</p>
+</div>
+<div id="ncdf4" class="section level2">
+<h2>ncdf4</h2>
+<pre class="r"><code>## read and open the nc file
+chl = ncdf4::nc_open(&quot;e:/GIS/Joeline satellite data/Chl-a/M2012092-2012121.vw.all_products.MYO.median.01apr12-30apr12.1368530290.data.nc&quot;)
+
+## extract variables
+chl.a = ncdf4::ncvar_get(nc = chl, varid = &quot;chl_oc3&quot;)
+lon = ncdf4::ncvar_get(nc = chl, varid = &quot;longitude&quot;)
+lat = ncdf4::ncvar_get(nc = chl, varid = &quot;latitude&quot;)
+
+## convert the matrix and vector to data frame with expand grid
+chl.a.tb = expand.grid(lon,lat) %&gt;% 
+  bind_cols(chl.a %&gt;% expand.grid()) %&gt;% 
+  as_tibble() %&gt;%
+  rename(lon = 1, lat = 2, chl = 3) %&gt;%
+  filter(lon &gt;= 39.0 &amp; lon &lt;= 40.0 &amp; lat &gt;= -8.0 &amp; lat &lt;= -7.5 &amp; chl &lt; 4.1)
+
+## map the distribution
+ggplot() + 
+  geom_raster(data = chl.a.tb, aes(x = lon,  y = lat, fill = chl))+
+  geom_sf(data = bongo, fill = &quot;grey80&quot;, col = &quot;black&quot;)+
+  coord_sf(xlim = c(39.29841, 39.99928), c(-8.001797, -7.498381))+
+  scale_fill_gradientn(colours = oce::oce.colorsJet(120), na.value = &quot;white&quot;, breaks = seq(0,4.2,0.5))+
+  metR::scale_x_longitude(ticks = .2) + 
+  metR::scale_y_latitude(breaks = c(-7.92, -7.80, -7.68, -7.56))+
+  guides(fill = guide_colorbar(title = expression(Chlorophyll-a~(mg~m^{-3})),
+                               title.position = &quot;right&quot;,
+                               title.theme = element_text(angle = 90), 
+                               barwidth = unit(.5, &quot;cm&quot;),barheight = unit(7.5, &quot;cm&quot;),title.hjust = .5))+
+  theme_bw()</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2019-12-01-plotting-the-spatial-distribution-of-chlorophyll-from-modis_files/figure-html/fig3-1.png" alt="The Spatial distribution of chl-a in the Rufiji-Mafia channel. The chl-a value were procesed using algorithm in ncdf4 package" width="672" />
+<p class="caption">
+Figure 2: The Spatial distribution of chl-a in the Rufiji-Mafia channel. The chl-a value were procesed using algorithm in ncdf4 package
+</p>
+</div>
+</div>
+<div id="raster-package" class="section level2">
+<h2>raster package</h2>
+<pre class="r"><code>## read as raster object
+chl.a = raster::raster(&quot;e:/GIS/Joeline satellite data/Chl-a/M2012092-2012121.vw.all_products.MYO.median.01apr12-30apr12.1368530290.data.nc&quot;, 
+                       varname = &quot;chl_oc3&quot;)
+
+## create chopping object
+rufiji.extent = raster::extent(39.0, 40.0, -8.0,-7.5)
+## chop the raster object
+chl.a = raster::crop(x = chl.a, y = rufiji.extent) 
+
+
+#assign all cells with values greater than 4.1 to NA
+chl.a = chl.a %&gt;% 
+  raster::clamp(upper = 4.1, # lower clamp value
+                lower = 0.1,  # upper clamp value
+                usevalues = FALSE # force value to NA
+                )
+
+## convert from raster object to data frame and then tibble
+chl.a.tb = chl.a %&gt;% 
+  raster::as.data.frame(xy = TRUE) %&gt;% 
+  as_tibble() %&gt;%
+  rename(lon = 1, lat = 2, chl = 3) 
+
+## map the distribution of chl
+ggplot() + 
+  geom_raster(data = chl.a.tb, aes(x = lon,  y = lat, fill = chl))+
+  geom_sf(data = bongo, fill = &quot;grey80&quot;, col = &quot;black&quot;)+
+  coord_sf(xlim = c(39.29841, 39.99928), c(-8.001797, -7.498381))+
+  scale_fill_gradientn(colours = oce::oce.colorsJet(120), na.value = &quot;white&quot;, breaks = seq(0,4.2,0.5))+
+  metR::scale_x_longitude(ticks = .2) + 
+  metR::scale_y_latitude(breaks = c(-7.92, -7.80, -7.68, -7.56))+
+  guides(fill = guide_colorbar(title = expression(Chlorophyll-a~(mg~m^{-3})),
+                               title.position = &quot;right&quot;,
+                               title.theme = element_text(angle = 90), 
+                               barwidth = unit(.5, &quot;cm&quot;),barheight = unit(7.5, &quot;cm&quot;),title.hjust = .5))+
+  theme_bw()</code></pre>
+<div class="figure"><span id="fig:fig4"></span>
+<img src="/post/2019-12-01-plotting-the-spatial-distribution-of-chlorophyll-from-modis_files/figure-html/fig4-1.png" alt="The Spatial distribution of chl-a in the Rufiji-Mafia channel. The chl-a value were procesed using algorithm in raster package" width="672" />
+<p class="caption">
+Figure 3: The Spatial distribution of chl-a in the Rufiji-Mafia channel. The chl-a value were procesed using algorithm in raster package
+</p>
+</div>
+</div>
+<div id="cited-references" class="section level2 unnumbered">
+<h2>Cited references</h2>
+<div id="refs" class="references">
+<div id="ref-oceanmap">
+<p>Bauer, Robert K. 2019. <em>Oceanmap: A Plotting Toolbox for 2D Oceanographic Data</em>. <a href="https://CRAN.R-project.org/package=oceanmap">https://CRAN.R-project.org/package=oceanmap</a>.</p>
+</div>
+<div id="ref-raster">
+<p>Hijmans, Robert J. 2017. <em>Raster: Geographic Data Analysis and Modeling</em>. <a href="https://CRAN.R-project.org/package=raster">https://CRAN.R-project.org/package=raster</a>.</p>
+</div>
+<div id="ref-ncdf4">
+<p>Pierce, David. 2017. <em>Ncdf4: Interface to Unidata netCDF (Version 4 or Earlier) Format Data Files</em>. <a href="https://CRAN.R-project.org/package=ncdf4">https://CRAN.R-project.org/package=ncdf4</a>.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

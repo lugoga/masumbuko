@@ -6,10 +6,20 @@
     <description>Recent content in chlorophyll on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 31 May 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 01 Dec 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/chlorophyll/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>plotting the Spatial distribution of Chlorophyll in Mafia Channel from MODIS</title>
+      <link>/12/01/2019/plotting-the-spatial-distribution-of-chlorophyll-from-modis/</link>
+      <pubDate>Sun, 01 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/12/01/2019/plotting-the-spatial-distribution-of-chlorophyll-from-modis/</guid>
+      <description>Making graphics and maps is one of the important skills for oceanographers and marine scientists. Maps are often used by scientists to locate areas of interest—where the study being presented was conducted. Thus ability to make maps that convey the message in a simple manner form an important first impression for readers. Despite this, software tools for producing high-quality maps are non-trivial to use.
+In this post I illustrate how some key lines of code for access, download and map the spatial distribution of chlorophyll-a concentration within the Rufiji-Mafia Channel using a combination of packages in the R environment.</description>
+    </item>
     
     <item>
       <title>Forecasting chlorophyll value in the Pemba channel with the prophet package in R</title>

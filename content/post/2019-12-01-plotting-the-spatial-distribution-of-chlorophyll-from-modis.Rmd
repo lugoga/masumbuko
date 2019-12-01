@@ -1,0 +1,251 @@
+---
+title: plotting the Spatial distribution of Chlorophyll in Mafia Channel from MODIS
+author: Masumbuko Semba
+date: '2019-12-01'
+slug: plotting-the-spatial-distribution-of-chlorophyll-from-modis
+categories:
+  - Information Technology
+  - MODIS
+  - Oceanography
+  - satellite
+tags:
+  - MODIS
+  - chlorophyll
+  - blogdown
+  - Masumbuko Semba
+  - Tanzania
+  - Rufiji River
+  - Mafia Channel
+  - Pemba Channel
+  - Bathymetry
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
+```
+
+Making graphics and maps is one of the important skills for oceanographers and marine scientists. Maps are often used by scientists to locate areas of interest---where the study being presented was conducted. Thus ability to make maps that convey the message in a simple manner form an important first impression for readers. Despite this, software tools for producing high-quality maps are non-trivial to use.
+
+In this post I illustrate how some key lines of code for access, download and map the spatial distribution of chlorophyll-a concentration within the Rufiji-Mafia Channel using a combination of packages in the R environment. You load the packages as the chunk below shows, if are not installed in your machine, you can simply install them from CRAN
+
+```{r, eval=FALSE}
+
+the.packages = c("oceanmap", "raster", 
+                 "ncdf4", "tidyverse")
+
+install.packages(the.packages)
+```
+
+
+Then you load them in your working session
+```{r}
+require(oceanmap)
+require(raster)
+require(ncdf4)
+require(tidyverse)
+```
+
+
+## Data
+I used the chlorophyll-*a* dataset from MODIS. You can easily extract and download level 3 chlorophyll and sea surface temperature data of the area of interest  from [NASA ocean color](https://oceancolor.gsfc.nasa.gov/l3/). Once you have downloaded the dataset and saved them in working directory of your local machine. The data is in the netCDF format as an array of five variables. But we are only interested with three variables describe below;
+
++ **longitude**; degree east also called eastings
++ **latitude**; degree north also called northings
++ **chl_oc3**; Chlorophyll-a concentration in sea water as measured by the MODIS sensor mapped in grid of longitude and latitude. The cell without chl-a values are assigned a missing value of -32767 and 
+
+You simply read this files with the `nc_open()` function from the **ncdf4** package [@ncdf4]
+
+
+```{r, eval=FALSE}
+chl = ncdf4::nc_open("./Chl-a/M2012092-2012121.vw.all_products.MYO.median.01apr12-30apr12.1368530290.data.nc")
+
+```
+
+
+```{r, echo=FALSE}
+## this is the one that run but does not display, the above never run but illustrate 
+chl = ncdf4::nc_open("e:/GIS/Joeline satellite data/Chl-a/M2012092-2012121.vw.all_products.MYO.median.01apr12-30apr12.1368530290.data.nc")
+
+```
+
+Scientist in R community are familiar with  **ncdf4** package and often use its function to import and extract variables from netCDF files [@ncdf4]. For instance many would read the variables embedded in the file using the `ncvar_get()` function. However, in this post I switched to **oceanmap** package because it offers some simple but powerful functions to work high dimension data [@oceanmap]. For example, I used `nc2raster()` function to convert the `ncdf4-object` to a Raster object, setting the time variable as layer name. This chunk below shows;
+
+```{r, eval=FALSE}
+## for display the code only, but never run
+chl.dat.raster = chl %>%
+    oceanmap::nc2raster(varname = "chl_oc3",
+                       t = 1, 
+                       lonname="longitude", 
+                       latname="latitude", 
+                       date=T, layer = 1)
+
+
+```
+
+
+```{r, include=FALSE}
+
+## for procesing but never show the result and the code
+chl.dat.raster = chl %>%
+    oceanmap::nc2raster(varname = "chl_oc3",
+                       t = 1, 
+                       lonname="longitude", 
+                       latname="latitude", 
+                       date=T, layer = 1)
+
+
+```
+Once we have the raster object, we can check its geographical extent with `chl.dat.raster %>% raster::extent()` command;
+```{r}
+chl.dat.raster %>% raster::extent()
+```
+
+We notice that the raster object lies in longitude between `r metR::LonLabel(38)`38 and `rmetR::LonLabel(43)`  and latitude  `r metR::LatLabel(-12)` and `r metR::LatLabel(-3)`. This extent cover the entire coastal area of Tanzania. Because our interest is in Rufiji--Mafia Channel, we need to chop only the cell that fall within this area.  I used the `extent()` function from raster to chop only the area. In order to do this, I first create the extent layer using the maximum and minimum values of longitude and latitude and assign it as `rufiji.extent`. I used used this extent layer to crop the large raster layer and assign it a name as `chl.mafia` 
+
+```{r}
+## create chopping object
+rufiji.extent = raster::extent(39.3, 40.0, -8.0,-7.5)
+## chop the raster object
+chl.mafia = raster::crop(x = chl.dat.raster, y = rufiji.extent) 
+
+```
+
+We can have a glimpse of the cropped raster object of Rufiji--Mafia Channel
+```{r}
+chl.mafia
+```
+
+We notice that the value of chlorophyll-a range from 0.07688248 to 30.65916 mgm^-3^. The range is quite big and the maximum value is usual higher in poor coastal water like Rufiji. Based on local knowledge, this channel is one of the most productive marine habitats in the Western Indian Ocean Region, however, its values hardly exceed 3 mgm^-3^. Therefore, we need to remove extremely higher values. I used the `clamp()` function from **raster** package [@raster] to assign values to a minimum and maximum value. That is, all values below the lower clamp value and above the upper clamp value become NA (or the lower/upper value if useValue=TRUE)
+
+
+```{r}
+##
+#chl.mafia[chl.mafia > 3.1] = NaN
+
+chl.mafia = chl.mafia %>% 
+  raster::clamp(upper = 3.1, # lower clamp value
+                lower = 0.1,  # upper clamp value
+                usevalues = FALSE # force value to NA
+                )
+chl.mafia
+```
+
+## Mapping chl-a 
+So far, you’ve learned the tools to get your data into R , transform and format in a convenient structure for analysis. However, visualize this data can help us better understand the spatial distribution of chl-a in this channel. R has several tools that can turn data into plots. But my focus in this post is to map chl-a using **oceanmap** [@oceanmap] package and **ggplot2** package [@ggplot]. **oceanmap** package has `v()` function that is used to plot 2D oceanographic data. For this case we use this function to map the spatial distribution of chlorophyll-a in the Rufiji--Mafia channel (Figure \@ref(fig:fig1)). 
+
+```{r fig1, fig.cap="The Spatial distribution of chl-a in the Rufiji-Mafia channel mapped with the oceanmap package", results='hide',fig.keep='all'}
+
+oceanmap::v(obj = chl.mafia, cbpos = "b", pal = "jet",
+            cb.xlab = expression("Chlorophyll-a (mg m"^-3*")"), bwd = 0.01, grid = F, 
+            # Save = T, plotname = "rufiji_mafia_chl", fileformat = "png", width = 10, height = 5, 
+            replace.na = F, axeslabels = FALSE)
+```
+
+```{r, echo=FALSE}
+bongo = sf::st_read("e:/GIS/Tanzania spatial data Bank/EAF14 Tanzania spatial datasets/Tanzania/Spatial/AdmInfr/tanzani2.shp", quiet = TRUE)
+
+bongo = bongo%>% sf::st_set_crs(4326)
+```
+
+You can also use **ggplot2** package, that use the grammar of graphics, to make lot similar to those made with **oceanmap** package. For instance, the chunk below shows codes from **ggplot** used to generate figure \@ref(fig:fig2). 
+
+```{r fig2, fig.cap="The Spatial distribution of chl-a in the Rufiji-Mafia channel mapped with the ggplot2 package"}
+chl.mafia.df = chl.mafia %>% 
+  raster::as.data.frame(xy = TRUE) %>% rename(lon = x, lat = y, chl = 3)
+
+ggplot() + 
+  geom_raster(data = chl.mafia.df, aes(x = lon,  y = lat, fill = chl))+
+  geom_sf(data = bongo, fill = "grey80", col = "black")+
+  coord_sf(xlim = c(39.29841, 39.99928), c(-8.001797, -7.498381))+
+  scale_fill_gradientn(colours = oce::oce.colorsJet(120), na.value = "white", breaks = seq(0,3.2,0.5))+
+  metR::scale_x_longitude(ticks = .2) + 
+  metR::scale_y_latitude(breaks = c(-7.92, -7.80, -7.68, -7.56))+
+  guides(fill = guide_colorbar(title = expression(Chlorophyll-a~(mg~m^{-3})),
+                               title.position = "right",
+                               title.theme = element_text(angle = 90), 
+                               barwidth = unit(.5, "cm"),barheight = unit(7.5, "cm"),title.hjust = .5))+
+  theme_bw()
+```
+
+There are big difference of the chl-values processed with the `nc2raster()` function from **oceanmap** package (figure \@ref(fig:fig2)) compared to those manipulated with **ncdf4** package (figure \@ref(fig:fig3)) and **raster** package (Figure \@ref(fig:fig4)). I will explain this differences in the comming posts
+
+## ncdf4
+```{r fig3, fig.cap="The Spatial distribution of chl-a in the Rufiji-Mafia channel. The chl-a value were procesed using algorithm in ncdf4 package"}
+## read and open the nc file
+chl = ncdf4::nc_open("e:/GIS/Joeline satellite data/Chl-a/M2012092-2012121.vw.all_products.MYO.median.01apr12-30apr12.1368530290.data.nc")
+
+## extract variables
+chl.a = ncdf4::ncvar_get(nc = chl, varid = "chl_oc3")
+lon = ncdf4::ncvar_get(nc = chl, varid = "longitude")
+lat = ncdf4::ncvar_get(nc = chl, varid = "latitude")
+
+## convert the matrix and vector to data frame with expand grid
+chl.a.tb = expand.grid(lon,lat) %>% 
+  bind_cols(chl.a %>% expand.grid()) %>% 
+  as_tibble() %>%
+  rename(lon = 1, lat = 2, chl = 3) %>%
+  filter(lon >= 39.0 & lon <= 40.0 & lat >= -8.0 & lat <= -7.5 & chl < 4.1)
+
+## map the distribution
+ggplot() + 
+  geom_raster(data = chl.a.tb, aes(x = lon,  y = lat, fill = chl))+
+  geom_sf(data = bongo, fill = "grey80", col = "black")+
+  coord_sf(xlim = c(39.29841, 39.99928), c(-8.001797, -7.498381))+
+  scale_fill_gradientn(colours = oce::oce.colorsJet(120), na.value = "white", breaks = seq(0,4.2,0.5))+
+  metR::scale_x_longitude(ticks = .2) + 
+  metR::scale_y_latitude(breaks = c(-7.92, -7.80, -7.68, -7.56))+
+  guides(fill = guide_colorbar(title = expression(Chlorophyll-a~(mg~m^{-3})),
+                               title.position = "right",
+                               title.theme = element_text(angle = 90), 
+                               barwidth = unit(.5, "cm"),barheight = unit(7.5, "cm"),title.hjust = .5))+
+  theme_bw()
+
+```
+
+## raster package
+```{r fig4, fig.cap="The Spatial distribution of chl-a in the Rufiji-Mafia channel. The chl-a value were procesed using algorithm in raster package"}
+## read as raster object
+chl.a = raster::raster("e:/GIS/Joeline satellite data/Chl-a/M2012092-2012121.vw.all_products.MYO.median.01apr12-30apr12.1368530290.data.nc", 
+                       varname = "chl_oc3")
+
+## create chopping object
+rufiji.extent = raster::extent(39.0, 40.0, -8.0,-7.5)
+## chop the raster object
+chl.a = raster::crop(x = chl.a, y = rufiji.extent) 
+
+
+#assign all cells with values greater than 4.1 to NA
+chl.a = chl.a %>% 
+  raster::clamp(upper = 4.1, # lower clamp value
+                lower = 0.1,  # upper clamp value
+                usevalues = FALSE # force value to NA
+                )
+
+## convert from raster object to data frame and then tibble
+chl.a.tb = chl.a %>% 
+  raster::as.data.frame(xy = TRUE) %>% 
+  as_tibble() %>%
+  rename(lon = 1, lat = 2, chl = 3) 
+
+## map the distribution of chl
+ggplot() + 
+  geom_raster(data = chl.a.tb, aes(x = lon,  y = lat, fill = chl))+
+  geom_sf(data = bongo, fill = "grey80", col = "black")+
+  coord_sf(xlim = c(39.29841, 39.99928), c(-8.001797, -7.498381))+
+  scale_fill_gradientn(colours = oce::oce.colorsJet(120), na.value = "white", breaks = seq(0,4.2,0.5))+
+  metR::scale_x_longitude(ticks = .2) + 
+  metR::scale_y_latitude(breaks = c(-7.92, -7.80, -7.68, -7.56))+
+  guides(fill = guide_colorbar(title = expression(Chlorophyll-a~(mg~m^{-3})),
+                               title.position = "right",
+                               title.theme = element_text(angle = 90), 
+                               barwidth = unit(.5, "cm"),barheight = unit(7.5, "cm"),title.hjust = .5))+
+  theme_bw()
+```
+
+
+
+## Cited references
