@@ -1,0 +1,171 @@
+---
+title: Computing Marine Heatwaves from temperature data
+author: Masumbuko Semba
+date: '2019-12-04'
+slug: computing-marine-heatwaves-from-temperature-data
+categories:
+  - Met
+  - R
+  - Oceanography
+  - Statistics
+  - Information Technology
+  - MODIS
+  - satellite
+tags:
+  - blogdown
+  - Temperature
+  - sea surface temperature
+  - Rmarkdown
+  - rainfall
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+require(tidyverse)
+```
+
+```{r}
+
+stations = worldmet::getMeta(lat = -6.8, lon = 39.3)
+
+
+```
+
+```{r}
+
+data = worldmet::importNOAA(code = "638700-99999", # unguja
+                                          year = 1990:2018, 
+                                          precip = TRUE)
+```
+
+```{r}
+temp.precip = data %>% 
+  select(date, air_temp, starts_with("precip")) %>% 
+  mutate(date = as.Date(date)) %>% group_by(date) %>% 
+  summarise(temperature = median(air_temp, na.rm = TRUE), 
+            precip = median(precip, na.rm = TRUE))
+
+temp.precip
+```
+we notice that days without rainfall should have value of NA, but instead the coder has put zero, we need to correct for this typing error in rainfall column
+
+```{r}
+temp.precip = temp.precip%>% 
+  mutate( precip = ifelse(precip==0, NA, precip))
+
+temp.precip
+```
+
+```{r}
+require(RmarineHeatWaves)
+require(heatwaveR)
+require(magrittr)
+```
+
+```{r}
+temperature = temp.precip %>% 
+  select(t = date, temp = temperature)
+
+
+```
+
+# Computing marine heatwaves
+Here are the ts2clm() and detect_event() function applied to the Western Australia test data included with this package (sst_WA), which are also discussed by Hobday et al. (2016):
+```{r}
+ts = temperature %>%
+  heatwaveR::ts2clm(climatologyPeriod = c("1990-01-01","2018-12-31"), 
+                    pctile = 90) 
+```
+
+```{r}
+mhw = ts %>% 
+  heatwaveR::detect_event()
+```
+
+```{r}
+
+mhw$event %>% 
+  dplyr::select(event_no, duration, date_start, date_peak, 
+                intensity_max, intensity_cumulative) %>% 
+  dplyr::arrange(-intensity_max)
+
+```
+## Visualising marine heatwaves
+```{r}
+mhw %>% 
+  heatwaveR::event_line(spread = 180, metric = "intensity_max", 
+                        start_date = "2016-01-01", end_date = "2018-12-31")
+```
+
+```{r}
+mhw %>%
+  heatwaveR::lolli_plot(metric = "intensity_max")
+```
+
+## Customized MHW visuals
+```{r}
+mhw$climatology %>% 
+  filter(t >= as.Date("2016-02-01") & t <= as.Date("2016-06-30")) %>%
+  ggplot() +
+  geom_flame(aes(x = t, y = temp, y2 = thresh))+
+  scale_y_continuous(limits = c(27,32), name = expression(Temperature~(degree*C)))+
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y")
+  
+```
+## Calculating marine cold-spells (MCSs)
+The calculation and visualisation of cold-spells is also provided for within this package. The data to be fed into the functions is the same as for MHWs. The main difference is that one is now calculating the 10th percentile threshold, rather than the 90th percentile threshold. Here are the top five cold-spells (cumulative intensity) detected in the OISST data for Western Australia:
+
+```{r}
+# First calculate the cold-spells
+ts_10th <- ts2clm(sst_WA, 
+                  climatologyPeriod = c("1990-01-01","2018-12-31"), 
+                  pctile = 10)
+
+mcs <- detect_event(ts_10th, coldSpells = TRUE)
+```
+
+
+
+## visualizing marine cold-spells
+```{r}
+mcs %>%
+  heatwaveR::event_line(spread = 200, metric = "intensity_cumulative",
+                      start_date = "2016-01-01", end_date = "2018-12-31")
+```
+
+```{r}
+lolli_plot(mcs, metric = "intensity_cumulative", xaxis = "event_no")
+```
+
+```{r}
+# Select the region of the time series of interest
+mcs2 <- mcs$climatology %>% 
+  filter(t > as.Date("2018-07-20") & t < as.Date("2018-10-20"))
+
+# Note that one must specify a colour other than the default 'salmon'
+ggplot(mcs2, aes(x = t, y = thresh, y2 = temp)) +
+  geom_flame(fill = "steelblue3")+
+  scale_y_continuous(limits = c(17,20))+
+  scale_x_date(date_breaks = "20 day", date_labels = "%d %b %Y")
+```
+
+
+```{r}
+# xtractomatic::searchData("varname:sst")
+siku = seq(as.Date("2014-11-03"), as.Date("2019-11-24"), by = "day")
+lat = -6.662914
+lon = 39.614538
+
+off.dar = siku %>% 
+  as_tibble() %>% 
+  mutate(lon = lon, lat = lat) %>% 
+  rename(date = value)
+
+sst = xtractomatic::xtracto(dtype = "mhsstd1day", xpos = off.dar$lon, ypos = off.dar$lat, tpos = off.dar$date)
+```
+

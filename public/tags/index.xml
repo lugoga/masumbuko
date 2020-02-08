@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Masumbuko Semba&#39;s Blog</title>
@@ -6,10 +6,73 @@
     <description>Recent content in Tags on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 01 Dec 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 08 Feb 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>analysis</title>
+      <link>/tags/analysis/</link>
+      <pubDate>Sat, 08 Feb 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/analysis/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>coronavirus</title>
+      <link>/tags/coronavirus/</link>
+      <pubDate>Sat, 08 Feb 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/coronavirus/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>manipulation</title>
+      <link>/tags/manipulation/</link>
+      <pubDate>Sat, 08 Feb 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/manipulation/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Masumbuko Semba</title>
+      <link>/tags/masumbuko-semba/</link>
+      <pubDate>Sat, 08 Feb 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/masumbuko-semba/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>R</title>
+      <link>/tags/r/</link>
+      <pubDate>Sat, 08 Feb 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/r/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>wuhan</title>
+      <link>/tags/wuhan/</link>
+      <pubDate>Sat, 08 Feb 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/wuhan/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>text mining;</title>
+      <link>/tags/text-mining/</link>
+      <pubDate>Mon, 02 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/text-mining/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Bathymetry</title>
@@ -21,11 +84,20 @@
     </item>
     
     <item>
-      <title>MODIS</title>
-      <link>/tags/modis/</link>
+      <title>blogdown</title>
+      <link>/tags/blogdown/</link>
       <pubDate>Sun, 01 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/modis/</guid>
+      <guid>/tags/blogdown/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>chlorophyll</title>
+      <link>/tags/chlorophyll/</link>
+      <pubDate>Sun, 01 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/chlorophyll/</guid>
       <description></description>
     </item>
     
@@ -39,11 +111,11 @@
     </item>
     
     <item>
-      <title>Masumbuko Semba</title>
-      <link>/tags/masumbuko-semba/</link>
+      <title>MODIS</title>
+      <link>/tags/modis/</link>
       <pubDate>Sun, 01 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/masumbuko-semba/</guid>
+      <guid>/tags/modis/</guid>
       <description></description>
     </item>
     
@@ -75,38 +147,11 @@
     </item>
     
     <item>
-      <title>blogdown</title>
-      <link>/tags/blogdown/</link>
-      <pubDate>Sun, 01 Dec 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/blogdown/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>chlorophyll</title>
-      <link>/tags/chlorophyll/</link>
-      <pubDate>Sun, 01 Dec 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/chlorophyll/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>Data science</title>
       <link>/tags/data-science/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/data-science/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>R</title>
-      <link>/tags/r/</link>
-      <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/r/</guid>
       <description></description>
     </item>
     
@@ -156,15 +201,6 @@
     </item>
     
     <item>
-      <title>RStudio</title>
-      <link>/tags/rstudio/</link>
-      <pubDate>Tue, 05 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/rstudio/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>coding</title>
       <link>/tags/coding/</link>
       <pubDate>Tue, 05 Nov 2019 00:00:00 +0000</pubDate>
@@ -179,6 +215,15 @@
       <pubDate>Tue, 05 Nov 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/ggwordcloud/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>RStudio</title>
+      <link>/tags/rstudio/</link>
+      <pubDate>Tue, 05 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/rstudio/</guid>
       <description></description>
     </item>
     
@@ -300,7 +345,7 @@
     </item>
     
     <item>
-      <title>bookdown</title>
+      <title>Bookdown</title>
       <link>/tags/bookdown/</link>
       <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
@@ -399,6 +444,15 @@
     </item>
     
     <item>
+      <title>primary productivity</title>
+      <link>/tags/primary-productivity/</link>
+      <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/primary-productivity/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Temperature</title>
       <link>/tags/temperature/</link>
       <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
@@ -408,11 +462,11 @@
     </item>
     
     <item>
-      <title>primary productivity</title>
-      <link>/tags/primary-productivity/</link>
-      <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
+      <title>etopo</title>
+      <link>/tags/etopo/</link>
+      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/tags/primary-productivity/</guid>
+      <guid>/tags/etopo/</guid>
       <description></description>
     </item>
     
@@ -431,15 +485,6 @@
       <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/pemba/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>etopo</title>
-      <link>/tags/etopo/</link>
-      <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/etopo/</guid>
       <description></description>
     </item>
     

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>analysis on Masumbuko Semba&#39;s Blog</title>
+    <link>/tags/analysis/</link>
+    <description>Recent content in analysis on Masumbuko Semba&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 08 Feb 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/analysis/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Model and Project the death toll of coronavirus at Wuhan Province in R</title>
+      <link>/02/08/2020/model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r/</link>
+      <pubDate>Sat, 08 Feb 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/02/08/2020/model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r/</guid>
+      <description>require(tidyverse)require(modelr)require(magrittr)require(gam)require(sf)IntroductionThis tutorial will show you how to scrape that data from html table, which lives in a wikipedia and download the data for further processing. Let us load the packages we need for the session
+world = spData::worldworld.sf = world %&amp;gt;% st_as_sf()confirmed = data.frame(name_long = c(&amp;quot;China&amp;quot;, &amp;quot;Singapore&amp;quot;, &amp;quot;Japan&amp;quot;, &amp;quot;Thailand&amp;quot;, &amp;quot;South Korea&amp;quot;, &amp;quot;Hong Kong&amp;quot;, &amp;quot;Taiwan&amp;quot;, &amp;quot;Australia&amp;quot;, &amp;quot;Malaysia&amp;quot;, &amp;quot;Germany&amp;quot;, &amp;quot;Vietnam&amp;quot;, &amp;quot;United States&amp;quot;, &amp;quot;Macao&amp;quot;, &amp;quot;Canada&amp;quot;, &amp;quot;France&amp;quot;, &amp;quot;Saudi Arabia&amp;quot;, &amp;quot;Philippines&amp;quot;, &amp;quot;India&amp;quot;, &amp;quot;Italy&amp;quot;, &amp;quot;United Kingdom&amp;quot;, &amp;quot;Russian Federation&amp;quot;, &amp;quot;Cambodia&amp;quot;, &amp;quot;Nepal&amp;quot;, &amp;quot;Sri Lanka&amp;quot;, &amp;quot;Belgium&amp;quot;, &amp;quot;Finland&amp;quot;, &amp;quot;Spain&amp;quot;, &amp;quot;Sweden&amp;quot;), number = c(31161, 30, 25, 25, 24, 24, 16, 15, 14, 13, 12, 12, 10, 7, 6, 5, 3, 3, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1))country.</description>
+    </item>
+    
+  </channel>
+</rss>

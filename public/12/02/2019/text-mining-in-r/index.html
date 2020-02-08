@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.62.2" />
+
+
+<title>Text mining in R - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Text mining in R - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">8 min read</span>
+    
+
+    <h1 class="article-title">Text mining in R</h1>
+
+    
+    <span class="article-date">2019/12/02</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p>Sentiment analysis provides a way to understand the attitudes and opinions expressed in texts. In this post, we explored how to approach sentiment analysis using tidy data principles; when text data is in a tidy data structure, sentiment analysis can be implemented as an inner join. We can use sentiment analysis to understand how a narrative arc changes throughout its course or what words with emotional and opinion content are important for a particular text. We will continue to develop our toolbox for applying sentiment analysis to different kinds of text in our case studies later in this book.</p>
+<pre class="r"><code>require(tidyverse)</code></pre>
+<pre><code>## Loading required package: tidyverse</code></pre>
+<pre><code>## -- Attaching packages ------------------------------- tidyverse 1.3.0 --</code></pre>
+<pre><code>## v ggplot2 3.2.1     v purrr   0.3.3
+## v tibble  2.1.3     v dplyr   0.8.3
+## v tidyr   1.0.0     v stringr 1.4.0
+## v readr   1.3.1     v forcats 0.4.0</code></pre>
+<pre><code>## -- Conflicts ---------------------------------- tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>require(tidytext)</code></pre>
+<pre><code>## Loading required package: tidytext</code></pre>
+<pre class="r"><code>scripture = sacred::king_james_version</code></pre>
+<pre class="r"><code># bib.data = scripture%&gt;% tidytext::unnest_tokens(word, text)
+
+bible.book = scripture %&gt;% filter(book %in% c(&quot;mat&quot;,&quot;luk&quot;, &quot;mar&quot;, &quot;joh&quot;) )</code></pre>
+<p>To work with this as a tidy dataset, we need to restructure it as one-token-per-row format. The unnest_tokens function is a way to convert a dataframe with a text column to be one-token-per-row:</p>
+<pre class="r"><code>bible.book = bible.book %&gt;% tidytext::unnest_tokens(word, text)</code></pre>
+<p>Now that the data is in one-word-per-row format, we can manipulate it with tidy tools like dplyr. We can remove stop words (accessible in a tidy form with the function get_stopwords()) with an anti_join.</p>
+<pre class="r"><code>bible.book = bible.book %&gt;% 
+  anti_join(get_stopwords())</code></pre>
+<pre><code>## Joining, by = &quot;word&quot;</code></pre>
+<p>We can also use <code>group_by()</code> and <code>count()</code> functions to find the most common words in all the books as a whole.</p>
+<pre class="r"><code>bible.book.freq = bible.book %&gt;% 
+  group_by(word) %&gt;% 
+  count(sort = TRUE) %&gt;% ungroup()</code></pre>
+<pre class="r"><code>require(ggwordcloud)</code></pre>
+<pre><code>## Loading required package: ggwordcloud</code></pre>
+<pre class="r"><code># ggplot(data = bible.book.freq %&gt;% filter(n &gt;20), 
+#        aes(label = word, y = n, as.character(n))) +
+#   geom_text_wordcloud(rm_outside = TRUE, max_steps = 1,
+#                       grid_size = 1, eccentricity = .9)+
+#   scale_size_area(max_size = 14)+
+#   scale_color_brewer(palette = &quot;Paired&quot;, direction = -1)+
+#   theme_void()
+
+bible.book.freq%&gt;% filter(n &gt;20) %&gt;% 
+  with(wordcloud::wordcloud(words = word, freq = n, max.words =150, random.order = F))</code></pre>
+<p><img src="/post/2019-12-02-text-mining-in-r_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<div id="most-common-positive-and-negative-words" class="section level2">
+<h2>Most common positive and negative words</h2>
+<p>There are a variety of methods and dictionaries that exist for evaluating the opinion or emotion in text. The <strong>tidytext</strong> package contains several sentiment lexicons. Three general-purpose lexicons are <em>afinn</em>, <em>bing</em> and <em>nrc</em>. These three lexicons are based on unigrams—single words. They contain many English words and the words are assigned scores for positive/negative sentiment, and also possibly emotions like joy, anger, sadness, and so forth. The nrc lexicon categorizes words in a binary fashion (“yes”/“no”) into categories of positive, negative, anger, anticipation, disgust, fear, joy, sadness, surprise, and trust. The bing lexicon categorizes words in a binary fashion into positive and negative categories. The AFINN lexicon assigns words with a score that runs between -5 and 5, with negative scores indicating negative sentiment and positive scores indicating positive sentiment. All of this information is tabulated in the sentiments dataset, and tidytext provides a function <code>get_sentiments()</code> to get specific sentiment lexicons without the columns that are not used in that lexicon.</p>
+<pre class="r"><code>bing = get_sentiments(lexicon = &quot;bing&quot;) #c(&quot;afinn&quot;, &quot;bing&quot;, &quot;loughran&quot;, &quot;nrc&quot;)</code></pre>
+<p>With data in a tidy format, sentiment analysis can be done as an inner join. This is another of the great successes of viewing text mining as a tidy data analysis task; much as removing stop words is an antijoin operation, performing sentiment analysis is an inner join operation.</p>
+<pre class="r"><code>bible.book.sentiments = bible.book.freq %&gt;% 
+  inner_join(bing, by = &quot;word&quot;)</code></pre>
+<p>One advantage of having the data frame with both sentiment and word is that we can analyze word counts that contribute to each sentiment.</p>
+<pre class="r"><code>bible.book.sentiments  %&gt;%
+  filter(n &gt; 20) %&gt;%
+  mutate(n = ifelse(sentiment == &quot;negative&quot;, -n, n)) %&gt;%
+  mutate(word = reorder(word, n)) %&gt;%
+  ggplot(aes(x = word, y = n, fill = sentiment)) +
+  geom_col(alpha = .8) +
+  coord_flip() +
+  labs(y = &quot;Contribution to sentiment&quot;)+
+  theme(panel.background = element_blank(), panel.grid = element_blank(),
+        legend.position = c(.75,.25))</code></pre>
+<p><img src="/post/2019-12-02-text-mining-in-r_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>This can be shown visually, and we can pipe straight into ggplot2, if we like, because of the way we are consistently using tools built for handling tidy data frames. For example, consider the wordcloud package, which uses base R graphics. Let’s look at the most common words in four Gospal of the Bible as a whole again, but this time as a wordcloud in Figure 2.5.</p>
+<pre class="r"><code>bible.book.sentiments %&gt;% 
+  with(wordcloud::wordcloud(words = word, freq = n, 
+                            max.words =150, random.order = F))</code></pre>
+<p><img src="/post/2019-12-02-text-mining-in-r_files/figure-html/unnamed-chunk-11-1.png" width="672" />
+In other functions, such as comparison.cloud(), you may need to structure a data frame the data frame so that the common words column become a rowname <code>column_to rownames()</code> function from <strong>dplyr</strong> package. Let’s spread the the sentiment to tag positive and negative words as separate variable using <code>spread()</code>.</p>
+<pre class="r"><code>bible.book.sentiments %&gt;% 
+  spread(key = sentiment, value = n, fill = 0)  %&gt;% 
+  column_to_rownames(var = &quot;word&quot;) %&gt;%
+  wordcloud::comparison.cloud(colors = c(&quot;#F8766D&quot;, &quot;#00BFC4&quot;), 
+                              max.words = 150, use.r.layout = F, 
+                              match.colors = T, random.order = F, title.size = 0.01)</code></pre>
+<p><img src="/post/2019-12-02-text-mining-in-r_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
+<div id="extracting-pdf-text-with-r-and-creating-tidy-data" class="section level2">
+<h2>Extracting PDF Text with R and Creating Tidy Data</h2>
+<p>In the digital age of today, data comes in many forms. Many of the more common file types like CSV, XLSX, and plain text (TXT) are easy to access and manage. Yet, sometimes, the data we need is locked away in a file format that is less accessible such as a PDF. If you have ever found yourself in this dilemma, fret not — pdftools has you covered.
+In this post, you will learn how to: use pdftools to extract text from a PDF, use the stringr package to manipulate strings of text, and create a tidy data set. In anticipation of March Madness and being a University of Cincinnati alumnus along with some other my other Datazar constituents, I have chosen to extract season statistics from the UC men’s basketball team. In the end, I will create a tibble showing season statistics for minutes played, field goal percentage, total points, and average points per game for each player.
+The first step is to load the packages that are needed using library(). The stringr package is a member of the tidyverse collection of R packages (more on that here if you are not familiar). The packages in therein are designed to make data science easy. I highly recommend purchasing R for Data Science by Hadley Wickham and Garrett Grolemund. It is a great book for beginners as well as a pocket reference for more advanced programmers. I use this book almost every day — it goes where I go.</p>
+<p>The next step is to load your PDF into your Datazar project. I am going to call my new object ‘UC_text’ and I am going to use the pdf_text command to read the text of my file. The read_lines() function reads the lines of our new file.</p>
+<pre class="r"><code>wiomsa.smp = pdftools::pdf_text(&quot;e:/Symposium-ProgrammeFINAL_titles.pdf&quot;) %&gt;%
+  readr::read_lines()
+
+wiomsa.smp %&gt;% head()</code></pre>
+<pre><code>## [1] &quot;                                                    LT 1&quot;                                             
+## [2] &quot;                                  Session I: Stock status assessment&quot;                                 
+## [3] &quot; 1100    Conand, C.; C. Michel; D. Chamari; F. Stella; G. Rodney; L. Thierry; L. Marc; M. Twalibu; M.&quot;
+## [4] &quot;         Thierry; S. Stanley; Y. Saleh; F. Kim - Fisheries and management of sea cucumbers in the&quot;    
+## [5] &quot;         WIO: an update&quot;                                                                              
+## [6] &quot; 1120    Everett, B.; S. Fennessy; N. van den Heever - Tracking temporal and spatial patterns in the&quot;</code></pre>
+<p>In the next series of steps, I will use functions in the stringr package to manipulate the lines of text into a desirable form. The first problem to tackle is the whitespace between the different elements in each line of text. The str_squish() function reduces the repeated whitespace between each string. I also need to remove the comma between each player’s first and last name. I’ll use str_replace_all() to remove the comma.</p>
+<pre class="r"><code>wiomsa.smp %&gt;% 
+  str_squish() %&gt;% 
+  str_replace_all(pattern = &quot;;&quot;, &quot; &quot;) %&gt;% 
+  str_replace_all(pattern = &quot;-&quot;, &quot;&quot;)%&gt;% 
+  str_replace_all(pattern = &quot;11th WIOMSA Scientific Symposium&quot;, &quot;&quot;)%&gt;% 
+  str_replace_all(pattern = &quot;WIO&quot;, &quot;&quot;) %&gt;%  
+  as_tibble() %&gt;% 
+  rename(text = 1)%&gt;% 
+  unnest_tokens(word, text) %&gt;%
+  anti_join(get_stopwords(), by = &quot;word&quot;) %&gt;%
+  group_by(word) %&gt;% count() %&gt;% ungroup() %&gt;% slice(-c(1:115)) %&gt;%
+  arrange(desc(n))</code></pre>
+<pre><code>## Warning: Calling `as_tibble()` on a vector is discouraged, because the behavior is likely to change in the future. Use `tibble::enframe(name = NULL)` instead.
+## This warning is displayed once per session.</code></pre>
+<pre><code>## # A tibble: 3,991 x 2
+##    word       n
+##    &lt;chr&gt;  &lt;int&gt;
+##  1 m        290
+##  2 s        248
+##  3 j        220
+##  4 c        165
+##  5 l        142
+##  6 n        129
+##  7 r        128
+##  8 t        117
+##  9 marine   116
+## 10 p         98
+## # ... with 3,981 more rows</code></pre>
+</div>
+<div id="tabulizer-package" class="section level2">
+<h2>tabulizer package</h2>
+<p>Earlier this year, a new package called tabulizer was released in R, which allows you to automatically pull out tables and text from PDFs. Note, this package only works if the PDF’s text is highlightable (if it’s typed) — i.e. it won’t work for scanned-in PDFs, or image files converted to PDFs.</p>
+<p>If you don’t have tabulizer installed, just run install.packages(“tabulizer”) to get started. After you have tabulizer installed, we’ll load it, and define a variable referencing an example PDF.</p>
+</div>
+<div id="how-to-scrape-tables-from-a-pdf" class="section level2">
+<h2>How to scrape tables from a PDF</h2>
+<p>You can extract tables from this PDF using the <code>extract_tables</code> function. we can add parameters to the function to specify the output flag to be data.frame, and set header = TRUE, to get back a list of data frames corresponding to the tables in the PDF. Once we have the results back, we can refer to any individual PDF table like any data frame we normally would in R.</p>
+<pre class="r"><code>program.table = tabulizer::extract_tables(&quot;e:/Symposium-ProgrammeFINAL_titles.pdf&quot;,
+                          output = &quot;data.frame&quot;, header = TRUE )</code></pre>
+</div>
+<div id="how-to-scrape-text-from-a-pdf" class="section level2">
+<h2>How to scrape text from a PDF</h2>
+<p>Scraping text from our sample PDF can be done using extract_text:</p>
+<pre class="r"><code>program.text = tabulizer::extract_text(&quot;e:/Symposium-ProgrammeFINAL_titles.pdf&quot;, )
+
+program.text %&gt;% as_tibble() %&gt;% 
+  rename( text = 1) %&gt;% 
+  separate(col = text, into = c(&quot;authors&quot;, &quot;title&quot;), sep = &quot;-&quot;) %&gt;% 
+  select(title) %&gt;%
+  separate_rows(title, sep = &quot;\r\n&quot;) %&gt;%
+  unnest_tokens(word, text) %&gt;% anti_join(get_stopwords())</code></pre>
+<pre class="r"><code>program.text %&gt;% 
+  str_replace_all(pattern = &quot;\r\n&quot;, replacement = &quot; &quot;) %&gt;% 
+  as_tibble()%&gt;%
+  rename( text = 1) %&gt;%
+  # separate_rows(title, sep = &quot;\r\n&quot;) </code></pre>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

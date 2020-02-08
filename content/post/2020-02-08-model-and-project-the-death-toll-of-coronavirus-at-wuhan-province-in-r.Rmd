@@ -1,0 +1,226 @@
+---
+title: Model and Project the death toll of coronavirus at Wuhan Province in R
+author: Masumbuko Semba
+date: '2020-02-08'
+slug: model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r
+categories:
+  - Information Technology
+tags:
+  - R
+  - Masumbuko Semba
+  - coronavirus
+  - wuhan
+  - analysis
+  - manipulation
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "", tidy = TRUE)
+```
+
+
+```{r}
+require(tidyverse)
+require(modelr)
+require(magrittr)
+require(gam)
+require(sf)
+```
+
+## Introduction
+
+This tutorial will show you how to scrape that data from html table, which lives in a wikipedia and download the data for further processing. Let us load the packages we need for the session
+
+```{r fig0, fig.cap="The map showing the spread of coronavirus, echo=FALSE"}
+world = spData::world
+
+world.sf = world %>% st_as_sf()
+confirmed = data.frame(name_long = c("China",  "Singapore", "Japan", "Thailand", "South Korea", "Hong Kong", "Taiwan", "Australia", "Malaysia", "Germany", "Vietnam", "United States", "Macao", "Canada", "France", "Saudi Arabia", "Philippines", "India", "Italy", "United Kingdom", "Russian Federation", "Cambodia", "Nepal", "Sri Lanka", "Belgium", "Finland", "Spain", "Sweden"),
+                       number = c(31161,30,25,25,24,24,16,15,14,13,12,12,10,7,6,5,3,3,3,3,2,1,1,1,1,1,1,1))
+
+country.corona = world.sf %>% full_join(confirmed) %>% filter(!is.na(number))
+
+ggplot() +
+  geom_sf(data = world.sf %>% filter(continent != "Antarctica"),
+          fill = "grey95", col = "grey85")+
+  ggspatial::layer_spatial(data = country.corona,  col = "#ED6300", fill = "#FBE1CB",size = .5)+
+  coord_sf(crs = "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs ")+
+  # geom_sf(data = country.corona,  col = "#ED6300", fill = "#FBE1CB",size = .5)+
+  cowplot::theme_map()
+```
+
+
+## Data
+The data for this analysis was obtained from the [Wikipedia page](https://en.wikipedia.org/wiki/Timeline_of_the_2019%E2%80%9320_Wuhan_coronavirus_outbreak) that provide updates of people died with coronavirus in Wuhan province. Once you open this page, you the html page will appear with a list of tables. Unfortunately, tables on the web are primarily designed for displaying and consuming data, not for analytical purposes. But, Christian Rubba -@htmltab developed a **htmltab** package that has `htmltab()` function,  enabled working with HTML tables from webpages easier and less time-consuming. 
+
+### Reading the Wuhan coronavirus Table
+To scrap data from html table, we first need a `url` as a path to the table and then choose which table we want to scrap from the url. For instance for the case of Wuhan coronavirus death, the table of interest is the second one. Therefore, I parsed the url and the table number in the `htmltab` function to extract the data.
+
+
+```{r}
+url = "https://en.wikipedia.org/wiki/Timeline_of_the_2019%E2%80%9320_Wuhan_coronavirus_outbreak"
+
+wuhan.coronavirus = htmltab::htmltab(doc = url, which = 3)
+
+```
+
+## Transform the data
+Once the data is downloaded, it is still untidy and hence require some further processing and organizing. I selected the column of interest and change their names to the meaningul ones. Then all variables that were imported as `structure` they were converted back to integer and change the date to a format that is machine compartible. I aslo used the `lubridate::yday` function to create a new variable that contains days in number from `01 January 2020`. The chunk below summarises the main steps involved to tidy the data. 
+
+```{r}
+
+corona = wuhan.coronavirus %>% 
+  select(date = 1, suspected = 2, confirmed = 3, serious = 5, 
+         death = 6, recovered = 7, death.recovered = 8)  %>%
+  as_tibble() %>% 
+  mutate(date = as.Date(date), day = lubridate::yday(date),
+         suspected = as.integer(suspected),
+         confirmed = as.integer(confirmed),
+         serious = as.integer(serious),
+         death = as.integer(death),
+         recovered = as.integer(recovered),
+         death.recovered = as.integer(death.recovered))
+
+```
+
+Once we have organized and structured the data in a format that facilitate anaysis, we can first visualize the data to see effect of coronavirus overtime. Figure \@ref(fig:fig1) indicate that the number of people die  by coronavirus has grown exponentially over the last 30 days. 
+
+```{r fig1, fig.cap="Toll death at Wuhan", fig.width=5, fig.height=3.5}
+ggplot(data = corona , 
+       aes(x = date, y = death)) +
+  geom_point()+
+  scale_x_date(date_breaks = "8 days" )+
+  cowplot::theme_minimal_grid()+
+  theme(panel.grid = element_line(linetype = 3), legend.position = "none")+
+  labs(x = "Date", y = "Cumulative Death")+
+  ggsci::scale_color_d3()
+```
+
+Looking on figure \@ref(fig:fig1) you notice that there are couple of days with unreported death. Then we need to trim off all observation before January 10,2020. We use the `filter` function from **dplyr** package [@dplyr]
+
+```{r}
+corona = corona %>% 
+  filter(date >= lubridate::dmy(100120))
+```
+
+## Modelling
+Alghout figure \@ref(fig:fig1) clearly indicates that number of people dying with coronavirus is growing exponentially over time, I still use linear model for modelling this growth. In addition to linear modelling, I will model the growth of number of people dying with corona virus using three other models---`quadratic, cubic and gam`. The chunk below show the line of codes for the four modelling algorithms
+
+```{r}
+## Linear model
+linear =  corona %$% 
+  lm(death~day)
+
+## Quadratic model
+quadratic =  corona %$% 
+  lm(death~poly(day,2))
+
+## Cubic model
+cubic =  corona %$% 
+  lm(death~poly(day,3))
+
+## GAM model
+gam =  corona %$% 
+  gam::gam(death~s(day))
+
+```
+
+
+Once the modelling is complete, we can assess the model to choose the best fit one. `glance` function from **broom** packages [@broom] that construct a single row summary of the model with all the model parameters including the coefficients, statistics and accuracy parameters. Table \@ref(tab:tab1) show the parameters that help the analyst to choose the model that best fit the data. In this case, all model except GAM showed a sinficant positive correlation that account for above 75 percent, but cubic show the correlation of 99 percent. With the hightest correlation coefficient and low values of BIC and AIC compared to other models, the cubic model is the best alogirith for fitting this kind of data.
+
+```{r tab1, echo=FALSE}
+linear %>% broom::glance() %>% mutate(model = "Linear") %>%
+  bind_rows(gam %>% broom::glance() %>% mutate(model = "GAM"),
+            quadratic %>% broom::glance() %>% mutate(model = "Quadratic"),
+            cubic %>% broom::glance() %>% mutate(model = "Cubic")) %>%
+  select(model, r.squared, statistic, p.value, AIC, BIC) %>%
+  kableExtra::kable(format = "html", digits = 4, caption = "Model accuracy assesment") %>%
+  kableExtra::column_spec(column = 1:6, width = "3cm") %>%
+  kableExtra::add_header_above(c("", "Stats parameter" = 3, "Accuracy parameter" = 2))
+```
+
+## Predictions
+Once we have fitted the data to our model, we can predict the values. Its better to grid the data first before we grid. the **modelr** package contains `data_grid` function that bins the `data`predictor` variable to the same interval.  The chunck below indicate the binning process of the predictor variable
+```{r}
+bins = corona %>% 
+  modelr::data_grid(day = modelr::seq_range(day, n = 20))
+
+```
+
+We then predict the response variable---death of people with corona virus. Instead of using the original dataset, we use the gridded (binned) predictor variable to predict the response variable. I used `modelr::gather_predictions` function to tidy the predicted values from each model and arrange the values in long--format. Table \@ref(tab:tab2) is a sample of the predicted values.
+
+```{r}
+predictions = bins%>% 
+  modelr::gather_predictions(linear, quadratic, cubic, gam)
+```
+
+```{r tab2, echo=FALSE}
+bins%>% 
+  modelr::gather_predictions(linear, quadratic, cubic, gam) %>%
+  sample_n(12) %>%
+  kableExtra::kable(format = "html", digits = 2, align = "l",
+                    caption = "Predicted people dying with coronavirus using four different models") %>%
+  kableExtra::column_spec(column = 1:3, width = "3cm")
+```
+
+
+```{r fig2, fig.cap="Fitted data from various modelling algorithms"}
+
+
+ggplot(data = corona, 
+       aes(x = day, y = death)) +
+  geom_point( shape = 1, size = 2.2) +
+  geom_line(data = predictions,
+            aes(x = day, y = pred, col = model), size = .95)+
+  scale_x_continuous(breaks = seq(9,40,4))+
+  cowplot::theme_minimal_grid()+
+  theme(panel.grid = element_line(linetype = 3), legend.position = "none")+
+  ggsci::scale_color_d3()+
+  facet_wrap(~model)
+```
+
+## Future predictions
+We can predict for the next ten more days to see how the death toll will behave, we use the function `predict` from **stats** package. First we create a data frame of the ten days begin from 40 day and end at day 50. Once we have the future days data frame, we can parse along with the cubic model to predict the future toll number of the coronavirus. 
+
+```{r}
+new.day = data.frame(day = 40:50)
+
+future.deaths = predict(cubic, new.day) %>% 
+  as_tibble() %>% 
+  bind_cols(new.day) %>% 
+  mutate(model = "future") %>% 
+  select(model, day, pred=value)
+```
+
+Then we combine the predicted and the future value of the death and assign the data as new.data that was used to generate figure \@ref(fig:fig3). We see that on the 50 day the projected toll number of people dying with coronavirus may reach to 2500 people. 
+
+```{r}
+new.data = predictions%>% 
+  filter(model == "cubic") %>% 
+  bind_rows(future.deaths)
+```
+
+
+```{r fig3, fig.cap="The number of people died with coronavirus in the Wuhan province. The points are cumulative death, the blue line is the fitted death using cubic polynomial algorithims and the red line show the projected number of people over the next ten days", echo=FALSE, fig.width=5, fig.height=3.5}
+
+
+ggplot(data = corona , 
+       aes(x = day, y = death)) +
+  geom_point(shape = 1, size = 2.2) +
+  geom_line(data =new.data,
+            aes(x = day, y = pred, col = model), size = .6)+
+  scale_x_continuous(breaks = seq(9,60,4)) +
+  cowplot::theme_minimal_grid()+
+  theme(panel.grid = element_line(linetype = 3), legend.position = c(.05,.85), 
+        legend.key.width = unit(1.2,"cm"), legend.title = element_blank())+
+  labs(x = "Days since January 1, 2020", y = "Cumulative Death") +
+  ggsci::scale_color_d3()
+  
+```
+
+
+## References

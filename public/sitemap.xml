@@ -1,107 +1,120 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/tags/analysis/</loc>
+    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/categories/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
+    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/coronavirus/</loc>
+    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/information-technology/</loc>
+    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/manipulation/</loc>
+    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/masumbuko-semba/</loc>
+    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/</loc>
+    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/02/08/2020/model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r/</loc>
+    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/r/</loc>
+    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/wuhan/</loc>
+    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/text-mining/</loc>
+    <lastmod>2019-12-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/12/02/2019/text-mining-in-r/</loc>
+    <lastmod>2019-12-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/text-mining/</loc>
+    <lastmod>2019-12-02T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/bathymetry/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/information-technology/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/modis/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/modis/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/mafia-channel/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/masumbuko-semba/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/oceanography/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/pemba-channel/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/post/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/rufiji-river/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/tanzania/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/blogdown/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/chlorophyll/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/mafia-channel/</loc>
+    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/modis/</loc>
+    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/modis/</loc>
+    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/oceanography/</loc>
+    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/pemba-channel/</loc>
+    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -110,9 +123,18 @@
   </url>
   
   <url>
+    <loc>/tags/rufiji-river/</loc>
+    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/categories/satellite/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/tanzania/</loc>
+    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -123,31 +145,21 @@
   <url>
     <loc>/tags/data-science/</loc>
     <lastmod>2019-11-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/categories/met/</loc>
     <lastmod>2019-11-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/r/</loc>
-    <lastmod>2019-11-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/semba/</loc>
     <lastmod>2019-11-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/tidyverse/</loc>
     <lastmod>2019-11-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -156,49 +168,43 @@
   </url>
   
   <url>
+    <loc>/tags/graphics/</loc>
+    <lastmod>2019-11-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/11/06/2019/looking-at-the-bible-through-wordcloud-in-r/</loc>
     <lastmod>2019-11-06T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/graphics/</loc>
-    <lastmod>2019-11-06T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/tags/programming/</loc>
     <lastmod>2019-11-06T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/wordcloud/</loc>
     <lastmod>2019-11-06T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/rstudio/</loc>
-    <lastmod>2019-11-05T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/11/05/2019/wordclouds-plotting-with-ggwordcloud-package-in-r/</loc>
-    <lastmod>2019-11-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/coding/</loc>
     <lastmod>2019-11-05T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/ggwordcloud/</loc>
     <lastmod>2019-11-05T00:00:00+00:00</lastmod>
-    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/rstudio/</loc>
+    <lastmod>2019-11-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/11/05/2019/wordclouds-plotting-with-ggwordcloud-package-in-r/</loc>
+    <lastmod>2019-11-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -209,7 +215,6 @@
   <url>
     <loc>/categories/r/</loc>
     <lastmod>2019-10-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -220,19 +225,16 @@
   <url>
     <loc>/tags/fao/</loc>
     <lastmod>2019-10-16T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/statistics/</loc>
-    <lastmod>2019-10-16T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/fisheries/</loc>
     <lastmod>2019-10-16T00:00:00+00:00</lastmod>
-    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/categories/statistics/</loc>
+    <lastmod>2019-10-16T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -273,7 +275,6 @@
   <url>
     <loc>/tags/forecasting/</loc>
     <lastmod>2019-08-09T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -284,30 +285,26 @@
   <url>
     <loc>/tags/time-series/</loc>
     <lastmod>2019-08-09T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/07/12/2019/pie-chart-and-donut-plot-with-ggplot2/</loc>
-    <lastmod>2019-07-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/donut/</loc>
     <lastmod>2019-07-12T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/ggplot/</loc>
     <lastmod>2019-07-12T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/pie/</loc>
     <lastmod>2019-07-12T00:00:00+00:00</lastmod>
-    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/07/12/2019/pie-chart-and-donut-plot-with-ggplot2/</loc>
+    <lastmod>2019-07-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -318,7 +315,6 @@
   <url>
     <loc>/tags/training/</loc>
     <lastmod>2019-06-17T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -329,13 +325,11 @@
   <url>
     <loc>/tags/indian-ocean/</loc>
     <lastmod>2019-05-31T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/oceanography/</loc>
     <lastmod>2019-05-31T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -344,21 +338,18 @@
   </url>
   
   <url>
-    <loc>/categories/technical/</loc>
-    <lastmod>2019-05-07T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/tags/precipitation/</loc>
     <lastmod>2019-05-07T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/rainfall/</loc>
     <lastmod>2019-05-07T00:00:00+00:00</lastmod>
-    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/categories/technical/</loc>
+    <lastmod>2019-05-07T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -369,31 +360,26 @@
   <url>
     <loc>/tags/aviso/</loc>
     <lastmod>2019-04-15T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/bookdown/</loc>
     <lastmod>2019-04-15T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/geostrophic-current/</loc>
     <lastmod>2019-04-15T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/surface-current/</loc>
     <lastmod>2019-04-15T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/drifter/</loc>
     <lastmod>2019-03-20T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -409,13 +395,11 @@
   <url>
     <loc>/tags/sea-surface-temperature/</loc>
     <lastmod>2019-03-18T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/ctd/</loc>
     <lastmod>2019-03-17T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -426,13 +410,11 @@
   <url>
     <loc>/tags/zanzibar/</loc>
     <lastmod>2019-03-17T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/chumbe-island/</loc>
     <lastmod>2019-02-22T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -441,32 +423,28 @@
   </url>
   
   <url>
+    <loc>/02/22/2019/publishing-code-into-technical-report/</loc>
+    <lastmod>2019-02-22T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/tags/rmarkdown/</loc>
     <lastmod>2019-02-22T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/categories/tool/</loc>
     <lastmod>2019-02-22T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/unguja/</loc>
-    <lastmod>2019-02-22T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/02/22/2019/publishing-code-into-technical-report/</loc>
     <lastmod>2019-02-22T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/east-africa/</loc>
     <lastmod>2019-02-20T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -485,15 +463,18 @@
   </url>
   
   <url>
-    <loc>/tags/temperature/</loc>
+    <loc>/tags/primary-productivity/</loc>
     <lastmod>2019-02-15T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/primary-productivity/</loc>
+    <loc>/tags/temperature/</loc>
     <lastmod>2019-02-15T00:00:00+00:00</lastmod>
-    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/etopo/</loc>
+    <lastmod>2019-02-14T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -504,19 +485,16 @@
   <url>
     <loc>/tags/mtwara/</loc>
     <lastmod>2019-02-14T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/pemba/</loc>
     <lastmod>2019-02-14T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/etopo/</loc>
-    <lastmod>2019-02-14T00:00:00+00:00</lastmod>
-    <priority>0</priority>
+    <loc>/tags/mapping/</loc>
+    <lastmod>2019-02-13T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -525,15 +503,8 @@
   </url>
   
   <url>
-    <loc>/tags/mapping/</loc>
-    <lastmod>2019-02-13T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/tags/oce/</loc>
     <lastmod>2019-02-13T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -544,13 +515,11 @@
   <url>
     <loc>/tags/pressure/</loc>
     <lastmod>2019-02-12T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/algoa/</loc>
     <lastmod>2019-02-09T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -561,25 +530,21 @@
   <url>
     <loc>/tags/kimbiji/</loc>
     <lastmod>2019-02-09T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/mld/</loc>
     <lastmod>2019-02-09T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/oxygen/</loc>
     <lastmod>2019-02-09T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/climate/</loc>
     <lastmod>2019-02-08T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -590,19 +555,16 @@
   <url>
     <loc>/tags/argo/</loc>
     <lastmod>2019-02-02T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/depth/</loc>
     <lastmod>2019-02-02T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/salinity/</loc>
     <lastmod>2019-02-02T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -623,7 +585,6 @@
   <url>
     <loc>/tags/eacc/</loc>
     <lastmod>2019-01-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -654,19 +615,16 @@
   <url>
     <loc>/tags/fluorescence/</loc>
     <lastmod>2018-10-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/wind-direction/</loc>
     <lastmod>2018-10-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/wind-speed/</loc>
     <lastmod>2018-10-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -677,7 +635,6 @@
   <url>
     <loc>/tags/ascat/</loc>
     <lastmod>2018-10-25T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -688,7 +645,6 @@
   <url>
     <loc>/tags/quikscat/</loc>
     <lastmod>2018-10-25T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -699,7 +655,6 @@
   <url>
     <loc>/tags/satellite/</loc>
     <lastmod>2018-10-23T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -710,7 +665,6 @@
   <url>
     <loc>/tags/adcp/</loc>
     <lastmod>2018-10-18T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -721,7 +675,6 @@
   <url>
     <loc>/tags/iioe-2/</loc>
     <lastmod>2018-10-15T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
