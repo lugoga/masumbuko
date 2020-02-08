@@ -35,7 +35,7 @@ require(sf)
 
 This tutorial will show you how to scrape that data from html table, which lives in a wikipedia and download the data for further processing. Let us load the packages we need for the session
 
-```{r fig0, fig.cap="The map showing the spread of coronavirus, echo=FALSE"}
+```{r fig0, fig.cap="The map showing the spread of coronavirus", echo=FALSE}
 world = spData::world
 
 world.sf = world %>% st_as_sf()

@@ -28,27 +28,10 @@ require(sf)</code></pre>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>This tutorial will show you how to scrape that data from html table, which lives in a wikipedia and download the data for further processing. Let us load the packages we need for the session</p>
-<pre class="r"><code>world = spData::world
-
-world.sf = world %&gt;% st_as_sf()
-confirmed = data.frame(name_long = c(&quot;China&quot;, &quot;Singapore&quot;, &quot;Japan&quot;, &quot;Thailand&quot;, &quot;South Korea&quot;, 
-    &quot;Hong Kong&quot;, &quot;Taiwan&quot;, &quot;Australia&quot;, &quot;Malaysia&quot;, &quot;Germany&quot;, &quot;Vietnam&quot;, &quot;United States&quot;, 
-    &quot;Macao&quot;, &quot;Canada&quot;, &quot;France&quot;, &quot;Saudi Arabia&quot;, &quot;Philippines&quot;, &quot;India&quot;, &quot;Italy&quot;, 
-    &quot;United Kingdom&quot;, &quot;Russian Federation&quot;, &quot;Cambodia&quot;, &quot;Nepal&quot;, &quot;Sri Lanka&quot;, &quot;Belgium&quot;, 
-    &quot;Finland&quot;, &quot;Spain&quot;, &quot;Sweden&quot;), number = c(31161, 30, 25, 25, 24, 24, 16, 15, 
-    14, 13, 12, 12, 10, 7, 6, 5, 3, 3, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1))
-
-country.corona = world.sf %&gt;% full_join(confirmed) %&gt;% filter(!is.na(number))
-
-ggplot() + geom_sf(data = world.sf %&gt;% filter(continent != &quot;Antarctica&quot;), fill = &quot;grey95&quot;, 
-    col = &quot;grey85&quot;) + ggspatial::layer_spatial(data = country.corona, col = &quot;#ED6300&quot;, 
-    fill = &quot;#FBE1CB&quot;, size = 0.5) + coord_sf(crs = &quot;+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs &quot;) + 
-    # geom_sf(data = country.corona, col = &#39;#ED6300&#39;, fill = &#39;#FBE1CB&#39;,size = .5)+
-cowplot::theme_map()</code></pre>
 <div class="figure"><span id="fig:fig0"></span>
-<img src="/post/2020-02-08-model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r_files/figure-html/fig0-1.png" alt="The map showing the spread of coronavirus, echo=FALSE" width="672" />
+<img src="/post/2020-02-08-model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r_files/figure-html/fig0-1.png" alt="The map showing the spread of coronavirus" width="672" />
 <p class="caption">
-Figure 1: The map showing the spread of coronavirus, echo=FALSE
+Figure 1: The map showing the spread of coronavirus
 </p>
 </div>
 </div>
@@ -249,35 +232,13 @@ pred
 <tbody>
 <tr>
 <td style="text-align:left;width: 3cm; ">
-linear
+gam
 </td>
 <td style="text-align:left;width: 3cm; ">
 17.37
 </td>
 <td style="text-align:left;width: 3cm; ">
-8.50
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-quadratic
-</td>
-<td style="text-align:left;width: 3cm; ">
-15.89
-</td>
-<td style="text-align:left;width: 3cm; ">
--31.38
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-cubic
-</td>
-<td style="text-align:left;width: 3cm; ">
-35.05
-</td>
-<td style="text-align:left;width: 3cm; ">
-489.80
+-1.82
 </td>
 </tr>
 <tr>
@@ -285,76 +246,10 @@ cubic
 gam
 </td>
 <td style="text-align:left;width: 3cm; ">
-21.79
+12.95
 </td>
 <td style="text-align:left;width: 3cm; ">
-15.21
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-linear
-</td>
-<td style="text-align:left;width: 3cm; ">
-35.05
-</td>
-<td style="text-align:left;width: 3cm; ">
-407.47
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-quadratic
-</td>
-<td style="text-align:left;width: 3cm; ">
-36.53
-</td>
-<td style="text-align:left;width: 3cm; ">
-582.84
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-cubic
-</td>
-<td style="text-align:left;width: 3cm; ">
-27.68
-</td>
-<td style="text-align:left;width: 3cm; ">
-127.58
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-linear
-</td>
-<td style="text-align:left;width: 3cm; ">
-26.21
-</td>
-<td style="text-align:left;width: 3cm; ">
-207.98
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-linear
-</td>
-<td style="text-align:left;width: 3cm; ">
-27.68
-</td>
-<td style="text-align:left;width: 3cm; ">
-241.23
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-quadratic
-</td>
-<td style="text-align:left;width: 3cm; ">
-27.68
-</td>
-<td style="text-align:left;width: 3cm; ">
-147.66
+-0.78
 </td>
 </tr>
 <tr>
@@ -370,13 +265,101 @@ cubic
 </tr>
 <tr>
 <td style="text-align:left;width: 3cm; ">
+linear
+</td>
+<td style="text-align:left;width: 3cm; ">
+32.11
+</td>
+<td style="text-align:left;width: 3cm; ">
+340.97
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+cubic
+</td>
+<td style="text-align:left;width: 3cm; ">
+32.11
+</td>
+<td style="text-align:left;width: 3cm; ">
+308.11
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+cubic
+</td>
+<td style="text-align:left;width: 3cm; ">
+18.84
+</td>
+<td style="text-align:left;width: 3cm; ">
+-0.47
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
 gam
+</td>
+<td style="text-align:left;width: 3cm; ">
+32.11
+</td>
+<td style="text-align:left;width: 3cm; ">
+319.97
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+cubic
+</td>
+<td style="text-align:left;width: 3cm; ">
+38.00
+</td>
+<td style="text-align:left;width: 3cm; ">
+729.80
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+cubic
+</td>
+<td style="text-align:left;width: 3cm; ">
+21.79
+</td>
+<td style="text-align:left;width: 3cm; ">
+16.95
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+cubic
+</td>
+<td style="text-align:left;width: 3cm; ">
+17.37
+</td>
+<td style="text-align:left;width: 3cm; ">
+-3.17
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+quadratic
 </td>
 <td style="text-align:left;width: 3cm; ">
 23.26
 </td>
 <td style="text-align:left;width: 3cm; ">
-30.95
+26.79
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+linear
+</td>
+<td style="text-align:left;width: 3cm; ">
+27.68
+</td>
+<td style="text-align:left;width: 3cm; ">
+241.23
 </td>
 </tr>
 </tbody>
