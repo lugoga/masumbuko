@@ -67,7 +67,7 @@
 
   <article class="article">
     
-    <span class="article-duration">6 min read</span>
+    <span class="article-duration">8 min read</span>
     
 
     <h1 class="article-title">Model and Project the death toll of coronavirus at Wuhan Province in R</h1>
@@ -81,27 +81,27 @@
 <script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
 
 
-<pre class="r"><code>require(tidyverse)
-require(modelr)
-require(magrittr)
-require(gam)
-require(sf)</code></pre>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>This tutorial will show you how to scrape that data from html table, which lives in a wikipedia and download the data for further processing. Let us load the packages we need for the session</p>
+<p>This tutorial will show you how to scrape that data from html table, which lives in a Wikipedia and download the data for further processing. Let us load the packages we need for the session. I will focus on the Wuhan coronavirus to illustrate the point. 86 people died in a single day in China on Friday 7th, February 2020. The coronavirus death toll has risen to at least 805, and the vast majority have died in mainland China. Globally, the virus has infected more 34,400 people across 28 countries and territories (Figure <a href="#fig:fig0">1</a>).</p>
 <div class="figure"><span id="fig:fig0"></span>
-<img src="/post/2020-02-08-model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r_files/figure-html/fig0-1.png" alt="The map showing the spread of coronavirus" width="672" />
+<img src="/post/2020-02-08-model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r_files/figure-html/fig0-1.png" alt="The map showing the countried infected with coronavirus" width="672" />
 <p class="caption">
-Figure 1: The map showing the spread of coronavirus
+Figure 1: The map showing the countried infected with coronavirus
 </p>
 </div>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
-<p>The data for this analysis was obtained from the <a href="https://en.wikipedia.org/wiki/Timeline_of_the_2019%E2%80%9320_Wuhan_coronavirus_outbreak">Wikipedia page</a> that provide updates of people died with coronavirus in Wuhan province. Once you open this page, you the html page will appear with a list of tables. Unfortunately, tables on the web are primarily designed for displaying and consuming data, not for analytical purposes. But, Christian Rubba <span class="citation">(<a href="#ref-htmltab">2016</a>)</span> developed a <strong>htmltab</strong> package that has <code>htmltab()</code> function, enabled working with HTML tables from webpages easier and less time-consuming.</p>
+<p>The data for this analysis was obtained from the <a href="https://en.wikipedia.org/wiki/Timeline_of_the_2019%E2%80%9320_Wuhan_coronavirus_outbreak">Wikipedia page</a> that provide updates of people died with coronavirus in Wuhan province. Once you open this page, you the html page will appear with a list of tables. Unfortunately, tables on the web are primarily designed for displaying and consuming data, not for analytical purposes. But, Christian Rubba <span class="citation">(<a href="#ref-htmltab">2016</a>)</span> developed a <strong>htmltab</strong> package that has <code>htmltab()</code> function, enabled working with HTML tables from webpages easier and less time-consuming. We need to load the package that I use for the session</p>
+<pre class="r"><code>require(tidyverse)
+require(modelr)
+require(magrittr)
+require(gam)
+require(sf)</code></pre>
 <div id="reading-the-wuhan-coronavirus-table" class="section level3">
 <h3>Reading the Wuhan coronavirus Table</h3>
-<p>To scrap data from html table, we first need a <code>url</code> as a path to the table and then choose which table we want to scrap from the url. For instance for the case of Wuhan coronavirus death, the table of interest is the second one. Therefore, I parsed the url and the table number in the <code>htmltab</code> function to extract the data.</p>
+<p>To scrap data from html table, we first need a <code>url</code> as a path to the table and then choose which table we want to scrap from the URL. For instance for the case of Wuhan coronavirus death, the table of interest is the second one. Therefore, I parsed the URL and the table number in the <code>htmltab</code> function to extract the data.</p>
 <pre class="r"><code>url = &quot;https://en.wikipedia.org/wiki/Timeline_of_the_2019%E2%80%9320_Wuhan_coronavirus_outbreak&quot;
 
 wuhan.coronavirus = htmltab::htmltab(doc = url, which = 3)</code></pre>
@@ -109,16 +109,16 @@ wuhan.coronavirus = htmltab::htmltab(doc = url, which = 3)</code></pre>
 </div>
 <div id="transform-the-data" class="section level2">
 <h2>Transform the data</h2>
-<p>Once the data is downloaded, it is still untidy and hence require some further processing and organizing. I selected the column of interest and change their names to the meaningul ones. Then all variables that were imported as <code>structure</code> they were converted back to integer and change the date to a format that is machine compartible. I aslo used the <code>lubridate::yday</code> function to create a new variable that contains days in number from <code>01 January 2020</code>. The chunk below summarises the main steps involved to tidy the data.</p>
+<p>Once the data is downloaded, it is still untidy and hence require some further processing and organizing. I selected the column of interest and change their names to the meaningful ones. Then all variables that were imported as <code>structure</code> they were converted back to integer and change the date to a format that is machine compatible. I also used the <code>lubridate::yday</code> function to create a new variable that contains days in number from <code>01 January 2020</code>. The chunk below summaries the main steps involved to tidy the data.</p>
 <pre class="r"><code>corona = wuhan.coronavirus %&gt;% select(date = 1, suspected = 2, confirmed = 3, serious = 5, 
     death = 6, recovered = 7, death.recovered = 8) %&gt;% as_tibble() %&gt;% mutate(date = as.Date(date), 
     day = lubridate::yday(date), suspected = as.integer(suspected), confirmed = as.integer(confirmed), 
     serious = as.integer(serious), death = as.integer(death), recovered = as.integer(recovered), 
     death.recovered = as.integer(death.recovered))</code></pre>
-<p>Once we have organized and structured the data in a format that facilitate anaysis, we can first visualize the data to see effect of coronavirus overtime. Figure <a href="#fig:fig1">2</a> indicate that the number of people die by coronavirus has grown exponentially over the last 30 days.</p>
-<pre class="r"><code>ggplot(data = corona, aes(x = date, y = death)) + geom_point() + scale_x_date(date_breaks = &quot;8 days&quot;) + 
+<p>Once we have organized and structured the data in a format that facilitate analysis, we can first visualize the data to see effect of coronavirus overtime. Figure <a href="#fig:fig1">2</a> indicate that the number of people die by coronavirus has grown exponentially over the last 30 days.</p>
+<pre class="r"><code>ggplot(data = corona, aes(x = date, y = death)) + geom_point() + scale_x_date(date_breaks = &quot;10 days&quot;) + 
     cowplot::theme_minimal_grid() + theme(panel.grid = element_line(linetype = 3), 
-    legend.position = &quot;none&quot;) + labs(x = &quot;Date&quot;, y = &quot;Cumulative Death&quot;) + ggsci::scale_color_d3()</code></pre>
+    legend.position = &quot;none&quot;) + labs(x = &quot;&quot;, y = &quot;Cumulative Death&quot;) + ggsci::scale_color_d3()</code></pre>
 <div class="figure"><span id="fig:fig1"></span>
 <img src="/post/2020-02-08-model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r_files/figure-html/fig1-1.png" alt="Toll death at Wuhan" width="480" />
 <p class="caption">
@@ -130,7 +130,7 @@ Figure 2: Toll death at Wuhan
 </div>
 <div id="modelling" class="section level2">
 <h2>Modelling</h2>
-<p>Alghout figure <a href="#fig:fig1">2</a> clearly indicates that number of people dying with coronavirus is growing exponentially over time, I still use linear model for modelling this growth. In addition to linear modelling, I will model the growth of number of people dying with corona virus using three other models—<code>quadratic, cubic and gam</code>. The chunk below show the line of codes for the four modelling algorithms</p>
+<p>Although figure <a href="#fig:fig1">2</a> clearly indicates that number of people dying with coronavirus is growing exponentially over time, I still use linear model for modelling this growth. In addition to linear modelling, I will model the growth of number of people dying with corona virus using three other models—<code>quadratic, cubic and gam</code>. The chunk below show the line of codes for the four modelling algorithms</p>
 <pre class="r"><code>## Linear model
 linear = corona %$% lm(death ~ day)
 
@@ -142,7 +142,7 @@ cubic = corona %$% lm(death ~ poly(day, 3))
 
 ## GAM model
 gam = corona %$% gam::gam(death ~ s(day))</code></pre>
-<p>Once the modelling is complete, we can assess the model to choose the best fit one. <code>glance</code> function from <strong>broom</strong> packages <span class="citation">(Robinson and Hayes <a href="#ref-broom">2020</a>)</span> that construct a single row summary of the model with all the model parameters including the coefficients, statistics and accuracy parameters. Table <a href="#tab:tab1">1</a> show the parameters that help the analyst to choose the model that best fit the data. In this case, all model except GAM showed a sinficant positive correlation that account for above 75 percent, but cubic show the correlation of 99 percent. With the hightest correlation coefficient and low values of BIC and AIC compared to other models, the cubic model is the best alogirith for fitting this kind of data.</p>
+<p>Once the modelling is complete, we can assess the model to choose the best fit one. <code>glance</code> function from <strong>broom</strong> packages <span class="citation">(Robinson and Hayes <a href="#ref-broom">2020</a>)</span> that construct a single row summary of the model with all the model parameters including the coefficients, statistics and accuracy parameters. Table <a href="#tab:tab1">1</a> show the parameters that help the analyst to choose the model that best fit the data. In this case, all model except GAM showed a significant positive correlation that account for above 75 percent, but cubic show the correlation of 99 percent. With the highest correlation coefficient and low values of BIC and AIC compared to other models, the cubic model is the best algorithm for fitting this kind of data.</p>
 <table>
 <caption>
 <span id="tab:tab1">Table 1: </span>Model accuracy assesment
@@ -189,19 +189,19 @@ BIC
 Linear
 </td>
 <td style="text-align:right;width: 3cm; ">
-0.7510
+0.7583
 </td>
 <td style="text-align:right;width: 3cm; ">
-75.3972
+81.5559
 </td>
 <td style="text-align:right;width: 3cm; ">
 0
 </td>
 <td style="text-align:right;width: 3cm; ">
-335.7241
+353.6042
 </td>
 <td style="text-align:right;width: 3cm; ">
-339.6116
+357.6008
 </td>
 </tr>
 <tr>
@@ -218,10 +218,10 @@ NA
 NA
 </td>
 <td style="text-align:right;width: 3cm; ">
-191.6935
+202.5072
 </td>
 <td style="text-align:right;width: 3cm; ">
-195.5810
+206.5038
 </td>
 </tr>
 <tr>
@@ -229,19 +229,19 @@ NA
 Quadratic
 </td>
 <td style="text-align:right;width: 3cm; ">
-0.9879
+0.9892
 </td>
 <td style="text-align:right;width: 3cm; ">
-977.5576
+1141.2742
 </td>
 <td style="text-align:right;width: 3cm; ">
 0
 </td>
 <td style="text-align:right;width: 3cm; ">
-256.1276
+268.6600
 </td>
 <td style="text-align:right;width: 3cm; ">
-261.3109
+273.9888
 </td>
 </tr>
 <tr>
@@ -252,16 +252,16 @@ Cubic
 0.9997
 </td>
 <td style="text-align:right;width: 3cm; ">
-23901.7971
+24647.4136
 </td>
 <td style="text-align:right;width: 3cm; ">
 0
 </td>
 <td style="text-align:right;width: 3cm; ">
-160.0421
+172.4291
 </td>
 <td style="text-align:right;width: 3cm; ">
-166.5213
+179.0901
 </td>
 </tr>
 </tbody>
@@ -293,68 +293,13 @@ pred
 <tbody>
 <tr>
 <td style="text-align:left;width: 3cm; ">
-gam
-</td>
-<td style="text-align:left;width: 3cm; ">
-17.37
-</td>
-<td style="text-align:left;width: 3cm; ">
--1.82
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-gam
-</td>
-<td style="text-align:left;width: 3cm; ">
-12.95
-</td>
-<td style="text-align:left;width: 3cm; ">
--0.78
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-cubic
-</td>
-<td style="text-align:left;width: 3cm; ">
-30.63
-</td>
-<td style="text-align:left;width: 3cm; ">
-236.66
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
 linear
 </td>
 <td style="text-align:left;width: 3cm; ">
-32.11
+13.05
 </td>
 <td style="text-align:left;width: 3cm; ">
-340.97
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-cubic
-</td>
-<td style="text-align:left;width: 3cm; ">
-32.11
-</td>
-<td style="text-align:left;width: 3cm; ">
-308.11
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-cubic
-</td>
-<td style="text-align:left;width: 3cm; ">
-18.84
-</td>
-<td style="text-align:left;width: 3cm; ">
--0.47
+-102.86
 </td>
 </tr>
 <tr>
@@ -362,43 +307,10 @@ cubic
 gam
 </td>
 <td style="text-align:left;width: 3cm; ">
-32.11
+26.79
 </td>
 <td style="text-align:left;width: 3cm; ">
-319.97
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-cubic
-</td>
-<td style="text-align:left;width: 3cm; ">
-38.00
-</td>
-<td style="text-align:left;width: 3cm; ">
-729.80
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-cubic
-</td>
-<td style="text-align:left;width: 3cm; ">
-21.79
-</td>
-<td style="text-align:left;width: 3cm; ">
-16.95
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-cubic
-</td>
-<td style="text-align:left;width: 3cm; ">
-17.37
-</td>
-<td style="text-align:left;width: 3cm; ">
--3.17
+101.61
 </td>
 </tr>
 <tr>
@@ -406,10 +318,32 @@ cubic
 quadratic
 </td>
 <td style="text-align:left;width: 3cm; ">
-23.26
+11.53
 </td>
 <td style="text-align:left;width: 3cm; ">
-26.79
+21.17
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+gam
+</td>
+<td style="text-align:left;width: 3cm; ">
+31.37
+</td>
+<td style="text-align:left;width: 3cm; ">
+280.96
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+cubic
+</td>
+<td style="text-align:left;width: 3cm; ">
+32.89
+</td>
+<td style="text-align:left;width: 3cm; ">
+351.43
 </td>
 </tr>
 <tr>
@@ -417,21 +351,88 @@ quadratic
 linear
 </td>
 <td style="text-align:left;width: 3cm; ">
-27.68
+19.16
 </td>
 <td style="text-align:left;width: 3cm; ">
-241.23
+47.63
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+linear
+</td>
+<td style="text-align:left;width: 3cm; ">
+22.21
+</td>
+<td style="text-align:left;width: 3cm; ">
+122.88
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+cubic
+</td>
+<td style="text-align:left;width: 3cm; ">
+28.32
+</td>
+<td style="text-align:left;width: 3cm; ">
+148.50
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+gam
+</td>
+<td style="text-align:left;width: 3cm; ">
+16.11
+</td>
+<td style="text-align:left;width: 3cm; ">
+-2.56
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+cubic
+</td>
+<td style="text-align:left;width: 3cm; ">
+25.26
+</td>
+<td style="text-align:left;width: 3cm; ">
+67.88
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+gam
+</td>
+<td style="text-align:left;width: 3cm; ">
+11.53
+</td>
+<td style="text-align:left;width: 3cm; ">
+-0.05
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+linear
+</td>
+<td style="text-align:left;width: 3cm; ">
+28.32
+</td>
+<td style="text-align:left;width: 3cm; ">
+273.38
 </td>
 </tr>
 </tbody>
 </table>
 <pre class="r"><code>ggplot(data = corona, aes(x = day, y = death)) + geom_point(shape = 1, size = 2.2) + 
     geom_line(data = predictions, aes(x = day, y = pred, col = model), size = 0.95) + 
-    scale_x_continuous(breaks = seq(9, 40, 4)) + cowplot::theme_minimal_grid() + 
-    theme(panel.grid = element_line(linetype = 3), legend.position = &quot;none&quot;) + ggsci::scale_color_d3() + 
-    facet_wrap(~model)</code></pre>
+    scale_x_continuous(breaks = seq(9, 40, 4)) + scale_y_continuous(breaks = seq(100, 
+    900, 150)) + cowplot::theme_minimal_grid() + theme(panel.grid = element_line(linetype = 3), 
+    legend.position = &quot;none&quot;) + labs(x = &quot;Days since January 1, 2020&quot;, y = &quot;Cumulative Death&quot;) + 
+    ggsci::scale_color_d3() + facet_wrap(~model)</code></pre>
 <div class="figure"><span id="fig:fig2"></span>
-<img src="/post/2020-02-08-model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r_files/figure-html/fig2-1.png" alt="Fitted data from various modelling algorithms" width="672" />
+<img src="/post/2020-02-08-model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r_files/figure-html/fig2-1.png" alt="Fitted data from various modelling algorithms" width="576" />
 <p class="caption">
 Figure 3: Fitted data from various modelling algorithms
 </p>
@@ -452,6 +453,30 @@ future.deaths = predict(cubic, new.day) %&gt;% as_tibble() %&gt;% bind_cols(new.
 Figure 4: The number of people died with coronavirus in the Wuhan province. The points are cumulative death, the blue line is the fitted death using cubic polynomial algorithims and the red line show the projected number of people over the next ten days
 </p>
 </div>
+<p>Figure <a href="#fig:fig4">5</a> only projected the death toll from the cubic polynomial, what if we want to compare the number of people that coronavirus will continue to affect in the next ten days from other algorithms. first we need to predict the value for each model. The chunk below show the lines of codes for each algorithm</p>
+<pre class="r"><code>cubic.future = predict(cubic, new.day) %&gt;% as_tibble() %&gt;% mutate(model = &quot;Cubic&quot;) %&gt;% 
+    bind_cols(new.day) %&gt;% select(model, day, pred = value)
+
+linear.future = predict(linear, new.day) %&gt;% as_tibble() %&gt;% mutate(model = &quot;Linear&quot;) %&gt;% 
+    bind_cols(new.day) %&gt;% select(model, day, pred = value)
+
+gam.future = predict(gam, new.day) %&gt;% as_tibble() %&gt;% mutate(model = &quot;GAM&quot;) %&gt;% 
+    bind_cols(new.day) %&gt;% select(model, day, pred = value)
+
+quadratic.future = predict(quadratic, new.day) %&gt;% as_tibble() %&gt;% mutate(model = &quot;Quadratic&quot;) %&gt;% 
+    bind_cols(new.day) %&gt;% select(model, day, pred = value)</code></pre>
+<p>Join the projected death tolls from the four algorithms with <code>bind_rows()</code> function from <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr">2018</a>)</span>. Once the dataset was tidy, was used to visually compare the projection of the coronavirus as shown in figure <a href="#fig:fig4">5</a></p>
+<pre class="r"><code>death.proj = cubic.future %&gt;% bind_rows(linear.future, gam.future, quadratic.future)</code></pre>
+<div class="figure"><span id="fig:fig4"></span>
+<img src="/post/2020-02-08-model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r_files/figure-html/fig4-1.png" alt="The number of people died with coronavirus in the Wuhan province. The points are cumulative death, the blue line is the fitted death using cubic algorithims and the red line show the projected number of people over the next ten days from four different algorithms" width="480" />
+<p class="caption">
+Figure 5: The number of people died with coronavirus in the Wuhan province. The points are cumulative death, the blue line is the fitted death using cubic algorithims and the red line show the projected number of people over the next ten days from four different algorithms
+</p>
+</div>
+</div>
+<div id="summaries" class="section level2">
+<h2>Summaries</h2>
+<p>In this post I illustrated how to extract data from html table using the <code>htmltab</code> function. I then processed and organized the data for easy analysis and plotting. I modeled the number of people die with corona virus using <code>linear</code>, <code>quadratic</code>, <code>cubic</code> and <code>gam</code> functions. I then used the fitted value to predict the effect of corona virus to the people of Wuhan for ten days. In a nutshell, the cubic polynomial algorithm fitted better to the trend of the data and is supported with the low BIC and AIC (Table <a href="#tab:tab1">1</a>), which are used to assess models accuracy.</p>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>

@@ -17,8 +17,7 @@
       <pubDate>Sat, 08 Feb 2020 00:00:00 +0000</pubDate>
       
       <guid>/02/08/2020/model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r/</guid>
-      <description>require(tidyverse)require(modelr)require(magrittr)require(gam)require(sf)IntroductionThis tutorial will show you how to scrape that data from html table, which lives in a wikipedia and download the data for further processing. Let us load the packages we need for the session
-Figure 1: The map showing the spread of coronavirusDataThe data for this analysis was obtained from the Wikipedia page that provide updates of people died with coronavirus in Wuhan province.</description>
+      <description>IntroductionThis tutorial will show you how to scrape that data from html table, which lives in a Wikipedia and download the data for further processing. Let us load the packages we need for the session. I will focus on the Wuhan coronavirus to illustrate the point. 86 people died in a single day in China on Friday 7th, February 2020. The coronavirus death toll has risen to at least 805, and the vast majority have died in mainland China.</description>
     </item>
     
     <item>
