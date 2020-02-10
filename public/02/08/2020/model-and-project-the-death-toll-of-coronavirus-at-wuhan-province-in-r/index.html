@@ -114,11 +114,11 @@ wuhan.coronavirus = htmltab::htmltab(doc = url, which = 3)</code></pre>
     death = 6, recovered = 7, death.recovered = 8) %&gt;% as_tibble() %&gt;% mutate(date = as.Date(date), 
     day = lubridate::yday(date), suspected = as.integer(suspected), confirmed = as.integer(confirmed), 
     serious = as.integer(serious), death = as.integer(death), recovered = as.integer(recovered), 
-    death.recovered = as.integer(death.recovered))</code></pre>
+    death.recovered = as.integer(death.recovered)) %&gt;% filter(!is.na(date))</code></pre>
 <p>Once we have organized and structured the data in a format that facilitate analysis, we can first visualize the data to see effect of coronavirus overtime. Figure <a href="#fig:fig1">2</a> indicate that the number of people die by coronavirus has grown exponentially over the last 30 days.</p>
 <pre class="r"><code>ggplot(data = corona, aes(x = date, y = death)) + geom_point() + scale_x_date(date_breaks = &quot;10 days&quot;) + 
     cowplot::theme_minimal_grid() + theme(panel.grid = element_line(linetype = 3), 
-    legend.position = &quot;none&quot;) + labs(x = &quot;&quot;, y = &quot;Cumulative Death&quot;) + ggsci::scale_color_d3()</code></pre>
+    legend.position = &quot;none&quot;) + labs(x = &quot;&quot;, y = &quot;Cumulative Death&quot;)</code></pre>
 <div class="figure"><span id="fig:fig1"></span>
 <img src="/post/2020-02-08-model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r_files/figure-html/fig1-1.png" alt="Toll death at Wuhan" width="480" />
 <p class="caption">
@@ -189,19 +189,19 @@ BIC
 Linear
 </td>
 <td style="text-align:right;width: 3cm; ">
-0.7583
+0.7654
 </td>
 <td style="text-align:right;width: 3cm; ">
-81.5559
+88.0797
 </td>
 <td style="text-align:right;width: 3cm; ">
 0
 </td>
 <td style="text-align:right;width: 3cm; ">
-353.6042
+371.5075
 </td>
 <td style="text-align:right;width: 3cm; ">
-357.6008
+375.6093
 </td>
 </tr>
 <tr>
@@ -218,10 +218,10 @@ NA
 NA
 </td>
 <td style="text-align:right;width: 3cm; ">
-202.5072
+212.2468
 </td>
 <td style="text-align:right;width: 3cm; ">
-206.5038
+216.3487
 </td>
 </tr>
 <tr>
@@ -229,19 +229,19 @@ NA
 Quadratic
 </td>
 <td style="text-align:right;width: 3cm; ">
-0.9892
+0.9904
 </td>
 <td style="text-align:right;width: 3cm; ">
-1141.2742
+1336.9924
 </td>
 <td style="text-align:right;width: 3cm; ">
 0
 </td>
 <td style="text-align:right;width: 3cm; ">
-268.6600
+280.9071
 </td>
 <td style="text-align:right;width: 3cm; ">
-273.9888
+286.3763
 </td>
 </tr>
 <tr>
@@ -249,19 +249,19 @@ Quadratic
 Cubic
 </td>
 <td style="text-align:right;width: 3cm; ">
-0.9997
+0.9996
 </td>
 <td style="text-align:right;width: 3cm; ">
-24647.4136
+23470.9052
 </td>
 <td style="text-align:right;width: 3cm; ">
 0
 </td>
 <td style="text-align:right;width: 3cm; ">
-172.4291
+187.1867
 </td>
 <td style="text-align:right;width: 3cm; ">
-179.0901
+194.0232
 </td>
 </tr>
 </tbody>
@@ -270,7 +270,7 @@ Cubic
 <div id="predictions" class="section level2">
 <h2>Predictions</h2>
 <p>Once we have fitted the data to our model, we can predict the values. Its better to grid the data first before we grid. the <strong>modelr</strong> package contains <code>data_grid</code> function that bins the <code>data</code>predictor` variable to the same interval. The chunck below indicate the binning process of the predictor variable</p>
-<pre class="r"><code>bins = corona %&gt;% modelr::data_grid(day = modelr::seq_range(day, n = 20))</code></pre>
+<pre class="r"><code>bins = corona %&gt;% modelr::data_grid(day = modelr::seq_range(day, n = 30))</code></pre>
 <p>We then predict the response variable—death of people with corona virus. Instead of using the original dataset, we use the gridded (binned) predictor variable to predict the response variable. I used <code>modelr::gather_predictions</code> function to tidy the predicted values from each model and arrange the values in long–format. Table <a href="#tab:tab2">2</a> is a sample of the predicted values.</p>
 <pre class="r"><code>predictions = bins %&gt;% modelr::gather_predictions(linear, quadratic, cubic, gam)</code></pre>
 <table>
@@ -296,10 +296,21 @@ pred
 linear
 </td>
 <td style="text-align:left;width: 3cm; ">
-13.05
+32.76
 </td>
 <td style="text-align:left;width: 3cm; ">
--102.86
+409.85
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+linear
+</td>
+<td style="text-align:left;width: 3cm; ">
+20.34
+</td>
+<td style="text-align:left;width: 3cm; ">
+77.40
 </td>
 </tr>
 <tr>
@@ -307,10 +318,87 @@ linear
 gam
 </td>
 <td style="text-align:left;width: 3cm; ">
-26.79
+30.69
 </td>
 <td style="text-align:left;width: 3cm; ">
-101.61
+247.19
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+gam
+</td>
+<td style="text-align:left;width: 3cm; ">
+15.17
+</td>
+<td style="text-align:left;width: 3cm; ">
+-2.77
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+cubic
+</td>
+<td style="text-align:left;width: 3cm; ">
+36.90
+</td>
+<td style="text-align:left;width: 3cm; ">
+626.02
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+cubic
+</td>
+<td style="text-align:left;width: 3cm; ">
+25.52
+</td>
+<td style="text-align:left;width: 3cm; ">
+74.04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+cubic
+</td>
+<td style="text-align:left;width: 3cm; ">
+38.97
+</td>
+<td style="text-align:left;width: 3cm; ">
+809.76
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+gam
+</td>
+<td style="text-align:left;width: 3cm; ">
+10.00
+</td>
+<td style="text-align:left;width: 3cm; ">
+0.95
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+linear
+</td>
+<td style="text-align:left;width: 3cm; ">
+30.69
+</td>
+<td style="text-align:left;width: 3cm; ">
+354.44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+linear
+</td>
+<td style="text-align:left;width: 3cm; ">
+27.59
+</td>
+<td style="text-align:left;width: 3cm; ">
+271.33
 </td>
 </tr>
 <tr>
@@ -318,21 +406,10 @@ gam
 quadratic
 </td>
 <td style="text-align:left;width: 3cm; ">
-11.53
+38.97
 </td>
 <td style="text-align:left;width: 3cm; ">
-21.17
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-gam
-</td>
-<td style="text-align:left;width: 3cm; ">
-31.37
-</td>
-<td style="text-align:left;width: 3cm; ">
-280.96
+777.28
 </td>
 </tr>
 <tr>
@@ -340,95 +417,18 @@ gam
 cubic
 </td>
 <td style="text-align:left;width: 3cm; ">
-32.89
+14.14
 </td>
 <td style="text-align:left;width: 3cm; ">
-351.43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-linear
-</td>
-<td style="text-align:left;width: 3cm; ">
-19.16
-</td>
-<td style="text-align:left;width: 3cm; ">
-47.63
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-linear
-</td>
-<td style="text-align:left;width: 3cm; ">
-22.21
-</td>
-<td style="text-align:left;width: 3cm; ">
-122.88
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-cubic
-</td>
-<td style="text-align:left;width: 3cm; ">
-28.32
-</td>
-<td style="text-align:left;width: 3cm; ">
-148.50
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-gam
-</td>
-<td style="text-align:left;width: 3cm; ">
-16.11
-</td>
-<td style="text-align:left;width: 3cm; ">
--2.56
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-cubic
-</td>
-<td style="text-align:left;width: 3cm; ">
-25.26
-</td>
-<td style="text-align:left;width: 3cm; ">
-67.88
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-gam
-</td>
-<td style="text-align:left;width: 3cm; ">
-11.53
-</td>
-<td style="text-align:left;width: 3cm; ">
--0.05
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-linear
-</td>
-<td style="text-align:left;width: 3cm; ">
-28.32
-</td>
-<td style="text-align:left;width: 3cm; ">
-273.38
+-2.70
 </td>
 </tr>
 </tbody>
 </table>
 <pre class="r"><code>ggplot(data = corona, aes(x = day, y = death)) + geom_point(shape = 1, size = 2.2) + 
     geom_line(data = predictions, aes(x = day, y = pred, col = model), size = 0.95) + 
-    scale_x_continuous(breaks = seq(9, 40, 4)) + scale_y_continuous(breaks = seq(100, 
-    900, 150)) + cowplot::theme_minimal_grid() + theme(panel.grid = element_line(linetype = 3), 
+    scale_x_continuous(breaks = seq(9, 40, 4)) + scale_y_continuous(breaks = seq(50, 
+    2000, 150)) + cowplot::theme_minimal_grid() + theme(panel.grid = element_line(linetype = 3), 
     legend.position = &quot;none&quot;) + labs(x = &quot;Days since January 1, 2020&quot;, y = &quot;Cumulative Death&quot;) + 
     ggsci::scale_color_d3() + facet_wrap(~model)</code></pre>
 <div class="figure"><span id="fig:fig2"></span>
@@ -443,8 +443,11 @@ Figure 3: Fitted data from various modelling algorithms
 <p>We can predict for the next ten more days to see how the death toll will behave, we use the function <code>predict</code> from <strong>stats</strong> package. First we create a data frame of the ten days begin from 40 day and end at day 50. Once we have the future days data frame, we can parse along with the cubic model to predict the future toll number of the coronavirus.</p>
 <pre class="r"><code>new.day = data.frame(day = 40:50)
 
-future.deaths = predict(cubic, new.day) %&gt;% as_tibble() %&gt;% bind_cols(new.day) %&gt;% 
-    mutate(model = &quot;future&quot;) %&gt;% select(model, day, pred = value)</code></pre>
+future.deaths = predict(cubic, new.day) %&gt;% 
+  tibble::enframe(name = NULL) %&gt;% # use enframe instead of as_tibble()
+  bind_cols(new.day) %&gt;% 
+  mutate(model = &quot;future&quot;) %&gt;% 
+  select(model, day, pred=value)</code></pre>
 <p>Then we combine the predicted and the future value of the death and assign the data as new.data that was used to generate figure <a href="#fig:fig3">4</a>. We see that on the 50 day the projected toll number of people dying with coronavirus may reach to 2500 people.</p>
 <pre class="r"><code>new.data = predictions %&gt;% filter(model == &quot;cubic&quot;) %&gt;% bind_rows(future.deaths)</code></pre>
 <div class="figure"><span id="fig:fig3"></span>

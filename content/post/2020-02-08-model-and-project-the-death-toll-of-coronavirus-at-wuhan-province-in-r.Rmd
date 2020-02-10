@@ -90,7 +90,8 @@ corona = wuhan.coronavirus %>%
          serious = as.integer(serious),
          death = as.integer(death),
          recovered = as.integer(recovered),
-         death.recovered = as.integer(death.recovered))
+         death.recovered = as.integer(death.recovered)) %>%
+  filter(!is.na(date))
 
 ```
 
@@ -103,8 +104,8 @@ ggplot(data = corona ,
   scale_x_date(date_breaks = "10 days" )+
   cowplot::theme_minimal_grid()+
   theme(panel.grid = element_line(linetype = 3), legend.position = "none")+
-  labs(x = "", y = "Cumulative Death")+
-  ggsci::scale_color_d3()
+  labs(x = "", y = "Cumulative Death")
+
 ```
 
 Looking on figure \@ref(fig:fig1) you notice that there are couple of days with unreported death. Then we need to trim off all observation before January 10,2020. We use the `filter` function from **dplyr** package [@dplyr]
@@ -154,7 +155,7 @@ linear %>% broom::glance() %>% mutate(model = "Linear") %>%
 Once we have fitted the data to our model, we can predict the values. Its better to grid the data first before we grid. the **modelr** package contains `data_grid` function that bins the `data`predictor` variable to the same interval.  The chunck below indicate the binning process of the predictor variable
 ```{r}
 bins = corona %>% 
-  modelr::data_grid(day = modelr::seq_range(day, n = 20))
+  modelr::data_grid(day = modelr::seq_range(day, n = 30))
 
 ```
 
@@ -184,7 +185,7 @@ ggplot(data = corona,
   geom_line(data = predictions,
             aes(x = day, y = pred, col = model), size = .95)+
   scale_x_continuous(breaks = seq(9,40,4))+
-  scale_y_continuous(breaks = seq(100,900,150))+
+  scale_y_continuous(breaks = seq(50,2000,150))+
   cowplot::theme_minimal_grid()+
   theme(panel.grid = element_line(linetype = 3), legend.position = "none")+
   labs(x = "Days since January 1, 2020", y = "Cumulative Death") +
@@ -199,7 +200,7 @@ We can predict for the next ten more days to see how the death toll will behave,
 new.day = data.frame(day = 40:50)
 
 future.deaths = predict(cubic, new.day) %>% 
-  as_tibble() %>% 
+  tibble::enframe(name = NULL) %>% # use enframe instead of as_tibble()
   bind_cols(new.day) %>% 
   mutate(model = "future") %>% 
   select(model, day, pred=value)
