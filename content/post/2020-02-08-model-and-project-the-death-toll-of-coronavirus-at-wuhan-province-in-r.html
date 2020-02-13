@@ -22,9 +22,9 @@ link-citations: yes
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>The recent contagious <a href="https://en.wikipedia.org/wiki/2019_novel_coronavirus">2019-nCoV Wuhan coronavirus</a> outbreak in China has sent shocks through financial markets and entire economies, and has duly triggered panic among the general population around the world. This noval coronavirus (nCoV) is a new strain that has never been identified in humans before. The risk associated with this virus to human led the World Health Organization (WHO) of United Nations to <a href="https://www.bbc.com/news/world-51318246">declare</a> 2019-nCoV as global health emergency.</p>
-<p>While trying to obtain the data for this contagious virus, I landed on <a href="https://en.wikipedia.org/wiki/Timeline_of_the_2019%E2%80%9320_Wuhan_coronavirus_outbreak">Wikipedia page</a> that provide a timeline of corona virus outbreak at Wuhan province. The data in html table constantly updated, which make copying the table and format it manually a daunting task. Therefore, this post focus taking you through the procedure to access that data from html table, structure and organize it in tidy format that make further analysis easier.</p>
-<p>As I have introudced, the post focus on the citizen data generated in Wuhan province as a result of a contagious coronavirus. When I was writing this post, 97 people died in China on a single day of 2020-02-11. The coronavirus death toll has risen to at least 1113, and the vast majority have died in mainland China. Globally, the virus has infected more 38800 people across 28 countries and territories (Figure <a href="#fig:fig0">1</a>).</p>
+<p>The recent contagious <a href="https://en.wikipedia.org/wiki/2019_novel_coronavirus">2019-nCoV Wuhan coronavirus</a> outbreak in China has brought shocks and triggered panic among the general population around the world. This noval coronavirus (nCoV) is a new strain that has never been identified in humans before. The risk associated with this virus to human led the World Health Organization (WHO) of United Nations to <a href="https://www.bbc.com/news/world-51318246">declare</a> 2019-nCoV as global health emergency.</p>
+<p>While trying to get the data for this contagious virus, I landed on <a href="https://en.wikipedia.org/wiki/Timeline_of_the_2019%E2%80%9320_Wuhan_coronavirus_outbreak">Wikipedia page</a> that provides a timeline of corona virus outbreak at Wuhan province in China. With this source of data I face a double challenge. The first challenge is the data I need is not in a tabular form and ready to read in R. The other challenge is that the data is kept in html table and constantly updated, which make copying and format the table manually a daunting task. Therefore, this post focus taking you through the procedure to access that data from html table, structure and organize it in tidy format that make further analysis easier.</p>
+<p>As I have introduced, the post focus on the citizen data generated in Wuhan province because of a contagious coronavirus. The number of people died with corona virus has skyrocket from one person on January 14, 2020 to 111 on NA. Just on single day of NA, coronavirus killed 0 people died in China. Globally, the virus has infected more 1219 people across 28 countries and territories (Figure <a href="#fig:fig0">1</a>).</p>
 <div class="figure"><span id="fig:fig0"></span>
 <img src="/post/2020-02-08-model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r_files/figure-html/fig0-1.png" alt="The map showing the countried infected with coronavirus" width="672" />
 <p class="caption">
@@ -154,19 +154,19 @@ BIC
 Linear
 </td>
 <td style="text-align:right;width: 3cm; ">
-0.7761
+0.1762
 </td>
 <td style="text-align:right;width: 3cm; ">
-100.5333
+4.2766
 </td>
 <td style="text-align:right;width: 3cm; ">
-0
+0.0518
 </td>
 <td style="text-align:right;width: 3cm; ">
-408.2848
+116.8576
 </td>
 <td style="text-align:right;width: 3cm; ">
-412.5867
+120.1308
 </td>
 </tr>
 <tr>
@@ -183,10 +183,10 @@ NA
 NA
 </td>
 <td style="text-align:right;width: 3cm; ">
-238.3016
+116.5505
 </td>
 <td style="text-align:right;width: 3cm; ">
-242.6035
+119.8236
 </td>
 </tr>
 <tr>
@@ -194,19 +194,19 @@ NA
 Quadratic
 </td>
 <td style="text-align:right;width: 3cm; ">
-0.9918
+0.2032
 </td>
 <td style="text-align:right;width: 3cm; ">
-1687.8134
+2.4228
 </td>
 <td style="text-align:right;width: 3cm; ">
-0
+0.1156
 </td>
 <td style="text-align:right;width: 3cm; ">
-307.8685
+118.1233
 </td>
 <td style="text-align:right;width: 3cm; ">
-313.6045
+122.4875
 </td>
 </tr>
 <tr>
@@ -214,19 +214,19 @@ Quadratic
 Cubic
 </td>
 <td style="text-align:right;width: 3cm; ">
-0.9997
+0.2271
 </td>
 <td style="text-align:right;width: 3cm; ">
-30146.7702
+1.7633
 </td>
 <td style="text-align:right;width: 3cm; ">
-0
+0.1902
 </td>
 <td style="text-align:right;width: 3cm; ">
-207.0566
+119.4525
 </td>
 <td style="text-align:right;width: 3cm; ">
-214.2265
+124.9077
 </td>
 </tr>
 </tbody>
@@ -260,79 +260,13 @@ pred
 <tbody>
 <tr>
 <td style="text-align:left;width: 3cm; ">
-cubic
-</td>
-<td style="text-align:left;width: 3cm; ">
-13.31
-</td>
-<td style="text-align:left;width: 3cm; ">
--1.56
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
 quadratic
 </td>
 <td style="text-align:left;width: 3cm; ">
-10.00
+27.55
 </td>
 <td style="text-align:left;width: 3cm; ">
-70.20
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-cubic
-</td>
-<td style="text-align:left;width: 3cm; ">
-28.76
-</td>
-<td style="text-align:left;width: 3cm; ">
-166.43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-quadratic
-</td>
-<td style="text-align:left;width: 3cm; ">
-18.83
-</td>
-<td style="text-align:left;width: 3cm; ">
--41.43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-gam
-</td>
-<td style="text-align:left;width: 3cm; ">
-13.31
-</td>
-<td style="text-align:left;width: 3cm; ">
--2.45
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-gam
-</td>
-<td style="text-align:left;width: 3cm; ">
-19.93
-</td>
-<td style="text-align:left;width: 3cm; ">
-3.15
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-cubic
-</td>
-<td style="text-align:left;width: 3cm; ">
-32.07
-</td>
-<td style="text-align:left;width: 3cm; ">
-308.81
+4.33
 </td>
 </tr>
 <tr>
@@ -340,10 +274,10 @@ cubic
 linear
 </td>
 <td style="text-align:left;width: 3cm; ">
-22.14
+22.03
 </td>
 <td style="text-align:left;width: 3cm; ">
-132.23
+2.74
 </td>
 </tr>
 <tr>
@@ -351,32 +285,10 @@ linear
 gam
 </td>
 <td style="text-align:left;width: 3cm; ">
-26.55
+30.86
 </td>
 <td style="text-align:left;width: 3cm; ">
-95.21
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-quadratic
-</td>
-<td style="text-align:left;width: 3cm; ">
-32.07
-</td>
-<td style="text-align:left;width: 3cm; ">
-341.90
-</td>
-</tr>
-<tr>
-<td style="text-align:left;width: 3cm; ">
-quadratic
-</td>
-<td style="text-align:left;width: 3cm; ">
-25.45
-</td>
-<td style="text-align:left;width: 3cm; ">
-67.62
+5.91
 </td>
 </tr>
 <tr>
@@ -384,10 +296,98 @@ quadratic
 cubic
 </td>
 <td style="text-align:left;width: 3cm; ">
-38.69
+14.31
 </td>
 <td style="text-align:left;width: 3cm; ">
-779.81
+-12.73
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+linear
+</td>
+<td style="text-align:left;width: 3cm; ">
+41.90
+</td>
+<td style="text-align:left;width: 3cm; ">
+7.10
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+cubic
+</td>
+<td style="text-align:left;width: 3cm; ">
+39.69
+</td>
+<td style="text-align:left;width: 3cm; ">
+6.10
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+linear
+</td>
+<td style="text-align:left;width: 3cm; ">
+12.10
+</td>
+<td style="text-align:left;width: 3cm; ">
+0.57
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+gam
+</td>
+<td style="text-align:left;width: 3cm; ">
+34.17
+</td>
+<td style="text-align:left;width: 3cm; ">
+6.42
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+cubic
+</td>
+<td style="text-align:left;width: 3cm; ">
+24.24
+</td>
+<td style="text-align:left;width: 3cm; ">
+3.41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+gam
+</td>
+<td style="text-align:left;width: 3cm; ">
+26.45
+</td>
+<td style="text-align:left;width: 3cm; ">
+3.88
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+quadratic
+</td>
+<td style="text-align:left;width: 3cm; ">
+40.79
+</td>
+<td style="text-align:left;width: 3cm; ">
+6.15
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 3cm; ">
+quadratic
+</td>
+<td style="text-align:left;width: 3cm; ">
+25.34
+</td>
+<td style="text-align:left;width: 3cm; ">
+3.51
 </td>
 </tr>
 </tbody>

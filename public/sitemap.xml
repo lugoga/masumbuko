@@ -63,6 +63,41 @@
   </url>
   
   <url>
+    <loc>/01/20/2020/easy-access-of-el-nino-southern-oscillation-data-in-r/</loc>
+    <lastmod>2020-01-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/enso/</loc>
+    <lastmod>2020-01-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/pacific-ocean/</loc>
+    <lastmod>2020-01-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/soi/</loc>
+    <lastmod>2020-01-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/01/13/2020/access-southern-oscillation-index-data-with-rsoi-package-in-r/</loc>
+    <lastmod>2020-01-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/el-nino/</loc>
+    <lastmod>2020-01-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/pacific/</loc>
+    <lastmod>2020-01-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/categories/text-mining/</loc>
     <lastmod>2019-12-02T00:00:00+00:00</lastmod>
   </url>
@@ -98,12 +133,12 @@
   </url>
   
   <url>
-    <loc>/categories/modis/</loc>
+    <loc>/tags/modis/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/modis/</loc>
+    <loc>/categories/modis/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
   

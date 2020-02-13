@@ -1,0 +1,96 @@
+---
+title: Access Southern Oscillation Index Data with rsoi package in R
+author: Masumbuko Semba
+date: '2020-01-13'
+slug: access-southern-oscillation-index-data-with-rsoi-package-in-r
+categories: []
+tags:
+  - SOI
+  - El Nino
+  - Pacific
+  - Pacific Ocean
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = FALSE)
+```
+
+## Introduction
+
+The Southern Oscillation Index (SOI) is defined as the standardized difference between barometric pressure between **Tahiti** and **Darwin**, **Australia.** The SOI is one measure of the large-scale fluctuations in air pressure occurring between the western and eastern tropical Pacific (i.e., the state of the Southern Oscillation) during *El Niño* and *La Niña* episodes. In general, smoothed time series of the SOI correspond very well with changes in ocean temperatures across the eastern tropical Pacific. 
+
+The negative phase of the SOI represents below-normal air pressure at **Tahiti** and above-normal air pressure at **Darwin.** Prolonged periods of negative (positive) SOI values coincide with abnormally warm (cold) ocean waters across the eastern tropical Pacific typical of El Niño (La Niña) episodes. The information of the methodology used to calculate SOI is available at the [Climate Prediction Center SOI](https://www.ncdc.noaa.gov/teleconnections/enso/indicators/soi/) page.
+
+Sam Albers [-@rsoi] developed a **rsoi** package that provide tools to access Various Northern and Southern Hemisphere Climate Indices. Some of these indices include;
+
+i. Southern Oscillation Index
+i. Oceanic Nino Index
+i. North Pacific Gyre Oscillation
+i. North Atlantic Oscillation
+i. Arctic Oscillation
+i. Antarctic Oscillation
+i. Multivariate ENSO Index Version 2
+
+In this post I will take you through how to install the package and download the data and plot the downloaded data. The **rsoi** package is available from the The [Comprehensive R Archive Network (CRAN)](https://cran.r-project.org/web/packages/rsoi/index.html) and you can install using the chunk below
+
+```{r, eval=FALSE}
+
+install.packages("rsoi")
+
+```
+
+Once you have installed the package you need to load the package into the session to access its functions. First we need to load the package into the session using the `require` function as highlighted in the chunk below. I also load the **tidyverse** package [@tidyverse], which contains tools  that I will use for data manipulation and plotting. 
+
+```{r, }
+require(rsoi)
+require(tidyverse)
+```
+
+The good thing about the **rsoi* is that all functions to download the indices begin with the world `dowload_` followed by the specific index. For instance, the function `download_soi` is used to access and download the  Southern Oscillation Index data. 
+```{r}
+soi = download_soi()
+```
+
+The SOI data that we have just downloaded is in data frame format and we can check the internal structure of the dataset using either `str` function from base R or `glimpse` function from **dplyr** package [@dplyr]. Table \@ref(tab:tab1) shows the sample of the southern Oscillation Index values that we just downloaded. 
+
+```{r tab1, echo=FALSE}
+nn = nrow(soi)
+na = nn-5
+
+soi %>% 
+  slice(2:6) %>%
+  bind_rows(soi %>% slice(na:nn)) %>% 
+  select(-5)  %>%
+  kableExtra::kable(format = "html", caption = "Sample of the southern Oscillation Index") %>%
+  kableExtra::column_spec(column = 1:4, width = "2.5cm")
+  
+```
+
+Once we have have the data we can plot to them to visualize the periods of negative (positive) SOI values, which coincide with abnormally warm (cold) ocean waters across the eastern tropical Pacific typical of El Niño (La Niña) episodes. The figure \@ref(fig:fig1) that show the SOI oscillation was plotted using the tools in  **ggplot2** package [@ggplot]. 
+
+```{r fig1, fig.cap="Southern Oscillation Index (SOI). Place mouse on a plot and window will popup that allows you to interact with the plot."}
+soi.status = soi %>% mutate(status = if_else(SOI >= 0, "positive", "negative"))
+
+soi.plot = ggplot(data = soi.status, aes(x = Date, y = SOI, fill = status))+
+  geom_col()+
+  # ggsci::scale_fill_d3() +
+  scale_fill_manual(values = c("red", "blue")) +
+  cowplot::theme_minimal_grid()+
+  labs(x = "", y = "SOI Index") +
+  scale_y_continuous(breaks = seq(-3,3,1)) +
+  # scale_x_date(date_breaks = "10 years", date_labels = "%Y")+
+  theme(legend.position = "none", panel.grid = element_line(linetype = "dotted"))
+
+soi.plot %>% plotly::ggplotly()
+```
+
+
+## Summary
+We have seen how to access SOI data in R using the **rsoi** and plot the value with **ggplot2** package. Note that isn't the only index you can get its data. **rsoi** package offers you more function to download other indices introduced in this post. You can explore more of other indices and get the data using almost similar catalytic approach explained in this post. 
+
+## Reference
+

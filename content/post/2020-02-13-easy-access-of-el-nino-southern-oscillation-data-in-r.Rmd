@@ -1,0 +1,91 @@
+---
+title: Easy access of El Nino-Southern Oscillation data in R
+author: Masumbuko Semba
+date: '2020-01-20'
+slug: easy-access-of-el-nino-southern-oscillation-data-in-r
+categories: []
+tags:
+  - ENSO
+  - SOI
+  - Pacific Ocean
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = FALSE)
+```
+
+El Niño-Southern Oscillation (ENSO) is one of the most important climate phenomena on Earth due to its ability to change the global atmospheric circulation, which in turn, influences temperature and precipitation across the globe. ENSO is a recurring climate pattern involving changes in the temperature of waters in the central and eastern tropical Pacific Ocean. On periods ranging from about three to seven years, the surface waters across a large swath of the tropical Pacific Ocean warm or cool by anywhere from 1°C to 3°C, compared to normal.
+
+This oscillating warming and cooling pattern, referred to as the ENSO cycle, directly affects rainfall distribution in the tropics and can have a strong influence on weather across the United States and other parts of the world. *El Niño* and *La Niña* are the extreme phases of the ENSO cycle; between these two phases is a third phase called ENSO-neutral.
+
++ **El Niño**:  A warming of the ocean surface, or above-average sea surface temperatures (SST), in the central and eastern tropical Pacific Ocean.  Over Indonesia, rainfall tends to become reduced while rainfall increases over the central and eastern tropical Pacific Ocean.  The low-level surface winds, which normally blow from east to west along the equator (“easterly winds”), instead weaken or, in some cases, start blowing the other direction (from west to east or “westerly winds”).  In general, the warmer the ocean temperature anomalies, the stronger the El Niño (and vice-versa).
+
++ **La Niña**:  A cooling of the ocean surface, or below-average sea surface temperatures (SST), in the central and eastern tropical Pacific Ocean.  Over Indonesia, rainfall tends to increase while rainfall decreases over the central and eastern tropical Pacific Ocean.  The normal easterly winds along the equator become even stronger.  In general, the cooler the ocean temperature anomalies, the stronger the La Niña (and vice-versa).
+
++ **Neutral**:  Neither El Niño or La Niña. Often tropical Pacific SSTs are generally close to average.  However, there are some instances when the ocean can look like it is in an El Niño or La Niña state, but the atmosphere is not playing along (or vice versa).
+
+Sam Albers [-@rsoi] developed a **rsoi** package that made access and download of ENSO data with easy. In this post I will focus on getting the ENSO data and work in R. The **rsoi** package is available from the The [Comprehensive R Archive Network (CRAN)](https://cran.r-project.org/web/packages/rsoi/index.html) and you can install using the chunk below
+
+```{r, eval=FALSE}
+
+install.packages("rsoi")
+
+```
+
+Once you have installed the package you need to load the package into the session to access its functions. First we need to load the package into the session using the `require` function as highlighted in the chunk below. I also load the **tidyverse** package [@tidyverse], which contains tools  that I will use for data manipulation and plotting. 
+
+```{r, }
+require(rsoi)
+require(tidyverse)
+```
+
+The good thing about the **rsoi* is that all functions to download the indices begin with the world `dowload_` followed by the specific index. For instance, the function `download_soi` is used to access and download the  Southern Oscillation Index data. 
+
+```{r}
+enso = rsoi::download_enso()
+```
+
+The enso data that we have just downloaded is in data frame format and we can check the internal structure of the dataset using either `str` function from base R or `glimpse` function from **dplyr** package [@dplyr]. Table \@ref(tab:tab1) shows the Sample of the El Niño-Southern Oscillation that we just downloaded. 
+
+```{r tab1, echo=FALSE}
+nn = nrow(enso)
+na = nn-5
+
+enso %>% 
+  slice(2:6) %>%
+  bind_rows(enso %>% slice(na:nn)) %>% 
+  select(-c(Year, Month)) %>% 
+  kableExtra::kable(format = "html", digits = 2, align = "c",
+                    caption = "Sample of the El Niño-Southern Oscillation") %>%
+  kableExtra::column_spec(column = 1:2, width = "2.5cm")%>%
+  kableExtra::column_spec(column = 3, width = "4.5cm")%>%
+  kableExtra::column_spec(column = 4:5, width = "2.5cm")
+
+  
+```
+
+Looking the ENSO data in table \@ref(tab:tab1) hide important patterns of El Niño (La Niña) episodes. The chunk below highlight the lines of code from **ggplot2** package [@ggplot] used to generate figure \@ref(fig:fig1) that show clearly the periods of ENSO phases over time. 
+
+```{r fig1, fig.cap="El Niño-Southern Oscillation episodes. Place mouse on a plot and window will popup that allows you to interact with the plot."}
+
+enso.plot = ggplot(data = enso, aes(x = Date, y = ONI, fill = phase))+
+  geom_col()+
+  # ggsci::scale_fill_jama() +
+  scale_fill_manual(values = c("blue","green", "red"), name = "") +
+  cowplot::theme_minimal_grid()+
+  labs(x = "", y = "ENSO Index") +
+  theme(legend.position = "top", panel.grid = element_line(linetype = "dotted"))
+
+enso.plot %>% 
+  plotly::ggplotly() %>%
+  plotly::layout(legend = list(orientation = "h", x = 0.4, y = 1.1))
+```
+
+## Summary
+We have seen how to access ENSO data in R using the **rsoi** and plot the value with **ggplot2** package. In the previous post we accessed and plotted SOI. **rsoi** package offers you more function to download other indices introduced in this post. You can explore more of other indices and get the data using almost similar catalytic approach explained in this post. 
+
+## References

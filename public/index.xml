@@ -17,7 +17,26 @@
       <pubDate>Sat, 08 Feb 2020 00:00:00 +0000</pubDate>
       
       <guid>/02/08/2020/model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r/</guid>
-      <description>IntroductionThe recent contagious 2019-nCoV Wuhan coronavirus outbreak in China has sent shocks through financial markets and entire economies, and has duly triggered panic among the general population around the world. This noval coronavirus (nCoV) is a new strain that has never been identified in humans before. The risk associated with this virus to human led the World Health Organization (WHO) of United Nations to declare 2019-nCoV as global health emergency.</description>
+      <description>IntroductionThe recent contagious 2019-nCoV Wuhan coronavirus outbreak in China has brought shocks and triggered panic among the general population around the world. This noval coronavirus (nCoV) is a new strain that has never been identified in humans before. The risk associated with this virus to human led the World Health Organization (WHO) of United Nations to declare 2019-nCoV as global health emergency.
+While trying to get the data for this contagious virus, I landed on Wikipedia page that provides a timeline of corona virus outbreak at Wuhan province in China.</description>
+    </item>
+    
+    <item>
+      <title>Easy access of El Nino-Southern Oscillation data in R</title>
+      <link>/01/20/2020/easy-access-of-el-nino-southern-oscillation-data-in-r/</link>
+      <pubDate>Mon, 20 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/01/20/2020/easy-access-of-el-nino-southern-oscillation-data-in-r/</guid>
+      <description>El Niño-Southern Oscillation (ENSO) is one of the most important climate phenomena on Earth due to its ability to change the global atmospheric circulation, which in turn, influences temperature and precipitation across the globe. ENSO is a recurring climate pattern involving changes in the temperature of waters in the central and eastern tropical Pacific Ocean. On periods ranging from about three to seven years, the surface waters across a large swath of the tropical Pacific Ocean warm or cool by anywhere from 1°C to 3°C, compared to normal.</description>
+    </item>
+    
+    <item>
+      <title>Access Southern Oscillation Index Data with rsoi package in R</title>
+      <link>/01/13/2020/access-southern-oscillation-index-data-with-rsoi-package-in-r/</link>
+      <pubDate>Mon, 13 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/01/13/2020/access-southern-oscillation-index-data-with-rsoi-package-in-r/</guid>
+      <description>IntroductionThe Southern Oscillation Index (SOI) is defined as the standardized difference between barometric pressure between Tahiti and Darwin, Australia. The SOI is one measure of the large-scale fluctuations in air pressure occurring between the western and eastern tropical Pacific (i.e., the state of the Southern Oscillation) during El Niño and La Niña episodes. In general, smoothed time series of the SOI correspond very well with changes in ocean temperatures across the eastern tropical Pacific.</description>
     </item>
     
     <item>
