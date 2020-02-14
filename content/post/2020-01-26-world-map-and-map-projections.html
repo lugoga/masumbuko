@@ -1,0 +1,184 @@
+---
+title: World map and Map projections
+author: Masumbuko Semba
+date: '2020-01-26'
+slug: world-map-and-map-projections
+categories: []
+tags:
+  - mapping
+  - map projections
+  - ggplot2
+  - sf
+  - world map
+  - world
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+
+<p>A map projection is a way to flatten a globe’s surface into a plane in order to make a map. This requires a systematic transformation of the latitudes and longitudes of locations from the surface of the globe into locations on a plane.[1] All projections of a sphere on a plane necessarily distort the surface in some way and to some extent. Depending on the purpose of the map, some distortions are acceptable and others are not; therefore, different map projections exist in order to preserve some properties of the sphere-like body at the expense of other properties. Every distinct map projection distorts in a distinct way, by definition.</p>
+<p>Projections are grouped according to properties of the model they preserve. Some of the more common categories are;</p>
+<ul>
+<li>cylindrical (e.g. Mercator),</li>
+<li>conic (e.g. Albers), and</li>
+<li>plane (e.g. stereographic)</li>
+</ul>
+<p>The three developable surfaces (plane, cylinder, cone) provide useful models for understanding, describing, and developing map projections. However, these models are limited in two fundamental ways. For one thing, most world projections in use do not fall into any of those categories. For another thing, even most projections that do fall into those categories are not naturally attainable through physical projection.</p>
+<p>In this post I will take you through the projection that are commonly and widely used to map features on the earth surface. First we need to load the <strong>sf</strong> package that support for simple features—a standardized way to encode spatial vector—point, lines and polygons <span class="citation">(Pebesma <a href="#ref-sf">2018</a>)</span>. The other package that we need is the <strong>tidyverse</strong>, a set of packages that we use for mapping and data manipulation <span class="citation">(Wickham <a href="#ref-tidyverse">2017</a>)</span>. Let’s load the package into our session</p>
+<pre class="r"><code>require(sf)
+require(tidyverse)</code></pre>
+<p>I assume that you are familiar with spatial data construction and that is not the focus of this post. You can use any spatial data that you know, but for this post I will use the world spatial data bundled in the <strong>spData</strong> package <span class="citation">(Bivand, Nowosad, and Lovelace <a href="#ref-spdata">2020</a>)</span>. The dataset is the simple feature and contains a records of 177 countries with 11 variables. We can simply load the data set as the highlighted in the chunk below.</p>
+<pre class="r"><code>dunia = spData::world %&gt;% 
+  st_as_sf()</code></pre>
+<div id="epsg-code" class="section level2">
+<h2>EPSG code</h2>
+<p>The EPSG codes are assigned to Geographical Coordinate System (GCS), coordinate transformation and their components. Therefore, instead of remembering all the details for a particular coordinate system, you simply parse the epsg code and the mapping software recognize and respond to that particular projections and its transformations. For more details please visit <a href="https://epsg.io/?q=World&amp;page=2">projection link</a>. Therefore, the maps that follows below are generated with different projections</p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 4326) +
+  ggtitle(&quot;WGS 84 - WGS84 - World Geodetic System 1984, used in GPS&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 3395) +
+  ggtitle(&quot;WGS 84 / World Mercator&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 4087) +
+  ggtitle(&quot;WGS 84 / World Equidistant Cylindrical&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 4088) +
+  ggtitle(&quot;World Equidistant Cylindrical (Sphere)&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 54030) +
+  ggtitle(&quot;World Robinson&quot;)+
+  cowplot::theme_minimal_grid() +
+  scale_fill_viridis_c()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 54024) +
+  ggtitle(&quot;World Bonne&quot;)+
+  cowplot::theme_minimal_grid()+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 54021) +
+  ggtitle(&quot;World Polyconic&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<pre class="r"><code>nc = ncdf4::nc_open(&quot;e:/GIS/ROADMAP/LAYERS DATA/GLOBAL LAYERS/coads/airtemp/airtemp_jan_global_coads_nvods.nc&quot;)
+ait = ncdf4::ncvar_get(nc, &quot;AIRT&quot;)
+lon = ncdf4::ncvar_get(nc, &quot;COADSXN100_80&quot;)
+lat = ncdf4::ncvar_get(nc, &quot;COADSY&quot;)
+
+
+
+air.data = expand.grid(lon,lat)  %&gt;% 
+  bind_cols(
+    ait %&gt;% expand.grid()  
+    ) %&gt;% 
+  rename(lon = 1, lat = 2, air.temperature = 3)
+
+air.raster = raster::raster(&quot;e:/GIS/ROADMAP/LAYERS DATA/GLOBAL LAYERS/coads/airtemp/airtemp_jan_global_coads_nvods.nc&quot;)
+
+air.tb = air.raster %&gt;% 
+  raster::as.data.frame(xy = TRUE) %&gt;% 
+  rename(lon = 1, lat = 2, air.temperature = 3)</code></pre>
+<pre class="r"><code>ggplot() +
+  # geom_raster(data = air.data, aes(x = lon, y = lat, fill = air.temperature))+
+  # geom_raster(data = air.tb, aes(x = lon, y = lat, fill = air.temperature))+
+  # ggspatial::layer_spatial(data = dunia)+
+  geom_sf(data = dunia)+
+  coord_sf(crs = 54009) +
+  ggtitle(&quot;World Mollweide&quot;)+
+  cowplot::theme_minimal_grid()+
+  scale_fill_gradientn(colours = oce::oce.colors9A(120), na.value = &quot;white&quot;)</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 54032) +
+  ggtitle(&quot;World Azimuthal Equidistant&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 54016) +
+  ggtitle(&quot;World Gall Stereographic&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 54013) +
+  ggtitle(&quot;World Eckert III&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 54012) +
+  ggtitle(&quot;World Eckert IV&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 54010) +
+  ggtitle(&quot;World Eckert VI&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 54003) +
+  ggtitle(&quot;World Miller Cylindrical&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 54002) +
+  ggtitle(&quot;World Equidistant Cylindrical&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 54001) +
+  ggtitle(&quot;World Plate Carree&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 54031) +
+  ggtitle(&quot;World Two Point Equidistant&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<pre class="r"><code>ggplot() +
+  ggspatial::layer_spatial(data = dunia)+
+  coord_sf(crs = 4088) +
+  ggtitle(&quot;World Equidistant Cylindrical (Sphere)&quot;)+
+  cowplot::theme_minimal_grid()</code></pre>
+<p><img src="/post/2020-01-26-world-map-and-map-projections_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-spdata">
+<p>Bivand, Roger, Jakub Nowosad, and Robin Lovelace. 2020. <em>SpData: Datasets for Spatial Analysis</em>. <a href="https://CRAN.R-project.org/package=spData">https://CRAN.R-project.org/package=spData</a>.</p>
+</div>
+<div id="ref-sf">
+<p>Pebesma, Edzer. 2018. <em>Sf: Simple Features for R</em>. <a href="https://CRAN.R-project.org/package=sf">https://CRAN.R-project.org/package=sf</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, Hadley. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+</div>
+</div>

@@ -66,6 +66,60 @@
     </item>
     
     <item>
+      <title>ggplot2</title>
+      <link>/tags/ggplot2/</link>
+      <pubDate>Sun, 26 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/ggplot2/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>map projections</title>
+      <link>/tags/map-projections/</link>
+      <pubDate>Sun, 26 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/map-projections/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>mapping</title>
+      <link>/tags/mapping/</link>
+      <pubDate>Sun, 26 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/mapping/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>sf</title>
+      <link>/tags/sf/</link>
+      <pubDate>Sun, 26 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/sf/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>world</title>
+      <link>/tags/world/</link>
+      <pubDate>Sun, 26 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/world/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>world map</title>
+      <link>/tags/world-map/</link>
+      <pubDate>Sun, 26 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/world-map/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>ENSO</title>
       <link>/tags/enso/</link>
       <pubDate>Mon, 20 Jan 2020 00:00:00 +0000</pubDate>
@@ -390,7 +444,7 @@
     </item>
     
     <item>
-      <title>bookdown</title>
+      <title>Bookdown</title>
       <link>/tags/bookdown/</link>
       <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
@@ -530,15 +584,6 @@
       <pubDate>Thu, 14 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/pemba/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>mapping</title>
-      <link>/tags/mapping/</link>
-      <pubDate>Wed, 13 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/mapping/</guid>
       <description></description>
     </item>
     

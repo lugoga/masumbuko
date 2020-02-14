@@ -6,10 +6,19 @@
     <description>Recent content in mapping on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 13 Feb 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 26 Jan 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/mapping/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>World map and Map projections</title>
+      <link>/01/26/2020/world-map-and-map-projections/</link>
+      <pubDate>Sun, 26 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/01/26/2020/world-map-and-map-projections/</guid>
+      <description>A map projection is a way to flatten a globe’s surface into a plane in order to make a map. This requires a systematic transformation of the latitudes and longitudes of locations from the surface of the globe into locations on a plane.[1] All projections of a sphere on a plane necessarily distort the surface in some way and to some extent. Depending on the purpose of the map, some distortions are acceptable and others are not; therefore, different map projections exist in order to preserve some properties of the sphere-like body at the expense of other properties.</description>
+    </item>
     
     <item>
       <title>Mapping with oce</title>

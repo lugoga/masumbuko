@@ -33,15 +33,13 @@ require(sf)
 
 url = "https://en.wikipedia.org/wiki/Timeline_of_the_2019%E2%80%9320_Wuhan_coronavirus_outbreak"
 
-wuhan.coronavirus = htmltab::htmltab(doc = url, which = 4)
+wuhan.coronavirus = htmltab::htmltab(doc = url, which = 3)
 
 ```
 
 
 
 ```{r, echo=FALSE}
-## identify the last row that will be chopped off 
-nr = nrow(wuhan.coronavirus)
 
 ## create a function that replace comma in numbers or integers
 replaceCommas<-function(x){
@@ -49,17 +47,22 @@ replaceCommas<-function(x){
 }
 
 corona = wuhan.coronavirus %>% 
-  select(date = 1, suspected = 2, confirmed = 3, serious = 6, 
-         death = 7, recovered = 8, death.recovered = 9)  %>%
+  select(date = 1, suspected = 2, confirmed = 5, serious = 7, 
+         death = 9, recovered = 10, death.recovered = 11)  %>%
   as_tibble() %>%
-  slice(-nr) %>% 
+  # slice(-nr) %>% 
   mutate(date = as.Date(date), day = lubridate::yday(date),
          suspected = replaceCommas(suspected),
          confirmed = replaceCommas(confirmed),
          serious = replaceCommas(serious),
          death = replaceCommas(death),
          recovered = replaceCommas(recovered),
-         death.recovered = replaceCommas(death.recovered))
+         death.recovered = replaceCommas(death.recovered)) %>%
+  filter(!is.na(date))
+
+
+## identify the last row that will be chopped off 
+nr = nrow(corona)
 
 ```
 
@@ -70,7 +73,7 @@ The recent contagious [2019-nCoV Wuhan coronavirus](https://en.wikipedia.org/wik
 
 While trying to get the data for this contagious virus, I landed on [Wikipedia page](https://en.wikipedia.org/wiki/Timeline_of_the_2019%E2%80%9320_Wuhan_coronavirus_outbreak) that provides a timeline of corona virus outbreak at Wuhan province in China. With this source of data I face a double challenge. The first challenge is the data I need is not in a tabular form and ready to read in R. The other challenge is that the data is kept in html table and constantly updated, which make copying and format the table manually a daunting task. Therefore, this post focus taking you through the procedure to access that data from html table, structure and organize it in tidy format that make further analysis easier.
 
-As I have introduced, the post focus on the citizen data generated in Wuhan province because of a contagious coronavirus. The number of people died with corona virus has skyrocket from one person on `r format(x = corona$date[4], format = "%B %d, %Y")` to `r corona$death[nr-1]` on `r format(corona$date[nr-1], format="%B %d, %Y")`. Just on single day of `r format(corona$date[nr-1], format="%B %d, %Y")`, coronavirus killed `r corona$death[nr-1]-corona$death[nr-2]` people died in China. Globally, the virus has infected more `r corona$confirmed[nr-1] %>% as.integer` people across 28 countries and territories (Figure \@ref(fig:fig0)).
+As I have introduced, the post focus on the citizen data generated in Wuhan province because of a contagious coronavirus. The number of people died with corona virus has skyrocket from one person on `r format(x = corona$date[4], format = "%B %d, %Y")` to `r corona$death[nr-1]` on `r format(corona$date[nr-1], format="%B %d, %Y")`. Just on single day of `r format(corona$date[nr-1], format="%B %d, %Y")`, coronavirus killed `r corona$death[nr-1]-corona$death[nr-2]` people in China alone. Globally, the virus has infected more `r corona$confirmed[nr-1] %>% as.integer` people across 28 countries and territories (Figure \@ref(fig:fig0)).
 
 ```{r fig0, fig.cap="The map showing the countried infected with coronavirus", echo=FALSE}
 
@@ -122,7 +125,7 @@ To scrap data from html table, we first need a `url` as a path to the table and 
 ```{r, eval=FALSE}
 url = "https://en.wikipedia.org/wiki/Timeline_of_the_2019%E2%80%9320_Wuhan_coronavirus_outbreak"
 
-wuhan.coronavirus = htmltab::htmltab(doc = url, which = 4)
+wuhan.coronavirus = htmltab::htmltab(doc = url, which = 3)
 
 ```
 
@@ -130,8 +133,6 @@ wuhan.coronavirus = htmltab::htmltab(doc = url, which = 4)
 Once the data is downloaded, it is still untidy and hence require some further processing and organizing. I selected the column of interest and change their names to the meaningful ones. Then all variables that were imported as `structure` they were converted back to integer and change the date to a format that is machine compatible. I also used the `lubridate::yday` function to create a new variable that contains days in number from `01 January 2020`. The chunk below summaries the main steps involved to tidy the data. 
 
 ```{r, eval=FALSE}
-## identify the last row that will be chopped off 
-nr = nrow(wuhan.coronavirus)
 
 ## create a function that replace comma in numbers or integers
 replaceCommas<-function(x){
@@ -139,17 +140,22 @@ replaceCommas<-function(x){
 }
 
 corona = wuhan.coronavirus %>% 
-  select(date = 1, suspected = 2, confirmed = 3, serious = 6, 
-         death = 7, recovered = 8, death.recovered = 9)  %>%
+  select(date = 1, suspected = 2, confirmed = 5, serious = 7, 
+         death = 9, recovered = 10, death.recovered = 11)  %>%
   as_tibble() %>%
-  slice(-nr) %>% 
+  # slice(-nr) %>% 
   mutate(date = as.Date(date), day = lubridate::yday(date),
          suspected = replaceCommas(suspected),
          confirmed = replaceCommas(confirmed),
          serious = replaceCommas(serious),
          death = replaceCommas(death),
          recovered = replaceCommas(recovered),
-         death.recovered = replaceCommas(death.recovered))
+         death.recovered = replaceCommas(death.recovered)) %>%
+  filter(!is.na(date))
+
+
+## identify the last row that will be chopped off 
+nr = nrow(corona)
 
 ```
 
@@ -159,7 +165,7 @@ Once we have organized and structured the data in a format that facilitate analy
 ggplot(data = corona , 
        aes(x = date, y = death)) +
   geom_point()+
-  scale_x_date(date_breaks = "12 days" )+
+  scale_x_date(date_breaks = "8 days" , date_labels = "%d %b")+
   cowplot::theme_minimal_grid()+
   theme(panel.grid = element_line(linetype = 3), legend.position = "none")+
   labs(x = "", y = "Cumulative Death")
@@ -255,7 +261,12 @@ ggplot(data = corona,
 We can predict for the next ten more days to see how the death toll will behave, we use the function `predict` from **stats** package. First we create a data frame of the ten days begin from 40 day and end at day 50. Once we have the future days data frame, we can parse along with the cubic model to predict the future toll number of the coronavirus. 
 
 ```{r}
-new.day = data.frame(day = 40:50)
+nra = nrow(corona)
+start.predict.day = corona$date[nra] %>% lubridate::yday()
+begin = start.predict.day+1
+end = start.predict.day+6
+
+new.day = data.frame(day = begin:end)
 
 future.deaths = predict(cubic, new.day) %>% 
   tibble::enframe(name = NULL) %>% # use enframe instead of as_tibble()
@@ -273,7 +284,7 @@ new.data = predictions%>%
 ```
 
 
-```{r fig3, fig.cap="The number of people died with coronavirus in the Wuhan province. The points are cumulative death, the blue line is the fitted death using cubic polynomial algorithims and the red line show the projected number of people over the next ten days", echo=FALSE, fig.width=5, fig.height=3.5}
+```{r fig3, fig.cap="The number of people died with coronavirus in the Wuhan province. The points are cumulative death, the blue line is the fitted death using cubic polynomial algorithims and the red line show the projected number of people over the next ten days", echo=FALSE, fig.width=6, fig.height=4.5}
 
 
 ggplot(data = corona , 
@@ -329,10 +340,10 @@ death.proj = cubic.future %>%
 ```
 
 
-```{r fig4, fig.cap="The number of people died with coronavirus in the Wuhan province. The points are cumulative death, the blue line is the fitted death using cubic algorithims and the red line show the projected number of people over the next ten days from four different algorithms", echo=FALSE, fig.width=5, fig.height=3.5}
+```{r fig4, fig.cap="The number of people died with coronavirus in the Wuhan province. The points are cumulative death, the blue line is the fitted death using cubic algorithims and the red line show the projected number of people over the next ten days from four different algorithms"}
 
 
-ggplot(data = corona , 
+pred = ggplot(data = corona , 
        aes(x = day, y = death)) +
   geom_point(shape = 1, size = 2.2) +
   geom_line()+
@@ -343,7 +354,10 @@ ggplot(data = corona ,
   theme(panel.grid = element_line(linetype = 3), legend.position = c(.05,.85), 
         legend.key.width = unit(1.2,"cm"), legend.title = element_blank())+
   labs(x = "Days since January 1, 2020", y = "Cumulative Death") +
-  ggsci::scale_color_d3()
+  ggsci::scale_color_d3() 
+
+  pred %>% plotly::ggplotly() %>%
+  plotly::layout(legend = list(orientation = "h", x = 0.4, y = 1.1))
 ```
 
 ## Summaries

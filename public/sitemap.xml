@@ -63,6 +63,41 @@
   </url>
   
   <url>
+    <loc>/tags/ggplot2/</loc>
+    <lastmod>2020-01-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/map-projections/</loc>
+    <lastmod>2020-01-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/mapping/</loc>
+    <lastmod>2020-01-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/sf/</loc>
+    <lastmod>2020-01-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/world/</loc>
+    <lastmod>2020-01-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/world-map/</loc>
+    <lastmod>2020-01-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/01/26/2020/world-map-and-map-projections/</loc>
+    <lastmod>2020-01-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/01/20/2020/easy-access-of-el-nino-southern-oscillation-data-in-r/</loc>
     <lastmod>2020-01-20T00:00:00+00:00</lastmod>
   </url>
@@ -525,11 +560,6 @@
   <url>
     <loc>/tags/pemba/</loc>
     <lastmod>2019-02-14T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/mapping/</loc>
-    <lastmod>2019-02-13T00:00:00+00:00</lastmod>
   </url>
   
   <url>
