@@ -29,17 +29,17 @@ require(sf)
 ```
 
 
-```{r,  echo=FALSE}
+```{r,  echo=FALSE, eval = FALSE}
 
 url = "https://en.wikipedia.org/wiki/Timeline_of_the_2019%E2%80%9320_Wuhan_coronavirus_outbreak"
 
 wuhan.coronavirus = htmltab::htmltab(doc = url, which = 3)
 
+
 ```
 
 
-
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval = FALSE}
 
 ## create a function that replace comma in numbers or integers
 replaceCommas<-function(x){
@@ -64,6 +64,24 @@ corona = wuhan.coronavirus %>%
 ## identify the last row that will be chopped off 
 nr = nrow(corona)
 
+```
+
+
+```{r, echo=FALSE}
+
+wuhan.coronavirus = read_csv("corona.csv", col_names = FALSE)
+
+corona = wuhan.coronavirus %>% 
+  select(date = 1, suspected = 2, confirmed = 5, serious = 7, 
+         death = 9, recovered = 10, death.recovered = 11)  %>%
+  as_tibble() %>%
+  # filter(!is.na(date)) %>%
+  slice(-38)  %>% 
+   mutate(date = lubridate::mdy(date), 
+          day = lubridate::yday(date))
+
+## identify the last row that will be chopped off 
+nr = nrow(corona)
 ```
 
 
@@ -362,6 +380,6 @@ pred = ggplot(data = corona ,
 
 ## Summaries
 
-In this post I illustrated how to extract data from html table using the `htmltab` function. I then processed and organized the data for easy analysis and plotting. I modeled the number of people die with corona virus using `linear`, `quadratic`, `cubic` and `gam` functions. I then used the fitted value to predict the effect of corona virus to the people of Wuhan for ten days. In a nutshell, the cubic polynomial algorithm fitted better to the trend of the data and is supported with the low BIC and AIC (Table \@ref(tab:tab1)), which are used to assess models accuracy.
+In this post I illustrated how to extract data from `html` table using the `htmltab` function. I then processed and organized the data for easy analysis and plotting. I modeled the number of people die with corona virus using `linear`, `quadratic`, `cubic` and `gam` functions. I then used the fitted value to predict the effect of corona virus to the people of Wuhan for ten days. In a nutshell, the cubic polynomial algorithm fitted better to the trend of the data and is supported with the low BIC and AIC (Table \@ref(tab:tab1)), which are used to assess models accuracy.
 
 ## References
