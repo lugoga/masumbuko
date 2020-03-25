@@ -31,7 +31,7 @@ knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, comment=FALSE, 
 
 Geographic coordinates are often in "degrees" but they can also include "minutes" and "seconds". This gives us a variety of different formats for reporting the coordinates and you'll see that different groups will use different formats. Computers do not really work well with DMS coordinates and we really prefer the coordinates to be in Decimal Degrees or DD.
 
-his format allows us to perform standard decimal math operations on the coordinates. Even if you see DMS coordinates in a software package, the software will convert the coordinates to DD for calculations. Unfortunately, many people are unfamiliar with this format and you will always  get data from a a colleague, and the coordinates are in DMS format that you’d like to clean up before you import them into your PC.
+This format allows us to perform standard decimal math operations on the coordinates. Even if you see DMS coordinates in a software package, the software will convert the coordinates to DD for calculations. Unfortunately, many people are unfamiliar with this format and you will always  get data from a a colleague, and the coordinates are in DMS format that you’d like to clean up before you import them into your PC.
 
 R has some tools that handle of coordinates formats. For instance function `char2dms` from **sp** package [@sp] is widely used to convert coordinates stored in character to decimal degrees. However, the `char2dms` demands you specify the termination character for each of degree, minutes and seconds. The other package in R is **biogeo** [@biogeo], which has a `dms2dd` function. However, this function  requires specific variable in the data frame that you ought to pass into function. Some of the variable required in the data frame include  degrees, minutes, seconds and direction.
 
@@ -54,7 +54,7 @@ require(leaflet)
 ```
 
 ## Data
-For illustration I use the dataset of coordinates recorded in Mwanza Gulf. First we load the data into the session. This dataset can also be accessed in R using the from [github](www.github.com).   Because the data is stored in Excel sheet, the function `read_excel` from **readxl** package [@readxl] is used. You must specify the sheet to read that you want to import its data. Either a string (the name of a sheet), or an integer (the position of the sheet). Ignored if the sheet is specified via range. If neither argument specifies the sheet, defaults to the first sheet. For this dataset, we need data from sheet 1, then we specify `sheet = 1` in the function. The chunk below show the path of the Excell file to read and the sheet number. 
+For illustration I use the dataset of coordinates recorded in Mwanza Gulf. First we load the data into the session. This dataset can also be accessed in R using the from [github](https://github.com/lugoga/masumbuko/blob/master/content/post/coordinates.xlsx).   Because the data is stored in Excel sheet, the function `read_excel` from **readxl** package [@readxl] is used. You must specify the sheet to read that you want to import its data. Either a string (the name of a sheet), or an integer (the position of the sheet). Ignored if the sheet is specified via range. If neither argument specifies the sheet, defaults to the first sheet. For this dataset, we need data from sheet 1, then we specify `sheet = 1` in the function. The chunk below show the path of the Excell file to read and the sheet number. 
 
 ```{r, echo=FALSE}
 coords = readxl::read_excel("e:/blogs/masumbuko/content/post/coordinates.xlsx", sheet = 1)
@@ -106,7 +106,7 @@ Decimal.Degree= Degrees + \frac{Minutes}{60} + \frac{Seconds}{3600}
 $$
 
 
-Unfortunately, this approach is tedious particularly when you have coordinate data stored in several different formats. The `parse_lon` and `parse_lat` function remove the tedious task of converting the data into columns and then compute using the formula. These function convert the degree--minutes--seconds into decimal degree straight. The chunk below highlight the steps used to convert the coordinates into the decimal degree (Table \@ref(tab:tab2)) and the locations in figure \@ref(fig:fig1) were mapped with **leaflet** package
+Unfortunately, this approach is tedious particularly when you have coordinate data stored in several different formats. The `parse_lon` and `parse_lat` function remove the tedious task of converting the data into columns and then compute using the formula. These function convert the degree--minutes--seconds into decimal degree straight. The chunk below highlight the steps used to convert the coordinates into the decimal degree (Table \@ref(tab:tab2)) and the locations in figure \@ref(fig:fig1) were mapped with **leaflet** package [@leaflet]
 
 ```{r}
 coords.dd = coords %>%
@@ -128,7 +128,7 @@ coords.dd %>%
 ```
 
 
-```{r fig98, fig.cap="The map showing the positions of the sampled locations across the Mwanza Gulf recorded in 2014. To view the name of the marks on the map just click the center of the mark"}
+```{r fig1, fig.cap="The map showing the positions of the sampled locations across the Mwanza Gulf recorded in 2014. To view the name of the marks on the map just click the center of the mark"}
 coords.dd %>%
   leaflet() %>%
   addTiles() %>%
