@@ -3,13 +3,98 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/tags/adcp/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/algoa/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/tags/analysis/</loc>
-    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/ascat/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/bathymetry/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/blogdown/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/categories/</loc>
-    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/climate/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/coding/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/data-science/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/02/25/2020/geographical-coordinates-conversion-made-easy-with-parzer-package-in-r/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/met/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/oceanography/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/r/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/satellite/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/statistics/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -33,27 +118,12 @@
   </url>
   
   <url>
-    <loc>/</loc>
-    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/02/08/2020/model-and-project-the-death-toll-of-coronavirus-at-wuhan-province-in-r/</loc>
     <lastmod>2020-02-08T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/</loc>
-    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/r/</loc>
-    <lastmod>2020-02-08T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
     <lastmod>2020-02-08T00:00:00+00:00</lastmod>
   </url>
   
@@ -148,16 +218,6 @@
   </url>
   
   <url>
-    <loc>/tags/bathymetry/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/blogdown/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/chlorophyll/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
@@ -168,17 +228,12 @@
   </url>
   
   <url>
-    <loc>/categories/modis/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/modis/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/oceanography/</loc>
+    <loc>/categories/modis/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
   
@@ -198,27 +253,12 @@
   </url>
   
   <url>
-    <loc>/categories/satellite/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/tanzania/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/11/29/2019/access-meteorogical-observations-using-worldmet-package/</loc>
-    <lastmod>2019-11-29T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/data-science/</loc>
-    <lastmod>2019-11-29T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/met/</loc>
     <lastmod>2019-11-29T00:00:00+00:00</lastmod>
   </url>
   
@@ -258,11 +298,6 @@
   </url>
   
   <url>
-    <loc>/tags/coding/</loc>
-    <lastmod>2019-11-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/ggwordcloud/</loc>
     <lastmod>2019-11-05T00:00:00+00:00</lastmod>
   </url>
@@ -283,11 +318,6 @@
   </url>
   
   <url>
-    <loc>/categories/r/</loc>
-    <lastmod>2019-10-29T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/10/16/2019/a-glimpse-of-fao-fisheries-statistics-in-r/</loc>
     <lastmod>2019-10-16T00:00:00+00:00</lastmod>
   </url>
@@ -299,11 +329,6 @@
   
   <url>
     <loc>/tags/fisheries/</loc>
-    <lastmod>2019-10-16T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/statistics/</loc>
     <lastmod>2019-10-16T00:00:00+00:00</lastmod>
   </url>
   
@@ -583,11 +608,6 @@
   </url>
   
   <url>
-    <loc>/tags/algoa/</loc>
-    <lastmod>2019-02-09T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/02/09/2019/comparing-classical-methods-for-estimating-the-mixed-layer-depth-along-the-transect-off-kimbiji-tanzania/</loc>
     <lastmod>2019-02-09T00:00:00+00:00</lastmod>
   </url>
@@ -605,11 +625,6 @@
   <url>
     <loc>/tags/oxygen/</loc>
     <lastmod>2019-02-09T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/climate/</loc>
-    <lastmod>2019-02-08T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -698,11 +713,6 @@
   </url>
   
   <url>
-    <loc>/tags/ascat/</loc>
-    <lastmod>2018-10-25T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/10/25/2018/processing-satellite-wind-speed-data-with-r/</loc>
     <lastmod>2018-10-25T00:00:00+00:00</lastmod>
   </url>
@@ -725,11 +735,6 @@
   <url>
     <loc>/10/20/2018/genetic-connectivity-in-western-indian-ocean-region/</loc>
     <lastmod>2018-10-20T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/adcp/</loc>
-    <lastmod>2018-10-18T00:00:00+00:00</lastmod>
   </url>
   
   <url>

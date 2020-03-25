@@ -1,0 +1,905 @@
+---
+title: Geographical coordinates conversion made easy with parzer package in R
+author: Masumbuko Semba
+date: '2020-02-25'
+slug: geographical-coordinates-conversion-made-easy-with-parzer-package-in-r
+categories:
+  - Oceanography
+  - R
+  - satellite
+  - Statistics
+  - Met
+tags:
+  - ADCP
+  - Algoa
+  - analysis
+  - Ascat
+  - Bathymetry
+  - blogdown
+  - Climate
+  - coding
+  - Data science
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/leaflet/leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet/leaflet.js"></script>
+<link href="/rmarkdown-libs/leafletfix/leafletfix.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4-compressed.js"></script>
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4leaflet.js"></script>
+<link href="/rmarkdown-libs/rstudio_leaflet/rstudio_leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet-binding/leaflet.js"></script>
+
+
+<p>Geographic coordinates are often in “degrees” but they can also include “minutes” and “seconds”. This gives us a variety of different formats for reporting the coordinates and you’ll see that different groups will use different formats. Computers do not really work well with DMS coordinates and we really prefer the coordinates to be in Decimal Degrees or DD.</p>
+<p>his format allows us to perform standard decimal math operations on the coordinates. Even if you see DMS coordinates in a software package, the software will convert the coordinates to DD for calculations. Unfortunately, many people are unfamiliar with this format and you will always get data from a a colleague, and the coordinates are in DMS format that you’d like to clean up before you import them into your PC.</p>
+<p>R has some tools that handle of coordinates formats. For instance function <code>char2dms</code> from <strong>sp</strong> package <span class="citation">(<span class="citeproc-not-found" data-reference-id="sp"><strong>???</strong></span>)</span> is widely used to convert coordinates stored in character to decimal degrees. However, the <code>char2dms</code> demands you specify the termination character for each of degree, minutes and seconds. The other package in R is <strong>biogeo</strong> <span class="citation">(<span class="citeproc-not-found" data-reference-id="biogeo"><strong>???</strong></span>)</span>, which has a <code>dms2dd</code> function. However, this function requires specific variable in the data frame that you ought to pass into function. Some of the variable required in the data frame include degrees, minutes, seconds and direction.</p>
+<p><span class="citation">Chamberlain (<a href="#ref-parzer" role="doc-biblioref">2020</a>)</span> from ropensci team developed a <strong>parzer</strong> package that has nifty functions to handle data sets with messy geographic coordinates. In this post, I highlight the necessary step you ought to take when you receive from a friend coordinates that are in mess condition.</p>
+<p>We need to install the package into the machine. The stable version is available in CRAN and you can simply intall the version with the code in the chunk below;</p>
+<pre class="r"><code>install.packages(&quot;parzer&quot;)</code></pre>
+<p>Once the package is installed, we need to call it into the session using the <code>require</code> function. we load other packages that we will use for data manipulation, mapping and plotting</p>
+<pre class="r"><code>require(parzer)
+require(tidyverse)
+require(sf)
+require(leaflet)</code></pre>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>For illustration I use the dataset of coordinates recorded in Mwanza Gulf. First we load the data into the session. This dataset can also be accessed in R using the from <a href="www.github.com">github</a>. Because the data is stored in Excel sheet, the function <code>read_excel</code> from <strong>readxl</strong> package <span class="citation">(Wickham and Bryan <a href="#ref-readxl" role="doc-biblioref">2018</a>)</span> is used. You must specify the sheet to read that you want to import its data. Either a string (the name of a sheet), or an integer (the position of the sheet). Ignored if the sheet is specified via range. If neither argument specifies the sheet, defaults to the first sheet. For this dataset, we need data from sheet 1, then we specify <code>sheet = 1</code> in the function. The chunk below show the path of the Excell file to read and the sheet number.</p>
+<pre class="r"><code>coords = readxl::read_excel(&quot;./content/post/coordinates.xlsx&quot;, sheet = 1)</code></pre>
+<p>Table <a href="#tab:tab1">1</a> is an dataset, showing the coordinates. A bird-eye view help us notice that the coordinates are stored as degree–minutes–seconds format.</p>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Geographical coordinates stored in degree minutes and seconds
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Geographical Coordinates
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+Station
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+<th style="text-align:center;">
+Longitude
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+E1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°34’10.0 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°53’49.4 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+E2
+</td>
+<td style="text-align:center;width: 4cm; ">
+NA
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°53’48.5 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+E3
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°34’18.7 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°53’50.8 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+F2
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°34’09.0 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°52’91.6 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+F5
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°34’15.3 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°53’11.3 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+E-F2
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°34’23.4 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°53’04.8 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+G1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°33’48.8 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°52’50.8 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+G2
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°33’54.6 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°52’55.1 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+G-F1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°33’82.9 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°52’82.8 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+I1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°33’03.5 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°51’22.2 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+J1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°32’98.1 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°50’37.5 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+J2
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°33’04.3 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°50’43.8 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+J4
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°33’17.7 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°50’49.6 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+K2
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°33’22.7 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°50’23.8 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+E1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°34’23.8 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°53’51.9 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+E2
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°34’20.1 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°53’50.8 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+EF1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°34’13.0 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°53’32.3 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+F1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°34’17.8 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°52’98.1 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+E1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°34’22.9 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°53’41.1 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+F1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°33’97.3 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°53’07.4 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+J1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°33’14.1 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°50’47.9 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+K1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°33’38.8 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°50’38.5 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+BB2
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°34’18.7 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°53’55.0 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+E1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°34’21.2 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°53’47.5 E
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 4cm; ">
+F1
+</td>
+<td style="text-align:center;width: 4cm; ">
+02°33’97.6 S
+</td>
+<td style="text-align:center;width: 4cm; ">
+32°53’0.15 E
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border:0;" colspan="100%">
+<sup>*</sup> Courtesy of TAFIRI
+</td>
+</tr>
+</tfoot>
+</table>
+</div>
+<div id="degrees-minutes-seconds-dms" class="section level2">
+<h2>Degrees, Minutes, Seconds (DMS)</h2>
+<p>Degrees for DMS are divided into 60 minutes and then each minute is divided into 60 seconds. This is just like the hours on our clocks and goes back to the Babylonians who worked with a base 60 number system!</p>
+<ul>
+<li>Each degree contains 60 minutes</li>
+<li>Each minute contains 60 seconds</li>
+</ul>
+</div>
+<div id="dms-formats" class="section level2">
+<h2>DMS Formats</h2>
+<p>One of the issues with DMS is that you will see them expressed in a variety of ways. This includes:</p>
+<ul>
+<li>02° 31’ 21" North by 32° 5’ 39" East</li>
+<li>02 31 21 N, 32 5 39 E</li>
+<li>023121N, 320539E</li>
+<li>023121, 320539</li>
+</ul>
+</div>
+<div id="convert-coordinates-to-decimal-degrees" class="section level2">
+<h2>Convert coordinates to decimal degrees</h2>
+<p>Computer software will convert coordinates from DMS to DD on a regular basis without us even knowing it is happening. However, it’s good to know the equation and I routinely see spreadsheets of data in DMS and I can quickly convert the data to DD because I know the following information. First, recognize that:</p>
+<ul>
+<li>60 minutes = one degree</li>
+<li>60 seconds = one minute</li>
+<li>3600 seconds = one degree</li>
+</ul>
+<p>Coordinates can be converted into decimal degrees in a spreadsheet using an appropriate formula shown in equation below;</p>
+<p><span class="math display">\[
+Decimal.Degree= Degrees + \frac{Minutes}{60} + \frac{Seconds}{3600}
+\]</span></p>
+<p>Unfortunately, this approach is tedious particularly when you have coordinate data stored in several different formats. The <code>parse_lon</code> and <code>parse_lat</code> function remove the tedious task of converting the data into columns and then compute using the formula. These function convert the degree–minutes–seconds into decimal degree straight. The chunk below highlight the steps used to convert the coordinates into the decimal degree (Table <a href="#tab:tab2">2</a>) and the locations in figure <a href="#fig:fig1"><strong>??</strong></a> were mapped with <strong>leaflet</strong> package</p>
+<pre class="r"><code>coords.dd = coords %&gt;%
+  mutate(Lon = parzer::parse_lon(Longitude),
+         Lat = parzer::parse_lat(Latitude))</code></pre>
+<table>
+<caption>
+<span id="tab:tab2">Table 2: </span>Geographical coordinates stored in degree minutes and seconds and decimal degree
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Geographical Coordinates
+</div>
+</th>
+</tr>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Degree Minutes Seconds
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Decimal Degree
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+Station
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+<th style="text-align:center;">
+Longitude
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+<th style="text-align:center;">
+Longitude
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+E1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°34’10.0 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°53’49.4 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.89706
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.569444
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+E2
+</td>
+<td style="text-align:center;width: 3cm; ">
+NA
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°53’48.5 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.89680
+</td>
+<td style="text-align:center;width: 3cm; ">
+NaN
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+E3
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°34’18.7 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°53’50.8 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.89745
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.571861
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+F2
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°34’09.0 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°52’91.6 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.89211
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.569167
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+F5
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°34’15.3 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°53’11.3 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.88647
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.570917
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+E-F2
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°34’23.4 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°53’04.8 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.88467
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.573167
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+G1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°33’48.8 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°52’50.8 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.88078
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.563556
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+G2
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°33’54.6 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°52’55.1 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.88197
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.565167
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+G-F1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°33’82.9 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°52’82.8 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.88967
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.573028
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+I1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°33’03.5 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°51’22.2 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.85617
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.550972
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+J1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°32’98.1 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°50’37.5 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.84375
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.560583
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+J2
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°33’04.3 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°50’43.8 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.84550
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.551194
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+J4
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°33’17.7 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°50’49.6 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.84711
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.554917
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+K2
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°33’22.7 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°50’23.8 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.83994
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.556306
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+E1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°34’23.8 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°53’51.9 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.89775
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.573278
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+E2
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°34’20.1 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°53’50.8 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.89745
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.572250
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+EF1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°34’13.0 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°53’32.3 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.89231
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.570278
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+F1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°34’17.8 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°52’98.1 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.89392
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.571611
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+E1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°34’22.9 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°53’41.1 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.89475
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.573028
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+F1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°33’97.3 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°53’07.4 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.88539
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.577028
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+J1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°33’14.1 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°50’47.9 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.84664
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.553917
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+K1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°33’38.8 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°50’38.5 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.84403
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.560778
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+BB2
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°34’18.7 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°53’55.0 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.89861
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.571861
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+E1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°34’21.2 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°53’47.5 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.89653
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.572555
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3cm; ">
+F1
+</td>
+<td style="text-align:center;width: 3cm; ">
+02°33’97.6 S
+</td>
+<td style="text-align:center;width: 3cm; ">
+32°53’0.15 E
+</td>
+<td style="text-align:center;width: 3cm; ">
+32.88337
+</td>
+<td style="text-align:center;width: 3cm; ">
+-2.577111
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border:0;" colspan="100%">
+<sup>*</sup> Courtesy of TAFIRI
+</td>
+</tr>
+</tfoot>
+</table>
+<pre class="r"><code>coords.dd %&gt;%
+  leaflet() %&gt;%
+  addTiles() %&gt;%
+  # addMarkers(lng = ~longitude.start, lat = ~latitude.start, popup = ~`Trawling number`)%&gt;%
+  addMarkers(lng = ~Lon, lat = ~Lat, popup = ~Station)</code></pre>
+<div class="figure"><span id="fig:fig98"></span>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-2.56944441795349,null,-2.57186102867126,-2.56916666030884,-2.57091665267944,-2.57316660881042,-2.56355547904968,-2.56516671180725,-2.57302784919739,-2.55097222328186,-2.5605833530426,-2.55119442939758,-2.55491662025452,-2.55630564689636,-2.57327771186829,-2.57224988937378,-2.57027769088745,-2.57161116600037,-2.57302784919739,-2.57702779769897,-2.55391669273376,-2.56077766418457,-2.57186102867126,-2.57255554199219,-2.57711100578308],[32.8970565795898,32.8968048095703,32.8974456787109,32.8921127319336,32.8864707946777,32.8846664428711,32.8807792663574,32.8819732666016,32.8896675109863,32.8561668395996,32.84375,32.8455009460449,32.847110748291,32.8399429321289,32.8977508544922,32.8974456787109,32.8923072814941,32.8939170837402,32.8947486877441,32.8853874206543,32.8466377258301,32.8440284729004,32.8986129760742,32.8965263366699,32.883373260498],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["E1","E2","E3","F2","F5","E-F2","G1","G2","G-F1","I1","J1","J2","J4","K2","E1","E2","EF1","F1","E1","F1","J1","K1","BB2","E1","F1"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-2.57711100578308,-2.55097222328186],"lng":[32.8399429321289,32.8986129760742]}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 1: The map showing the positions of the sampled locations across the Mwanza Gulf recorded in 2014. To view the name of the marks on the map just click the center of the mark
+</p>
+</div>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-parzer">
+<p>Chamberlain, Scott. 2020. <em>Parzer: Parse Messy Geographic Coordinates</em>. <a href="https://CRAN.R-project.org/package=parzer">https://CRAN.R-project.org/package=parzer</a>.</p>
+</div>
+<div id="ref-readxl">
+<p>Wickham, Hadley, and Jennifer Bryan. 2018. <em>Readxl: Read Excel Files</em>. <a href="https://CRAN.R-project.org/package=readxl">https://CRAN.R-project.org/package=readxl</a>.</p>
+</div>
+</div>
+</div>

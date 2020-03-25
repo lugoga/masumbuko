@@ -1,0 +1,143 @@
+---
+title: Geographical coordinates conversion made easy with parzer package in R
+author: Masumbuko Semba
+date: '2020-02-25'
+slug: geographical-coordinates-conversion-made-easy-with-parzer-package-in-r
+categories:
+  - Oceanography
+  - R
+  - satellite
+  - Statistics
+  - Met
+tags:
+  - ADCP
+  - Algoa
+  - analysis
+  - Ascat
+  - Bathymetry
+  - blogdown
+  - Climate
+  - coding
+  - Data science
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, comment=FALSE, quit = TRUE)
+```
+
+Geographic coordinates are often in "degrees" but they can also include "minutes" and "seconds". This gives us a variety of different formats for reporting the coordinates and you'll see that different groups will use different formats. Computers do not really work well with DMS coordinates and we really prefer the coordinates to be in Decimal Degrees or DD.
+
+his format allows us to perform standard decimal math operations on the coordinates. Even if you see DMS coordinates in a software package, the software will convert the coordinates to DD for calculations. Unfortunately, many people are unfamiliar with this format and you will always  get data from a a colleague, and the coordinates are in DMS format that you’d like to clean up before you import them into your PC.
+
+R has some tools that handle of coordinates formats. For instance function `char2dms` from **sp** package [@sp] is widely used to convert coordinates stored in character to decimal degrees. However, the `char2dms` demands you specify the termination character for each of degree, minutes and seconds. The other package in R is **biogeo** [@biogeo], which has a `dms2dd` function. However, this function  requires specific variable in the data frame that you ought to pass into function. Some of the variable required in the data frame include  degrees, minutes, seconds and direction.
+
+@parzer from ropensci team developed a **parzer** package that has nifty functions to handle data sets with messy geographic coordinates. In this post, I highlight the necessary step you ought to take when you receive from a friend coordinates that are in mess condition. 
+
+We need to install the package into the machine. The stable version is available in CRAN and you can simply intall the version with the code in the chunk below;
+
+```{r, eval=FALSE}
+install.packages("parzer")
+```
+
+Once the package is installed, we need to call it into the session using the `require` function. we load other packages that we will use for data manipulation, mapping and plotting
+
+```{r packages}
+
+require(parzer)
+require(tidyverse)
+require(sf)
+require(leaflet)
+```
+
+## Data
+For illustration I use the dataset of coordinates recorded in Mwanza Gulf. First we load the data into the session. This dataset can also be accessed in R using the from [github](www.github.com).   Because the data is stored in Excel sheet, the function `read_excel` from **readxl** package [@readxl] is used. You must specify the sheet to read that you want to import its data. Either a string (the name of a sheet), or an integer (the position of the sheet). Ignored if the sheet is specified via range. If neither argument specifies the sheet, defaults to the first sheet. For this dataset, we need data from sheet 1, then we specify `sheet = 1` in the function. The chunk below show the path of the Excell file to read and the sheet number. 
+
+```{r, echo=FALSE}
+coords = readxl::read_excel("e:/blogs/masumbuko/content/post/coordinates.xlsx", sheet = 1)
+
+```
+
+```{r, eval=FALSE}
+coords = readxl::read_excel("./content/post/coordinates.xlsx", sheet = 1)
+
+```
+
+Table \@ref(tab:tab1) is an dataset, showing the coordinates. A bird-eye view help us notice that the coordinates are stored as degree--minutes--seconds format. 
+
+```{r tab1, echo=FALSE}
+coords %>%
+  kableExtra::kable(format = "html", align = "c",
+                    caption = "Geographical  coordinates stored in degree minutes and seconds") %>%
+  kableExtra::column_spec(width = "4cm", column = 1:3) %>%
+  kableExtra::add_footnote(label = "Courtesy of TAFIRI", notation = "symbol", 
+                           threeparttable = TRUE, escape = TRUE) %>%
+  kableExtra::add_header_above(c("", "Geographical Coordinates" = 2))
+```
+
+## Degrees, Minutes, Seconds (DMS)
+Degrees for DMS are divided into 60 minutes and then each minute is divided into 60 seconds. This is just like the hours on our clocks and goes back to the Babylonians who worked with a base 60 number system!
+
++ Each degree contains 60 minutes
++ Each minute contains 60 seconds
+
+## DMS Formats
+One of the issues with DMS is that you will see them expressed in a variety of ways. This includes:
+
++ 02° 31' 21" North by 32° 5' 39" East
++ 02 31 21 N, 32 5 39 E
++ 023121N, 320539E
++ 023121, 320539
+
+## Convert coordinates to decimal degrees
+Computer software will convert coordinates from DMS to DD on a regular basis without us even knowing it is happening. However, it's good to know the equation and I routinely see spreadsheets of data in DMS and I can quickly convert the data to DD because I know the following information. First, recognize that:
+
++ 60 minutes = one degree
++ 60 seconds = one minute
++ 3600 seconds = one degree
+
+Coordinates can be converted into decimal degrees in a spreadsheet using an appropriate formula shown in equation below;
+
+$$
+Decimal.Degree= Degrees + \frac{Minutes}{60} + \frac{Seconds}{3600}
+$$
+
+
+Unfortunately, this approach is tedious particularly when you have coordinate data stored in several different formats. The `parse_lon` and `parse_lat` function remove the tedious task of converting the data into columns and then compute using the formula. These function convert the degree--minutes--seconds into decimal degree straight. The chunk below highlight the steps used to convert the coordinates into the decimal degree (Table \@ref(tab:tab2)) and the locations in figure \@ref(fig:fig1) were mapped with **leaflet** package
+
+```{r}
+coords.dd = coords %>%
+  mutate(Lon = parzer::parse_lon(Longitude),
+         Lat = parzer::parse_lat(Latitude))
+```
+
+```{r tab2, echo=FALSE}
+coords.dd %>%
+  kableExtra::kable(format = "html", align = "c", 
+                    col.names = c("Station","Latitude", "Longitude","Latitude", "Longitude"),
+                    caption = "Geographical  coordinates stored in degree minutes and seconds and decimal degree") %>%
+  kableExtra::column_spec(width = "3cm", column = 1:5) %>%
+  kableExtra::add_footnote(label = "Courtesy of TAFIRI", notation = "symbol", 
+                           threeparttable = TRUE, escape = TRUE) %>%
+  kableExtra::add_header_above(c("", "Degree Minutes Seconds" = 2, "Decimal Degree" = 2))%>%
+  kableExtra::add_header_above(c("", "Geographical Coordinates" = 4))
+
+```
+
+
+```{r fig98, fig.cap="The map showing the positions of the sampled locations across the Mwanza Gulf recorded in 2014. To view the name of the marks on the map just click the center of the mark"}
+coords.dd %>%
+  leaflet() %>%
+  addTiles() %>%
+  # addMarkers(lng = ~longitude.start, lat = ~latitude.start, popup = ~`Trawling number`)%>%
+  addMarkers(lng = ~Lon, lat = ~Lat, popup = ~Station)
+
+
+```
+
+## References
+
+
