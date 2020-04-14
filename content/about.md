@@ -9,6 +9,17 @@ Apart from my academic research and data analysis, I spend my time working on da
 
 I started this blog to share some ground-breaking analytical solutions using R programming language, a free but powerful for working data, visualize results and make report in multiple formats (Words, HTML, Epub, and PDF). If you have questions questions about any of the content posted here you can reach me by filling this form; 
 
+
+
+
+ ##  counter  
+ <script type="text/javascript" id="clustrmaps" src="//cdn.clustrmaps.com/map_v2.js?d=82RnIf8A3tXOKQaQrhO3g0MZWtY1jCtyelq-xeooOiU&cl=ffffff&w=a"></script>
+ 
+ 
+ <a href="https://clustrmaps.com/site/1b61z"  title="Visit tracker"><img src="//www.clustrmaps.com/map_v2.png?d=82RnIf8A3tXOKQaQrhO3g0MZWtY1jCtyelq-xeooOiU&cl=ffffff" /></a>
+    
+
+
 <form name="contact" method="POST" netlify>
 	<p>
     <label>Your Full Name: <input type="text" name="name" /></label>
@@ -35,4 +46,5 @@ I started this blog to share some ground-breaking analytical solutions using R p
     <button type=”submit”>Send</button>
   </p>
 </form>
+
 

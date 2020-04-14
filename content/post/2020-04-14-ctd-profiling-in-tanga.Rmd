@@ -1,0 +1,188 @@
+---
+title: CTD Profiling in Tanga
+author: Masumbuko Semba
+date: '2020-04-14'
+slug: ctd-profiling-in-tanga
+categories: []
+tags:
+  - CTD
+  - Tanga
+  - Oceanography
+  - Indian Ocean
+  - Seabird
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+require(tidyverse)
+require(oce)
+require(ocedata)
+require(sf)
+
+```
+
+
+
+```{r}
+
+# st_layers("alltransects.gpx")
+
+deepsea.station = st_read("e:/Data Manipulation/Deep sea/CTD deepsea/alltransects.gpx", layer = "waypoints", quiet = TRUE)
+
+# ggplot() +
+#   geom_sf(data = deepsea.station)
+
+
+```
+
+
+```{r}
+deepsea.station = deepsea.station%>%select(name, time)%>%arrange(time)
+
+```
+
+
+```{r}
+deepsea.file = dir("e:/Data Manipulation/Deep sea/CTD deepsea/Old CTD", pattern = ".cnv", full.names = T)
+
+# length(deepsea.file);nrow(deepsea.station)
+
+```
+
+```{r}
+ctd.cast = deepsea.station%>%slice(-c(6, 12))
+# length(deepsea.file);nrow(ctd.cast)
+
+# ggplot() +
+#   geom_sf(data = ctd.cast)
+
+```
+
+
+```{r}
+coordinates = ctd.cast%>%st_coordinates()%>%as_tibble()%>%rename(lon = X, lat = Y)
+
+st_geometry(ctd.cast) = NULL
+
+ctd.cast.tb = coordinates%>%bind_cols(ctd.cast)
+
+```
+
+
+```{r, eval=FALSE}
+for (j in 1:12){
+  readline(prompt = "ENTER")
+read.ctd(deepsea.file[j]) %>% 
+  plotScan(main = paste("Transect ",ctd.cast.tb$name[j], " cast on ",ctd.cast.tb$time[j] ))
+print(j)
+}
+```
+
+```{r}
+deepsea.file = deepsea.file[-c(1,2)]
+ctd.cast.tb = ctd.cast.tb %>% slice(-c(1,2))
+
+# length(deepsea.file); nrow(ctd.cast.tb)
+
+```
+
+
+In March 2020, The Tanzania Fisheries Research Institute collected oceanographic variable in Coastal waters of Tanga, located in the northern part of Tanzania. After a bit of steaming, we were about 10 km east of Tanga port in the Pemba channel water. The first order of business was to drop some casts and get some data!
+
+## CTD Profiling 
+Continuous measurements of temperature, salinity, oxygen and fluorescence were made with a Sea-Bird SBE-9/11Plus CTD package with dual temperature, salinity and oxygen sensors and fluorometer. A CTD cast to depths ranging between 40 and 150 m was conducted at Station during field campaign.
+
+## Data Processing 
+Seabird has a Data Processing software (Seasoft V2) to help massage the data. We processed a bit of data with that and created ‘.cnv’ files and then brought it into R. The function `read.ctd.sbe` from **oce** package was used to import Seabird formatted `cnv` files into R session [@oce; @ocedata]. Once in R session, the CTD cast was further processed. First the the data from downcast were selected and aligned to standard depth of 2 meters interval. Unfortunately our CTD data doesn’t have GPS data. The geographical position data for each cast was integrated into the files. Lastly, the information that describe the people collected the data, the Institute and its address were added as metadata. The post--processing steps was chained in **FOR** loop to iterate processing of data for each cast as the chunk below highlight;
+
+
+```{r, echo=TRUE}
+
+deepsea.ctd = list()
+
+for (i in 1:length(deepsea.file)) {
+  
+  deepsea.ctd[[i]] = read.ctd(deepsea.file[i])%>%
+    ctdTrim(method = "downcast")%>%
+    ctdDecimate(p = 2)
+  deepsea.ctd[[i]]@metadata$scientist = "Semba Masumbuko and Patroba Matiku and Mathew Silas"
+  deepsea.ctd[[i]]@metadata$institute = "TAFIRI"
+  deepsea.ctd[[i]]@metadata$address = "P.O BOX 9500, Dar es Salaam"
+  deepsea.ctd[[i]]@metadata$longitude =ctd.cast.tb$lon[i]
+  deepsea.ctd[[i]]@metadata$latitude =ctd.cast.tb$lat[i]
+  deepsea.ctd[[i]][["oxygen"]] = deepsea.ctd[[i]][["oxygen2"]]
+
+
+}
+
+
+```
+
+
+## Results 
+Figure \@ref(fig:fig1) and \@ref(fig:fig2) show a typical CTD profiles. While \@ref(fig:fig1) use `unesco` to get the older seawater formulation, a figure \@ref(fig:fig2)used the newer `gsw` seawater formulation. These figure \@ref(fig:fig2)  show partial temperature and salinity change with water depth. As the depth increases (moving down on the vertical axis), temperature (in red) increases, until a maximum is reached at a depth of 50 meters. 
+
+Salinity, shown in green, increases rapidly with depth, until about 60 meters deep, where it increases only very slowly to about 35.3 absolute salinity ([g/kg]). Note that the differences being measured here are very small 0.1 degrees C and 0.01 ppt (Figure \@ref(fig:fig2).
+
+
+```{r fig1, echo=TRUE, fig.cap="A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the **unesco** equation of state."}
+
+
+deepsea.ctd[[8]] %>% 
+  oce::plot(eos = "unesco",
+  useSmoothScatter = FALSE, grid = F,
+  showHemi = FALSE, 
+  drawIsobaths = TRUE)
+```
+
+
+```{r fig2, echo=TRUE, fig.cap="A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the **gsw** equation of state."}
+
+
+deepsea.ctd[[8]] %>% 
+  oce::plot(eos = "gsw",
+  useSmoothScatter = FALSE, grid = F,
+  showHemi = FALSE, 
+  drawIsobaths = TRUE)
+```
+
+
+### Cross--section
+Then, the multiple CTD casts were stitched together to form a section. Section requires the multiple CTD cast organized in a list file. This was done already in section \@ref(label:processing). The function `as.section` from **oce** package was used to create a section file. 
+
+```{r, echo=TRUE}
+all.transects = deepsea.ctd %>% as.section()
+```
+
+subset the transect of interest from the section. For our case, we can simply extract a transect using the indices. Once transect is extracted from the section was used make a basic contour plot (Figure \@ref(fig:fig3) and image plot (Figure \@ref(fig:fig4).
+
+```{r fig3, fig.cap="Contour plot", echo=TRUE}
+all.transects %>% 
+  subset(indices = 7:10)%>% 
+  plot(which = c("temperature", "oxygen", "fluorescence", "salinity"),
+       ztype = "contour", xtype = "longitude", eos = "gsw")
+
+
+```
+
+
+```{r fig4, fig.cap="image plot", echo=TRUE}
+all.transects %>% 
+  subset(indices = 7:10)%>% 
+  plot(which = c("temperature", "oxygen", "fluorescence", "salinity"),
+       ztype = "image", xtype = "longitude", filledContours=FALSE, eos = "gsw")
+
+
+
+```
+
+Fluorescence comes from the fluorometer, which measures the quantity of primary producers in the water column. You can see in figure \@ref(fig:fig4) that mid-water peaks phytoplankton at the thermocline (where the there is a rapid temperature change). This probably reflects the zone of mixing between deeper nutrient rich waters and shallower brighter waters (but nutrient poor).
+
+
+## Reference
+

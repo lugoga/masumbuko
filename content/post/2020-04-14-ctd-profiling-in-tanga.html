@@ -1,0 +1,111 @@
+---
+title: CTD Profiling in Tanga
+author: Masumbuko Semba
+date: '2020-04-14'
+slug: ctd-profiling-in-tanga
+categories: []
+tags:
+  - CTD
+  - Tanga
+  - Oceanography
+  - Indian Ocean
+  - Seabird
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+
+<p>In March 2020, The Tanzania Fisheries Research Institute collected oceanographic variable in Coastal waters of Tanga, located in the northern part of Tanzania. After a bit of steaming, we were about 10 km east of Tanga port in the Pemba channel water. The first order of business was to drop some casts and get some data!</p>
+<div id="ctd-profiling" class="section level2">
+<h2>CTD Profiling</h2>
+<p>Continuous measurements of temperature, salinity, oxygen and fluorescence were made with a Sea-Bird SBE-9/11Plus CTD package with dual temperature, salinity and oxygen sensors and fluorometer. A CTD cast to depths ranging between 40 and 150 m was conducted at Station during field campaign.</p>
+</div>
+<div id="data-processing" class="section level2">
+<h2>Data Processing</h2>
+<p>Seabird has a Data Processing software (Seasoft V2) to help massage the data. We processed a bit of data with that and created ‘.cnv’ files and then brought it into R. The function <code>read.ctd.sbe</code> from <strong>oce</strong> package was used to import Seabird formatted <code>cnv</code> files into R session <span class="citation">(Kelley and Richards <a href="#ref-oce" role="doc-biblioref">2018</a>; Kelley <a href="#ref-ocedata" role="doc-biblioref">2015</a>)</span>. Once in R session, the CTD cast was further processed. First the the data from downcast were selected and aligned to standard depth of 2 meters interval. Unfortunately our CTD data doesn’t have GPS data. The geographical position data for each cast was integrated into the files. Lastly, the information that describe the people collected the data, the Institute and its address were added as metadata. The post–processing steps was chained in <strong>FOR</strong> loop to iterate processing of data for each cast as the chunk below highlight;</p>
+<pre class="r"><code>deepsea.ctd = list()
+
+for (i in 1:length(deepsea.file)) {
+  
+  deepsea.ctd[[i]] = read.ctd(deepsea.file[i])%&gt;%
+    ctdTrim(method = &quot;downcast&quot;)%&gt;%
+    ctdDecimate(p = 2)
+  deepsea.ctd[[i]]@metadata$scientist = &quot;Semba Masumbuko and Patroba Matiku and Mathew Silas&quot;
+  deepsea.ctd[[i]]@metadata$institute = &quot;TAFIRI&quot;
+  deepsea.ctd[[i]]@metadata$address = &quot;P.O BOX 9500, Dar es Salaam&quot;
+  deepsea.ctd[[i]]@metadata$longitude =ctd.cast.tb$lon[i]
+  deepsea.ctd[[i]]@metadata$latitude =ctd.cast.tb$lat[i]
+  deepsea.ctd[[i]][[&quot;oxygen&quot;]] = deepsea.ctd[[i]][[&quot;oxygen2&quot;]]
+
+
+}</code></pre>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p>Figure <a href="#fig:fig1">1</a> and <a href="#fig:fig2">2</a> show a typical CTD profiles. While <a href="#fig:fig1">1</a> use <code>unesco</code> to get the older seawater formulation, a figure <a href="#fig:fig2">2</a>used the newer <code>gsw</code> seawater formulation. These figure <a href="#fig:fig2">2</a> show partial temperature and salinity change with water depth. As the depth increases (moving down on the vertical axis), temperature (in red) increases, until a maximum is reached at a depth of 50 meters.</p>
+<p>Salinity, shown in green, increases rapidly with depth, until about 60 meters deep, where it increases only very slowly to about 35.3 absolute salinity ([g/kg]). Note that the differences being measured here are very small 0.1 degrees C and 0.01 ppt (Figure <a href="#fig:fig2">2</a>.</p>
+<pre class="r"><code>deepsea.ctd[[8]] %&gt;% 
+  oce::plot(eos = &quot;unesco&quot;,
+  useSmoothScatter = FALSE, grid = F,
+  showHemi = FALSE, 
+  drawIsobaths = TRUE)</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2020-04-14-ctd-profiling-in-tanga_files/figure-html/fig1-1.png" alt="A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the **unesco** equation of state." width="672" />
+<p class="caption">
+Figure 1: A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the <strong>unesco</strong> equation of state.
+</p>
+</div>
+<pre class="r"><code>deepsea.ctd[[8]] %&gt;% 
+  oce::plot(eos = &quot;gsw&quot;,
+  useSmoothScatter = FALSE, grid = F,
+  showHemi = FALSE, 
+  drawIsobaths = TRUE)</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2020-04-14-ctd-profiling-in-tanga_files/figure-html/fig2-1.png" alt="A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the **gsw** equation of state." width="672" />
+<p class="caption">
+Figure 2: A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the <strong>gsw</strong> equation of state.
+</p>
+</div>
+<div id="crosssection" class="section level3">
+<h3>Cross–section</h3>
+<p>Then, the multiple CTD casts were stitched together to form a section. Section requires the multiple CTD cast organized in a list file. This was done already in section <a href="#label:processing"><strong>??</strong></a>. The function <code>as.section</code> from <strong>oce</strong> package was used to create a section file.</p>
+<pre class="r"><code>all.transects = deepsea.ctd %&gt;% as.section()</code></pre>
+<pre><code>## Warning in as.section(.): estimated waterDepth as max(pressure) for CTDs
+## numbered 1:10</code></pre>
+<p>subset the transect of interest from the section. For our case, we can simply extract a transect using the indices. Once transect is extracted from the section was used make a basic contour plot (Figure <a href="#fig:fig3">3</a> and image plot (Figure <a href="#fig:fig4">4</a>.</p>
+<pre class="r"><code>all.transects %&gt;% 
+  subset(indices = 7:10)%&gt;% 
+  plot(which = c(&quot;temperature&quot;, &quot;oxygen&quot;, &quot;fluorescence&quot;, &quot;salinity&quot;),
+       ztype = &quot;contour&quot;, xtype = &quot;longitude&quot;, eos = &quot;gsw&quot;)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2020-04-14-ctd-profiling-in-tanga_files/figure-html/fig3-1.png" alt="Contour plot" width="672" />
+<p class="caption">
+Figure 3: Contour plot
+</p>
+</div>
+<pre class="r"><code>all.transects %&gt;% 
+  subset(indices = 7:10)%&gt;% 
+  plot(which = c(&quot;temperature&quot;, &quot;oxygen&quot;, &quot;fluorescence&quot;, &quot;salinity&quot;),
+       ztype = &quot;image&quot;, xtype = &quot;longitude&quot;, filledContours=FALSE, eos = &quot;gsw&quot;)</code></pre>
+<div class="figure"><span id="fig:fig4"></span>
+<img src="/post/2020-04-14-ctd-profiling-in-tanga_files/figure-html/fig4-1.png" alt="image plot" width="672" />
+<p class="caption">
+Figure 4: image plot
+</p>
+</div>
+<p>Fluorescence comes from the fluorometer, which measures the quantity of primary producers in the water column. You can see in figure <a href="#fig:fig4">4</a> that mid-water peaks phytoplankton at the thermocline (where the there is a rapid temperature change). This probably reflects the zone of mixing between deeper nutrient rich waters and shallower brighter waters (but nutrient poor).</p>
+</div>
+</div>
+<div id="reference" class="section level2 unnumbered">
+<h2>Reference</h2>
+<div id="refs" class="references">
+<div id="ref-ocedata">
+<p>Kelley, Dan. 2015. <em>Ocedata: Oceanographic Datasets for Oce</em>. <a href="https://CRAN.R-project.org/package=ocedata">https://CRAN.R-project.org/package=ocedata</a>.</p>
+</div>
+<div id="ref-oce">
+<p>Kelley, Dan, and Clark Richards. 2018. <em>Oce: Analysis of Oceanographic Data</em>. <a href="https://CRAN.R-project.org/package=oce">https://CRAN.R-project.org/package=oce</a>.</p>
+</div>
+</div>
+</div>

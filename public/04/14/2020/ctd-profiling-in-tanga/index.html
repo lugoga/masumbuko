@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.64.1" />
+
+
+<title>CTD Profiling in Tanga - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="CTD Profiling in Tanga - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">4 min read</span>
+    
+
+    <h1 class="article-title">CTD Profiling in Tanga</h1>
+
+    
+    <span class="article-date">2020/04/14</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p>In March 2020, The Tanzania Fisheries Research Institute collected oceanographic variable in Coastal waters of Tanga, located in the northern part of Tanzania. After a bit of steaming, we were about 10 km east of Tanga port in the Pemba channel water. The first order of business was to drop some casts and get some data!</p>
+<div id="ctd-profiling" class="section level2">
+<h2>CTD Profiling</h2>
+<p>Continuous measurements of temperature, salinity, oxygen and fluorescence were made with a Sea-Bird SBE-9/11Plus CTD package with dual temperature, salinity and oxygen sensors and fluorometer. A CTD cast to depths ranging between 40 and 150 m was conducted at Station during field campaign.</p>
+</div>
+<div id="data-processing" class="section level2">
+<h2>Data Processing</h2>
+<p>Seabird has a Data Processing software (Seasoft V2) to help massage the data. We processed a bit of data with that and created ‘.cnv’ files and then brought it into R. The function <code>read.ctd.sbe</code> from <strong>oce</strong> package was used to import Seabird formatted <code>cnv</code> files into R session <span class="citation">(Kelley and Richards <a href="#ref-oce" role="doc-biblioref">2018</a>; Kelley <a href="#ref-ocedata" role="doc-biblioref">2015</a>)</span>. Once in R session, the CTD cast was further processed. First the the data from downcast were selected and aligned to standard depth of 2 meters interval. Unfortunately our CTD data doesn’t have GPS data. The geographical position data for each cast was integrated into the files. Lastly, the information that describe the people collected the data, the Institute and its address were added as metadata. The post–processing steps was chained in <strong>FOR</strong> loop to iterate processing of data for each cast as the chunk below highlight;</p>
+<pre class="r"><code>deepsea.ctd = list()
+
+for (i in 1:length(deepsea.file)) {
+  
+  deepsea.ctd[[i]] = read.ctd(deepsea.file[i])%&gt;%
+    ctdTrim(method = &quot;downcast&quot;)%&gt;%
+    ctdDecimate(p = 2)
+  deepsea.ctd[[i]]@metadata$scientist = &quot;Semba Masumbuko and Patroba Matiku and Mathew Silas&quot;
+  deepsea.ctd[[i]]@metadata$institute = &quot;TAFIRI&quot;
+  deepsea.ctd[[i]]@metadata$address = &quot;P.O BOX 9500, Dar es Salaam&quot;
+  deepsea.ctd[[i]]@metadata$longitude =ctd.cast.tb$lon[i]
+  deepsea.ctd[[i]]@metadata$latitude =ctd.cast.tb$lat[i]
+  deepsea.ctd[[i]][[&quot;oxygen&quot;]] = deepsea.ctd[[i]][[&quot;oxygen2&quot;]]
+
+
+}</code></pre>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p>Figure <a href="#fig:fig1">1</a> and <a href="#fig:fig2">2</a> show a typical CTD profiles. While <a href="#fig:fig1">1</a> use <code>unesco</code> to get the older seawater formulation, a figure <a href="#fig:fig2">2</a>used the newer <code>gsw</code> seawater formulation. These figure <a href="#fig:fig2">2</a> show partial temperature and salinity change with water depth. As the depth increases (moving down on the vertical axis), temperature (in red) increases, until a maximum is reached at a depth of 50 meters.</p>
+<p>Salinity, shown in green, increases rapidly with depth, until about 60 meters deep, where it increases only very slowly to about 35.3 absolute salinity ([g/kg]). Note that the differences being measured here are very small 0.1 degrees C and 0.01 ppt (Figure <a href="#fig:fig2">2</a>.</p>
+<pre class="r"><code>deepsea.ctd[[8]] %&gt;% 
+  oce::plot(eos = &quot;unesco&quot;,
+  useSmoothScatter = FALSE, grid = F,
+  showHemi = FALSE, 
+  drawIsobaths = TRUE)</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2020-04-14-ctd-profiling-in-tanga_files/figure-html/fig1-1.png" alt="A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the **unesco** equation of state." width="672" />
+<p class="caption">
+Figure 1: A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the <strong>unesco</strong> equation of state.
+</p>
+</div>
+<pre class="r"><code>deepsea.ctd[[8]] %&gt;% 
+  oce::plot(eos = &quot;gsw&quot;,
+  useSmoothScatter = FALSE, grid = F,
+  showHemi = FALSE, 
+  drawIsobaths = TRUE)</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2020-04-14-ctd-profiling-in-tanga_files/figure-html/fig2-1.png" alt="A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the **gsw** equation of state." width="672" />
+<p class="caption">
+Figure 2: A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the <strong>gsw</strong> equation of state.
+</p>
+</div>
+<div id="crosssection" class="section level3">
+<h3>Cross–section</h3>
+<p>Then, the multiple CTD casts were stitched together to form a section. Section requires the multiple CTD cast organized in a list file. This was done already in section <a href="#label:processing"><strong>??</strong></a>. The function <code>as.section</code> from <strong>oce</strong> package was used to create a section file.</p>
+<pre class="r"><code>all.transects = deepsea.ctd %&gt;% as.section()</code></pre>
+<pre><code>## Warning in as.section(.): estimated waterDepth as max(pressure) for CTDs
+## numbered 1:10</code></pre>
+<p>subset the transect of interest from the section. For our case, we can simply extract a transect using the indices. Once transect is extracted from the section was used make a basic contour plot (Figure <a href="#fig:fig3">3</a> and image plot (Figure <a href="#fig:fig4">4</a>.</p>
+<pre class="r"><code>all.transects %&gt;% 
+  subset(indices = 7:10)%&gt;% 
+  plot(which = c(&quot;temperature&quot;, &quot;oxygen&quot;, &quot;fluorescence&quot;, &quot;salinity&quot;),
+       ztype = &quot;contour&quot;, xtype = &quot;longitude&quot;, eos = &quot;gsw&quot;)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2020-04-14-ctd-profiling-in-tanga_files/figure-html/fig3-1.png" alt="Contour plot" width="672" />
+<p class="caption">
+Figure 3: Contour plot
+</p>
+</div>
+<pre class="r"><code>all.transects %&gt;% 
+  subset(indices = 7:10)%&gt;% 
+  plot(which = c(&quot;temperature&quot;, &quot;oxygen&quot;, &quot;fluorescence&quot;, &quot;salinity&quot;),
+       ztype = &quot;image&quot;, xtype = &quot;longitude&quot;, filledContours=FALSE, eos = &quot;gsw&quot;)</code></pre>
+<div class="figure"><span id="fig:fig4"></span>
+<img src="/post/2020-04-14-ctd-profiling-in-tanga_files/figure-html/fig4-1.png" alt="image plot" width="672" />
+<p class="caption">
+Figure 4: image plot
+</p>
+</div>
+<p>Fluorescence comes from the fluorometer, which measures the quantity of primary producers in the water column. You can see in figure <a href="#fig:fig4">4</a> that mid-water peaks phytoplankton at the thermocline (where the there is a rapid temperature change). This probably reflects the zone of mixing between deeper nutrient rich waters and shallower brighter waters (but nutrient poor).</p>
+</div>
+</div>
+<div id="reference" class="section level2 unnumbered">
+<h2>Reference</h2>
+<div id="refs" class="references">
+<div id="ref-ocedata">
+<p>Kelley, Dan. 2015. <em>Ocedata: Oceanographic Datasets for Oce</em>. <a href="https://CRAN.R-project.org/package=ocedata">https://CRAN.R-project.org/package=ocedata</a>.</p>
+</div>
+<div id="ref-oce">
+<p>Kelley, Dan, and Clark Richards. 2018. <em>Oce: Analysis of Oceanographic Data</em>. <a href="https://CRAN.R-project.org/package=oce">https://CRAN.R-project.org/package=oce</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+
