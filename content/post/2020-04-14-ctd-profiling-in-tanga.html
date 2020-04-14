@@ -10,6 +10,8 @@ tags:
   - Oceanography
   - Indian Ocean
   - Seabird
+  - TAFIRI
+  - IMS
 bibliography: [blog.bib]
 # csl: apa.csl
 link-citations: yes
@@ -17,7 +19,13 @@ link-citations: yes
 
 
 
-<p>In March 2020, The Tanzania Fisheries Research Institute collected oceanographic variable in Coastal waters of Tanga, located in the northern part of Tanzania. After a bit of steaming, we were about 10 km east of Tanga port in the Pemba channel water. The first order of business was to drop some casts and get some data!</p>
+<p>In February 2020, The Institute of Marine Sciences (IMS) in collaboration with Tanzania Fisheries Research Institute (TAFIRI) collected oceanographic variables using CTD in coastal waters of Tanga .The sampled area had three transects from the shallow water below 50 meters deep and cruised to the middle of the Pemba channel. The data collection was completed in three days, each day with one transect. We started sampling with the southmost transect located at Kigombe, followed with the middle and finished with the northern transect located near the Tanga city (Figure <a href="#fig:map">1</a>).</p>
+<div class="figure"><span id="fig:map"></span>
+<img src="/post/2020-04-14-ctd-profiling-in-tanga_files/figure-html/map-1.png" alt="Map of Conductivity-Temperatue-Depth (CTD) cast stations" width="672" />
+<p class="caption">
+Figure 1: Map of Conductivity-Temperatue-Depth (CTD) cast stations
+</p>
+</div>
 <div id="ctd-profiling" class="section level2">
 <h2>CTD Profiling</h2>
 <p>Continuous measurements of temperature, salinity, oxygen and fluorescence were made with a Sea-Bird SBE-9/11Plus CTD package with dual temperature, salinity and oxygen sensors and fluorometer. A CTD cast to depths ranging between 40 and 150 m was conducted at Station during field campaign.</p>
@@ -44,8 +52,8 @@ for (i in 1:length(deepsea.file)) {
 </div>
 <div id="results" class="section level2">
 <h2>Results</h2>
-<p>Figure <a href="#fig:fig1">1</a> and <a href="#fig:fig2">2</a> show a typical CTD profiles. While <a href="#fig:fig1">1</a> use <code>unesco</code> to get the older seawater formulation, a figure <a href="#fig:fig2">2</a>used the newer <code>gsw</code> seawater formulation. These figure <a href="#fig:fig2">2</a> show partial temperature and salinity change with water depth. As the depth increases (moving down on the vertical axis), temperature (in red) increases, until a maximum is reached at a depth of 50 meters.</p>
-<p>Salinity, shown in green, increases rapidly with depth, until about 60 meters deep, where it increases only very slowly to about 35.3 absolute salinity ([g/kg]). Note that the differences being measured here are very small 0.1 degrees C and 0.01 ppt (Figure <a href="#fig:fig2">2</a>.</p>
+<p>Figure <a href="#fig:fig1">2</a> and <a href="#fig:fig2">3</a> show a typical CTD profiles. While <a href="#fig:fig1">2</a> use <code>unesco</code> to get the older seawater formulation, a figure <a href="#fig:fig2">3</a>used the newer <code>gsw</code> seawater formulation. These figure <a href="#fig:fig2">3</a> show partial temperature and salinity change with water depth. As the depth increases (moving down on the vertical axis), temperature (in red) increases, until a maximum is reached at a depth of 50 meters.</p>
+<p>Salinity, shown in green, increases rapidly with depth, until about 60 meters deep, where it increases only very slowly to about 35.3 absolute salinity ([g/kg]). Note that the differences being measured here are very small 0.1 degrees C and 0.01 ppt (Figure <a href="#fig:fig2">3</a>.</p>
 <pre class="r"><code>deepsea.ctd[[8]] %&gt;% 
   oce::plot(eos = &quot;unesco&quot;,
   useSmoothScatter = FALSE, grid = F,
@@ -54,7 +62,7 @@ for (i in 1:length(deepsea.file)) {
 <div class="figure"><span id="fig:fig1"></span>
 <img src="/post/2020-04-14-ctd-profiling-in-tanga_files/figure-html/fig1-1.png" alt="A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the **unesco** equation of state." width="672" />
 <p class="caption">
-Figure 1: A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the <strong>unesco</strong> equation of state.
+Figure 2: A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the <strong>unesco</strong> equation of state.
 </p>
 </div>
 <pre class="r"><code>deepsea.ctd[[8]] %&gt;% 
@@ -65,7 +73,7 @@ Figure 1: A typical CTD Plots showing profiles of salinity and temperature (topl
 <div class="figure"><span id="fig:fig2"></span>
 <img src="/post/2020-04-14-ctd-profiling-in-tanga_files/figure-html/fig2-1.png" alt="A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the **gsw** equation of state." width="672" />
 <p class="caption">
-Figure 2: A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the <strong>gsw</strong> equation of state.
+Figure 3: A typical CTD Plots showing profiles of salinity and temperature (topleft), profiles of density and the square of buoyancy frequency (topright), a TS diagram (bottomleft) and a coastline diagram indicating the station location (bottomright) using the <strong>gsw</strong> equation of state.
 </p>
 </div>
 <div id="crosssection" class="section level3">
@@ -74,7 +82,7 @@ Figure 2: A typical CTD Plots showing profiles of salinity and temperature (topl
 <pre class="r"><code>all.transects = deepsea.ctd %&gt;% as.section()</code></pre>
 <pre><code>## Warning in as.section(.): estimated waterDepth as max(pressure) for CTDs
 ## numbered 1:10</code></pre>
-<p>subset the transect of interest from the section. For our case, we can simply extract a transect using the indices. Once transect is extracted from the section was used make a basic contour plot (Figure <a href="#fig:fig3">3</a> and image plot (Figure <a href="#fig:fig4">4</a>.</p>
+<p>subset the transect of interest from the section. For our case, we can simply extract a transect using the indices. Once transect is extracted from the section was used make a basic contour plot (Figure <a href="#fig:fig3">4</a> and image plot (Figure <a href="#fig:fig4">5</a>.</p>
 <pre class="r"><code>all.transects %&gt;% 
   subset(indices = 7:10)%&gt;% 
   plot(which = c(&quot;temperature&quot;, &quot;oxygen&quot;, &quot;fluorescence&quot;, &quot;salinity&quot;),
@@ -82,7 +90,7 @@ Figure 2: A typical CTD Plots showing profiles of salinity and temperature (topl
 <div class="figure"><span id="fig:fig3"></span>
 <img src="/post/2020-04-14-ctd-profiling-in-tanga_files/figure-html/fig3-1.png" alt="Contour plot" width="672" />
 <p class="caption">
-Figure 3: Contour plot
+Figure 4: Contour plot
 </p>
 </div>
 <pre class="r"><code>all.transects %&gt;% 
@@ -92,10 +100,10 @@ Figure 3: Contour plot
 <div class="figure"><span id="fig:fig4"></span>
 <img src="/post/2020-04-14-ctd-profiling-in-tanga_files/figure-html/fig4-1.png" alt="image plot" width="672" />
 <p class="caption">
-Figure 4: image plot
+Figure 5: image plot
 </p>
 </div>
-<p>Fluorescence comes from the fluorometer, which measures the quantity of primary producers in the water column. You can see in figure <a href="#fig:fig4">4</a> that mid-water peaks phytoplankton at the thermocline (where the there is a rapid temperature change). This probably reflects the zone of mixing between deeper nutrient rich waters and shallower brighter waters (but nutrient poor).</p>
+<p>Fluorescence comes from the fluorometer, which measures the quantity of primary producers in the water column. You can see in figure <a href="#fig:fig4">5</a> that mid-water peaks phytoplankton at the thermocline (where the there is a rapid temperature change). This probably reflects the zone of mixing between deeper nutrient rich waters and shallower brighter waters (but nutrient poor).</p>
 </div>
 </div>
 <div id="reference" class="section level2 unnumbered">

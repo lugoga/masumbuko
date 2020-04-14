@@ -21,6 +21,15 @@
     </item>
     
     <item>
+      <title>IMS</title>
+      <link>/tags/ims/</link>
+      <pubDate>Tue, 14 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/ims/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Indian Ocean</title>
       <link>/tags/indian-ocean/</link>
       <pubDate>Tue, 14 Apr 2020 00:00:00 +0000</pubDate>
@@ -44,6 +53,15 @@
       <pubDate>Tue, 14 Apr 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/seabird/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>TAFIRI</title>
+      <link>/tags/tafiri/</link>
+      <pubDate>Tue, 14 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/tafiri/</guid>
       <description></description>
     </item>
     
@@ -507,7 +525,7 @@
     </item>
     
     <item>
-      <title>bookdown</title>
+      <title>Bookdown</title>
       <link>/tags/bookdown/</link>
       <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       

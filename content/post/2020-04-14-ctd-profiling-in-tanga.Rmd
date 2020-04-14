@@ -10,6 +10,8 @@ tags:
   - Oceanography
   - Indian Ocean
   - Seabird
+  - TAFIRI
+  - IMS
 bibliography: [blog.bib]
 # csl: apa.csl
 link-citations: yes
@@ -23,6 +25,8 @@ require(tidyverse)
 require(oce)
 require(ocedata)
 require(sf)
+
+load("e:/Data Manipulation/Deep sea/February_survey.RData")
 
 ```
 
@@ -92,7 +96,58 @@ ctd.cast.tb = ctd.cast.tb %>% slice(-c(1,2))
 ```
 
 
-In March 2020, The Tanzania Fisheries Research Institute collected oceanographic variable in Coastal waters of Tanga, located in the northern part of Tanzania. After a bit of steaming, we were about 10 km east of Tanga port in the Pemba channel water. The first order of business was to drop some casts and get some data!
+In February 2020, The Institute of Marine Sciences (IMS) in collaboration with Tanzania Fisheries Research Institute (TAFIRI) collected oceanographic variables using CTD in coastal waters of Tanga .The sampled area had three transects from the shallow water below 50 meters deep and cruised  to the middle of the Pemba channel. The data collection was completed in three days, each day with one transect. We started sampling with the southmost transect located at Kigombe, followed with the middle and finished with the northern transect located near the Tanga city (Figure \@ref(fig:map)).
+
+```{r map, fig.cap="Map of Conductivity-Temperatue-Depth (CTD) cast stations"}
+
+transect = casts %>% slice(1:4) %>% mutate(transect = "Lower") %>% 
+  bind_rows(
+    casts %>% slice(5:9) %>% mutate(transect = "Middle"),
+    casts %>% slice(10:13) %>% mutate(transect = "Upper")
+  )
+
+ggplot() +
+  geom_sf(data = study.area, col = "#ED6300", fill = "#FBE1CB",size = .35) +
+  metR::geom_contour2(data = study.area.bath,
+               aes(x = lon, y = lat, z=depth*-1), binwidth = 100, col = "grey70", 
+               size = 0.25, lineend = "round", linemitre = 6)+
+  metR::geom_text_contour(data = study.area.bath,
+               aes(x = lon, y = lat, z=depth*-1),
+               binwidth = 100, rotate = TRUE, check_overlap = TRUE, parse = TRUE, size = 2.7,
+               stroke = .35, col = "#ED6300")+
+  metR::geom_contour2(data = study.area.bath %>% filter(depth > -90),
+               aes(x = lon, y = lat, z=depth*-1), binwidth = 50, col = "grey70", 
+               size = 0.25, lineend = "round", linemitre = 6)+
+  metR::geom_text_contour(data = study.area.bath%>% filter(depth > -90),
+               aes(x = lon, y = lat, z=depth*-1),
+               binwidth = 50, rotate = TRUE, check_overlap = TRUE, parse = TRUE, size = 2.7,
+               stroke = .35, col = "#ED6300")+
+  geom_path(data = transect, aes(x = lon, y = lat, col = transect), size = .5) +
+  geom_point(data = transect, aes(x = lon, y = lat, col = transect), size = 2) +
+  # ggrepel::geom_text_repel(data = casts,  aes(x = lon, y = lat, label = name), size = 4,
+  #                          point.padding = TRUE, segment.colour = NA,nudge_x = -0.095, nudge_y = .0075,) +
+  coord_sf(xlim = c(38.9, 39.75), ylim = c(-5.5, -5),crs = 4326)+ #robinson projection
+  labs(x = "", y = "")+
+  cowplot::theme_minimal_grid()+
+  theme_bw() %+%
+  theme(panel.background = element_rect(fill = NA),
+        panel.grid.major = element_line(linetype = 3, colour = "grey60"),
+        axis.text = element_text(colour = 1, size = 12),
+        legend.background = element_blank(),
+        legend.key = element_blank(),
+       legend.position = c(.09,.42),
+       legend.key.width = unit(.9,"cm"))+
+  scale_x_continuous(breaks = seq(39.0,40.5, 0.3))+
+  scale_y_continuous(breaks = c(-5.4,-5.1))+
+  ggspatial::annotation_scale(location = "bl", text_cex = .95)+
+  ggspatial::annotation_north_arrow(location = "tr", height = unit(2, "lines"), 
+                                    width = unit(1, "lines"))+
+  annotate(geom = "text", x = 39.45, y = -5.05, label = "Pemba\nChannel", size = 4, col = "#ED6300")+
+  annotate(geom = "text", x = 39.7, y = -5.38, label = "Pemba\nIsland", size = 4, col = "#ED6300")+
+  annotate(geom = "text", x = 39.1, y = -5.1, label = "Tanga", size = 4, col = "#ED6300")+
+  ggsci::scale_color_aaas(name = "Transects")
+
+```
 
 ## CTD Profiling 
 Continuous measurements of temperature, salinity, oxygen and fluorescence were made with a Sea-Bird SBE-9/11Plus CTD package with dual temperature, salinity and oxygen sensors and fluorometer. A CTD cast to depths ranging between 40 and 150 m was conducted at Station during field campaign.
