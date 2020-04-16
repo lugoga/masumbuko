@@ -131,11 +131,12 @@ Figure 1: Barplot showing the mean values with standard deviation as error. Erro
 <pre class="r"><code>nutrients %&gt;%
   ggplot(aes(fill= site, y = value, x = as.factor(month)))+
   geom_col(position = &quot;dodge&quot;)+
-  geom_errorbar(aes(ymin = value, ymax = value+error), 
+  geom_errorbar(aes(ymin = value, ymax = value+error, col= site), 
                 position = position_dodge(0.9), width = .3)+
   scale_x_discrete(name = &quot;&quot;, label = c(&quot;Apr 2012&quot;, &quot;Sep 2012&quot; ,&quot;Jan 2013&quot; ,
                              &quot;Apr 2013&quot;, &quot;Sep 2013&quot;, &quot;Jan 2014&quot;))+
   ggsci::scale_fill_jco(name = &quot;Site&quot;)+
+  ggsci::scale_color_jco(name = &quot;Site&quot;)+
   ggpubr::theme_pubclean()+
   theme(axis.title.x = element_blank(), legend.position = &quot;right&quot;)+
   coord_cartesian(expand = FALSE)+
