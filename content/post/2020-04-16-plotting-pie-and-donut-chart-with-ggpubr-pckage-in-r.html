@@ -1,0 +1,174 @@
+---
+title: Plotting Pie and Donut Chart with ggpubr pckage in R
+author: Masumbuko Semba
+date: '2020-04-06'
+slug: plotting-pie-and-donut-chart-with-ggpubr-pckage-in-r
+categories: []
+tags:
+  - pie chart
+  - donut chart
+  - ggpubr
+  - ggplot2
+  - analysis
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/plotly-binding/plotly.js"></script>
+<script src="/rmarkdown-libs/typedarray/typedarray.min.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link href="/rmarkdown-libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/plotly-main/plotly-latest.min.js"></script>
+
+
+<p>Once in this blog I explained how to make <a href="https://semba-blog.netlify.app/07/12/2019/pie-chart-and-donut-plot-with-ggplot2/">pie chart and donut plot with <strong>ggplot2</strong></a>. In this post, I will extend the topic by introducing <strong>ggpubr</strong> package, which has nifty function to facilitate a hustle free process of plotting publication quality figures. I will show you how you can use the function from this package to make a pie chart and donut chart with additional function to polish the charts from <strong>ggplot2</strong> <span class="citation">(Wickham <a href="#ref-ggplot" role="doc-biblioref">2016</a>)</span>. First, we need to load the <strong>tidyverse</strong> package that will assist to process, manipulate and visualize the data <span class="citation">(Wickham <a href="#ref-tidyverse" role="doc-biblioref">2017</a>)</span>. I prefer load packages using the <code>require()</code>, but you can use the <code>library</code> function, which does similar task.</p>
+<pre class="r"><code>require(tidyverse)</code></pre>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>A pie chart need a series of data representing counts or proportions of different groups. Like the previous post, we download the daily logs of R version downloads with different operating systems. We use <strong>cranlog</strong> package <span class="citation">(Csárdi <a href="#ref-cranlog" role="doc-biblioref">2019</a>)</span> to obtain logs of R download for various operating system in the last thirty days from today.</p>
+<pre class="r"><code>rdown = cranlogs::cran_downloads(packages = &quot;R&quot;, 
+                                 from = lubridate::today()-30, 
+                                 to = lubridate::today()) %&gt;%
+  mutate(os = replace(os, os==&quot;src&quot;, &quot;Linux&quot;),
+         os = replace(os, os==&quot;osx&quot;, &quot;Mac&quot;),
+         os = replace(os, os==&quot;win&quot;, &quot;Windows&quot;))
+
+rdown %&gt;% sample_n(size = 10)</code></pre>
+<pre><code>         date version      os count
+1  2020-04-06   3.4.3   Linux     3
+2  2020-03-18  2.15.2     Mac     3
+3  2020-03-18   3.4.0 Windows     1
+4  2020-03-31   3.0.0     Mac     2
+5  2020-04-12   3.5.0 Windows     2
+6  2020-04-08   3.0.1     Mac     3
+7  2020-03-22   3.4.3 Windows     4
+8  2020-03-30   3.3.3     Mac    68
+9  2020-03-21  2.13.2 Windows     1
+10 2020-03-24   3.6.0     Mac     3</code></pre>
+<p>To understand the R version download, we first ask the question, Are R downloads differs over weekdays and operating system? Here we want to understand whether there are days of week with more downloads than others and if there are which operating system has more downloads. We can answer this question by simply extract days of week using the <code>wday</code> function from <strong>lubridate</strong> package <span class="citation">(Grolemund and Wickham <a href="#ref-lubridate" role="doc-biblioref">2011</a>)</span> and then group the compute the frequency of downloads based on the week day and operating system. Data without type of operating system were omitted from the dataset.The chunk below illustrate the code of lines used to prepare the data to answer the question asked above.</p>
+<pre class="r"><code>weeday.logs = rdown %&gt;% 
+  mutate(day = lubridate::wday(date, abbr = TRUE, label = TRUE)) %&gt;% 
+  group_by(os,day) %&gt;% 
+  count() %&gt;% 
+  ungroup() %&gt;% 
+  filter(os != &quot;NA&quot;) </code></pre>
+<p>Figure <a href="#fig:fig1">1</a> shows the frequency of R downloads over week days at three different operating systems. We notice that while Windows and Linux download patterns are very close over the week days, the downloads from Mac operating system is higher than those from Windows and Linux operating system over all the days of the week. This suggest that Mac users downloaded more R from CRAN than any other operating system over the last 30 days.</p>
+<pre class="r"><code>weeday.logs%&gt;% 
+  ggplot()+
+  geom_col(aes(x = day, y = n, fill = os), position = position_dodge(.9))+
+  ggsci::scale_fill_jama(name = &quot;Operating \nSystem&quot;)+
+  ggpubr::theme_pubclean()+
+  theme(axis.title.x = element_blank(), legend.position = &quot;right&quot;, 
+        legend.key = element_blank())+
+  coord_cartesian(expand = FALSE)+
+  scale_y_continuous(breaks = seq(50,260,50))+
+  scale_x_discrete(limits = c(&quot;Mon&quot;, &quot;Tue&quot;, &quot;Wed&quot;, &quot;Thu&quot;, &quot;Fri&quot;, &quot;Sat&quot;, &quot;Sun&quot;))+
+  labs(y = &quot;Number of downloads&quot;)</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2020-04-16-plotting-pie-and-donut-chart-with-ggpubr-pckage-in-r_files/figure-html/fig1-1.png" alt="Week day R downloads across multiple operating systems" width="768" />
+<p class="caption">
+Figure 1: Week day R downloads across multiple operating systems
+</p>
+</div>
+<p>Then we might be interested the percentage of dominance of Mac in downloading R as compared to Linux and Windows Operating Systems. To be able to address this issue, we need first to compute the frequency of downloads for each operating system. The combination of <code>group_by</code> and <code>count</code> functions from <strong>dplyr</strong> <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span> package helps us getting the frequencies of operating systems downloads. Once we computed the frequency, we can transform them into fraction and change into percentage. To be able to label, we stitch the percentage values and the operating system into a variable called label using the <code>paste</code> function. The chunk below highlight the key steps.</p>
+<pre class="r"><code>os = rdown %&gt;% group_by(os) %&gt;% 
+  count() %&gt;% 
+  ungroup() %&gt;% 
+  filter(os != &quot;NA&quot;) %&gt;% 
+  mutate(percentage = n/sum(n)*100) %&gt;%
+  mutate_if(is.numeric, round, digits = 0) %&gt;%
+  mutate(label = paste(os,&quot;\n&quot;,&quot;(&quot;, percentage, &quot;% &quot;,&quot;)&quot;, sep = &quot;&quot;))</code></pre>
+</div>
+<div id="pie-and-donut-chart" class="section level2">
+<h2>Pie and donut chart</h2>
+<p>Although <strong>ggplot</strong> does a decent way to plot both the pie and donut plot, Alboukadel Kassambara <span class="citation">(<a href="#ref-ggpubr" role="doc-biblioref">2020</a>)</span> developed a <strong>ggpubr</strong> package, which extend some functions of <strong>ggplot2</strong>. Some of the function of <strong>ggpubr</strong> are <code>ggpie</code> and <code>ggdonutchart</code>, which have some arguments to pass on and generate a pie and donut plot directly. These function works well with other <strong>ggplot2</strong> functions and other tidyverse functions. The code below illustrate how to make figure <a href="#fig:fig2">2</a> using the <code>ggpie</code> function.</p>
+<pre class="r"><code>ggpubr::ggpie(data = os, x = &quot;n&quot;, label = &quot;label&quot;, color = &quot;white&quot;,
+                     lab.font = &quot;white&quot;,fill = &quot;os&quot;,lab.pos = &quot;in&quot;, 
+                     orientation = &quot;horizontal&quot;, lab.adjust = 100)+
+  ggsci::scale_fill_jama()+
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2020-04-16-plotting-pie-and-donut-chart-with-ggpubr-pckage-in-r_files/figure-html/fig2-1.png" alt="Pie chart from **ggpubr** package" width="672" />
+<p class="caption">
+Figure 2: Pie chart from <strong>ggpubr</strong> package
+</p>
+</div>
+<p>Also the code below show how to use <code>ggdonutchart</code> function to generate a donut plot shown in figure <a href="#fig:fig3">3</a>.</p>
+<pre class="r"><code> ggpubr::ggdonutchart(data = os, x = &quot;n&quot;, label = &quot;label&quot;, color = &quot;white&quot;,
+                     lab.font = &quot;white&quot;,fill = &quot;os&quot;,lab.pos = &quot;in&quot;, 
+                     orientation = &quot;horizontal&quot;)+
+  ggsci::scale_fill_jama()+
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2020-04-16-plotting-pie-and-donut-chart-with-ggpubr-pckage-in-r_files/figure-html/fig3-1.png" alt="Pie chart from **ggpubr** package" width="672" />
+<p class="caption">
+Figure 3: Pie chart from <strong>ggpubr</strong> package
+</p>
+</div>
+</div>
+<div id="remarks" class="section level2">
+<h2>Remarks</h2>
+<p>Although the post use <strong>cranlog</strong> package to download the logs of R across multiple operating system, but the this post mainly focus on using functions from <strong>ggpubr</strong> package to plot pie and donut chart. Until now I hope you have seen how easy to make pie and donut chart in R by combining <strong>ggplot2</strong> and <strong>ggpubr</strong> functions. I hope you wont be troubled anymore with how you should arrange the label in either pie or donut chart when using the <strong>ggpubr</strong> package, as it does well labeling the pieces. Figure <a href="#fig:fig4">4</a> and <a href="#fig:fig5">5</a> are bonus plots in this post made with <strong>plotly</strong> package. I have included the code for generating these plots in this post. Check for coming posts that explain making interactive plots with <strong>plotly</strong> package <span class="citation">(Sievert <a href="#ref-plotly" role="doc-biblioref">2018</a>)</span></p>
+<pre class="r"><code>plotly::plot_ly(data = os, 
+                labels = ~label, 
+                values = ~n, 
+                type = &#39;pie&#39;,
+                textinfo=&#39;label+percent&#39;,
+                showlegend = FALSE) %&gt;% 
+plotly::layout(title = &#39;Percentage of R downloads by Operating System&#39;,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))</code></pre>
+<div class="figure"><span id="fig:fig4"></span>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"visdat":{"60e04c7717c4":["function () ","plotlyVisDat"]},"cur_data":"60e04c7717c4","attrs":{"60e04c7717c4":{"labels":{},"values":{},"textinfo":"label+percent","showlegend":false,"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"pie"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Percentage of R downloads by Operating System","xaxis":{"showgrid":false,"zeroline":false,"showticklabels":false},"yaxis":{"showgrid":false,"zeroline":false,"showticklabels":false},"hovermode":"closest","showlegend":true},"source":"A","config":{"showSendToCloud":false},"data":[{"labels":["Linux<br />(26% )","Mac<br />(48% )","Windows<br />(26% )"],"values":[742,1366,756],"textinfo":"label+percent","showlegend":false,"type":"pie","marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(255,255,255,1)"}},"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 4: Pie chart from plotly package
+</p>
+</div>
+<pre class="r"><code>plotly::plot_ly(data = os, 
+                labels = ~label, 
+                values = ~n, 
+                type = &#39;pie&#39;, hole = 0.6,
+                textinfo=&#39;label+percent&#39;,
+                showlegend = FALSE) %&gt;% 
+plotly::layout(title = &#39;Percentage of R downloads by Operating System&#39;,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))</code></pre>
+<div class="figure"><span id="fig:fig5"></span>
+<div id="htmlwidget-2" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"visdat":{"60e065673947":["function () ","plotlyVisDat"]},"cur_data":"60e065673947","attrs":{"60e065673947":{"labels":{},"values":{},"hole":0.6,"textinfo":"label+percent","showlegend":false,"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"pie"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Percentage of R downloads by Operating System","xaxis":{"showgrid":false,"zeroline":false,"showticklabels":false},"yaxis":{"showgrid":false,"zeroline":false,"showticklabels":false},"hovermode":"closest","showlegend":true},"source":"A","config":{"showSendToCloud":false},"data":[{"labels":["Linux<br />(26% )","Mac<br />(48% )","Windows<br />(26% )"],"values":[742,1366,756],"hole":0.6,"textinfo":"label+percent","showlegend":false,"type":"pie","marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(255,255,255,1)"}},"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 5: Donut chart from plotly package
+</p>
+</div>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-cranlog">
+<p>Csárdi, Gábor. 2019. <em>Cranlogs: Download Logs from the ’Rstudio’ ’Cran’ Mirror</em>. <a href="https://CRAN.R-project.org/package=cranlogs">https://CRAN.R-project.org/package=cranlogs</a>.</p>
+</div>
+<div id="ref-lubridate">
+<p>Grolemund, Garrett, and Hadley Wickham. 2011. “Dates and Times Made Easy with lubridate.” <em>Journal of Statistical Software</em> 40 (3): 1–25. <a href="http://www.jstatsoft.org/v40/i03/">http://www.jstatsoft.org/v40/i03/</a>.</p>
+</div>
+<div id="ref-ggpubr">
+<p>Kassambara, Alboukadel. 2020. <em>Ggpubr: ’Ggplot2’ Based Publication Ready Plots</em>. <a href="https://CRAN.R-project.org/package=ggpubr">https://CRAN.R-project.org/package=ggpubr</a>.</p>
+</div>
+<div id="ref-plotly">
+<p>Sievert, Carson. 2018. <em>Plotly for R</em>. <a href="https://plotly-r.com">https://plotly-r.com</a>.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>———. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+</div>
+</div>

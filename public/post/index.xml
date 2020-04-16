@@ -21,6 +21,15 @@
     </item>
     
     <item>
+      <title>Plotting Pie and Donut Chart with ggpubr pckage in R</title>
+      <link>/04/06/2020/plotting-pie-and-donut-chart-with-ggpubr-pckage-in-r/</link>
+      <pubDate>Mon, 06 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/04/06/2020/plotting-pie-and-donut-chart-with-ggpubr-pckage-in-r/</guid>
+      <description>Once in this blog I explained how to make pie chart and donut plot with ggplot2. In this post, I will extend the topic by introducing ggpubr package, which has nifty function to facilitate a hustle free process of plotting publication quality figures. I will show you how you can use the function from this package to make a pie chart and donut chart with additional function to polish the charts from ggplot2 (Wickham 2016).</description>
+    </item>
+    
+    <item>
       <title>Barplot with errorbar in ggplot2</title>
       <link>/03/25/2020/barplot-with-errorbar-in-ggplot2/</link>
       <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>

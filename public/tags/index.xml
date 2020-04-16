@@ -75,6 +75,51 @@
     </item>
     
     <item>
+      <title>analysis</title>
+      <link>/tags/analysis/</link>
+      <pubDate>Mon, 06 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/analysis/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>donut chart</title>
+      <link>/tags/donut-chart/</link>
+      <pubDate>Mon, 06 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/donut-chart/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ggplot2</title>
+      <link>/tags/ggplot2/</link>
+      <pubDate>Mon, 06 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/ggplot2/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ggpubr</title>
+      <link>/tags/ggpubr/</link>
+      <pubDate>Mon, 06 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/ggpubr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>pie chart</title>
+      <link>/tags/pie-chart/</link>
+      <pubDate>Mon, 06 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/pie-chart/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>barplot</title>
       <link>/tags/barplot/</link>
       <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
@@ -89,15 +134,6 @@
       <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/errorbar/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>ggplot2</title>
-      <link>/tags/ggplot2/</link>
-      <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/ggplot2/</guid>
       <description></description>
     </item>
     
@@ -125,15 +161,6 @@
       <pubDate>Tue, 25 Feb 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/algoa/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>analysis</title>
-      <link>/tags/analysis/</link>
-      <pubDate>Tue, 25 Feb 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/analysis/</guid>
       <description></description>
     </item>
     
@@ -552,7 +579,7 @@
     </item>
     
     <item>
-      <title>bookdown</title>
+      <title>Bookdown</title>
       <link>/tags/bookdown/</link>
       <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       

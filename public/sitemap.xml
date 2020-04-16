@@ -58,6 +58,36 @@
   </url>
   
   <url>
+    <loc>/tags/analysis/</loc>
+    <lastmod>2020-04-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/donut-chart/</loc>
+    <lastmod>2020-04-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/ggplot2/</loc>
+    <lastmod>2020-04-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/ggpubr/</loc>
+    <lastmod>2020-04-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/pie-chart/</loc>
+    <lastmod>2020-04-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/04/06/2020/plotting-pie-and-donut-chart-with-ggpubr-pckage-in-r/</loc>
+    <lastmod>2020-04-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/tags/barplot/</loc>
     <lastmod>2020-03-25T00:00:00+00:00</lastmod>
   </url>
@@ -73,11 +103,6 @@
   </url>
   
   <url>
-    <loc>/tags/ggplot2/</loc>
-    <lastmod>2020-03-25T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/rmarkdown/</loc>
     <lastmod>2020-03-25T00:00:00+00:00</lastmod>
   </url>
@@ -89,11 +114,6 @@
   
   <url>
     <loc>/tags/algoa/</loc>
-    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/analysis/</loc>
     <lastmod>2020-02-25T00:00:00+00:00</lastmod>
   </url>
   
