@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.64.1" />
+
+
+<title>Barplot with errorbar in ggplot2 - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Barplot with errorbar in ggplot2 - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">5 min read</span>
+    
+
+    <h1 class="article-title">Barplot with errorbar in ggplot2</h1>
+
+    
+    <span class="article-date">2020/03/25</span>
+    
+
+    <div class="article-content">
+      
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/datatables-binding/datatables.js"></script>
+<link href="/rmarkdown-libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="/rmarkdown-libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/dt-core/js/jquery.dataTables.min.js"></script>
+<link href="/rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Bar plots with error bars are very frequently used plots in sciences to represent the variation in a continuous variable within one or more categorical variables. Error bars give a general idea of how precise a measurement is, or conversely, how far from the reported value the true (error free) value might be. If the value displayed on your barplot is the result of an aggregation (like the mean value of several data points), you may want to display error bars. These are not always straightforward to make with the base functions in R. In this post I illustrate plotting bar and point with error bars with the <strong>ggplot2</strong> package <span class="citation">(Wickham <a href="#ref-ggplot" role="doc-biblioref">2016</a>)</span>.</p>
+<p>There essential three values—<em>standard deviation, Standard error or confidence Interval</em> that are widely used to represent the variation of the values from the mean. Sometimes scientist never mention which one is used. It is important to understand them and how they are calculated, since they give very different results. For the purpose of time, I will only focus on the standard deviation to illustrate the point in this post. We first need to load the tidyverse package that house several package for import, manipulate and visualize the data. We simply load the functions of the package using the <code>require</code> function.</p>
+<pre class="r"><code>require(tidyverse)</code></pre>
+</div>
+<div id="dataset" class="section level2">
+<h2>Dataset</h2>
+<p>In this post, I use the dataset from colleague that represent the concentration of ammonia <span class="math inline">\(NH_4-N\)</span> collected from Pemba, Zanzibar and Mafia Channel along the coastal waters of Tanzania. The data is stored in Excel spreadsheet. Let’s first import the dataset from the local directory of my machine into R session. This is done using the <code>read_excel</code> function from the <strong>readxl</strong> package <span class="citation">(Wickham and Bryan <a href="#ref-readxl" role="doc-biblioref">2018</a>)</span></p>
+<pre class="r"><code>nutrients = readxl::read_excel(&quot;/data_rearranged_semba.xlsx&quot;, sheet = 3)</code></pre>
+<p>To contrast a variable across site and sampling time, we first need to summaries the data to obtain means and a measure of variation of ammonia for each of the three sites during the sampling period in the data set. There are several ways to do this in R, but we like the <code>summarise</code> and <code>group_by</code> functions in the <strong>dplyr</strong><span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span> . The code in the chunk below summarize the data set presented in table below</p>
+<pre class="r"><code>nutrients = nutrients %&gt;%
+  group_by(month, site) %&gt;%
+  summarise(value = mean(ammonia),
+            error = sd(ammonia)) %&gt;%
+  ungroup()</code></pre>
+<div id="htmlwidget-1" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"filter":"none","caption":"<caption>Mean and Standard Deviation of ammonia in channels<\/caption>","data":[["2012-04-01T00:00:00Z","2012-04-01T00:00:00Z","2012-04-01T00:00:00Z","2012-09-01T00:00:00Z","2012-09-01T00:00:00Z","2012-09-01T00:00:00Z","2013-01-01T00:00:00Z","2013-01-01T00:00:00Z","2013-01-01T00:00:00Z","2013-04-01T00:00:00Z","2013-04-01T00:00:00Z","2013-04-01T00:00:00Z","2013-09-01T00:00:00Z","2013-09-01T00:00:00Z","2013-09-01T00:00:00Z","2014-01-01T00:00:00Z","2014-01-01T00:00:00Z","2014-01-01T00:00:00Z"],["NH4-N","NH4-N","NH4-N","NH4-N","NH4-N","NH4-N","NH4-N","NH4-N","NH4-N","NH4-N","NH4-N","NH4-N","NH4-N","NH4-N","NH4-N","NH4-N","NH4-N","NH4-N"],["Pemba","Zanzibar","Mafia","Pemba","Zanzibar","Mafia","Pemba","Zanzibar","Mafia","Pemba","Zanzibar","Mafia","Pemba","Zanzibar","Mafia","Pemba","Zanzibar","Mafia"],[37.9,42.34,44.09,67.66,63.43,46.14,88.74,65.42,39.37,101.29,21.47,19.83,84.58,77.17,52.12,53.46,57.07,41.63],[6.49,4.86,7.66,5.51,0.66,6.04,6.99,5.34,4.88,3.79,3.44,3.44,2.83,0.9,2.39,4.97,3.94,5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Month<\/th>\n      <th>Nutrient<\/th>\n      <th>Channel<\/th>\n      <th>Mean<\/th>\n      <th>SD<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[3,4]}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<p>We can now make a bar plot of means of ammonia concentration during the sampled period with standard deviations as the error bar and color them with channel. The following code uses the standard deviations. The code in the chunk below was used to make figure <a href="#fig:fig1">1</a>. In a nutshell, the bar was created with the <code>geom_col</code> function. The function <code>geom_col</code> uses the value of the y variable (mean_PL) as the height of the bars.</p>
+<p>Then, add an extra layer using the <code>geom_errorbar</code> function, which takes at least 3 arguments in its aesthetics—<code>ymin</code> and <code>ymax</code>, which define the position of the bottom and the top of the error bar respectively. Note that within the <code>geom_errorbar</code> function, <code>ymin</code> and <code>ymax</code> are the top and bottom of the error bars (defined here as mean <span class="math inline">\(\pm\)</span> sd), and width defines how wide the error bars are.</p>
+<pre class="r"><code>nutrients %&gt;%
+  ggplot(aes(fill= site, y = value, x = as.factor(month)))+
+  geom_col(position = &quot;dodge&quot;)+
+  geom_errorbar(aes(ymin = value-error, ymax = value+error), 
+                position = position_dodge(0.9), width = .3)+
+  scale_x_discrete(name = &quot;&quot;, label = c(&quot;Apr 2012&quot;, &quot;Sep 2012&quot; ,&quot;Jan 2013&quot; ,
+                             &quot;Apr 2013&quot;, &quot;Sep 2013&quot;, &quot;Jan 2014&quot;))+
+  ggsci::scale_fill_jco(name = &quot;Site&quot;)+
+  ggpubr::theme_pubclean()+
+  theme(axis.title.x = element_blank(), legend.position = &quot;right&quot;)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_continuous(breaks = seq(20,110,20), name = expression(NH[4]-N))</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2020-03-25-barplot-with-errorbar-in-ggplot2_files/figure-html/fig1-1.png" alt="Barplot showing the mean values with standard deviation as error. Error bars in both sides" width="768" />
+<p class="caption">
+Figure 1: Barplot showing the mean values with standard deviation as error. Error bars in both sides
+</p>
+</div>
+<p>Sometimes you may wish to only show the position of the top of the error bar and hide the bottom error as seen in figure <a href="#fig:fig2">2</a>. That is easily done by supplying only the mean value in the <code>ymin</code> argument when add an extra layer using the <code>geom_errorbar</code> as the chunk below illustrates;</p>
+<pre class="r"><code>nutrients %&gt;%
+  ggplot(aes(fill= site, y = value, x = as.factor(month)))+
+  geom_col(position = &quot;dodge&quot;)+
+  geom_errorbar(aes(ymin = value, ymax = value+error), 
+                position = position_dodge(0.9), width = .3)+
+  scale_x_discrete(name = &quot;&quot;, label = c(&quot;Apr 2012&quot;, &quot;Sep 2012&quot; ,&quot;Jan 2013&quot; ,
+                             &quot;Apr 2013&quot;, &quot;Sep 2013&quot;, &quot;Jan 2014&quot;))+
+  ggsci::scale_fill_jco(name = &quot;Site&quot;)+
+  ggpubr::theme_pubclean()+
+  theme(axis.title.x = element_blank(), legend.position = &quot;right&quot;)+
+  coord_cartesian(expand = FALSE)+
+  scale_y_continuous(breaks = seq(20,110,20), name = expression(NH[4]-N))</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2020-03-25-barplot-with-errorbar-in-ggplot2_files/figure-html/fig2-1.png" alt="Barplot showing the mean values with standard deviation as error. Errors in top side" width="768" />
+<p class="caption">
+Figure 2: Barplot showing the mean values with standard deviation as error. Errors in top side
+</p>
+</div>
+<p>You can also use geom_point instead of geom_bar if you want the error bars to plot on points as in figure <a href="#fig:fig3">3</a> generated using the lines of code in the chunk below;</p>
+<pre class="r"><code>nutrients %&gt;%
+  ggplot(aes(col= site, y = value, x = as.factor(month)))+
+  geom_point(position = position_dodge(0.4), size = 4)+
+  geom_errorbar(aes(ymin = value-error, ymax = value+error), 
+                position = position_dodge(0.4), width = .3)+
+  scale_x_discrete(name = &quot;&quot;, label = c(&quot;Apr 2012&quot;, &quot;Sep 2012&quot; ,&quot;Jan 2013&quot; ,
+                             &quot;Apr 2013&quot;, &quot;Sep 2013&quot;, &quot;Jan 2014&quot;))+
+  ggsci::scale_color_jco(name = &quot;Site&quot;)+
+  ggpubr::theme_pubclean()+
+  theme(axis.title.x = element_blank(), legend.position = &quot;right&quot;, 
+        legend.key = element_blank())+
+  scale_y_continuous(breaks = seq(20,110,20), name = expression(NH[4]-N))</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2020-03-25-barplot-with-errorbar-in-ggplot2_files/figure-html/fig3-1.png" alt="Point plots showing the mean values with standard deviation as error" width="768" />
+<p class="caption">
+Figure 3: Point plots showing the mean values with standard deviation as error
+</p>
+</div>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
+</div>
+<div id="ref-readxl">
+<p>Wickham, Hadley, and Jennifer Bryan. 2018. <em>Readxl: Read Excel Files</em>. <a href="https://CRAN.R-project.org/package=readxl">https://CRAN.R-project.org/package=readxl</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

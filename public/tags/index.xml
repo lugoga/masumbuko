@@ -75,6 +75,42 @@
     </item>
     
     <item>
+      <title>barplot</title>
+      <link>/tags/barplot/</link>
+      <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/barplot/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>errorbar</title>
+      <link>/tags/errorbar/</link>
+      <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/errorbar/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ggplot2</title>
+      <link>/tags/ggplot2/</link>
+      <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/ggplot2/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Rmarkdown</title>
+      <link>/tags/rmarkdown/</link>
+      <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/rmarkdown/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>ADCP</title>
       <link>/tags/adcp/</link>
       <pubDate>Tue, 25 Feb 2020 00:00:00 +0000</pubDate>
@@ -197,15 +233,6 @@
       <pubDate>Sat, 08 Feb 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/wuhan/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>ggplot2</title>
-      <link>/tags/ggplot2/</link>
-      <pubDate>Sun, 26 Jan 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/ggplot2/</guid>
       <description></description>
     </item>
     
@@ -525,7 +552,7 @@
     </item>
     
     <item>
-      <title>Bookdown</title>
+      <title>bookdown</title>
       <link>/tags/bookdown/</link>
       <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
@@ -584,15 +611,6 @@
       <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/chumbe-island/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Rmarkdown</title>
-      <link>/tags/rmarkdown/</link>
-      <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/rmarkdown/</guid>
       <description></description>
     </item>
     

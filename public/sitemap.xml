@@ -58,6 +58,31 @@
   </url>
   
   <url>
+    <loc>/tags/barplot/</loc>
+    <lastmod>2020-03-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/03/25/2020/barplot-with-errorbar-in-ggplot2/</loc>
+    <lastmod>2020-03-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/errorbar/</loc>
+    <lastmod>2020-03-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/ggplot2/</loc>
+    <lastmod>2020-03-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/rmarkdown/</loc>
+    <lastmod>2020-03-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/tags/adcp/</loc>
     <lastmod>2020-02-25T00:00:00+00:00</lastmod>
   </url>
@@ -170,11 +195,6 @@
   <url>
     <loc>/tags/wuhan/</loc>
     <lastmod>2020-02-08T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/ggplot2/</loc>
-    <lastmod>2020-01-26T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -544,11 +564,6 @@
   
   <url>
     <loc>/02/22/2019/publishing-code-into-technical-report/</loc>
-    <lastmod>2019-02-22T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/rmarkdown/</loc>
     <lastmod>2019-02-22T00:00:00+00:00</lastmod>
   </url>
   

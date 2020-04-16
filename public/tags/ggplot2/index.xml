@@ -6,10 +6,19 @@
     <description>Recent content in ggplot2 on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 26 Jan 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 25 Mar 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/ggplot2/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Barplot with errorbar in ggplot2</title>
+      <link>/03/25/2020/barplot-with-errorbar-in-ggplot2/</link>
+      <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/03/25/2020/barplot-with-errorbar-in-ggplot2/</guid>
+      <description>IntroductionBar plots with error bars are very frequently used plots in sciences to represent the variation in a continuous variable within one or more categorical variables. Error bars give a general idea of how precise a measurement is, or conversely, how far from the reported value the true (error free) value might be. If the value displayed on your barplot is the result of an aggregation (like the mean value of several data points), you may want to display error bars.</description>
+    </item>
     
     <item>
       <title>World map and Map projections</title>
