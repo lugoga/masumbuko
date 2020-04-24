@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.64.1" />
+
+
+<title>Lake Victoria Bathymetry - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Lake Victoria Bathymetry - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">8 min read</span>
+    
+
+    <h1 class="article-title">Lake Victoria Bathymetry</h1>
+
+    
+    <span class="article-date">2020/04/24</span>
+    
+
+    <div class="article-content">
+      
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/leaflet/leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet/leaflet.js"></script>
+<link href="/rmarkdown-libs/leafletfix/leafletfix.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4-compressed.js"></script>
+<script src="/rmarkdown-libs/Proj4Leaflet/proj4leaflet.js"></script>
+<link href="/rmarkdown-libs/rstudio_leaflet/rstudio_leaflet.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/leaflet-binding/leaflet.js"></script>
+
+
+<p>I was looking for bathymetry dataset for Lake Victoria online and I came across this <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/SOEKNR#">link</a>. It stores several products of the bathymetry data of the Lake Victoria. Among them products is the gridded TIFF file. This dataset was created by a team from Harvard University in 2017 <span class="citation">(Hamilton et al. <a href="#ref-hamilton" role="doc-biblioref">2016</a>)</span>. They used over 4.2 million points collected over 100-years of surveys. The point data was obtained from an Admiral Bathymetry map and points collected in the field. Roughly, 3.8 million points come from the survey conducted by Lake Victoria Regional Hydro-acoustics Working Group.</p>
+<p>In this post I illustrate step by step processing the bathymetric of Lake Victoria, which is stored in n TIFF format using R language <span class="citation">(R Core Team <a href="#ref-r" role="doc-biblioref">2018</a>)</span>. You first need to download the dataset from <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/SOEKNR#">here</a> as TIFF. It has about 48 MB, so you need to patient if you internet speed is slow for this file to download. I load some of the packages to manipulate, analyse and even visualize the bathymetry data of Lake Victoria. These packages include;</p>
+<pre class="r"><code>require(tidyverse)
+require(sf)
+require(leaflet)</code></pre>
+<p><strong>raster</strong> package contains nifty function to handle raster file like the bathymetry dataset of Lake Victoria <span class="citation">(Hijmans <a href="#ref-raster" role="doc-biblioref">2017</a>)</span>. But, often there conflict between <strong>raster</strong> and <strong>tidyverse</strong> packages, I will only call specific function of raster package when needed using the <code>raster::</code> arguments throughtout this post. Once the dataset is download, you can simply load or import in R session using <code>raster</code> function from <strong>raster</strong> package <span class="citation">(Hijmans <a href="#ref-raster" role="doc-biblioref">2017</a>)</span>.</p>
+<pre class="r"><code>## read the ascii file
+lake.victoria = raster::raster(&quot;e:/GIS/Lake_victoria/LV_Bathy_V7.tif&quot;)
+
+lake.victoria.shp = st_read(&quot;e:/GIS/Lake_victoria/wb_lv_tzn.shp&quot;, quiet = TRUE)</code></pre>
+<p>When we plot the bathymetry of Lake Victoria as shown in figure <a href="#fig:fig1">1</a>, we notice that depth vary across the lake range between 0 to about 80 meters deep. Unfortunately, the longitude and latitude values are unfamiliar to me and I the datum used to present this dataset are unclear to me.</p>
+<pre class="r"><code>lake.victoria %&gt;% raster::plot()</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2020-04-24-lake-victoria-bathymetry_files/figure-html/fig1-1.png" alt="Lake Victoria batymetry map" width="672" />
+<p class="caption">
+Figure 1: Lake Victoria batymetry map
+</p>
+</div>
+<p>To have a glimpse of the <code>Coordinate Reference System</code> (CRS) in the dataset, I used <code>raster::crs()</code> function to check the datum used;</p>
+<pre class="r"><code>lake.victoria %&gt;% raster::crs()</code></pre>
+<pre><code>FALSE CRS arguments:
+FALSE  +proj=lcc +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25 +x_0=0 +y_0=0
+FALSE +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0</code></pre>
+<div id="reproject-rasters" class="section level2">
+<h2>Reproject Rasters</h2>
+<p>We can use the <code>projectRaster</code> function to reproject a raster into a new CRS. I have used <code>+proj=longlat +ellps=WGS84 +datum=WGS84</code> to transform the projection into WGS84 geographical coordinate system of longitude and latitude measured in degree. Keep in mind that reprojection only works when you first have a defined CRS for the raster object that you want to reproject.</p>
+<pre class="r"><code># reproject to UTM
+lake.victoria.wgs = lake.victoria %&gt;% 
+  raster::projectRaster(crs=&quot;+proj=longlat +ellps=WGS84 +datum=WGS84&quot;)</code></pre>
+<p>When we replot the projected bathymetry as shown in figure <a href="#fig:fig2">2</a>, we notice that the longitude and latitude are in degree.</p>
+<pre class="r"><code>lake.victoria.wgs %&gt;% raster::plot()</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2020-04-24-lake-victoria-bathymetry_files/figure-html/fig2-1.png" alt="Transformed projection of Lake Victoria bathymetry to datum WGS84" width="672" />
+<p class="caption">
+Figure 2: Transformed projection of Lake Victoria bathymetry to datum WGS84
+</p>
+</div>
+<p>If we are fine with the projection, but the plotting isn’t pleasing. We might want to use the grammar of graphic <strong>ggplot2</strong> and its extended package like the <strong>metR</strong> to improve the plot. However, these package use data organized in data frame instead of raster. We use the <code>raster::as.data.frame(xy = TRUE)</code> to convert raster to data frame and tidy the data into lon, lat, and depth with <code>rename(lon = x, lat = y, depth = 3)</code> from dplyr package <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span>.</p>
+<pre class="r"><code>## convert raster to data frame
+lake.victoria.df = lake.victoria.wgs %&gt;% 
+  raster::as.data.frame(xy = TRUE) %&gt;%
+  dplyr::as_tibble() %&gt;% 
+## rename the variable
+  dplyr::rename(lon = x, lat = y, depth = 3)%&gt;% 
+  dplyr::mutate(depth = as.numeric(depth))</code></pre>
+<p>Once we have organized the data frame from raster, we can use the information now to plot the spatial variation of water depth in the lake. Figure <a href="#fig:fig3">3</a> show filled contour of depth in Lake Victoria. This figure <a href="#fig:fig3">3</a> was plotted using the code in the chunk below;</p>
+<pre class="r"><code>lake.victoria.df %&gt;%
+  ggplot(aes(x = lon, y = lat))+
+  geom_contour_filled(aes(z = depth))+
+  metR::scale_x_longitude(ticks = 0.5)+
+  metR::scale_y_latitude(ticks = 0.5)+
+  coord_cartesian(expand = FALSE)+
+  theme(panel.background = element_blank(), panel.grid = element_line(linetype = 3))</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2020-04-24-lake-victoria-bathymetry_files/figure-html/fig3-1.png" alt="Bathymetry of Lake Victoria" width="672" />
+<p class="caption">
+Figure 3: Bathymetry of Lake Victoria
+</p>
+</div>
+<p>We may also wish to plot only the section of the lake and use contour lines instead of filled contour. we need then to have base maps. the chunk below show how to import the base maps into our session. The lake boundary is in projected in UTM zone 36 south and the regions layer is in WGS84. Therefore, I will import and project on the fly the lake baseman, but for the region baseman simply import into the session with the <code>st_read</code> function <span class="citation">(Pebesma <a href="#ref-sf" role="doc-biblioref">2018</a>)</span>. To reduce processing time while drawing contour, the lake baseman data frame was filter to accommodate only value that fall within the specified area of interest using <code>filter</code> function from dplyr <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span></p>
+<pre class="r"><code>## import lake boundary and project to wgs84
+lv.boundary = st_read(&quot;e:/GIS/Lake_victoria/wb_lv_tzn.shp&quot;, quiet = TRUE) %&gt;% 
+  st_transform(4326)
+
+## import basemap contain regions in Tanzania
+boundary = st_read(&quot;e:/GIS/tanzania-latest.shp/nbs/Districts.shp&quot;, quiet = TRUE)
+
+## chop the area of interest 
+mwanza.gulf= lake.victoria.df %&gt;% 
+  dplyr::filter(lon &gt; 33.25 &amp; lon &lt; 34 &amp; 
+                  lat &gt; -2.0 &amp; lat &lt; -1.5)</code></pre>
+<p>I then plot the contour shown in figure <a href="#fig:fig5">4</a> using the combination of <strong>ggplot2</strong> <span class="citation">(Wickham <a href="#ref-ggplot" role="doc-biblioref">2016</a>)</span> and <strong>metR</strong> <span class="citation">(Campitelli <a href="#ref-metr" role="doc-biblioref">2019</a>)</span> packages. The chunk below highlight the code used to plot figure figure <a href="#fig:fig5">4</a></p>
+<pre class="r"><code>  ggplot()+
+  # geom_sf(data = lv.boundary, fill = NA, col = &quot;black&quot;, size = .5) +
+  metR::geom_contour2(data = mwanza.gulf, aes(x = lon, y = lat, z = depth),
+                      binwidth = 5, col = &quot;grey60&quot;, size = 0.25)+
+  metR::geom_text_contour(data = mwanza.gulf, aes(x = lon, y = lat, z = depth),
+                          binwidth = 5, stroke = .80, 
+                          stroke.color = &quot;white&quot;, check_overlap = TRUE,
+                          col = &quot;grey50&quot;, rotate = FALSE, parse = TRUE, size = 3.2)+
+  geom_sf(data = boundary, col = &quot;#ED6300&quot;, fill = &quot;#FBE1CB&quot;,size = .5) +
+  metR::scale_x_longitude(breaks = c(33.35,33.68))+
+  metR::scale_y_latitude(breaks = c(-1.81,-1.58))+
+  coord_sf(expand = FALSE, ylim = c(-1.85, -1.55), xlim = c(33.3,33.73))+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = NA, colour = &quot;black&quot;),
+        panel.grid = element_line(linetype = 3), axis.text = element_text(size = 11))</code></pre>
+<div class="figure"><span id="fig:fig5"></span>
+<img src="/post/2020-04-24-lake-victoria-bathymetry_files/figure-html/fig5-1.png" alt="Contour map in Lake Victoria" width="672" />
+<p class="caption">
+Figure 4: Contour map in Lake Victoria
+</p>
+</div>
+</div>
+<div id="extract" class="section level2">
+<h2>Extracting information from bathymetric data</h2>
+<p>Although there several function to extract value from the raster package, in this post we will use <code>extract()</code> function from <strong>raster</strong> package to retrieve depth information on a set of longitude/latitude pairs. This is helpful to get depth information along a GPS track record for instance. Table <a href="#tab:tab1">1</a> show stations and pairs of longitude and latitude. We will use these geographical positions in this dataset to extracts depth.</p>
+<table class="table" style="font-size: 12px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:tab1">Table 1: </span>Stations and geographical locations
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Geographical Positions [Degree]
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+Station
+</th>
+<th style="text-align:center;">
+Longitude
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 2cm; ">
+E
+</td>
+<td style="text-align:center;width: 2cm; ">
+32.89067
+</td>
+<td style="text-align:center;width: 2cm; ">
+-2.568583
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; ">
+F
+</td>
+<td style="text-align:center;width: 2cm; ">
+32.88360
+</td>
+<td style="text-align:center;width: 2cm; ">
+-2.561467
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; ">
+G
+</td>
+<td style="text-align:center;width: 2cm; ">
+32.87533
+</td>
+<td style="text-align:center;width: 2cm; ">
+-2.555717
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; ">
+H
+</td>
+<td style="text-align:center;width: 2cm; ">
+32.86427
+</td>
+<td style="text-align:center;width: 2cm; ">
+-2.551117
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; ">
+I
+</td>
+<td style="text-align:center;width: 2cm; ">
+32.85027
+</td>
+<td style="text-align:center;width: 2cm; ">
+-2.549017
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; ">
+J
+</td>
+<td style="text-align:center;width: 2cm; ">
+32.84070
+</td>
+<td style="text-align:center;width: 2cm; ">
+-2.546917
+</td>
+</tr>
+</tbody>
+</table>
+<p>Before we extract, we need to convert spatial information in table <a href="#tab:tab1">1</a> to simple feature; You can do that using the <code>st_as_sf</code> function from *sf** package <span class="citation">(Pebesma <a href="#ref-sf" role="doc-biblioref">2018</a>)</span>. The process of turning spatial information in tabular form into spatial feature is highlighted in the chunk below;</p>
+<pre class="r"><code>gulf.sf = gulf.tb %&gt;% 
+  st_as_sf(coords = c(&quot;lon&quot;, &quot;lat&quot;)) %&gt;% 
+  st_set_crs(4326)</code></pre>
+<p>We can then extract the depth from the raster layer at the corresponding pair of latitude and longitude using the <code>extract</code> function of raster package. You must make sure that the raster and simple feature layers that you intend to use for extraction are in the same projections. The result of the extraction is a vector with depth value, which you then combine with the original dataset (Table <a href="#tab:tab2">2</a>). The chunk below show the two main steps explained above;</p>
+<pre class="r"><code>## extract points to a specific geographical location
+depth = lake.victoria %&gt;% 
+  raster::extract(gulf.sf) %&gt;% as_tibble()
+
+## bind the depth to the dataset
+gulf.tb = gulf.tb %&gt;% bind_cols(depth) %&gt;% 
+  rename(depth = value) %&gt;%
+  mutate_if(is.numeric, round, digits = 3)</code></pre>
+<table class="table" style="font-size: 12px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:tab2">Table 2: </span>The stations with their corresponding geographical positions and maximum depth
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+Station
+</th>
+<th style="text-align:center;">
+Longitude
+</th>
+<th style="text-align:center;">
+Latitude
+</th>
+<th style="text-align:center;">
+Depth [m]
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 2cm; ">
+E
+</td>
+<td style="text-align:center;width: 2cm; ">
+32.891
+</td>
+<td style="text-align:center;width: 2cm; ">
+-2.569
+</td>
+<td style="text-align:center;width: 2cm; ">
+12.003
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; ">
+F
+</td>
+<td style="text-align:center;width: 2cm; ">
+32.884
+</td>
+<td style="text-align:center;width: 2cm; ">
+-2.561
+</td>
+<td style="text-align:center;width: 2cm; ">
+14.273
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; ">
+G
+</td>
+<td style="text-align:center;width: 2cm; ">
+32.875
+</td>
+<td style="text-align:center;width: 2cm; ">
+-2.556
+</td>
+<td style="text-align:center;width: 2cm; ">
+15.853
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; ">
+H
+</td>
+<td style="text-align:center;width: 2cm; ">
+32.864
+</td>
+<td style="text-align:center;width: 2cm; ">
+-2.551
+</td>
+<td style="text-align:center;width: 2cm; ">
+14.615
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; ">
+I
+</td>
+<td style="text-align:center;width: 2cm; ">
+32.850
+</td>
+<td style="text-align:center;width: 2cm; ">
+-2.549
+</td>
+<td style="text-align:center;width: 2cm; ">
+8.888
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; ">
+J
+</td>
+<td style="text-align:center;width: 2cm; ">
+32.841
+</td>
+<td style="text-align:center;width: 2cm; ">
+-2.547
+</td>
+<td style="text-align:center;width: 2cm; ">
+6.650
+</td>
+</tr>
+</tbody>
+</table>
+<p>You might need to customize the information you want to visualize on the interactive map like leaflet. For instance, i want to show the depth extracted in section <a href="#label:extract"><strong>??</strong></a> and the corresponding information shown in table <a href="#tab:tab2">2</a> as table in leaflet. To do that, I must add a column <code>label</code> with html tag. Therefore, the function below will add the label variable as html table in the dataset, which is then used to display the information in the interactive map shown in figure <a href="#fig:fig999"><strong>??</strong></a> label with the</p>
+<pre class="r"><code>## label for leaflet popups
+library(&quot;htmltools&quot;)
+
+addLabel &lt;- function(data) {
+  
+  data$label &lt;- paste0(
+    &#39;&lt;b&gt;&#39;,  &#39;&lt;/b&gt;&lt;br&gt;
+    &lt;table style=&quot;width:120px;&quot;&gt;
+    &lt;tr&gt;&lt;td&gt;Station:&lt;/td&gt;&lt;td align=&quot;right&quot;&gt;&#39;, data$station, &#39;&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Longitude:&lt;/td&gt;&lt;td align=&quot;right&quot;&gt;&#39;, data$lon, &#39;&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Latitude:&lt;/td&gt;&lt;td align=&quot;right&quot;&gt;&#39;, data$lat, &#39;&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Depth:&lt;/td&gt;&lt;td align=&quot;right&quot;&gt;&#39;, data$depth, &#39;&lt;/td&gt;&lt;/tr&gt;
+    &lt;/table&gt;&#39;
+  )
+  data$label &lt;- lapply(data$label, HTML)
+
+  return(data)
+}
+
+gulf.tb = gulf.tb %&gt;% addLabel()</code></pre>
+<div class="figure"><span id="fig:fig99"></span>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-2.569,-2.561,-2.556,-2.551,-2.549,-2.547],[32.891,32.884,32.875,32.864,32.85,32.841],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["<b><\/b><br>\n    <table style=\"width:120px;\">\n    <tr><td>Station:<\/td><td align=\"right\">E<\/td><\/tr>\n    <tr><td>Longitude:<\/td><td align=\"right\">32.891<\/td><\/tr>\n    <tr><td>Latitude:<\/td><td align=\"right\">-2.569<\/td><\/tr>\n    <tr><td>Depth:<\/td><td align=\"right\">12.003<\/td><\/tr>\n    <\/table>","<b><\/b><br>\n    <table style=\"width:120px;\">\n    <tr><td>Station:<\/td><td align=\"right\">F<\/td><\/tr>\n    <tr><td>Longitude:<\/td><td align=\"right\">32.884<\/td><\/tr>\n    <tr><td>Latitude:<\/td><td align=\"right\">-2.561<\/td><\/tr>\n    <tr><td>Depth:<\/td><td align=\"right\">14.273<\/td><\/tr>\n    <\/table>","<b><\/b><br>\n    <table style=\"width:120px;\">\n    <tr><td>Station:<\/td><td align=\"right\">G<\/td><\/tr>\n    <tr><td>Longitude:<\/td><td align=\"right\">32.875<\/td><\/tr>\n    <tr><td>Latitude:<\/td><td align=\"right\">-2.556<\/td><\/tr>\n    <tr><td>Depth:<\/td><td align=\"right\">15.853<\/td><\/tr>\n    <\/table>","<b><\/b><br>\n    <table style=\"width:120px;\">\n    <tr><td>Station:<\/td><td align=\"right\">H<\/td><\/tr>\n    <tr><td>Longitude:<\/td><td align=\"right\">32.864<\/td><\/tr>\n    <tr><td>Latitude:<\/td><td align=\"right\">-2.551<\/td><\/tr>\n    <tr><td>Depth:<\/td><td align=\"right\">14.615<\/td><\/tr>\n    <\/table>","<b><\/b><br>\n    <table style=\"width:120px;\">\n    <tr><td>Station:<\/td><td align=\"right\">I<\/td><\/tr>\n    <tr><td>Longitude:<\/td><td align=\"right\">32.85<\/td><\/tr>\n    <tr><td>Latitude:<\/td><td align=\"right\">-2.549<\/td><\/tr>\n    <tr><td>Depth:<\/td><td align=\"right\">8.888<\/td><\/tr>\n    <\/table>","<b><\/b><br>\n    <table style=\"width:120px;\">\n    <tr><td>Station:<\/td><td align=\"right\">J<\/td><\/tr>\n    <tr><td>Longitude:<\/td><td align=\"right\">32.841<\/td><\/tr>\n    <tr><td>Latitude:<\/td><td align=\"right\">-2.547<\/td><\/tr>\n    <tr><td>Depth:<\/td><td align=\"right\">6.65<\/td><\/tr>\n    <\/table>"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-2.569,-2.547],"lng":[32.841,32.891]}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 5: The map showing the positions of the sampled locations across the Mwanza Gulf. To view the name of the marks on the map and other information just click any mark
+</p>
+</div>
+</div>
+<div id="cited-references" class="section level2 unnumbered">
+<h2>Cited references</h2>
+<div id="refs" class="references">
+<div id="ref-metr">
+<p>Campitelli, Elio. 2019. <em>MetR: Tools for Easier Analysis of Meteorological Fields</em>. <a href="https://CRAN.R-project.org/package=metR">https://CRAN.R-project.org/package=metR</a>.</p>
+</div>
+<div id="ref-hamilton">
+<p>Hamilton, Stuart, Anthony Taabu Munyaho, Noah Krach, and Sarah Glaser. 2016. “Bathymetry TIFF, Lake Victoria Bathymetry, raster, 2017, V7.” Harvard Dataverse. <a href="https://doi.org/10.7910/DVN/SOEKNR">https://doi.org/10.7910/DVN/SOEKNR</a>.</p>
+</div>
+<div id="ref-raster">
+<p>Hijmans, Robert J. 2017. <em>Raster: Geographic Data Analysis and Modeling</em>. <a href="https://CRAN.R-project.org/package=raster">https://CRAN.R-project.org/package=raster</a>.</p>
+</div>
+<div id="ref-sf">
+<p>Pebesma, Edzer. 2018. <em>Sf: Simple Features for R</em>. <a href="https://CRAN.R-project.org/package=sf">https://CRAN.R-project.org/package=sf</a>.</p>
+</div>
+<div id="ref-r">
+<p>R Core Team. 2018. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/">https://www.R-project.org/</a>.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

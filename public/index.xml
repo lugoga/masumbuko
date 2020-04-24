@@ -6,10 +6,19 @@
     <description>Recent content on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 14 Apr 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 24 Apr 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Lake Victoria Bathymetry</title>
+      <link>/04/24/2020/lake-victoria-bathymetry/</link>
+      <pubDate>Fri, 24 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/04/24/2020/lake-victoria-bathymetry/</guid>
+      <description>I was looking for bathymetry dataset for Lake Victoria online and I came across this link. It stores several products of the bathymetry data of the Lake Victoria. Among them products is the gridded TIFF file. This dataset was created by a team from Harvard University in 2017 (Hamilton et al. 2016). They used over 4.2 million points collected over 100-years of surveys.</description>
+    </item>
     
     <item>
       <title>CTD Profiling in Tanga</title>

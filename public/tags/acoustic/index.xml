@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Acoustic on Masumbuko Semba&#39;s Blog</title>
+    <link>/tags/acoustic/</link>
+    <description>Recent content in Acoustic on Masumbuko Semba&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 24 Apr 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/acoustic/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Lake Victoria Bathymetry</title>
+      <link>/04/24/2020/lake-victoria-bathymetry/</link>
+      <pubDate>Fri, 24 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/04/24/2020/lake-victoria-bathymetry/</guid>
+      <description>I was looking for bathymetry dataset for Lake Victoria online and I came across this link. It stores several products of the bathymetry data of the Lake Victoria. Among them products is the gridded TIFF file. This dataset was created by a team from Harvard University in 2017 (Hamilton et al. 2016). They used over 4.2 million points collected over 100-years of surveys.</description>
+    </item>
+    
+  </channel>
+</rss>

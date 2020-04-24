@@ -1,0 +1,234 @@
+---
+title: Lake Victoria Bathymetry
+author: Masumbuko Semba
+date: '2020-04-24'
+slug: lake-victoria-bathymetry
+categories:
+  - Information Technology
+tags:
+  - Lake Victoria
+  - Bathymetry
+  - R
+  - Masumbuko Semba
+  - Acoustic
+  - Tanzania
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, comment=FALSE, quit = TRUE)
+```
+
+
+I was looking for bathymetry dataset for Lake Victoria online and I came across this [link](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/SOEKNR#). It stores several products of the bathymetry data of the Lake Victoria. Among them products is the gridded TIFF file. This dataset was created by a team from Harvard University in 2017 [@hamilton]. They used over 4.2 million points collected over 100-years of surveys. The point data was obtained from an Admiral Bathymetry map and points collected in the field. Roughly, 3.8 million points come from the survey conducted by Lake Victoria Regional Hydro-acoustics Working Group. 
+
+In this post I illustrate step by step processing the bathymetric of Lake Victoria, which is stored in n TIFF format using R language [@r]. You first need to download the dataset from [here](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/SOEKNR#) as TIFF. It has about 48 MB, so you need to patient if you internet speed is slow for this file to download. I load some of the packages to manipulate, analyse and even visualize the bathymetry data of Lake Victoria. These packages include;
+
+```{r}
+require(tidyverse)
+require(sf)
+require(leaflet)
+```
+
+**raster** package contains nifty function to handle raster file like the bathymetry dataset of Lake Victoria [@raster]. But, often there conflict between **raster** and **tidyverse** packages, I will only call specific function of raster package when needed using the `raster::` arguments throughtout this post. Once the dataset is download, you can simply load or import in R session using `raster` function from **raster** package [@raster].
+ 
+
+```{r}
+
+## read the ascii file
+lake.victoria = raster::raster("e:/GIS/Lake_victoria/LV_Bathy_V7.tif")
+
+lake.victoria.shp = st_read("e:/GIS/Lake_victoria/wb_lv_tzn.shp", quiet = TRUE)
+
+```
+
+When we plot the bathymetry of Lake Victoria as shown in figure \@ref(fig:fig1), we notice that depth vary across the lake range between 0 to about 80 meters deep. Unfortunately, the longitude and latitude values are unfamiliar to me and I the datum used to present this dataset are unclear to me.
+```{r fig1, fig.cap="Lake Victoria batymetry map"}
+lake.victoria %>% raster::plot()
+```
+
+To have a glimpse of the `Coordinate Reference System` (CRS) in the dataset, I used `raster::crs()` function to check the datum used;
+
+```{r}
+lake.victoria %>% raster::crs()
+```
+
+## Reproject Rasters
+We can use the `projectRaster` function to reproject a raster into a new CRS. I have used `+proj=longlat +ellps=WGS84 +datum=WGS84` to transform the projection into WGS84 geographical coordinate system of longitude and latitude measured in degree. Keep in mind that reprojection only works when you first have a defined CRS for the raster object that you want to reproject. 
+
+```{r}
+# reproject to UTM
+lake.victoria.wgs = lake.victoria %>% 
+  raster::projectRaster(crs="+proj=longlat +ellps=WGS84 +datum=WGS84")
+
+```
+
+When we replot the projected bathymetry as shown in figure \@ref(fig:fig2), we notice that the longitude and latitude are in degree.
+
+```{r fig2, fig.cap="Transformed projection of Lake Victoria bathymetry to datum WGS84"}
+
+lake.victoria.wgs %>% raster::plot()
+```
+
+If we are fine with the projection, but the plotting isn't pleasing. We might want to use the grammar of graphic **ggplot2** and its extended package like the **metR** to improve the plot. However, these package use data organized in data frame instead of raster. We use the `raster::as.data.frame(xy = TRUE) ` to convert raster to data frame and tidy the data into lon, lat, and depth with `rename(lon = x, lat = y, depth = 3)` from dplyr package [@dplyr].
+
+```{r}
+## convert raster to data frame
+lake.victoria.df = lake.victoria.wgs %>% 
+  raster::as.data.frame(xy = TRUE) %>%
+  dplyr::as_tibble() %>% 
+## rename the variable
+  dplyr::rename(lon = x, lat = y, depth = 3)%>% 
+  dplyr::mutate(depth = as.numeric(depth))
+```
+
+Once we have organized the data frame from raster, we can use the information now to plot the spatial variation of water depth in the lake. Figure \@ref(fig:fig3) show filled contour of depth in Lake Victoria. This figure \@ref(fig:fig3) was plotted using the code in the chunk below;
+
+```{r fig3, fig.cap="Bathymetry of Lake Victoria"}
+lake.victoria.df %>%
+  ggplot(aes(x = lon, y = lat))+
+  geom_contour_filled(aes(z = depth))+
+  metR::scale_x_longitude(ticks = 0.5)+
+  metR::scale_y_latitude(ticks = 0.5)+
+  coord_cartesian(expand = FALSE)+
+  theme(panel.background = element_blank(), panel.grid = element_line(linetype = 3))
+  
+```
+
+We may also wish to plot only the section of the lake and use contour lines instead of filled contour. we need then to have base maps. the chunk below show how to import the base maps into our session. The lake boundary is in projected in UTM zone 36 south and the regions layer is in WGS84. Therefore, I will import and project on the fly the lake baseman, but for the region baseman simply import into the session with the `st_read` function [@sf]. To reduce processing time while drawing contour, the lake baseman data frame was filter to accommodate only value that fall within the specified area of interest using `filter` function from dplyr [@dplyr]
+
+```{r}
+## import lake boundary and project to wgs84
+lv.boundary = st_read("e:/GIS/Lake_victoria/wb_lv_tzn.shp", quiet = TRUE) %>% 
+  st_transform(4326)
+
+## import basemap contain regions in Tanzania
+boundary = st_read("e:/GIS/tanzania-latest.shp/nbs/Districts.shp", quiet = TRUE)
+
+## chop the area of interest 
+mwanza.gulf= lake.victoria.df %>% 
+  dplyr::filter(lon > 33.25 & lon < 34 & 
+                  lat > -2.0 & lat < -1.5)
+
+```
+
+I then plot the contour  shown in figure \@ref(fig:fig5) using the combination of **ggplot2** [@ggplot] and **metR** [@metr] packages. The chunk below highlight the code used to plot figure figure \@ref(fig:fig5)
+
+```{r fig5, fig.cap="Contour map in Lake Victoria"}
+
+  ggplot()+
+  # geom_sf(data = lv.boundary, fill = NA, col = "black", size = .5) +
+  metR::geom_contour2(data = mwanza.gulf, aes(x = lon, y = lat, z = depth),
+                      binwidth = 5, col = "grey60", size = 0.25)+
+  metR::geom_text_contour(data = mwanza.gulf, aes(x = lon, y = lat, z = depth),
+                          binwidth = 5, stroke = .80, 
+                          stroke.color = "white", check_overlap = TRUE,
+                          col = "grey50", rotate = FALSE, parse = TRUE, size = 3.2)+
+  geom_sf(data = boundary, col = "#ED6300", fill = "#FBE1CB",size = .5) +
+  metR::scale_x_longitude(breaks = c(33.35,33.68))+
+  metR::scale_y_latitude(breaks = c(-1.81,-1.58))+
+  coord_sf(expand = FALSE, ylim = c(-1.85, -1.55), xlim = c(33.3,33.73))+
+  theme_bw()+
+  theme(panel.background = element_rect(fill = NA, colour = "black"),
+        panel.grid = element_line(linetype = 3), axis.text = element_text(size = 11))
+
+```
+
+
+## Extracting information from bathymetric data {#extract}
+
+Although there several function to extract value from the raster package, in this post we will use `extract()` function from **raster** package to retrieve depth information on a set of longitude/latitude pairs. This is helpful to get depth information along a GPS track record for instance. Table \@ref(tab:tab1) show stations and pairs of longitude and latitude. We will use these geographical positions in this dataset to extracts depth. 
+
+```{r tab1, echo=FALSE}
+gulf = readxl::read_excel("e:/Data Manipulation/kishe_mwanzaGulf/Coordinates Mwanza Gulf_2006, 2008, 2014-2.xlsx", sheet = 2) 
+
+gulf.tb = gulf %>%
+  mutate(lon.dd = parzer::parse_lon(lon),
+         lat.dd = parzer::parse_lat(lat))  %>%
+  select(station = 1, lon = 4, lat = 5)
+
+
+gulf.tb %>% 
+  kableExtra::kable(format = "html", align = "c", 
+                    col.names = c("Station","Longitude", "Latitude"), 
+                    caption = "Stations and geographical locations") %>%
+  kableExtra::column_spec(column = 1:3, width = "2cm") %>%
+  kableExtra::add_header_above(c("", "Geographical Positions [Degree]" = 2))%>%
+  kableExtra::kable_styling(font_size = 12)
+  
+
+```
+
+Before we extract, we need to convert spatial information in table \@ref(tab:tab1) to simple feature; You can do that using the `st_as_sf` function from *sf** package [@sf]. The process of turning spatial information in tabular form into spatial feature is highlighted in the chunk below;
+```{r}
+gulf.sf = gulf.tb %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+```
+
+We can then extract the depth from the raster layer at the corresponding pair of latitude and longitude using the `extract` function of raster package. You must make sure that the raster and simple feature layers that you intend to use for extraction are in the same projections. The result of the extraction is a vector with depth value, which you then combine with the original dataset (Table \@ref(tab:tab2)). The chunk below show the two main steps explained above; 
+
+```{r}
+## extract points to a specific geographical location
+depth = lake.victoria %>% 
+  raster::extract(gulf.sf) %>% as_tibble()
+
+## bind the depth to the dataset
+gulf.tb = gulf.tb %>% bind_cols(depth) %>% 
+  rename(depth = value) %>%
+  mutate_if(is.numeric, round, digits = 3)
+```
+
+```{r tab2, echo=FALSE}
+gulf.tb %>%
+  kableExtra::kable(format = "html", align = "c",
+                    col.names = c("Station", "Longitude", "Latitude", "Depth [m]"), 
+                    caption = "The stations with their corresponding geographical positions and maximum depth") %>%
+  kableExtra::column_spec(column = 1:4,width = "2cm") %>%
+  kableExtra::kable_styling(font_size = 12)
+```
+
+You might need to customize the information you want to visualize on the interactive map like leaflet. For instance, i want to show the depth extracted in section \@ref(label:extract) and the corresponding information shown in table \@ref(tab:tab2) as table in leaflet. To do that, I must add a column `label` with html tag. Therefore, the function below will add the label variable as html table in the dataset, which is then used to display the information in the interactive map shown in figure \@ref(fig:fig999) label with the 
+
+```{r}
+## label for leaflet popups
+library("htmltools")
+
+addLabel <- function(data) {
+  
+  data$label <- paste0(
+    '<b>',  '</b><br>
+    <table style="width:120px;">
+    <tr><td>Station:</td><td align="right">', data$station, '</td></tr>
+    <tr><td>Longitude:</td><td align="right">', data$lon, '</td></tr>
+    <tr><td>Latitude:</td><td align="right">', data$lat, '</td></tr>
+    <tr><td>Depth:</td><td align="right">', data$depth, '</td></tr>
+    </table>'
+  )
+  data$label <- lapply(data$label, HTML)
+
+  return(data)
+}
+
+gulf.tb = gulf.tb %>% addLabel()
+```
+
+
+
+```{r fig99, fig.cap="The map showing the positions of the sampled locations across the Mwanza Gulf. To view the name of the marks on the map  and other information just click any mark", echo=FALSE}
+
+
+gulf.tb %>%
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(lng = ~lon, lat = ~lat, popup = ~label)
+
+```
+
+
+## Cited references
+
