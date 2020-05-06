@@ -28,11 +28,15 @@ knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, comment=FALSE, 
 ```
 
 
-One of the most important components of a data management strategy is the proper handling of missing values. Often you will find datasets that have used either zero or NA to represent missing values in cell of a data frame or table. Everyone who deals with data has to deal with this important distinction.  And far too often people get it wrong. Spreadsheet software like Microsoft Excel [@excel] and OpenOffice Calc [@libreoffice] is ubiquitous.  Given the prevalence of PC’s in the government and business world, most people have Excel on their desktop and many small datasets are generated in Excel and disseminated as Excel files.
+One of the most important components of a data management strategy is the proper handling of missing values. Often you will find datasets that have used either zero or NA to represent missing values in cell of a data frame or table. The question that may sober our mind is that, which of the two way of storing missing value in the data is right? You will notice that everyone who deals with data has to deal with this important distinction.  And far too often people get it wrong. 
 
-One of the problems in using spreadsheet software to work with data is that the default data validation settings on these tools are too forgiving.  By default, data entered into a cell can be of any type — string, float, decimal, date, etc. It is important, therefore, to know the features of Excel to properly encode the meaning “missing value” whenever necessary. The question that may sober our mind is that, which of the two way of storing missing value in the data is right?
+Given the prevalence of PC’s in the government and business world, most people have Excel on their desktop and many small datasets are generated in Excel and disseminated as Excel files. Spreadsheet software like Microsoft Excel [@excel] and OpenOffice Calc [@libreoffice] is ubiquitous.  
 
-Like other programming language, **R** is capable of handling missing values [@r. However, to those accustomed to working with missing values in other software, the way in which R handles missing values may require a shift in thinking. On this post, I will present a case in which you have received a data with zero as missing values and how you can convert to `NA`---a standard form for missing value in **R**. Let's first load the package we will use for this post. 
+One of the problems in using spreadsheet software to work with data is that the default data validation settings on these tools are too forgiving.  By default, data entered into a cell can be of any type — string, float, decimal, date, etc. Though these tools offers features to properly encode the  “missing value”, data entry in spreadsheet tend to ignore them.
+
+Unlike spreadsheet, **R** data stored in data frame are type specific and you can not mix them in one variable [@r. R store missing values by the symbol `NA` (not available). Impossible values (e.g., dividing by zero) are represented by the symbol `NaN` (not a number). To those accustomed to working with missing values in spreadsheet software they find hard to handle data in R and handles missing values in R to them may require a shift in thinking.
+
+On this post, I will present a case in which you have received a data with zero as missing values and how you can convert to `NA`---a standard form for missing value in **R**. Let's first load the package we will use for this post. 
 
 
 ```{r}

@@ -17,7 +17,7 @@
       <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
       
       <guid>/05/06/2020/conver-improper-filled-missing-values-to-na-in-r/</guid>
-      <description>One of the most important components of a data management strategy is the proper handling of missing values. Often you will find datasets that have used either zero or NA to represent missing values in cell of a data frame or table. Everyone who deals with data has to deal with this important distinction. And far too often people get it wrong. Spreadsheet software like Microsoft Excel (Kraus 2014) and OpenOffice Calc (Oualline and Oualline 2018) is ubiquitous.</description>
+      <description>One of the most important components of a data management strategy is the proper handling of missing values. Often you will find datasets that have used either zero or NA to represent missing values in cell of a data frame or table. The question that may sober our mind is that, which of the two way of storing missing value in the data is right? You will notice that everyone who deals with data has to deal with this important distinction.</description>
     </item>
     
     <item>
