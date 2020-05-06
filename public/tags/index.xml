@@ -6,10 +6,109 @@
     <description>Recent content in Tags on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 24 Apr 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 06 May 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Data science</title>
+      <link>/tags/data-science/</link>
+      <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/data-science/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Indian Ocean</title>
+      <link>/tags/indian-ocean/</link>
+      <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/indian-ocean/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Mafia Channel</title>
+      <link>/tags/mafia-channel/</link>
+      <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/mafia-channel/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Masumbuko Semba</title>
+      <link>/tags/masumbuko-semba/</link>
+      <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/masumbuko-semba/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Missing Values</title>
+      <link>/tags/missing-values/</link>
+      <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/missing-values/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Pemba Channel</title>
+      <link>/tags/pemba-channel/</link>
+      <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/pemba-channel/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>R</title>
+      <link>/tags/r/</link>
+      <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/r/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>RStudio</title>
+      <link>/tags/rstudio/</link>
+      <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/rstudio/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>sea surface temperature</title>
+      <link>/tags/sea-surface-temperature/</link>
+      <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/sea-surface-temperature/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Tanzania</title>
+      <link>/tags/tanzania/</link>
+      <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/tanzania/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Zanzibar</title>
+      <link>/tags/zanzibar/</link>
+      <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/zanzibar/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Acoustic</title>
@@ -39,33 +138,6 @@
     </item>
     
     <item>
-      <title>Masumbuko Semba</title>
-      <link>/tags/masumbuko-semba/</link>
-      <pubDate>Fri, 24 Apr 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/masumbuko-semba/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>R</title>
-      <link>/tags/r/</link>
-      <pubDate>Fri, 24 Apr 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/r/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Tanzania</title>
-      <link>/tags/tanzania/</link>
-      <pubDate>Fri, 24 Apr 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/tanzania/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>CTD</title>
       <link>/tags/ctd/</link>
       <pubDate>Tue, 14 Apr 2020 00:00:00 +0000</pubDate>
@@ -80,15 +152,6 @@
       <pubDate>Tue, 14 Apr 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/ims/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Indian Ocean</title>
-      <link>/tags/indian-ocean/</link>
-      <pubDate>Tue, 14 Apr 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/indian-ocean/</guid>
       <description></description>
     </item>
     
@@ -255,15 +318,6 @@
     </item>
     
     <item>
-      <title>Data science</title>
-      <link>/tags/data-science/</link>
-      <pubDate>Tue, 25 Feb 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/data-science/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>coronavirus</title>
       <link>/tags/coronavirus/</link>
       <pubDate>Sat, 08 Feb 2020 00:00:00 +0000</pubDate>
@@ -399,29 +453,11 @@
     </item>
     
     <item>
-      <title>Mafia Channel</title>
-      <link>/tags/mafia-channel/</link>
-      <pubDate>Sun, 01 Dec 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/mafia-channel/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>MODIS</title>
       <link>/tags/modis/</link>
       <pubDate>Sun, 01 Dec 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/modis/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Pemba Channel</title>
-      <link>/tags/pemba-channel/</link>
-      <pubDate>Sun, 01 Dec 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/pemba-channel/</guid>
       <description></description>
     </item>
     
@@ -485,15 +521,6 @@
       <pubDate>Tue, 05 Nov 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/ggwordcloud/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>RStudio</title>
-      <link>/tags/rstudio/</link>
-      <pubDate>Tue, 05 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/rstudio/</guid>
       <description></description>
     </item>
     
@@ -597,7 +624,7 @@
     </item>
     
     <item>
-      <title>Bookdown</title>
+      <title>bookdown</title>
       <link>/tags/bookdown/</link>
       <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       
@@ -629,24 +656,6 @@
       <pubDate>Wed, 20 Mar 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/drifter/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>sea surface temperature</title>
-      <link>/tags/sea-surface-temperature/</link>
-      <pubDate>Mon, 18 Mar 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/sea-surface-temperature/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Zanzibar</title>
-      <link>/tags/zanzibar/</link>
-      <pubDate>Sun, 17 Mar 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/zanzibar/</guid>
       <description></description>
     </item>
     

@@ -3,17 +3,97 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/categories/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/05/06/2020/conver-improper-filled-missing-values-to-na-in-r/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/data-science/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/indian-ocean/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/mafia-channel/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/masumbuko-semba/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/missing-values/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/pemba-channel/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/r/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/r/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/rstudio/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/sea-surface-temperature/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/tanzania/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/zanzibar/</loc>
+    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/tags/acoustic/</loc>
     <lastmod>2020-04-24T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/bathymetry/</loc>
-    <lastmod>2020-04-24T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/</loc>
     <lastmod>2020-04-24T00:00:00+00:00</lastmod>
   </url>
   
@@ -33,36 +113,6 @@
   </url>
   
   <url>
-    <loc>/tags/masumbuko-semba/</loc>
-    <lastmod>2020-04-24T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/</loc>
-    <lastmod>2020-04-24T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/</loc>
-    <lastmod>2020-04-24T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/r/</loc>
-    <lastmod>2020-04-24T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
-    <lastmod>2020-04-24T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/tanzania/</loc>
-    <lastmod>2020-04-24T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/ctd/</loc>
     <lastmod>2020-04-14T00:00:00+00:00</lastmod>
   </url>
@@ -74,11 +124,6 @@
   
   <url>
     <loc>/tags/ims/</loc>
-    <lastmod>2020-04-14T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/indian-ocean/</loc>
     <lastmod>2020-04-14T00:00:00+00:00</lastmod>
   </url>
   
@@ -183,11 +228,6 @@
   </url>
   
   <url>
-    <loc>/tags/data-science/</loc>
-    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/02/25/2020/geographical-coordinates-conversion-made-easy-with-parzer-package-in-r/</loc>
     <lastmod>2020-02-25T00:00:00+00:00</lastmod>
   </url>
@@ -199,11 +239,6 @@
   
   <url>
     <loc>/categories/oceanography/</loc>
-    <lastmod>2020-02-25T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/r/</loc>
     <lastmod>2020-02-25T00:00:00+00:00</lastmod>
   </url>
   
@@ -323,22 +358,12 @@
   </url>
   
   <url>
-    <loc>/tags/mafia-channel/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/modis/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/modis/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/pemba-channel/</loc>
+    <loc>/categories/modis/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
   
@@ -394,11 +419,6 @@
   
   <url>
     <loc>/tags/ggwordcloud/</loc>
-    <lastmod>2019-11-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/rstudio/</loc>
     <lastmod>2019-11-05T00:00:00+00:00</lastmod>
   </url>
   
@@ -573,17 +593,7 @@
   </url>
   
   <url>
-    <loc>/tags/sea-surface-temperature/</loc>
-    <lastmod>2019-03-18T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/03/17/2019/interactive-map-with-leaflet/</loc>
-    <lastmod>2019-03-17T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/zanzibar/</loc>
     <lastmod>2019-03-17T00:00:00+00:00</lastmod>
   </url>
   

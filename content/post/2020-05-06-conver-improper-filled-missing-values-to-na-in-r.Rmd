@@ -1,0 +1,122 @@
+---
+title: Convert incorrect filled missing values to NA in R data frame
+author: Masumbuko Semba
+date: '2020-05-06'
+slug: conver-improper-filled-missing-values-to-na-in-r
+categories:
+  - R
+tags:
+  - Data science
+  - Missing Values
+  - Masumbuko Semba
+  - R
+  - RStudio
+  - Mafia Channel
+  - Pemba Channel
+  - Zanzibar
+  - Tanzania
+  - Indian Ocean
+  - sea surface temperature
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, comment=FALSE, quit = TRUE)
+```
+
+
+One of the most important components of a data management strategy is the proper handling of missing values. Often you will find datasets that have used either zero or NA to represent missing values in cell of a data frame or table. Everyone who deals with data has to deal with this important distinction.  And far too often people get it wrong. Spreadsheet software like Microsoft Excel [@excel] and OpenOffice Calc [@libreoffice] is ubiquitous.  Given the prevalence of PC’s in the government and business world, most people have Excel on their desktop and many small datasets are generated in Excel and disseminated as Excel files.
+
+One of the problems in using spreadsheet software to work with data is that the default data validation settings on these tools are too forgiving.  By default, data entered into a cell can be of any type — string, float, decimal, date, etc. It is important, therefore, to know the features of Excel to properly encode the meaning “missing value” whenever necessary. The question that may sober our mind is that, which of the two way of storing missing value in the data is right?
+
+Like other programming language, **R** is capable of handling missing values [@r. However, to those accustomed to working with missing values in other software, the way in which R handles missing values may require a shift in thinking. On this post, I will present a case in which you have received a data with zero as missing values and how you can convert to `NA`---a standard form for missing value in **R**. Let's first load the package we will use for this post. 
+
+
+```{r}
+require(tidyverse)
+```
+
+
+The tidyverse is an ecosystem of packages for data import, manipulate, model, visualize and share. For the purpose of learning, we first create a random sea surface temperature for three sites recorded for thirty days in March 2020. Table \@ref(tab:tab1) shows a sample of temperature records in the three sites for four consecutive days generated in the chunk below; 
+
+```{r}
+
+sst = tibble(data = rnorm(n = 90, mean = 28.5, sd = 1.5), 
+              sites = rep(c("Pemba", "Zanzibar", "Mafia"), times = 30), 
+              day = rep(seq(lubridate::dmy(010320),lubridate::dmy(300320), by = "day"), each = 3)) %>%
+  select(day, everything())
+```
+
+```{r tab1, echo=FALSE}
+sst %>% 
+  slice(1:12) %>%
+  mutate_if(is.numeric, round, digit = 2)%>%
+  select(day, sites, data)%>%
+  kableExtra::kable(format = "html", align = "c",
+                    caption = "A sample of sea Surface temperature", col.names = c("Day","Sites", "Temperature")) %>%
+  kableExtra::column_spec(column = 1, width = "3.5cm")%>%
+  kableExtra::column_spec(column = 2, width = "2.5cm")
+```
+
+Once we have the dataset, we can introduce the zero value in the temperature variable at `r seq(5, 90, length.out = 20) %>% as.integer()` index of the data frame. 
+
+```{r}
+sst[seq(5, 90, length.out = 20) %>% as.integer(),2] = 0
+```
+
+To have a clear view of the position of zero, I first converted the long form table of the sea surface temperature to wider form using the `pivot_wider` function from **tidyr** package [@tidyr]. Table \@ref(tab:tab2) shows the temperature in the wider format with four columns. The first column represent the data of temperature records and the second to the fourth columns represent the temperature records of the three channels.  Take note of the position of zero at each channel
+
+```{r}
+sst.wide = sst %>% 
+  pivot_wider(names_from = sites, 
+              values_from = data, 
+              id_cols = day)
+```
+
+
+```{r tab2, echo=FALSE}
+sst.wide %>% 
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kableExtra::kable(format = "html", caption = "Sea Surface temperature in wider form", col.names = c("Day", "Pemba", "Zanzibar", "Mafia")) %>%
+  kableExtra::column_spec(column = 1:4, width = "2.5cm") %>%
+  kableExtra::add_header_above(c("", "Channel" = 3))
+```
+
+In short, table \@ref(tab:tab2) show that there are several days with zero value. But we know that it is impossible to have zero sea surface temperature. This indicate a common problem that you will often face when you deal with data from different sources. The data found in the real world is that data is rarely clean and homogeneous. In particular, many interesting datasets will have some amount of missing values. To make matters even more complicated, different data sources may indicate missing data in different ways.
+
+Thus, for us to work with this data, we need to convert the 0 entries in the three channels to `NA`. To do that, we use the `mutate_at()` function from **dplyr** [@dplyr] to specify which variables we want to apply our mutating function to, and we use the `if_else()` function to specify what to replace the value with if the condition is `true` or `false`. The chunk below summarize how to convert the zero cell to `NA` and the result is presented in table \@ref(tab:tab3)
+
+```{r}
+sst.clean = sst.wide %>% 
+  mutate_at(vars(Pemba, Zanzibar, Mafia),
+            
+            function(.var){
+              
+              if_else(.var ==0, ## if the value is equal to zero
+                      true = as.numeric(NA), ## replace it with NA
+                      false = .var ## else leave the value as it is
+                      )
+              
+                         }
+            )
+
+
+```
+
+
+```{r tab3, echo=FALSE}
+
+sst.clean %>% 
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kableExtra::kable(format = "html", caption = "Sea Surface temperature in wider form with zero replaced with NA", col.names = c("Day", "Pemba", "Zanzibar", "Mafia")) %>%
+  kableExtra::column_spec(column = 1:4, width = "2.5cm") %>%
+  kableExtra::add_header_above(c("", "Channel" = 3))
+```
+
+## Summary
+Here we have seen how to convert inproper filled cell of data frame with missing values to `NA` in data frame using **tidyverse** functions and seen a nested function that specifically designed to handle these missing values in a uniform way. Missing data is a fact of life in real-world datasets, and we’ll face often when we works with data from other sources.
+
+## Reference

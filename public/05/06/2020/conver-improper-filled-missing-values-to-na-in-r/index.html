@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.64.1" />
+
+
+<title>Convert incorrect filled missing values to NA in R data frame - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Convert incorrect filled missing values to NA in R data frame - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">6 min read</span>
+    
+
+    <h1 class="article-title">Convert incorrect filled missing values to NA in R data frame</h1>
+
+    
+    <span class="article-date">2020/05/06</span>
+    
+
+    <div class="article-content">
+      
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<p>One of the most important components of a data management strategy is the proper handling of missing values. Often you will find datasets that have used either zero or NA to represent missing values in cell of a data frame or table. Everyone who deals with data has to deal with this important distinction. And far too often people get it wrong. Spreadsheet software like Microsoft Excel <span class="citation">(Kraus <a href="#ref-excel" role="doc-biblioref">2014</a>)</span> and OpenOffice Calc <span class="citation">(Oualline and Oualline <a href="#ref-libreoffice" role="doc-biblioref">2018</a>)</span> is ubiquitous. Given the prevalence of PC’s in the government and business world, most people have Excel on their desktop and many small datasets are generated in Excel and disseminated as Excel files.</p>
+<p>One of the problems in using spreadsheet software to work with data is that the default data validation settings on these tools are too forgiving. By default, data entered into a cell can be of any type — string, float, decimal, date, etc. It is important, therefore, to know the features of Excel to properly encode the meaning “missing value” whenever necessary. The question that may sober our mind is that, which of the two way of storing missing value in the data is right?</p>
+<p>Like other programming language, <strong>R</strong> is capable of handling missing values [<span class="citation">R Core Team (<a href="#ref-r" role="doc-biblioref">2018</a>)</span>. However, to those accustomed to working with missing values in other software, the way in which R handles missing values may require a shift in thinking. On this post, I will present a case in which you have received a data with zero as missing values and how you can convert to <code>NA</code>—a standard form for missing value in <strong>R</strong>. Let’s first load the package we will use for this post.</p>
+<pre class="r"><code>require(tidyverse)</code></pre>
+<p>The tidyverse is an ecosystem of packages for data import, manipulate, model, visualize and share. For the purpose of learning, we first create a random sea surface temperature for three sites recorded for thirty days in March 2020. Table <a href="#tab:tab1">1</a> shows a sample of temperature records in the three sites for four consecutive days generated in the chunk below;</p>
+<pre class="r"><code>sst = tibble(data = rnorm(n = 90, mean = 28.5, sd = 1.5), 
+              sites = rep(c(&quot;Pemba&quot;, &quot;Zanzibar&quot;, &quot;Mafia&quot;), times = 30), 
+              day = rep(seq(lubridate::dmy(010320),lubridate::dmy(300320), by = &quot;day&quot;), each = 3)) %&gt;%
+  select(day, everything())</code></pre>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>A sample of sea Surface temperature
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+Day
+</th>
+<th style="text-align:center;">
+Sites
+</th>
+<th style="text-align:center;">
+Temperature
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 3.5cm; ">
+2020-03-01
+</td>
+<td style="text-align:center;width: 2.5cm; ">
+Pemba
+</td>
+<td style="text-align:center;">
+29.10
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3.5cm; ">
+2020-03-01
+</td>
+<td style="text-align:center;width: 2.5cm; ">
+Zanzibar
+</td>
+<td style="text-align:center;">
+27.96
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3.5cm; ">
+2020-03-01
+</td>
+<td style="text-align:center;width: 2.5cm; ">
+Mafia
+</td>
+<td style="text-align:center;">
+29.16
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3.5cm; ">
+2020-03-02
+</td>
+<td style="text-align:center;width: 2.5cm; ">
+Pemba
+</td>
+<td style="text-align:center;">
+26.17
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3.5cm; ">
+2020-03-02
+</td>
+<td style="text-align:center;width: 2.5cm; ">
+Zanzibar
+</td>
+<td style="text-align:center;">
+28.11
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3.5cm; ">
+2020-03-02
+</td>
+<td style="text-align:center;width: 2.5cm; ">
+Mafia
+</td>
+<td style="text-align:center;">
+28.58
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3.5cm; ">
+2020-03-03
+</td>
+<td style="text-align:center;width: 2.5cm; ">
+Pemba
+</td>
+<td style="text-align:center;">
+30.59
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3.5cm; ">
+2020-03-03
+</td>
+<td style="text-align:center;width: 2.5cm; ">
+Zanzibar
+</td>
+<td style="text-align:center;">
+30.82
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3.5cm; ">
+2020-03-03
+</td>
+<td style="text-align:center;width: 2.5cm; ">
+Mafia
+</td>
+<td style="text-align:center;">
+29.83
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3.5cm; ">
+2020-03-04
+</td>
+<td style="text-align:center;width: 2.5cm; ">
+Pemba
+</td>
+<td style="text-align:center;">
+29.19
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3.5cm; ">
+2020-03-04
+</td>
+<td style="text-align:center;width: 2.5cm; ">
+Zanzibar
+</td>
+<td style="text-align:center;">
+29.41
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 3.5cm; ">
+2020-03-04
+</td>
+<td style="text-align:center;width: 2.5cm; ">
+Mafia
+</td>
+<td style="text-align:center;">
+26.60
+</td>
+</tr>
+</tbody>
+</table>
+<p>Once we have the dataset, we can introduce the zero value in the temperature variable at 5, 9, 13, 18, 22, 27, 31, 36, 40, 45, 49, 54, 58, 63, 67, 72, 76, 81, 85, 90 index of the data frame.</p>
+<pre class="r"><code>sst[seq(5, 90, length.out = 20) %&gt;% as.integer(),2] = 0</code></pre>
+<p>To have a clear view of the position of zero, I first converted the long form table of the sea surface temperature to wider form using the <code>pivot_wider</code> function from <strong>tidyr</strong> package <span class="citation">(Wickham and Henry <a href="#ref-tidyr" role="doc-biblioref">2018</a>)</span>. Table <a href="#tab:tab2">2</a> shows the temperature in the wider format with four columns. The first column represent the data of temperature records and the second to the fourth columns represent the temperature records of the three channels. Take note of the position of zero at each channel</p>
+<pre class="r"><code>sst.wide = sst %&gt;% 
+  pivot_wider(names_from = sites, 
+              values_from = data, 
+              id_cols = day)</code></pre>
+<table>
+<caption>
+<span id="tab:tab2">Table 2: </span>Sea Surface temperature in wider form
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="3">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Channel
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Day
+</th>
+<th style="text-align:right;">
+Pemba
+</th>
+<th style="text-align:right;">
+Zanzibar
+</th>
+<th style="text-align:right;">
+Mafia
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-01
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.10
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.96
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.16
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-02
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.17
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.58
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-03
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.59
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.82
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-04
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.19
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.41
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.60
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-05
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.60
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.18
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-06
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.67
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.87
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-07
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.03
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.19
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+32.16
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-08
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.77
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.87
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-09
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.81
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.69
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-10
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.46
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+31.29
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.17
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-11
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.29
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.87
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-12
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+31.05
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.08
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-13
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+32.18
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.16
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.93
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-14
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+31.39
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.36
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-15
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.67
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.30
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-16
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.57
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.18
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-17
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.17
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.73
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-18
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.90
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.55
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-19
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.79
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.14
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+31.09
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-20
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.44
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.49
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-21
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.29
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.49
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-22
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.34
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.61
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.08
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-23
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.50
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.57
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-24
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.61
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.41
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-25
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.99
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+31.27
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-26
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.71
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.33
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-27
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.10
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.74
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-28
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.74
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.48
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.21
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-29
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.08
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.51
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-30
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.55
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.01
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+0.00
+</td>
+</tr>
+</tbody>
+</table>
+<p>In short, table <a href="#tab:tab2">2</a> show that there are several days with zero value. But we know that it is impossible to have zero sea surface temperature. This indicate a common problem that you will often face when you deal with data from different sources. The data found in the real world is that data is rarely clean and homogeneous. In particular, many interesting datasets will have some amount of missing values. To make matters even more complicated, different data sources may indicate missing data in different ways.</p>
+<p>Thus, for us to work with this data, we need to convert the 0 entries in the three channels to <code>NA</code>. To do that, we use the <code>mutate_at()</code> function from <strong>dplyr</strong> <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span> to specify which variables we want to apply our mutating function to, and we use the <code>if_else()</code> function to specify what to replace the value with if the condition is <code>true</code> or <code>false</code>. The chunk below summarize how to convert the zero cell to <code>NA</code> and the result is presented in table <a href="#tab:tab3">3</a></p>
+<pre class="r"><code>sst.clean = sst.wide %&gt;% 
+  mutate_at(vars(Pemba, Zanzibar, Mafia),
+            
+            function(.var){
+              
+              if_else(.var ==0, ## if the value is equal to zero
+                      true = as.numeric(NA), ## replace it with NA
+                      false = .var ## else leave the value as it is
+                      )
+              
+                         }
+            )</code></pre>
+<table>
+<caption>
+<span id="tab:tab3">Table 3: </span>Sea Surface temperature in wider form with zero replaced with NA
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="3">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Channel
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Day
+</th>
+<th style="text-align:right;">
+Pemba
+</th>
+<th style="text-align:right;">
+Zanzibar
+</th>
+<th style="text-align:right;">
+Mafia
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-01
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.10
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.96
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.16
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-02
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.17
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.58
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-03
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.59
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.82
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-04
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.19
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.41
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.60
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-05
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.60
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.18
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-06
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.67
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.87
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-07
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.03
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.19
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+32.16
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-08
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.77
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.87
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-09
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.81
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.69
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-10
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.46
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+31.29
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.17
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-11
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.29
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.87
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-12
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+31.05
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.08
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-13
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+32.18
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.16
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.93
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-14
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+31.39
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.36
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-15
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.67
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.30
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-16
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.57
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.18
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-17
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.17
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.73
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-18
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.90
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.55
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-19
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.79
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.14
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+31.09
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-20
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.44
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.49
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-21
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.29
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.49
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-22
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.34
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.61
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.08
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-23
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.50
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.57
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-24
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.61
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.41
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-25
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.99
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+31.27
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-26
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+26.71
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.33
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-27
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.10
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.74
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-28
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.74
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+28.48
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.21
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-29
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.08
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+30.51
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2.5cm; ">
+2020-03-30
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+29.55
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+27.01
+</td>
+<td style="text-align:right;width: 2.5cm; ">
+NA
+</td>
+</tr>
+</tbody>
+</table>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<p>Here we have seen how to convert inproper filled cell of data frame with missing values to <code>NA</code> in data frame using <strong>tidyverse</strong> functions and seen a nested function that specifically designed to handle these missing values in a uniform way. Missing data is a fact of life in real-world datasets, and we’ll face often when we works with data from other sources.</p>
+</div>
+<div id="reference" class="section level2 unnumbered">
+<h2>Reference</h2>
+<div id="refs" class="references">
+<div id="ref-excel">
+<p>Kraus, Daniel. 2014. “Consolidated Data Analysis and Presentation Using an Open-Source Add-in for the Microsoft Excel Spreadsheet Software.” <em>Medical Writing</em> 23 (1): 25–28.</p>
+</div>
+<div id="ref-libreoffice">
+<p>Oualline, Steve, and Grace Oualline. 2018. “Working with Spreadsheets in Libreoffice Calc.” In <em>Practical Free Alternatives to Commercial Software</em>, 89–117. Springer.</p>
+</div>
+<div id="ref-r">
+<p>R Core Team. 2018. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/">https://www.R-project.org/</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+<div id="ref-tidyr">
+<p>Wickham, Hadley, and Lionel Henry. 2018. <em>Tidyr: Easily Tidy Data with ’Spread()’ and ’Gather()’ Functions</em>. <a href="https://CRAN.R-project.org/package=tidyr">https://CRAN.R-project.org/package=tidyr</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

@@ -46,13 +46,16 @@ deepsea.station = st_read("e:/Data Manipulation/Deep sea/CTD deepsea/alltransect
 
 
 ```{r}
-deepsea.station = deepsea.station%>%select(name, time)%>%arrange(time)
+deepsea.station = deepsea.station %>% 
+  select(name, time)%>%
+  arrange(time)
 
 ```
 
 
 ```{r}
-deepsea.file = dir("e:/Data Manipulation/Deep sea/CTD deepsea/Old CTD", pattern = ".cnv", full.names = T)
+deepsea.file = dir("e:/Data Manipulation/Deep sea/CTD deepsea/Old CTD", 
+                   pattern = ".cnv", full.names = T)
 
 # length(deepsea.file);nrow(deepsea.station)
 
