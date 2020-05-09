@@ -1,0 +1,444 @@
+---
+title: A Unified Machine Learning in R with tidymodels
+author: Masumbuko Semba
+date: '2020-05-09'
+slug: a-unified-machine-learning-in-r-with-tidymodels
+categories:
+  - Machine learning
+  - Artificial intelligence
+tags: 
+  - Lake Tanganyika
+  - Lates stappersii
+  - Stolothrissa tanganicae
+  - Limnothrissa miodon
+  - Masumbuko Semba
+  - tidymodels
+  - tidyverse
+  - Tanzania
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+
+<div id="tidymodels" class="section level1">
+<h1>tidymodels</h1>
+<p><strong>tidymodels</strong> is a suite of packages that make machine learning with R a breeze. R has many packages for machine learning, each with their own syntax and function arguments. <strong>tidymodels</strong> aims to provide an unified interface, which allows data scientists to focus on the problem they’re trying to solve, instead of wasting time with learning package syntax.</p>
+<p>The tidymodels has a modular approach meaning that specific, smaller packages designed to work hand in hand. Thus, tidymodels is to modeling what the tidyverse is to data wrangling<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. The packages included in <strong>tidymodels</strong> are:</p>
+<ul>
+<li><strong>parsnip</strong> for model definition <span class="citation">(Kuhn and Vaughan <a href="#ref-parsnip" role="doc-biblioref">2020</a><a href="#ref-parsnip" role="doc-biblioref">a</a>)</span></li>
+<li><strong>recipes</strong> for data preprocessing and feature engineering <span class="citation">(Kuhn and Wickham <a href="#ref-recipes" role="doc-biblioref">2020</a><a href="#ref-recipes" role="doc-biblioref">a</a>)</span></li>
+<li><strong>rsample</strong> to resample data (useful for cross-validation) <span class="citation">(Kuhn, Chow, and Wickham <a href="#ref-rsample" role="doc-biblioref">2020</a>)</span></li>
+<li><strong>yardstick</strong> to evaluate model performance <span class="citation">(Kuhn and Vaughan <a href="#ref-yardstick" role="doc-biblioref">2020</a><a href="#ref-yardstick" role="doc-biblioref">b</a>)</span></li>
+<li><strong>dials</strong> to define tuning parameters of your models <span class="citation">(Kuhn <a href="#ref-dials" role="doc-biblioref">2020</a><a href="#ref-dials" role="doc-biblioref">a</a>)</span></li>
+<li><strong>tune</strong> for model tuning <span class="citation">(Kuhn <a href="#ref-tune" role="doc-biblioref">2020</a><a href="#ref-tune" role="doc-biblioref">b</a>)</span></li>
+<li><strong>workflows</strong> which allows you to bundle everything together and train models easily <span class="citation">(Vaughan <a href="#ref-workflows" role="doc-biblioref">2020</a>)</span></li>
+</ul>
+<p>In this post, I will walk through a machine learning example from start to end and explain how to use the appropriate <strong>tidymodels</strong> packages at each place. Figure <a href="#fig:fig0">1</a> illustrates key modeling steps that are unified in <strong>tidymodels</strong> that we are going to use use in this article:</p>
+<div class="figure"><span id="fig:fig0"></span>
+<img src="/post/2020-05-09-a-unified-machine-learning-in-r-with-tidymodels_files/figure-html/fig0-1.png" alt="Conceptual model tidymodel's concept. Courtesy of Edgar Ruiz" width="672" />
+<p class="caption">
+Figure 1: Conceptual model tidymodel’s concept. Courtesy of Edgar Ruiz
+</p>
+</div>
+</div>
+<div id="data" class="section level1">
+<h1>Data</h1>
+<p>We use the <code>dagaa</code> dataset to illustrate the concept. This dataset comes with base R as a data frame. This dataset consists of 50 samples from each of three species of fish (<em>Lates, Limno and Stolothrisa</em>). It also contains four variables— the total length, weight, sex and stage of maturity that were collected to quantify the morphologic variation of three three species. We can import the the file using <code>read_excel</code> function from <strong>readxl</strong> package and specify the sheet number where the data is stored and the number of locums to skip.</p>
+<pre class="r"><code>dagaa = readxl::read_excel(&quot;dagaa_species.xls&quot;,  sheet = 3, skip = 8) </code></pre>
+<p>A quick skim of the dataset reveal that there are three variables <span class="citation">(Waring et al. <a href="#ref-skimr" role="doc-biblioref">2020</a>)</span>, a Species factor variable and total length and weight of species as numerical variables without missing values. <strong>tidymodel</strong> prefer string variables as factor and since the Species variable is in factor already, we need no any transformation for now.</p>
+<pre class="r"><code>dagaa.clean %&gt;% 
+  skimr::skim()</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-3">Table 1: </span>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">Piped data</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">3929</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">3</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">numeric</td>
+<td align="left">2</td>
+</tr>
+<tr class="odd">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Group variables</td>
+<td align="left">species</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="left">species</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">p0</th>
+<th align="right">p25</th>
+<th align="right">p50</th>
+<th align="right">p75</th>
+<th align="right">p100</th>
+<th align="left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">total_length</td>
+<td align="left">Limno</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">74.03</td>
+<td align="right">19.98</td>
+<td align="right">0.00</td>
+<td align="right">58.00</td>
+<td align="right">71.00</td>
+<td align="right">90.00</td>
+<td align="right">190.00</td>
+<td align="left">▁▇▆▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">total_length</td>
+<td align="left">Lstp</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">251.20</td>
+<td align="right">59.47</td>
+<td align="right">61.00</td>
+<td align="right">227.00</td>
+<td align="right">259.50</td>
+<td align="right">285.00</td>
+<td align="right">480.00</td>
+<td align="left">▁▂▇▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">total_length</td>
+<td align="left">Stolo</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">75.02</td>
+<td align="right">10.81</td>
+<td align="right">0.00</td>
+<td align="right">68.00</td>
+<td align="right">78.00</td>
+<td align="right">83.00</td>
+<td align="right">98.00</td>
+<td align="left">▁▁▂▇▇</td>
+</tr>
+<tr class="even">
+<td align="left">weight</td>
+<td align="left">Limno</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">3.77</td>
+<td align="right">5.03</td>
+<td align="right">0.00</td>
+<td align="right">1.40</td>
+<td align="right">2.51</td>
+<td align="right">5.14</td>
+<td align="right">90.25</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">weight</td>
+<td align="left">Lstp</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">122.18</td>
+<td align="right">84.16</td>
+<td align="right">1.21</td>
+<td align="right">83.66</td>
+<td align="right">110.82</td>
+<td align="right">148.02</td>
+<td align="right">707.00</td>
+<td align="left">▇▃▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">weight</td>
+<td align="left">Stolo</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">3.17</td>
+<td align="right">7.74</td>
+<td align="right">0.00</td>
+<td align="right">1.99</td>
+<td align="right">3.03</td>
+<td align="right">3.67</td>
+<td align="right">228.00</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+</tbody>
+</table>
+<p>Once we have the dataset, we can load the <strong>tidymodels</strong> <span class="citation">(Kuhn and Wickham <a href="#ref-tidymodels" role="doc-biblioref">2020</a><a href="#ref-tidymodels" role="doc-biblioref">b</a>)</span> and <strong>tidyverse</strong> <span class="citation">(Wickham <a href="#ref-tidyverse" role="doc-biblioref">2017</a>)</span> packages into our session. Loading the <strong>tidymodels</strong> package loads a bunch of packages for modeling and also a few others from the tidyverse like ggplot2 and dplyr. You can use use <code>libray</code> function to load the package, but I prefer <code>require</code> for loading the packages in R.</p>
+<pre class="r"><code>require(tidymodels)
+require(tidyverse)</code></pre>
+</div>
+<div id="preprocess" class="section level1">
+<h1>Pre–Process</h1>
+<p>Data pre–processing is an important stage in modelling, which clean and transform a raw dataset into useful and understandable format. In layman’s terms, raw data is often incomplete, inconsistent, and might be lacking certain behaviors, and is likely to contain many errors, hence that’s when pre-process comes in.</p>
+<div id="data-sampling" class="section level2">
+<h2>Data sampling</h2>
+<p>First, let’s split the dataset into raining and testing set. We will use the training set of iris dataset to train and fit the model and the testing set to evaluate our final model performance. The split is handled automatically using a <code>initial_split</code> function from <strong>rsample</strong> package <span class="citation">(Kuhn, Chow, and Wickham <a href="#ref-rsample" role="doc-biblioref">2020</a>)</span>, which creates a special <code>split object</code>.</p>
+<pre class="r"><code>set.seed(234589)
+
+dagaa.split = dagaa.clean %&gt;% 
+  rsample::initial_split(prop = .8, strata = &quot;species&quot;)</code></pre>
+<p>The printed output of <code>iris.split</code> inform us about the number observation we have sampled as trained and testing set along with the total observations.We can extract training and testing sets from the split object using <code>training</code> and <code>testing</code> functions. At a later stage we will tune parameter in the model and hence we want to use a cross-validation object. We also create a cross–validation object from the training set using the <code>vfold_cv</code> function.</p>
+<pre class="r"><code>## train.set
+dagaa.train = dagaa.split  %&gt;% 
+  rsample::training()
+
+## test set
+dagaa.test = dagaa.split %&gt;% 
+  rsample::testing()
+
+## cross validation set
+iris.cv = dagaa.train %&gt;% 
+  rsample::vfold_cv()</code></pre>
+</div>
+<div id="define-a-recipe" class="section level2">
+<h2>Define a recipe</h2>
+<p><strong>tidymodels</strong> comes with a <strong>recipes</strong> packages, which provides an interface to specify the role of each variable as either an outcome or predictor using a formula. It also provides pre–processing functions for transforming raw data.</p>
+<p>Creating a recipe object with tidymodels package involve two steps chained with pipes. These steps include;</p>
+<ol style="list-style-type: decimal">
+<li><strong>Specify the formula</strong>—specify the formula that feed the predictor and outcome variables</li>
+<li><strong>Specify steps</strong>— you specify data transformation steps. Each data transformation is a step. Functions corresponding to specific types of steps has a prefix <code>step_</code>. <strong>recipes</strong> has several <code>step_*</code> functions.</li>
+</ol>
+<p>Looking on figure <a href="#fig:fig1">2</a>, we notice that weight and total length of the three species varies.</p>
+<pre class="r"><code>dagaa.clean %&gt;% pivot_longer(cols = 2:3, names_to = &quot;variable&quot;, values_to = &quot;data&quot;) %&gt;%
+  group_by(species, variable) %&gt;%
+  summarise(data.mean = mean(data),
+            data.sd = sd(data),
+            upper = data.mean+data.sd,
+            lower = data.mean-data.sd)%&gt;%
+  ggplot(aes(x = variable, y = data.mean, col = species)) +
+  geom_point(position = position_dodge(.4), size = 4)+
+  geom_errorbar(aes(ymin = lower, ymax = upper),
+                position = position_dodge(.4), width = .25)+
+  ggsci::scale_color_jco(label = c(&quot;Limnothrisa&quot;,&quot;Lates&quot;, &quot;Stolothrissa&quot;))+
+  ggpubr::theme_pubclean()+
+  theme(legend.title = element_blank(), legend.key = element_blank(), 
+        legend.key.width = unit(2, &quot;lines&quot;), legend.position = &quot;right&quot;)+
+  coord_cartesian(expand = TRUE) +
+  scale_y_continuous(name = &quot;Morphometric&quot;, breaks = seq(50,350,50))+
+  scale_x_discrete(name = &quot;&quot;, labels = c(&quot;Total Length (cm)&quot;, &quot;Weight (gm)&quot;))</code></pre>
+<div class="figure" style="text-align: c"><span id="fig:fig1"></span>
+<img src="/post/2020-05-09-a-unified-machine-learning-in-r-with-tidymodels_files/figure-html/fig1-1.png" alt="Morphometric measurment of iris flower. The length and width varies for iris flower species" width="576" />
+<p class="caption">
+Figure 2: Morphometric measurment of iris flower. The length and width varies for iris flower species
+</p>
+</div>
+<p>To model them as predictor of species type, we must transform these numeric variables. First, we use <code>step_corr</code> to check the correlation of predictor variables and if two or more variables correlate, others are dropped and one is retained. Then, use the <code>step_normalize</code> to scale and center total length and weight numeric data to have a standard deviation of one.</p>
+<p>Other important feature is that we can apply step to a specific variable, groups or all variables in the dataset. The <code>all_outcomes</code> and <code>all_predictors</code> functions provide convenient ways to specify groups of variables. For instance, if we want <code>step_normalize</code> to transform only predictors we simply parse <code>step_corr(all_predictors())</code>.</p>
+<p>After a brief introduction of <em>recipe</em>, we can now go on and create a recipe object. We use the training set and not the raw iris dataset to define the following recipe, transform and prep.</p>
+<pre class="r"><code>dagaa.recipe = dagaa.train %&gt;% 
+  recipe(species ~ .) %&gt;%
+  step_normalize(all_numeric()) %&gt;%
+  # step_dummy(sex, stage_mat) %&gt;%
+  step_corr(all_numeric()) %&gt;%
+  prep()</code></pre>
+<p>You notice that I have specified the short formula <code>species ~ .</code>, where <code>.</code> represents all variable in the dataset. If we are interested with the recipe object we just created, we can simply print it in a console.</p>
+<pre class="r"><code>dagaa.recipe</code></pre>
+<pre><code>Data Recipe
+
+Inputs:
+
+      role #variables
+   outcome          1
+ predictor          2
+
+Training data contained 3144 data points and no missing data.
+
+Operations:
+
+Centering and scaling for total_length, weight [trained]
+Correlation filter removed no terms [trained]</code></pre>
+<p>The printed output describes what was done and the how many variables are used as outcome and predictor. It also tells us that the <code>step_corr</code> there is no auto correlation of the variable. We can further extracted the transformed testing dataset from <code>prepped</code> and <code>recipe</code> data data with the <code>juice</code> function. Note that a transformed <code>dagaa.training</code> must originate from the <code>recipe</code>, which is <code>prepped</code>.</p>
+<pre class="r"><code>## transformed training set
+dagaa.training = dagaa.recipe %&gt;% 
+  juice()</code></pre>
+<p>We also need to transform the testing set of the dagaa dataset. We can do that by parsing the <code>dagaa.test</code> data set we extracted from the <code>dagaa.split</code> in a <code>bake</code> function. Note that the transformation of the <code>iris.testing</code> must originate from the <code>recipe</code>, which is <code>prepped</code> and <code>recipe</code> dagaa.test` set.</p>
+<pre class="r"><code>## transformed testing set
+dagaa.testing = dagaa.recipe %&gt;% 
+  recipes::bake(dagaa.test)
+
+dagaa.testing %&gt;% glimpse()</code></pre>
+<pre><code>Rows: 785
+Columns: 3
+$ total_length &lt;dbl&gt; 0.031118132, -0.210271965, 0.006979122, 0.103535161, -...
+$ weight       &lt;dbl&gt; -0.16375381, -0.19805308, -0.14964944, -0.13843005, -0...
+$ species      &lt;fct&gt; Stolo, Stolo, Stolo, Stolo, Stolo, Stolo, Stolo, Stolo...</code></pre>
+</div>
+<div id="train-a-model" class="section level2">
+<h2>Train a model</h2>
+<p>So far we have split the dataset into training and testing, we have create a prepped recipe object, extracted transformed training set and transformed the testing set. The next step we need to do is to train our model using the <strong>parsnip</strong> package <span class="citation">(Kuhn and Vaughan <a href="#ref-parsnip" role="doc-biblioref">2020</a><a href="#ref-parsnip" role="doc-biblioref">a</a>)</span>. <strong>parsnip</strong> provides a unified interface of different models that exist in R.</p>
+<p>There are a few primary components that you need to provide for the model specification. These includes;</p>
+<ol style="list-style-type: decimal">
+<li><strong>Model type</strong> specify a function that define a model like <code>rand_forest</code> for random forest and <code>logistic_reg</code> for logistic regression. If you are wondering of type of modes to use, you can consult <a href="https://tidymodels.github.io/parsnip/articles/articles/Models.html">this article</a> that describe different function <strong>tidymodels</strong> support</li>
+<li><strong>Set arguments</strong> are set using <code>set_args</code></li>
+<li><strong>Set engine</strong> is the specific package that the model you choose must come from. For instance the <code>ranger</code> engine drives the Random Forest model and <code>glmnet</code> drives the Logistic regression. You specify the engine to use in the model with the <code>set_engine</code> function.</li>
+<li><strong>Set mode</strong> allows to specify the type of prediction—whether <code>classification</code> for binary/categorical prediction or <code>regression</code> for continuous prediction.</li>
+</ol>
+<p>For instance, if we want to fit a random forest model as implemented by the <code>ranger</code> package for the purpose of classification, the <code>rand_forest()</code> function is used to initialize a Random Forest model and parse the <code>trees</code> argument to define number of tree. Then we use <code>set_engine()</code> function to command rand_forest<code>function for Random Forest model we specified must come from</code>ranger<code>package. Since the prediction is binary, we used the</code>set_mode<code>to specify the type of model. Finally, to execute the model, the</code>fit()` function is used.</p>
+<p>This will automatically train the model specified using the transformed training data. Notice that the model runs on top of the juiced trained data because is a transformed instead of the raw trained. The chunk below shows the model specification.</p>
+<pre class="r"><code>rf.model = rand_forest() %&gt;%
+  set_engine(engine = &quot;ranger&quot;) %&gt;%
+  set_mode(mode = &quot;classification&quot;) %&gt;%
+  fit(species~., data = dagaa.training)
+
+rf.model</code></pre>
+<pre><code>parsnip model object
+
+Fit time:  750ms 
+Ranger result
+
+Call:
+ ranger::ranger(formula = formula, data = data, num.threads = 1,      verbose = FALSE, seed = sample.int(10^5, 1), probability = TRUE) 
+
+Type:                             Probability estimation 
+Number of trees:                  500 
+Sample size:                      3144 
+Number of independent variables:  2 
+Mtry:                             1 
+Target node size:                 10 
+Variable importance mode:         none 
+Splitrule:                        gini 
+OOB prediction error (Brier s.):  0.1558837 </code></pre>
+<p>Note that the printed fit object provide the model result.</p>
+</div>
+<div id="metrics-to-evaluate-classification-model" class="section level2">
+<h2>Metrics To Evaluate Classification Model</h2>
+<p>The <strong>yardstick</strong> package is specifically designed to measure model performance for both numeric and categorical outcomes, and it plays well with grouped predictions. A nice thing about <strong>tidymodels</strong> is that when we use <code>predict</code> function in the fitted model against the transformed testing set, the output is the tibble.</p>
+<div id="accuracy-and-kappa" class="section level3">
+<h3>Accuracy and Kappa</h3>
+<p><code>Accuracy</code> is the percentage of correctly classifies instances out of all instances. It is more useful on a binary classification than multi-class classification problems because it can be less clear exactly how the accuracy breaks down across those classes (e.g. you need to go deeper with a confusion matrix). Learn more about Accuracy here.</p>
+<p><code>Kappa</code> or <code>Cohen’s Kappa</code> is like classification accuracy, except that it is normalized at the baseline of random chance on your dataset. It is a more useful measure to use on problems that have an imbalance in the classes (e.g. 70-30 split for classes 0 and 1 and you can achieve 70% accuracy by predicting all instances are for class 0).</p>
+<p>since all the prediction information is tibble, we can apply the <code>metric</code> function from <strong>yardstick</strong> and compare original species value (<code>truth = Species</code>) against predicted species values (<code>estimate = .pred_class</code>) to evaluate our model performance. The function expects a tibble that contains the actual results (truth) and what the model predicted (estimate). The <code>metrics()</code> function calculates <code>accuracy</code> and <code>kap</code> metrics for numeric outcomes. Furthermore, it automatically recognizes that <code>lm_preds</code> is grouped by folds and thus calculates the metrics for each fold.</p>
+<pre class="r"><code>rf.model %&gt;% predict(dagaa.testing) %&gt;%
+  bind_cols(dagaa.testing) %&gt;%
+  metrics(truth = species, estimate = .pred_class)</code></pre>
+<pre><code># A tibble: 2 x 3
+  .metric  .estimator .estimate
+  &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;
+1 accuracy multiclass     0.776
+2 kap      multiclass     0.575</code></pre>
+</div>
+<div id="gain-and-roc-curve" class="section level3">
+<h3>Gain and Roc Curve</h3>
+<p>When we develop statistical models for classification tasks (e.g. using machine learning), we usually need to have a way to compare the generated models to decide which model is best. Typical tools for this task are Gains, ROC or Lift charts.</p>
+<p>The Gains and the ROC curve are visualizations showing overall performance of the models. The shape of the curves will tell us a lot about the behavior of the model. It clearly shows how much our model is better than a model assigning categories randomly and how far we are from the optimal model which is in practice unachievable. These curves can help in setting the final cut-off point for deciding which probabilities will mean positive and negative response prediction.</p>
+<p>In order to plot gain or roc curve, we need first to compute the probability for each possible predicted value by setting the type argument to <code>prob.</code> That will return a tibble with as many variables as there are possible predicted values. Their name will default to the original value name, prefixed with <code>.pred_</code>.</p>
+<pre class="r"><code>dagaa.prob = rf.model %&gt;% 
+  predict(dagaa.testing, type = &quot;prob&quot;) %&gt;%
+  bind_cols(dagaa.testing)</code></pre>
+</div>
+<div id="gain-curve" class="section level3">
+<h3>Gain Curve</h3>
+<p>Once we have the probability of prediction, we can use <code>gain_curve</code> function fro <strong>yardstick</strong> package to compute values for gain curve. Figure <a href="#fig:fig4">3</a> is a gain plot. The gains associated with the model is shown as black curve for the three species.</p>
+<pre class="r"><code>dagaa.gain = dagaa.prob %&gt;%
+  yardstick::gain_curve(species, 
+                        .pred_Limno, 
+                        .pred_Lstp, 
+                        .pred_Stolo)
+
+dagaa.gain %&gt;% 
+  autoplot()+
+  ggpubr::theme_pubclean()+
+  theme(strip.background = element_blank())</code></pre>
+<div class="figure"><span id="fig:fig4"></span>
+<img src="/post/2020-05-09-a-unified-machine-learning-in-r-with-tidymodels_files/figure-html/fig4-1.png" alt="Gain curve of modelled species" width="672" />
+<p class="caption">
+Figure 3: Gain curve of modelled species
+</p>
+</div>
+</div>
+</div>
+<div id="roc-curve" class="section level2">
+<h2>ROC curve</h2>
+<p>The other tool used to assess the model accuracy based on a confusion matrix are Sensitivity and Specificity. The ROC curve (Receiver Operating Characteristics curve) is the display of <code>sensitivity</code> and <code>specificity</code> for different cut-off values for probability (If the probability of positive response is above the cut-off, we predict a positive outcome, if not we are predicting a negative one). Each cut-off value defines one point on ROC curve, ranging cut-off from 0 to 1 will draw the whole ROC curve. to obtain the value for roc curve, we use the <code>roc_curve</code> function from yardstick.</p>
+<pre class="r"><code>dagaa.roc = dagaa.prob %&gt;%
+  yardstick::roc_curve(species, 
+                        .pred_Limno, 
+                        .pred_Lstp, 
+                        .pred_Stolo)</code></pre>
+<p>The black curve on ROC curve in figure <a href="#fig:fig5">4</a> is the same model as the example for the Gains chart (Figure <a href="#fig:fig4">3</a>). The Y axis measures the rate (as a percentage) of correctly predicted species with a positive response. The X axis measures the rate of incorrectly predicted species with a negative response. Since the optimal model should have sensitivity that rise to a maximum and specificity will stay the whole time at 1. The task is to have ROC curve of the developed model as close as possible to optimal model. Therefore, based on that information, figure <a href="#fig:fig5">4</a> indicates that our model predicted well for <code>Lates</code> species as compared to <code>Limno</code> and <code>Stolo</code>.</p>
+<pre class="r"><code>dagaa.roc %&gt;% 
+  autoplot()+
+  ggpubr::theme_pubclean()+
+  theme(strip.background = element_blank())</code></pre>
+<div class="figure"><span id="fig:fig5"></span>
+<img src="/post/2020-05-09-a-unified-machine-learning-in-r-with-tidymodels_files/figure-html/fig5-1.png" alt="Roc curve of modelled species" width="672" />
+<p class="caption">
+Figure 4: Roc curve of modelled species
+</p>
+</div>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<p>I hanged on <a href="http://www.rebeccabarter.com/blog/2020-03-25_machine_learning/#tune-the-parameters">Rebecca Barter</a> post on <em>Tidymodels: tidy machine learning in R</em> that explain briefly the use of tidymodels package in R. I also glimpsed <a href="https://rviews.rstudio.com/2019/06/19/a-gentle-intro-to-tidymodels/">Edger Ruiz</a> post that provide a gentle introduction to tidymodels. These post provided resourceful material for learning basic functions of tidymodels.</p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-dials">
+<p>Kuhn, Max. 2020a. <em>Dials: Tools for Creating Tuning Parameter Values</em>. <a href="https://CRAN.R-project.org/package=dials">https://CRAN.R-project.org/package=dials</a>.</p>
+</div>
+<div id="ref-tune">
+<p>———. 2020b. <em>Tune: Tidy Tuning Tools</em>. <a href="https://CRAN.R-project.org/package=tune">https://CRAN.R-project.org/package=tune</a>.</p>
+</div>
+<div id="ref-rsample">
+<p>Kuhn, Max, Fanny Chow, and Hadley Wickham. 2020. <em>Rsample: General Resampling Infrastructure</em>. <a href="https://CRAN.R-project.org/package=rsample">https://CRAN.R-project.org/package=rsample</a>.</p>
+</div>
+<div id="ref-parsnip">
+<p>Kuhn, Max, and Davis Vaughan. 2020a. <em>Parsnip: A Common Api to Modeling and Analysis Functions</em>. <a href="https://CRAN.R-project.org/package=parsnip">https://CRAN.R-project.org/package=parsnip</a>.</p>
+</div>
+<div id="ref-yardstick">
+<p>———. 2020b. <em>Yardstick: Tidy Characterizations of Model Performance</em>. <a href="https://CRAN.R-project.org/package=yardstick">https://CRAN.R-project.org/package=yardstick</a>.</p>
+</div>
+<div id="ref-recipes">
+<p>Kuhn, Max, and Hadley Wickham. 2020a. <em>Recipes: Preprocessing Tools to Create Design Matrices</em>. <a href="https://CRAN.R-project.org/package=recipes">https://CRAN.R-project.org/package=recipes</a>.</p>
+</div>
+<div id="ref-tidymodels">
+<p>———. 2020b. <em>Tidymodels: Easily Install and Load the ’Tidymodels’ Packages</em>. <a href="https://CRAN.R-project.org/package=tidymodels">https://CRAN.R-project.org/package=tidymodels</a>.</p>
+</div>
+<div id="ref-workflows">
+<p>Vaughan, Davis. 2020. <em>Workflows: Modeling Workflows</em>. <a href="https://CRAN.R-project.org/package=workflows">https://CRAN.R-project.org/package=workflows</a>.</p>
+</div>
+<div id="ref-skimr">
+<p>Waring, Elin, Michael Quinn, Amelia McNamara, Eduardo Arino de la Rubia, Hao Zhu, and Shannon Ellis. 2020. <em>Skimr: Compact and Flexible Summaries of Data</em>. <a href="https://CRAN.R-project.org/package=skimr">https://CRAN.R-project.org/package=skimr</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, Hadley. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://hansjoerg.me/2020/02/09/tidymodels-for-machine-learning/">Tutorial on tidymodels for Machine Learning</a><a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</div>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>tidyverse on Masumbuko Semba&#39;s Blog</title>
-    <link>/tags/tidyverse/</link>
-    <description>Recent content in tidyverse on Masumbuko Semba&#39;s Blog</description>
+    <title>Machine learning on Masumbuko Semba&#39;s Blog</title>
+    <link>/categories/machine-learning/</link>
+    <description>Recent content in Machine learning on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 09 May 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/tidyverse/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/machine-learning/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -19,15 +19,6 @@
       <guid>/05/09/2020/a-unified-machine-learning-in-r-with-tidymodels/</guid>
       <description>tidymodelstidymodels is a suite of packages that make machine learning with R a breeze. R has many packages for machine learning, each with their own syntax and function arguments. tidymodels aims to provide an unified interface, which allows data scientists to focus on the problem they’re trying to solve, instead of wasting time with learning package syntax.
 The tidymodels has a modular approach meaning that specific, smaller packages designed to work hand in hand.</description>
-    </item>
-    
-    <item>
-      <title>Access meteorogical observations using worldmet package</title>
-      <link>/11/29/2019/access-meteorogical-observations-using-worldmet-package/</link>
-      <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/11/29/2019/access-meteorogical-observations-using-worldmet-package/</guid>
-      <description>David Carslaw (2019) developed R package worldmet, which provides an easy way to access world meteorological data from from the Integrated Surface Database of National Oceanic and Atmospheric Administration (NOAA). The Integrated Surface Database (ISD) consists of global hourly and synoptic observations compiled from numerous sources into a single common ASCII format and common data model.</description>
     </item>
     
   </channel>

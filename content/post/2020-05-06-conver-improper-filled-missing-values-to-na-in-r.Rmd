@@ -123,4 +123,14 @@ sst.clean %>%
 ## Summary
 Here we have seen how to convert inproper filled cell of data frame with missing values to `NA` in data frame using **tidyverse** functions and seen a nested function that specifically designed to handle these missing values in a uniform way. Missing data is a fact of life in real-world datasets, and we’ll face often when we works with data from other sources.
 
+
+## Remarks
+If creating functions is a hurdle task to you, **dplyr** has a `na_if()` function that convert a value that meet a specified condition to `NA` for all the variables. For instance we could also change the zero values in the dataset into NA as shwon in the chunk below;
+
+```{r}
+sst.wide %>%
+  na_if(0)
+```
+
+
 ## Reference

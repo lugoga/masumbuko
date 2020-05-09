@@ -1,0 +1,314 @@
+---
+title: A Unified Machine Learning in R with tidymodels
+author: Masumbuko Semba
+date: '2020-05-09'
+slug: a-unified-machine-learning-in-r-with-tidymodels
+categories:
+  - Machine learning
+  - Artificial intelligence
+tags: 
+  - Lake Tanganyika
+  - Lates stappersii
+  - Stolothrissa tanganicae
+  - Limnothrissa miodon
+  - Masumbuko Semba
+  - tidymodels
+  - tidyverse
+  - Tanzania
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "")
+
+require(magrittr)
+require(tidyverse)
+require(tidymodels)
+```
+
+# tidymodels
+**tidymodels** is a suite of packages that make machine learning with R a breeze. R has many packages for machine learning, each with their own syntax and function arguments. **tidymodels** aims to provide an unified interface, which allows data scientists to focus on the problem they’re trying to solve, instead of wasting time with learning package syntax. 
+
+The tidymodels has a modular approach meaning that specific, smaller packages designed to work hand in hand. Thus, tidymodels is to modeling what the tidyverse is to data wrangling^[[Tutorial on tidymodels for Machine Learning](https://hansjoerg.me/2020/02/09/tidymodels-for-machine-learning/)]. The packages included in **tidymodels** are:
+
++ **parsnip** for model definition [@parsnip]
++ **recipes** for data preprocessing and feature engineering [@recipes]
++ **rsample** to resample data (useful for cross-validation) [@rsample]
++ **yardstick** to evaluate model performance [@yardstick]
++ **dials** to define tuning parameters of your models [@dials]
++ **tune** for model tuning [@tune]
++ **workflows** which allows you to bundle everything together and train models easily [@workflows]
+
+In this post, I will walk through a machine learning example from start to end and explain how to use the appropriate **tidymodels** packages at each place. Figure \@ref(fig:fig0) illustrates key modeling steps that are unified in **tidymodels** that we are going to use use in this article:
+
+```{r fig0, fig.cap="Conceptual model tidymodel's concept. Courtesy of Edgar Ruiz", echo=FALSE}
+
+ cowplot::ggdraw() + cowplot::draw_image("tidymodel_concept.png", scale = 1)
+```
+
+
+# Data
+
+We use the `dagaa` dataset to illustrate the concept. This dataset comes with base R as a data frame. This dataset consists of 50 samples from each of three species of fish (*Lates, Limno and Stolothrisa*). It also contains four variables--- the total length, weight, sex and stage of maturity that were collected to quantify the morphologic variation of three three species.  We can import the the file using `read_excel` function from **readxl** package and specify the sheet number where the data is stored and the number of locums to skip. 
+
+```{r, eval=FALSE}
+dagaa = readxl::read_excel("dagaa_species.xls",  sheet = 3, skip = 8) 
+```
+
+
+```{r, echo=FALSE}
+dagaa = readxl::read_excel("e:/Data Manipulation/gillnet_kigoma/dagaa/Ringnet_research_Data_Feb2020.xls", 
+                                 sheet = 3, skip = 8) 
+
+dagaa.clean = dagaa%>%
+  select(7,9:12) %>%
+  rename(species = 1, total_length = 2, weight = 3, sex = 4, stage_mat = 5) %>% 
+  mutate(total_length = as.integer(total_length), 
+         stage_mat = replace(stage_mat, stage_mat == "2", 'I'),
+         stage_mat = replace(stage_mat, stage_mat == "2A", 'I'),
+         stage_mat = replace(stage_mat, stage_mat == "2B", 'II'),
+         # stage_mat = replace(stage_mat, stage_mat == "M", 'III'), ## turn off comment and include the "M" 
+         stage_mat = replace(stage_mat, stage_mat == "3", 'III'),
+         stage_mat = replace(stage_mat, stage_mat == "4", 'IV'),
+         stage_mat = replace(stage_mat, stage_mat == "5", 'IV'))   %>%
+  mutate_if(is.character, as.factor)%>% group_by(species) %>%
+  filter(!is.na(species)) %>%
+  filter(!is.na(total_length)) %>%
+  select(species:weight) %>%
+  filter(!is.na(weight))
+```
+
+
+A quick skim of the dataset reveal that there are three variables [@skimr], a Species factor variable and total length and weight of species as numerical variables without missing values. **tidymodel** prefer string variables as factor and since the Species variable is in factor already, we need no any transformation for now. 
+
+```{r}
+dagaa.clean %>% 
+  skimr::skim()
+```
+
+Once we have the dataset, we can load the **tidymodels** [@tidymodels] and **tidyverse** [@tidyverse] packages into our session. Loading the **tidymodels** package loads a bunch of packages for modeling and also a few others from the tidyverse like ggplot2 and dplyr. You can use use `libray` function to load the package, but I prefer `require` for loading the packages in R. 
+
+```{r}
+require(tidymodels)
+require(tidyverse)
+
+```
+
+# Pre--Process
+
+Data pre--processing is an important stage in modelling, which clean and transform a raw dataset into useful and understandable format. In layman’s terms, raw data is often incomplete, inconsistent, and might be lacking certain behaviors, and is likely to contain many errors, hence that's when pre-process comes in. 
+
+## Data sampling
+First, let's split the dataset into raining and testing set. We will use the training set of iris dataset to train and fit the model and the testing set to evaluate our final model performance. The split is handled automatically using a `initial_split` function from **rsample** package [@rsample], which creates a special `split object`.
+
+```{r}
+set.seed(234589)
+
+dagaa.split = dagaa.clean %>% 
+  rsample::initial_split(prop = .8, strata = "species")
+
+
+```
+
+
+The printed output of `iris.split` inform us about the number observation we have sampled as trained and testing set along with the total observations.We can extract  training and testing sets from the split object using `training` and `testing` functions. At a later stage we will tune parameter in the model and hence we want to use a cross-validation object. We also create a cross--validation object from the training set using the `vfold_cv` function. 
+
+```{r}
+## train.set
+dagaa.train = dagaa.split  %>% 
+  rsample::training()
+
+## test set
+dagaa.test = dagaa.split %>% 
+  rsample::testing()
+
+## cross validation set
+iris.cv = dagaa.train %>% 
+  rsample::vfold_cv()
+```
+
+
+## Define a recipe
+**tidymodels** comes with a **recipes** packages, which provides an interface to specify the role of each variable as either an outcome or predictor using a formula. It also provides pre--processing functions for transforming raw data. 
+
+Creating a recipe object with tidymodels package involve two steps chained with pipes. These steps include;
+
+1. **Specify the formula**---specify the formula that feed the predictor and outcome variables
+2. **Specify steps**--- you specify data transformation steps. Each data transformation is a step. Functions corresponding to specific types of steps has a prefix `step_`. **recipes** has several `step_*` functions. 
+
+Looking on figure \@ref(fig:fig1), we notice that weight and total length of the three species varies. 
+
+```{r fig1, fig.width=6, fig.height=4, fig.align="c", fig.cap="Morphometric measurment of iris flower. The length and width varies for iris flower species"}
+
+dagaa.clean %>% pivot_longer(cols = 2:3, names_to = "variable", values_to = "data") %>%
+  group_by(species, variable) %>%
+  summarise(data.mean = mean(data),
+            data.sd = sd(data),
+            upper = data.mean+data.sd,
+            lower = data.mean-data.sd)%>%
+  ggplot(aes(x = variable, y = data.mean, col = species)) +
+  geom_point(position = position_dodge(.4), size = 4)+
+  geom_errorbar(aes(ymin = lower, ymax = upper),
+                position = position_dodge(.4), width = .25)+
+  ggsci::scale_color_jco(label = c("Limnothrisa","Lates", "Stolothrissa"))+
+  ggpubr::theme_pubclean()+
+  theme(legend.title = element_blank(), legend.key = element_blank(), 
+        legend.key.width = unit(2, "lines"), legend.position = "right")+
+  coord_cartesian(expand = TRUE) +
+  scale_y_continuous(name = "Morphometric", breaks = seq(50,350,50))+
+  scale_x_discrete(name = "", labels = c("Total Length (cm)", "Weight (gm)"))
+
+
+```
+
+To model them as predictor of species type, we must transform these numeric variables. First, we use `step_corr` to check the correlation of predictor variables and if two or more variables correlate, others are dropped and one is retained. Then, use the `step_normalize` to scale and center total length and weight numeric data to have a standard deviation of one.
+
+Other important feature is that we can apply step to a specific variable, groups or all variables in the dataset. The `all_outcomes` and `all_predictors` functions provide convenient ways to specify groups of variables. For instance, if we want `step_normalize` to transform only predictors we simply parse `step_corr(all_predictors())`. 
+
+After a brief introduction of *recipe*, we can now go on and create a recipe object. We use the training set and not the raw iris dataset to define the following recipe, transform and prep. 
+
+
+
+```{r}
+dagaa.recipe = dagaa.train %>% 
+  recipe(species ~ .) %>%
+  step_normalize(all_numeric()) %>%
+  # step_dummy(sex, stage_mat) %>%
+  step_corr(all_numeric()) %>%
+  prep()
+```
+
+You notice that I have specified the short formula `species ~ .`, where `.` represents all variable in the dataset. If we are interested with the recipe object we just created, we can simply print it in a console.
+
+```{r}
+dagaa.recipe
+```
+
+The printed output describes what was done and the how many variables are used as outcome and predictor. It also tells us that the `step_corr` there is no auto correlation of the variable.  We can further extracted the transformed testing dataset  from `prepped` and `recipe` data data with the `juice` function. Note that a transformed `dagaa.training` must originate from the `recipe`, which is `prepped`. 
+
+```{r}
+## transformed training set
+dagaa.training = dagaa.recipe %>% 
+  juice()
+
+```
+
+We also need to transform the testing set of the dagaa dataset. We can do that by parsing the `dagaa.test` data set we extracted from the `dagaa.split` in a `bake` function. Note that the transformation of the `iris.testing` must originate from the `recipe`, which is `prepped` and `recipe ` dagaa.test` set. 
+
+```{r}
+## transformed testing set
+dagaa.testing = dagaa.recipe %>% 
+  recipes::bake(dagaa.test)
+
+dagaa.testing %>% glimpse()
+```
+
+
+## Train a model
+So far we have split the dataset into training and testing, we have create a prepped recipe object, extracted transformed training set and transformed the testing set. The next step we need to do is to train our model using the **parsnip** package [@parsnip]. **parsnip** provides a unified interface of different models that exist in R. 
+
+There are a few primary components that you need to provide for the model specification. These includes;
+
+1. **Model type** specify a function that define a model like `rand_forest` for random forest and `logistic_reg` for logistic regression. If you are wondering of type of modes to use, you can consult [this article](https://tidymodels.github.io/parsnip/articles/articles/Models.html)  that describe different function **tidymodels** support
+1. **Set arguments** are set using `set_args`
+1. **Set engine** is the specific package that the model you choose must come from. For instance the `ranger` engine drives the Random Forest model and `glmnet` drives the Logistic regression. You specify the engine to use in the model with the `set_engine` function. 
+1. **Set mode** allows to specify the type of prediction---whether `classification` for binary/categorical prediction or `regression` for continuous prediction. 
+
+For instance, if we want to fit a random forest model as implemented by the `ranger` package for the purpose of classification,  the `rand_forest()` function is used to initialize a Random Forest model and parse the `trees` argument to define number of tree. Then we use `set_engine()` function to command rand_forest` function for Random Forest model we specified must come from `ranger` package. Since the prediction is binary, we used the `set_mode` to specify the type of model. Finally, to execute the model, the `fit()` function is used.  
+
+This will automatically train the model specified using the transformed training data. Notice that the model runs on top of the juiced trained data because is a transformed instead of the raw trained. The chunk below shows the model specification.
+
+
+```{r}
+rf.model = rand_forest() %>%
+  set_engine(engine = "ranger") %>%
+  set_mode(mode = "classification") %>%
+  fit(species~., data = dagaa.training)
+
+rf.model
+```
+
+Note that the printed fit object provide the model result. 
+
+## Metrics To Evaluate Classification Model
+The **yardstick** package is specifically designed to measure model performance for both numeric and categorical outcomes, and it plays well with grouped predictions. A nice thing about **tidymodels** is that when we use `predict` function in the fitted model against the transformed testing set, the output is the tibble.
+
+### Accuracy and Kappa
+`Accuracy` is the percentage of correctly classifies instances out of all instances. It is more useful on a binary classification than multi-class classification problems because it can be less clear exactly how the accuracy breaks down across those classes (e.g. you need to go deeper with a confusion matrix). Learn more about Accuracy here.
+
+`Kappa` or `Cohen’s Kappa` is like classification accuracy, except that it is normalized at the baseline of random chance on your dataset. It is a more useful measure to use on problems that have an imbalance in the classes (e.g. 70-30 split for classes 0 and 1 and you can achieve 70% accuracy by predicting all instances are for class 0). 
+
+since all the prediction information is tibble, we can apply the `metric` function from **yardstick** and compare original species value (`truth = Species`) against predicted species values (`estimate = .pred_class`) to evaluate our model performance. The function expects a tibble that contains the actual results (truth) and what the model predicted (estimate). The `metrics()` function calculates `accuracy` and `kap` metrics for numeric outcomes. Furthermore, it automatically recognizes that `lm_preds` is grouped by folds and thus calculates the metrics for each fold.
+
+```{r}
+rf.model %>% predict(dagaa.testing) %>%
+  bind_cols(dagaa.testing) %>%
+  metrics(truth = species, estimate = .pred_class)
+```
+
+
+### Gain and Roc Curve
+When we develop statistical models for classification tasks (e.g. using machine learning), we usually need to have a way to compare the generated models to decide which model is best. Typical tools for this task are Gains, ROC or Lift charts.
+
+The Gains and the ROC curve are visualizations showing overall performance of the models. The shape of the curves will tell us a lot about the behavior of the model. It clearly shows how much our model is better than a model assigning categories randomly and how far we are from the optimal model which is in practice unachievable. These curves can help in setting the final cut-off point for deciding which probabilities will mean positive and negative response prediction.
+
+In order to plot gain or roc curve, we need first to compute  the probability for each possible predicted value by setting the type argument to `prob.` That will return a tibble with as many variables as there are possible predicted values. Their name will default to the original value name, prefixed with `.pred_`.
+
+
+```{r}
+dagaa.prob = rf.model %>% 
+  predict(dagaa.testing, type = "prob") %>%
+  bind_cols(dagaa.testing)
+```
+
+
+### Gain Curve
+Once we have the probability of prediction, we can use `gain_curve` function fro **yardstick** package to compute values for gain curve. Figure \@ref(fig:fig4) is a gain plot. The gains associated with the model is shown as black curve for the three species.
+
+```{r fig4, fig.cap="Gain curve of modelled species"}
+
+dagaa.gain = dagaa.prob %>%
+  yardstick::gain_curve(species, 
+                        .pred_Limno, 
+                        .pred_Lstp, 
+                        .pred_Stolo)
+
+dagaa.gain %>% 
+  autoplot()+
+  ggpubr::theme_pubclean()+
+  theme(strip.background = element_blank())
+
+```
+
+
+
+## ROC curve
+The other tool used to assess the model accuracy based on a confusion matrix are Sensitivity and Specificity. The ROC curve (Receiver Operating Characteristics curve) is the display of `sensitivity` and `specificity` for different cut-off values for probability (If the probability of positive response is above the cut-off, we predict a positive outcome, if not we are predicting a negative one). Each cut-off value defines one point on ROC curve, ranging cut-off from 0 to 1 will draw the whole ROC curve.  to obtain the value for roc curve, we use the `roc_curve` function from yardstick.
+
+```{r}
+dagaa.roc = dagaa.prob %>%
+  yardstick::roc_curve(species, 
+                        .pred_Limno, 
+                        .pred_Lstp, 
+                        .pred_Stolo)
+```
+
+The black curve on ROC curve in figure \@ref(fig:fig5) is the same model as the example for the Gains chart (Figure \@ref(fig:fig4)). The Y axis measures the rate (as a percentage) of correctly predicted species with a positive response. The X axis measures the rate of incorrectly predicted species with a negative response. Since the optimal model should have sensitivity that rise to a maximum and specificity will stay the whole time at 1. The task is to have ROC curve of the developed model as close as possible to optimal model. Therefore, based on that information, figure \@ref(fig:fig5) indicates that our model predicted well for `Lates` species as compared to `Limno` and `Stolo`.
+
+```{r fig5, fig.cap="Roc curve of modelled species"}
+
+dagaa.roc %>% 
+  autoplot()+
+  ggpubr::theme_pubclean()+
+  theme(strip.background = element_blank())
+
+```
+
+## Summary
+I hanged on [Rebecca Barter](http://www.rebeccabarter.com/blog/2020-03-25_machine_learning/#tune-the-parameters) post on *Tidymodels: tidy machine learning in R* that explain briefly the use of tidymodels package in R. I also glimpsed [Edger Ruiz](https://rviews.rstudio.com/2019/06/19/a-gentle-intro-to-tidymodels/) post that provide a gentle introduction to tidymodels. These post provided resourceful material for learning basic functions of tidymodels.
+
+## References
+
