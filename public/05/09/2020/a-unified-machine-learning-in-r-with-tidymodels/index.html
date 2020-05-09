@@ -80,8 +80,8 @@
       
 
 
-<div id="tidymodels" class="section level1">
-<h1>tidymodels</h1>
+<div id="tidymodels" class="section level2">
+<h2>tidymodels</h2>
 <p><strong>tidymodels</strong> is a suite of packages that make machine learning with R a breeze. R has many packages for machine learning, each with their own syntax and function arguments. <strong>tidymodels</strong> aims to provide an unified interface, which allows data scientists to focus on the problem they’re trying to solve, instead of wasting time with learning package syntax.</p>
 <p>The tidymodels has a modular approach meaning that specific, smaller packages designed to work hand in hand. Thus, tidymodels is to modeling what the tidyverse is to data wrangling<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. The packages included in <strong>tidymodels</strong> are:</p>
 <ul>
@@ -370,7 +370,7 @@ $ species      &lt;fct&gt; Stolo, Stolo, Stolo, Stolo, Stolo, Stolo, Stolo, Stol
 rf.model</code></pre>
 <pre><code>parsnip model object
 
-Fit time:  750ms 
+Fit time:  790ms 
 Ranger result
 
 Call:
@@ -403,10 +403,11 @@ OOB prediction error (Brier s.):  0.1558837 </code></pre>
   &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;
 1 accuracy multiclass     0.776
 2 kap      multiclass     0.575</code></pre>
+<p>The printed output indicates that our model has an accuracy of 0.775 andd the kappa of 0.574.</p>
 </div>
 <div id="gain-and-roc-curve" class="section level3">
 <h3>Gain and Roc Curve</h3>
-<p>When we develop statistical models for classification tasks (e.g. using machine learning), we usually need to have a way to compare the generated models to decide which model is best. Typical tools for this task are Gains, ROC or Lift charts.</p>
+<p>When we develop statistical models for classification tasks (e.g. using machine learning), we usually need to have a way to compare the generated models results to help us decide whether the model fitted well the data—the best model. Some of the tools in <strong>yardstick</strong> package include <code>gains</code> and `roc1 tools.</p>
 <p>The Gains and the ROC curve are visualizations showing overall performance of the models. The shape of the curves will tell us a lot about the behavior of the model. It clearly shows how much our model is better than a model assigning categories randomly and how far we are from the optimal model which is in practice unachievable. These curves can help in setting the final cut-off point for deciding which probabilities will mean positive and negative response prediction.</p>
 <p>In order to plot gain or roc curve, we need first to compute the probability for each possible predicted value by setting the type argument to <code>prob.</code> That will return a tibble with as many variables as there are possible predicted values. Their name will default to the original value name, prefixed with <code>.pred_</code>.</p>
 <pre class="r"><code>dagaa.prob = rf.model %&gt;% 

@@ -18,6 +18,7 @@ tags:
 bibliography: [blog.bib]
 # csl: apa.csl
 link-citations: yes
+
 ---
 
 
@@ -29,7 +30,7 @@ require(tidyverse)
 require(tidymodels)
 ```
 
-# tidymodels
+## tidymodels
 **tidymodels** is a suite of packages that make machine learning with R a breeze. R has many packages for machine learning, each with their own syntax and function arguments. **tidymodels** aims to provide an unified interface, which allows data scientists to focus on the problem they’re trying to solve, instead of wasting time with learning package syntax. 
 
 The tidymodels has a modular approach meaning that specific, smaller packages designed to work hand in hand. Thus, tidymodels is to modeling what the tidyverse is to data wrangling^[[Tutorial on tidymodels for Machine Learning](https://hansjoerg.me/2020/02/09/tidymodels-for-machine-learning/)]. The packages included in **tidymodels** are:
@@ -249,9 +250,10 @@ rf.model %>% predict(dagaa.testing) %>%
   metrics(truth = species, estimate = .pred_class)
 ```
 
+The printed output indicates that our model has an accuracy of 0.775 andd the kappa of 0.574. 
 
 ### Gain and Roc Curve
-When we develop statistical models for classification tasks (e.g. using machine learning), we usually need to have a way to compare the generated models to decide which model is best. Typical tools for this task are Gains, ROC or Lift charts.
+When we develop statistical models for classification tasks (e.g. using machine learning), we usually need to have a way to compare the generated models results to help us decide whether the model fitted well the data---the best model. Some of the tools in **yardstick** package include `gains` and `roc1 tools.
 
 The Gains and the ROC curve are visualizations showing overall performance of the models. The shape of the curves will tell us a lot about the behavior of the model. It clearly shows how much our model is better than a model assigning categories randomly and how far we are from the optimal model which is in practice unachievable. These curves can help in setting the final cut-off point for deciding which probabilities will mean positive and negative response prediction.
 
