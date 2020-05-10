@@ -121,7 +121,7 @@ sst.clean %>%
 ```
 
 ## Summary
-Here we have seen how to convert inproper filled cell of data frame with missing values to `NA` in data frame using **tidyverse** functions and seen a nested function that specifically designed to handle these missing values in a uniform way. Missing data is a fact of life in real-world datasets, and we’ll face often when we works with data from other sources.
+Here we have seen how to convert inproper filled cell of data frame with missing values to `NA` in for all columns in data frame using **tidyverse** functions and we have seen a nested function that specifically designed to handle these missing values in a uniform way. Missing data is a fact of life in real-world datasets, and we’ll face often when we works with data from other sources.
 
 
 ## Remarks

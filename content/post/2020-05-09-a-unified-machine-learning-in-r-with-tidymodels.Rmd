@@ -28,6 +28,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "
 require(magrittr)
 require(tidyverse)
 require(tidymodels)
+require(plotly)
 ```
 
 ## tidymodels
@@ -51,35 +52,22 @@ In this post, I will walk through a machine learning example from start to end a
 ```
 
 
-# Data
-
-We use the `dagaa` dataset to illustrate the concept. This dataset comes with base R as a data frame. This dataset consists of 50 samples from each of three species of fish (*Lates, Limno and Stolothrisa*). It also contains four variables--- the total length, weight, sex and stage of maturity that were collected to quantify the morphologic variation of three three species.  We can import the the file using `read_excel` function from **readxl** package and specify the sheet number where the data is stored and the number of locums to skip. 
+After a brief introduction, we proceed with loading some packages we need to work with. We can load the **tidymodels** [@tidymodels] and **tidyverse** [@tidyverse] packages into our session. Loading the **tidymodels** package loads a bunch of packages for modeling and also a few others from the tidyverse like ggplot2 and dplyr. You can use use `libray` function to load the package, but I prefer `require` for loading the packages in R. 
 
 ```{r, eval=FALSE}
-dagaa = readxl::read_excel("dagaa_species.xls",  sheet = 3, skip = 8) 
+require(tidymodels)
+require(tidyverse)
+
 ```
 
 
-```{r, echo=FALSE}
-dagaa = readxl::read_excel("e:/Data Manipulation/gillnet_kigoma/dagaa/Ringnet_research_Data_Feb2020.xls", 
-                                 sheet = 3, skip = 8) 
+## Data
 
-dagaa.clean = dagaa%>%
-  select(7,9:12) %>%
-  rename(species = 1, total_length = 2, weight = 3, sex = 4, stage_mat = 5) %>% 
-  mutate(total_length = as.integer(total_length), 
-         stage_mat = replace(stage_mat, stage_mat == "2", 'I'),
-         stage_mat = replace(stage_mat, stage_mat == "2A", 'I'),
-         stage_mat = replace(stage_mat, stage_mat == "2B", 'II'),
-         # stage_mat = replace(stage_mat, stage_mat == "M", 'III'), ## turn off comment and include the "M" 
-         stage_mat = replace(stage_mat, stage_mat == "3", 'III'),
-         stage_mat = replace(stage_mat, stage_mat == "4", 'IV'),
-         stage_mat = replace(stage_mat, stage_mat == "5", 'IV'))   %>%
-  mutate_if(is.character, as.factor)%>% group_by(species) %>%
-  filter(!is.na(species)) %>%
-  filter(!is.na(total_length)) %>%
-  select(species:weight) %>%
-  filter(!is.na(weight))
+We use the `dagaa` dataset to illustrate the concept. This dataset contains 3,869 observations of three variables: species, total length and weight. Speceis  is a factor with three levels describing three species of sardines in Lake Tanganyika. We can import the the file using `read_csv` function from **readr** package [@readr]. 
+
+
+```{r}
+dagaa.clean = read_csv("dagaa.csv")
 ```
 
 
@@ -90,19 +78,54 @@ dagaa.clean %>%
   skimr::skim()
 ```
 
-Once we have the dataset, we can load the **tidymodels** [@tidymodels] and **tidyverse** [@tidyverse] packages into our session. Loading the **tidymodels** package loads a bunch of packages for modeling and also a few others from the tidyverse like ggplot2 and dplyr. You can use use `libray` function to load the package, but I prefer `require` for loading the packages in R. 
+Figure \@ref(fig:fig99) shows unfit between the points and regression lines of the three species. However, the quadratic fits well the data. This indicates that there is a non--linear relation between total length and weight of the three species, and a higher order terms may solve the problem. 
 
-```{r}
-require(tidymodels)
-require(tidyverse)
+```{r fig99, fig.cap="Quadratic and linear regression line superimposed in scatterplot with raw data"}
 
+dagaa.clean %>% 
+  filter(total_length <= 600)%>%
+  ggplot(aes(x = total_length, y = weight))+
+  geom_jitter(alpha = .2)+
+  geom_smooth(method = "lm", formula = "y ~ poly(x, 2)", se = FALSE, 
+              show.legend = TRUE, aes(color = "Quadratic")) +
+  geom_smooth(method = "lm", formula = "y ~ x", se = FALSE,
+              show.legend = TRUE, aes(color = "Linear"))+
+  facet_wrap(~species, scales = "free")+
+  ggpubr::theme_pubclean()+
+  scale_color_manual(name = "Model", values = c("blue", "red"))+
+  theme(legend.position = "right", 
+        strip.background = element_blank(),
+        legend.key = element_blank())+
+  labs(x = "Total length (mm)", y = "Weight of fish (gm)")
 ```
 
-# Pre--Process
+Figure \@ref(fig:fig98) indicates that both linear and quadratic models fits well the log--transformed data. This is very clear picture that tell us we need to transform the data before we model them. 
+
+```{r fig98, fig.cap="Quadratic and linear regression line superimposed in scatterplot with log-transformed data"}
+
+dagaa.clean %>% 
+  ggplot(aes(x = total_length, y = weight))+
+  scale_y_continuous(trans = log_trans(), labels = function(x) round(x, -2))+
+  scale_x_continuous(trans = log_trans(), labels = function(x) round(x, -2))+
+  geom_jitter(alpha = .2)+
+  geom_smooth(method = "lm", formula = "y ~ poly(x, 2)", 
+              se = FALSE, show.legend = TRUE, aes(color = "Quadratic")) +
+  geom_smooth(method = "lm", formula = "y ~ x", 
+              se = FALSE,show.legend = TRUE, aes(color = "Linear"))+
+  facet_wrap(~species)+
+  ggpubr::theme_pubclean()+
+  scale_color_manual(name = "Model", values = c("blue", "red"))+
+  theme(legend.position = "right", 
+        strip.background = element_blank(),
+        legend.key = element_blank())+
+  labs(x = "Total length (mm)", y = "Weight of fish (gm)")
+```
+
+## Pre--Process
 
 Data pre--processing is an important stage in modelling, which clean and transform a raw dataset into useful and understandable format. In layman’s terms, raw data is often incomplete, inconsistent, and might be lacking certain behaviors, and is likely to contain many errors, hence that's when pre-process comes in. 
 
-## Data sampling
+### Data sampling
 First, let's split the dataset into raining and testing set. We will use the training set of iris dataset to train and fit the model and the testing set to evaluate our final model performance. The split is handled automatically using a `initial_split` function from **rsample** package [@rsample], which creates a special `split object`.
 
 ```{r}
@@ -132,7 +155,7 @@ iris.cv = dagaa.train %>%
 ```
 
 
-## Define a recipe
+### Define a recipe
 **tidymodels** comes with a **recipes** packages, which provides an interface to specify the role of each variable as either an outcome or predictor using a formula. It also provides pre--processing functions for transforming raw data. 
 
 Creating a recipe object with tidymodels package involve two steps chained with pipes. These steps include;
@@ -195,6 +218,7 @@ The printed output describes what was done and the how many variables are used a
 dagaa.training = dagaa.recipe %>% 
   juice()
 
+dagaa.training %>% glimpse()
 ```
 
 We also need to transform the testing set of the dagaa dataset. We can do that by parsing the `dagaa.test` data set we extracted from the `dagaa.split` in a `bake` function. Note that the transformation of the `iris.testing` must originate from the `recipe`, which is `prepped` and `recipe ` dagaa.test` set. 
@@ -250,7 +274,7 @@ rf.model %>% predict(dagaa.testing) %>%
   metrics(truth = species, estimate = .pred_class)
 ```
 
-The printed output indicates that our model has an accuracy of 0.775 andd the kappa of 0.574. 
+The printed output indicates that our model has an accuracy of 0.77 andd the kappa of 0.56. 
 
 ### Gain and Roc Curve
 When we develop statistical models for classification tasks (e.g. using machine learning), we usually need to have a way to compare the generated models results to help us decide whether the model fitted well the data---the best model. Some of the tools in **yardstick** package include `gains` and `roc1 tools.
