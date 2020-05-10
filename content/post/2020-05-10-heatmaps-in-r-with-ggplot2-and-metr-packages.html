@@ -1,0 +1,178 @@
+---
+title: 'Heatmaps in R with ggplot2 and metR packages '
+author: Masumbuko Semba
+date: '2020-05-10'
+slug: heatmaps-in-r-with-ggplot2-and-metr-packages
+categories:
+  - Oceanography
+tags:
+  - Masumbuko Semba
+  - ADCP
+  - Indian Ocean
+  - Tanzania
+  - Coastal Waters
+  - Marine
+  - heatmaps
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+
+---
+
+
+
+<p>Heatmaps are powerful data visualization tools broadly widely used with meteorologic and oceanographic data. Heatmaps are excellent at tracking signals that move, like ocean current. These diagrams can be used for many more types of atmospheric features. The concept is to represent a matrix of values as colors where usually is organized by a gradient. This post explains how to create a heatmap of ocean current in R using the <code>geom_tile()</code>, <code>geom_contour_filled</code> from <strong>ggplot2</strong> <span class="citation">(Wickham <a href="#ref-ggplot" role="doc-biblioref">2016</a>)</span> and <code>geom_contour_fill</code> from <strong>metR</strong> package <span class="citation">(Campitelli <a href="#ref-metr" role="doc-biblioref">2019</a>)</span>. We will also see how to customize the plot color with <code>scale_fill_gradientn()</code> and <code>scale_fill_manual()</code> functions within the <strong>ggplot2</strong> package.</p>
+<p>Let’s start by loading the package into the session. I load a <strong>tidyverse</strong> package, which bundles different packages for data import, manipulate, visualize and share. We load the package using a <code>require()</code> function <span class="citation">(R Core Team <a href="#ref-r" role="doc-biblioref">2018</a>)</span>. For color palette, I also load the <strong>wesanderson</strong> package <span class="citation">(Ram and Wickham <a href="#ref-wesa" role="doc-biblioref">2018</a>)</span>. I will use both the generic and customized palette for heatmaps plots I will generate in this post.</p>
+<p>.</p>
+<pre class="r"><code>require(wesanderson)
+require(tidyverse)</code></pre>
+<p>Let’s first extract the names of all the palette with <code>wes_palettes</code></p>
+<pre class="r"><code>pa = wes_palettes %&gt;% 
+  names()
+
+pa</code></pre>
+<pre><code> [1] &quot;BottleRocket1&quot;  &quot;BottleRocket2&quot;  &quot;Rushmore1&quot;      &quot;Rushmore&quot;      
+ [5] &quot;Royal1&quot;         &quot;Royal2&quot;         &quot;Zissou1&quot;        &quot;Darjeeling1&quot;   
+ [9] &quot;Darjeeling2&quot;    &quot;Chevalier1&quot;     &quot;FantasticFox1&quot;  &quot;Moonrise1&quot;     
+[13] &quot;Moonrise2&quot;      &quot;Moonrise3&quot;      &quot;Cavalcanti1&quot;    &quot;GrandBudapest1&quot;
+[17] &quot;GrandBudapest2&quot; &quot;IsleofDogs1&quot;    &quot;IsleofDogs2&quot;   </code></pre>
+<p>My interest is to use the <code>Zissou1</code> palette, which is indexed at location 7. I generate two more colour palettes from <code>Zissou1</code> using <code>wes_palette</code> function. One for continuous plot and the other for discrete one.</p>
+<pre class="r"><code>pal = wes_palette(name = pa[7], n = 10, type = &quot;continuous&quot;)
+pal2 = wes_palette(name = pa[7], n = 5, type = &quot;discrete&quot;)</code></pre>
+<p>Once i have created my palette, I can now load the dataset. In this post I use the ocean current data collected close to Jambe Island, in Tanga region coastal waters. The data was collected using the SonTek M9 adp instrument, which measure and records profile of current. I load the data using the <code>read_csv</code> function from <strong>readr</strong> <span class="citation">(Wickham, Hester, and Francois <a href="#ref-readr" role="doc-biblioref">2017</a>)</span>.</p>
+<pre class="r"><code>shallow.tb = read_csv(&quot;jambe_adp_m9.csv&quot;)</code></pre>
+<div id="tiled" class="section level2">
+<h2>Tiled</h2>
+<p>There are different functions to create a heatmap in <strong>ggplot2</strong> and one of them is the <code>geom_tile</code>. The good news of using ggplot2 function is simply that it works with data frame that are tidied in `xyz format. Our dataset is in that format and hence we can go straight to make a heatmap. Figure <a href="#fig:fig1">1</a> is a heatmap showing the how speed of current varies both with depth and longitude.</p>
+<pre class="r"><code>transect.tile = shallow.tb %&gt;% 
+  ggplot() +
+  geom_tile(aes(x = lon, y = depth, fill = speed)) +
+  coord_cartesian(expand = FALSE) +
+  labs(x = NULL, y = &quot;Water Depth [m]&quot;)+
+  theme_bw() %+%
+  theme(panel.background = element_rect(fill = &quot;grey90&quot;),
+        panel.grid.major = element_line(linetype = 3, colour = &quot;grey60&quot;),
+        axis.text = element_text(colour = 1, size = 10),
+        axis.title = element_text(colour = 1, size = 12),
+        legend.background = element_blank(),
+        legend.key = element_blank(),
+       legend.position = &quot;right&quot;)+
+  scale_y_reverse()+
+  metR::scale_x_longitude(ticks = 0.005,position = &quot;bottom&quot;)
+  
+transect.tile</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2020-05-10-heatmaps-in-r-with-ggplot2-and-metr-packages_files/figure-html/fig1-1.png" alt="Cross section of ocean Current velocity in shallow water along Jambe Island, in Tanga region. The grey color represent the bottom depth" width="816" />
+<p class="caption">
+Figure 1: Cross section of ocean Current velocity in shallow water along Jambe Island, in Tanga region. The grey color represent the bottom depth
+</p>
+</div>
+<p>The generic color gradient in figure <a href="#fig:fig1">1</a> may not show clearly the feature difference, hence I used the color palette i created to customize figure <a href="#fig:fig2">2</a>. You will notice that now figure <a href="#fig:fig2">2</a> is clearly and easy to notice where the change of ocean current speed.</p>
+<pre class="r"><code>transect.tile +
+  scale_fill_gradientn(colours = pal, breaks = seq(0.34,2.1, length.out = 8),
+                       labels = seq(0.34,2.1, length.out = 8) %&gt;% round(2), na.value = NA)+
+  guides(fill = guide_legend(title.position = &quot;right&quot;,direction = &quot;vertical&quot;,
+                               title.theme = element_text(angle = 90, size = 12, colour = &quot;black&quot;),
+                               barheight = .5, barwidth = .95,
+                               title.hjust = 0.5, raster = FALSE,
+                               title = expression(Current~velocity~(ms^{-1}))))</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2020-05-10-heatmaps-in-r-with-ggplot2-and-metr-packages_files/figure-html/fig2-1.png" alt="Color coded cross section of ocean Current velocity in shallow water along Jambe Island, Tanga. The grey color represent the bottom depth" width="816" />
+<p class="caption">
+Figure 2: Color coded cross section of ocean Current velocity in shallow water along Jambe Island, Tanga. The grey color represent the bottom depth
+</p>
+</div>
+<p>Each individual column in figure <a href="#fig:fig2">2</a> is speed of ocean current from the surface to the bottom, averaged by longitude. The horizontal axis shows the longitude, and the vertical axis shows the speed of current from the surface to the maximum depth.</p>
+</div>
+<div id="filled-contour" class="section level2">
+<h2>filled contour</h2>
+<p><span class="citation">Campitelli (<a href="#ref-metr" role="doc-biblioref">2019</a>)</span> developed a <strong>metR</strong> package that has several plotting functions. One of these function is the <code>geom_filled_contour</code>, which plot <code>xyz</code> into filled contour with equal interval. However, the drawback of this function is its tendency of imputing missing values. For instance the bottom depth that the <code>geom_tile</code> separated with the current velocity in figure <a href="#fig:fig2">2</a> is filled with interpolated value in figure <a href="#fig:fig3">3</a> and <a href="#fig:fig4">4</a></p>
+<pre class="r"><code>transect.metr = shallow.tb %&gt;% 
+  ggplot() +
+  metR::geom_contour_fill(aes(x = lon, y = depth, z = speed), 
+                          na.fill = TRUE, bins = 10) +
+  coord_cartesian(expand = FALSE) +
+  labs(x = NULL, y = &quot;Water Depth [m]&quot;)+
+  theme_bw() %+%
+  theme(panel.background = element_rect(fill = &quot;grey90&quot;),
+        panel.grid.major = element_line(linetype = 3, colour = &quot;grey60&quot;),
+        axis.text = element_text(colour = 1, size = 10),
+        axis.title = element_text(colour = 1, size = 12),
+        legend.background = element_blank(),
+        legend.key = element_blank(),
+       legend.position = &quot;right&quot;)+
+  scale_y_reverse()+
+  metR::scale_x_longitude(ticks = 0.005,position = &quot;bottom&quot;)
+  
+transect.metr</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2020-05-10-heatmaps-in-r-with-ggplot2-and-metr-packages_files/figure-html/fig3-1.png" alt="Cross section of ocean Current velocity in shallow water along Jambe Island, in Tanga region. The grey color which represent the bottom depth has disappeared" width="816" />
+<p class="caption">
+Figure 3: Cross section of ocean Current velocity in shallow water along Jambe Island, in Tanga region. The grey color which represent the bottom depth has disappeared
+</p>
+</div>
+<pre class="r"><code>transect.metr +
+  scale_fill_gradientn(colours = pal, breaks = seq(0.34,2.1, length.out = 8),
+                       labels = seq(0.34,2.1, length.out = 8) %&gt;% round(2))+
+  guides(fill = guide_legend(title.position = &quot;right&quot;,direction = &quot;vertical&quot;,
+                               title.theme = element_text(angle = 90, size = 12, colour = &quot;black&quot;),
+                               barheight = .5, barwidth = .95,
+                               title.hjust = 0.5, raster = FALSE,
+                               title = expression(Current~velocity~(ms^{-1}))))</code></pre>
+<div class="figure"><span id="fig:fig4"></span>
+<img src="/post/2020-05-10-heatmaps-in-r-with-ggplot2-and-metr-packages_files/figure-html/fig4-1.png" alt="Cross section of ocean Current velocity in shallow water along Jambe Island, in Tanga region. . The grey color which represent the bottom depth has disappeared" width="816" />
+<p class="caption">
+Figure 4: Cross section of ocean Current velocity in shallow water along Jambe Island, in Tanga region. . The grey color which represent the bottom depth has disappeared
+</p>
+</div>
+<p>Since version 3.3.0, <strong>ggplot2</strong> added a <code>geom_contour_filled</code> function that works similar to <code>geom_contour_fill</code> of <strong>metR</strong> package. It plot filled contour of gridded data without interpolating the missing values. The chunk below generates figure <a href="#fig:fig5"><strong>??</strong></a>.</p>
+<pre class="r"><code>transect.gg = shallow.tb %&gt;% 
+   # filter(depth &lt; 6) %&gt;%
+   ggplot(aes(x = lon, y = depth)) +
+  # metR::geom_contour_fill(aes(z = speed), na.fill = TRUE, bins = 20) +
+  geom_contour_filled(aes(z = speed), bins = 10)+
+  scale_y_reverse() + 
+  coord_cartesian(expand = FALSE) +
+  labs(x = NULL, y = &quot;Water Depth [m]&quot;)+
+  theme_bw() %+%
+  theme(panel.background = element_rect(fill = &quot;grey90&quot;),
+        panel.grid.major = element_line(linetype = 3, colour = &quot;grey60&quot;),
+        axis.text = element_text(colour = 1, size = 10),
+        axis.title = element_text(colour = 1, size = 12),
+        legend.background = element_blank(),
+        legend.key = element_blank(),
+       legend.position = &quot;right&quot;)+
+  metR::scale_x_longitude(ticks = 0.005,position = &quot;bottom&quot;)
+
+transect.gg</code></pre>
+<p><img src="/post/2020-05-10-heatmaps-in-r-with-ggplot2-and-metr-packages_files/figure-html/fig5-1.png" width="816" /></p>
+<p>You may might not be interested with default viridis color that from <code>geom_contour_filled</code> function (figure <a href="#fig:fig5"><strong>??</strong></a>). The customized figure <a href="#fig:fig6"><strong>??</strong></a> was generate used the chunk below.</p>
+<pre class="r"><code>transect.gg  +
+  scale_fill_manual(values = pal,  labels = seq(0.304,2.129, length.out = 10) %&gt;% round(2))+
+  guides(fill = guide_legend(title.position = &quot;right&quot;,direction = &quot;vertical&quot;,
+                               title.theme = element_text(angle = 90, size = 12, colour = &quot;black&quot;),
+                               barheight = .5, barwidth = .95,
+                               title.hjust = 0.5, raster = FALSE,
+                               title = expression(Current~velocity~(ms^{-1}))))</code></pre>
+<p><img src="/post/2020-05-10-heatmaps-in-r-with-ggplot2-and-metr-packages_files/figure-html/fig6-1.png" width="816" /></p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-metr">
+<p>Campitelli, Elio. 2019. <em>MetR: Tools for Easier Analysis of Meteorological Fields</em>. <a href="https://CRAN.R-project.org/package=metR">https://CRAN.R-project.org/package=metR</a>.</p>
+</div>
+<div id="ref-wesa">
+<p>Ram, Karthik, and Hadley Wickham. 2018. <em>Wesanderson: A Wes Anderson Palette Generator</em>. <a href="https://CRAN.R-project.org/package=wesanderson">https://CRAN.R-project.org/package=wesanderson</a>.</p>
+</div>
+<div id="ref-r">
+<p>R Core Team. 2018. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/">https://www.R-project.org/</a>.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
+</div>
+<div id="ref-readr">
+<p>Wickham, Hadley, Jim Hester, and Romain Francois. 2017. <em>Readr: Read Rectangular Text Data</em>. <a href="https://CRAN.R-project.org/package=readr">https://CRAN.R-project.org/package=readr</a>.</p>
+</div>
+</div>
+</div>

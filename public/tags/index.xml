@@ -6,10 +6,73 @@
     <description>Recent content in Tags on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 09 May 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 10 May 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>ADCP</title>
+      <link>/tags/adcp/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/adcp/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Coastal Waters</title>
+      <link>/tags/coastal-waters/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/coastal-waters/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>heatmaps</title>
+      <link>/tags/heatmaps/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/heatmaps/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Indian Ocean</title>
+      <link>/tags/indian-ocean/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/indian-ocean/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Marine</title>
+      <link>/tags/marine/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/marine/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Masumbuko Semba</title>
+      <link>/tags/masumbuko-semba/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/masumbuko-semba/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Tanzania</title>
+      <link>/tags/tanzania/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/tanzania/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Lake Tanganyika</title>
@@ -39,29 +102,11 @@
     </item>
     
     <item>
-      <title>Masumbuko Semba</title>
-      <link>/tags/masumbuko-semba/</link>
-      <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/masumbuko-semba/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>Stolothrissa tanganicae</title>
       <link>/tags/stolothrissa-tanganicae/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/stolothrissa-tanganicae/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Tanzania</title>
-      <link>/tags/tanzania/</link>
-      <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/tanzania/</guid>
       <description></description>
     </item>
     
@@ -89,15 +134,6 @@
       <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/data-science/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Indian Ocean</title>
-      <link>/tags/indian-ocean/</link>
-      <pubDate>Wed, 06 May 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/indian-ocean/</guid>
       <description></description>
     </item>
     
@@ -314,15 +350,6 @@
       <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/rmarkdown/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>ADCP</title>
-      <link>/tags/adcp/</link>
-      <pubDate>Tue, 25 Feb 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/adcp/</guid>
       <description></description>
     </item>
     

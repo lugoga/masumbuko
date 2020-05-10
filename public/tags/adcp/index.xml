@@ -6,10 +6,19 @@
     <description>Recent content in ADCP on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 25 Feb 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 10 May 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/adcp/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Heatmaps in R with ggplot2 and metR packages </title>
+      <link>/05/10/2020/heatmaps-in-r-with-ggplot2-and-metr-packages/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/05/10/2020/heatmaps-in-r-with-ggplot2-and-metr-packages/</guid>
+      <description>Heatmaps are powerful data visualization tools broadly widely used with meteorologic and oceanographic data. Heatmaps are excellent at tracking signals that move, like ocean current. These diagrams can be used for many more types of atmospheric features. The concept is to represent a matrix of values as colors where usually is organized by a gradient. This post explains how to create a heatmap of ocean current in R using the geom_tile(), geom_contour_filled from ggplot2 (Wickham 2016) and geom_contour_fill from metR package (Campitelli 2019).</description>
+    </item>
     
     <item>
       <title>Geographical coordinates conversion made easy with parzer package in R</title>
