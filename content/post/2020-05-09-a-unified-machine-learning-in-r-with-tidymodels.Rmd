@@ -28,7 +28,14 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "
 require(magrittr)
 require(tidyverse)
 require(tidymodels)
-require(plotly)
+require(qrcode)
+
+
+```
+
+```{r, fig.align='center', fig.height=2, fig.width=2, echo=FALSE}
+
+qrcode_gen("https://semba-blog.netlify.app/05/09/2020/a-unified-machine-learning-in-r-with-tidymodels/", mask = 7, )
 ```
 
 ## tidymodels
