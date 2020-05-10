@@ -128,6 +128,39 @@ dagaa.clean %>%
   labs(x = "Total length (mm)", y = "Weight of fish (gm)")
 ```
 
+We can compute the correlation of total length against weight for each species. The result show a strong correlation coefficient of length and weight for the three species. 
+
+```{r}
+dagaa.clean %>% group_by(species) %>%
+  summarise(sample = n(), 
+            correlation = cor(total_length, weight))
+```
+
+We can further test whether the relationship is significant with `cor.test` function. Because this function does not work in group, I have used a `for` loop to iterate the process and compute the statistic for each species individually and then stitch them with the `bind_rows` function. 
+
+```{r}
+viumbe = dagaa.clean %>% distinct(species) %>% pull()
+
+cor.stats = list()
+
+for (i in 1:length(viumbe)){
+
+cor.stats[[i]] = dagaa.clean %>%
+  filter(species == viumbe[i]) %$%
+  cor.test(total_length, weight, method = "pearson") %>% 
+  broom::tidy() %>%
+  mutate_if(is.numeric, round, digits = 2,) %>%
+  mutate(Species = viumbe[i])%>%
+  select(Species, 2,1,5:6,3 )
+  
+}
+
+cor.stats %>% bind_rows()
+```
+
+The printed result shows the estimated values (i.e the correlation coefficient), the lower and higher confidence interval and whether the estimated correlation is significant. We see that the length and weight for the three species is strong (R^2^ > 0.8) ans is significant (*p* < 0.05). *Stolothrissa* species have the higher coefficient (R^2^ > 0.95), compared to  *Limnothrissa* (R^2^ > 0.93) and *Lates* (R^2^ > 0.8).
+
+
 ## Pre--Process
 
 Data pre--processing is an important stage in modelling, which clean and transform a raw dataset into useful and understandable format. In layman’s terms, raw data is often incomplete, inconsistent, and might be lacking certain behaviors, and is likely to contain many errors, hence that's when pre-process comes in. 

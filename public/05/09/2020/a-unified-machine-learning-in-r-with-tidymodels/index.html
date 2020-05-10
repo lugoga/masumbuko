@@ -67,7 +67,7 @@
 
   <article class="article">
     
-    <span class="article-duration">15 min read</span>
+    <span class="article-duration">16 min read</span>
     
 
     <h1 class="article-title">A Unified Machine Learning in R with tidymodels</h1>
@@ -271,6 +271,41 @@ Figure 2: Quadratic and linear regression line superimposed in scatterplot with 
 Figure 3: Quadratic and linear regression line superimposed in scatterplot with log-transformed data
 </p>
 </div>
+<p>We can compute the correlation of total length against weight for each species. The result show a strong correlation coefficient of length and weight for the three species.</p>
+<pre class="r"><code>dagaa.clean %&gt;% group_by(species) %&gt;%
+  summarise(sample = n(), 
+            correlation = cor(total_length, weight))</code></pre>
+<pre><code># A tibble: 3 x 3
+  species sample correlation
+  &lt;chr&gt;    &lt;int&gt;       &lt;dbl&gt;
+1 Limno     1597       0.934
+2 Lstp       128       0.863
+3 Stolo     2144       0.946</code></pre>
+<p>We can further test whether the relationship is significant with <code>cor.test</code> function. Because this function does not work in group, I have used a <code>for</code> loop to iterate the process and compute the statistic for each species individually and then stitch them with the <code>bind_rows</code> function.</p>
+<pre class="r"><code>viumbe = dagaa.clean %&gt;% distinct(species) %&gt;% pull()
+
+cor.stats = list()
+
+for (i in 1:length(viumbe)){
+
+cor.stats[[i]] = dagaa.clean %&gt;%
+  filter(species == viumbe[i]) %$%
+  cor.test(total_length, weight, method = &quot;pearson&quot;) %&gt;% 
+  broom::tidy() %&gt;%
+  mutate_if(is.numeric, round, digits = 2,) %&gt;%
+  mutate(Species = viumbe[i])%&gt;%
+  select(Species, 2,1,5:6,3 )
+  
+}
+
+cor.stats %&gt;% bind_rows()</code></pre>
+<pre><code># A tibble: 3 x 6
+  Species statistic estimate conf.low conf.high p.value
+  &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+1 Lstp         19.2     0.86     0.81      0.9        0
+2 Stolo       134.      0.95     0.94      0.95       0
+3 Limno       104.      0.93     0.93      0.94       0</code></pre>
+<p>The printed result shows the estimated values (i.e the correlation coefficient), the lower and higher confidence interval and whether the estimated correlation is significant. We see that the length and weight for the three species is strong (R<sup>2</sup> &gt; 0.8) ans is significant (<em>p</em> &lt; 0.05). <em>Stolothrissa</em> species have the higher coefficient (R<sup>2</sup> &gt; 0.95), compared to <em>Limnothrissa</em> (R<sup>2</sup> &gt; 0.93) and <em>Lates</em> (R<sup>2</sup> &gt; 0.8).</p>
 </div>
 <div id="preprocess" class="section level2">
 <h2>Pre–Process</h2>
@@ -396,7 +431,7 @@ $ species      &lt;fct&gt; Lstp, Lstp, Lstp, Lstp, Lstp, Lstp, Lstp, Lstp, Lstp,
 rf.model</code></pre>
 <pre><code>parsnip model object
 
-Fit time:  701ms 
+Fit time:  720ms 
 Ranger result
 
 Call:
