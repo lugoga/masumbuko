@@ -1,0 +1,499 @@
+---
+title: Linear and Bayesian Regression Models with tidymodels package
+author: Masumbuko Semba
+date: '2020-05-11'
+slug: regression-with-tidymodels
+categories:
+  - Machine learning
+tags:
+  - regression
+  - classification
+  - Masumbuko Semba
+  - modelling
+  - tidymodels
+  - tidyverse
+  - Indian Ocean
+  - Tanzania
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+
+<p>As a data scientist, you need to distinguish between <code>regression predictive models</code> and <code>classification predictive models</code>. Clear understanding of these models helps to choose the best one for a specific use case. In a nutshell, <code>regression predictive models and</code>classification predictive models` fall under supervised machine learning. The main difference between them is that the output variable—in regression is numerical (or continuous) while that for classification is categorical (or discrete).</p>
+<p>A big part of machine learning is <code>classification</code> — we want to know what class or group an observation belongs to. Therefore, the ability to precisely classify observations to their groups is valuable for various business applications like predicting the future based on historical data.</p>
+<p>For example, when provided with a dataset about environmental variables, and you are asked to predict productivity, that is a regression task because productivity measured in term of chlorophyll concentration will be a continuous output.</p>
+<p>In this post we will focus on regression. We will learn the steps of modelling using <strong>tidymodels</strong> <span class="citation">(Kuhn and Wickham <a href="#ref-tidymodels" role="doc-biblioref">2020</a><a href="#ref-tidymodels" role="doc-biblioref">b</a>)</span>. We first explore the data and check if it fit for modelling, we then split the dataset into a training and testing sets. Next, we will create a recipe object and define our model. Lastly, we will train a specified model and evaluate its performance.</p>
+<p>I will use the same dataset for three different model’s algorithms. Example of the common regression algorithms include <code>random forest</code>, <code>linear regression</code>, <code>support vector regression (SVR)</code> and <code>bayes</code>. Some algorithms, such as <code>logistic regression</code>, have the name <code>regression</code> in their functions but they are not regression algorithms.</p>
+<p>To follow use code in this article, you will need <strong>tidymodels</strong> <span class="citation">(Kuhn and Wickham <a href="#ref-tidymodels" role="doc-biblioref">2020</a><a href="#ref-tidymodels" role="doc-biblioref">b</a>)</span> and <strong>tidyverse</strong> packages <span class="citation">(Wickham <a href="#ref-tidyverse" role="doc-biblioref">2017</a>)</span> installed in your machine. You can install them from CRAN. The chunk below highlight lines of code to install the packages if they are yet in your PC.</p>
+<pre class="r"><code>model.packages = c(&quot;tidymodels&quot;, &quot;tidyverse&quot;)
+
+install.packages(model.packages)</code></pre>
+<p>Once installed, you can load the packages in your session. We often we use several packages to accomplish a task. Even in this post, though seems only two packages are loaded, these are ecosystems which comes with dozens of packages bundled with them.</p>
+<pre class="r"><code>require(tidyverse)
+require(tidymodels)</code></pre>
+<div id="the-crtr-data" class="section level2">
+<h2>The CRTR data</h2>
+<p>We use the data collected with the Institute of Marine Sciences of the University of Dar es Salaam to illustrate the concept. The data was collected through the Coral Reef Targeted Research and Capacity Building for Management (CRTR) project between 2008 and 2009. The dataset contains;</p>
+<ul>
+<li>Chemical variables —nitrate, phosphate, salinity, pH, dissolved oxygen and ammonia</li>
+<li>Physical variables — temperature</li>
+<li>Biological variables— chlorophyll-<em>a</em></li>
+</ul>
+<p>Because the variables are organized in sheets of Excel spreadsheet, i used a <code>read_excel</code> function from <strong>readxl</strong> package <span class="citation">(Wickham and Bryan <a href="#ref-readxl" role="doc-biblioref">2018</a>)</span> to read the file from the sheet. And because there are several sheet, the processed was iterated with a <code>for</code> loop. Data from each sheet was allocated in the list file. The chunk below highlight the code used to read files in sheets.</p>
+<pre class="r"><code>variables = c(&quot;salinity&quot;, &quot;temperature&quot;, &quot;do&quot;, &quot;ph&quot;, &quot;chl&quot;, &quot;ammonia&quot;, &quot;phosphate&quot;, &quot;nitrate&quot;)
+
+crtr.list = list()
+
+for (i in 1:length(variables)){
+  
+  crtr.list[[i]] = readxl::read_excel(&quot;crtr.xlsx&quot;, sheet = i) %&gt;% 
+    mutate(variable = variables[i]) 
+
+}</code></pre>
+<p>The data was untidy and unsuitable for visualization and modelling in R. Therefore, the first thing I had to deal with the data was to tidy the variables in the dataset to a right format that <strong>tidymodels</strong> and <strong>tidyverse</strong> recognizes. First the dataset was unlisted with <code>bind_rows</code> function and the data was pivoted to long format and then back to wide format with only the variable of interested selected.</p>
+<pre class="r"><code>## organize in long form
+crtr.long = crtr.list %&gt;% 
+  bind_rows() %&gt;%
+  pivot_longer(cols =2:5, names_to = &quot;sites&quot;, values_to = &quot;data&quot; ) 
+
+## organize in the wide form
+crtr.wide = crtr.long %&gt;%
+  pivot_wider(names_from = variable, values_from = data) %&gt;%
+  mutate(month = lubridate::month(Date, label = TRUE, 
+                                  abb = TRUE) %&gt;% as.character()) %&gt;%
+  mutate_if(is.character, as.factor) %&gt;%
+  mutate_if(is.numeric, round, digits = 2)  %&gt;%
+  select(date = Date, month,sites, chl, everything())</code></pre>
+<p>Let’s us glimpse the dataset</p>
+<pre class="r"><code>crtr.wide %&gt;% 
+  glimpse()</code></pre>
+<pre><code>Rows: 52
+Columns: 11
+$ date        &lt;dttm&gt; 2008-03-01, 2008-03-01, 2008-03-01, 2008-03-01, 2008-0...
+$ month       &lt;fct&gt; Mar, Mar, Mar, Mar, Apr, Apr, Apr, Apr, May, May, May, ...
+$ sites       &lt;fct&gt; Pongwe, Mnemba, Chumbe, Bawe, Pongwe, Mnemba, Chumbe, B...
+$ chl         &lt;dbl&gt; 0.09, 0.26, 0.56, 0.43, 0.47, 1.01, 0.63, 1.39, 0.37, 0...
+$ salinity    &lt;dbl&gt; 35.0, 34.0, 32.0, 32.0, 35.0, 35.0, 34.0, 34.0, 36.0, 3...
+$ temperature &lt;dbl&gt; 28.8, 28.4, 28.0, 28.0, 28.2, 27.7, 28.1, 26.7, 27.0, 2...
+$ do          &lt;dbl&gt; 6.11, 5.95, 6.16, NA, 6.35, 6.14, 7.01, 6.31, 6.15, 6.1...
+$ ph          &lt;dbl&gt; 7.86, 7.88, 7.73, NA, 7.87, 7.88, 7.86, 7.91, 7.68, 7.8...
+$ ammonia     &lt;dbl&gt; 0.55, 0.80, 0.74, 0.94, 0.56, 0.72, 0.53, 0.97, 0.56, 0...
+$ phosphate   &lt;dbl&gt; 0.28, 0.28, 1.31, 1.90, 0.28, 0.32, 1.16, 0.84, 0.28, 0...
+$ nitrate     &lt;dbl&gt; 0.04, 0.07, 3.26, 3.34, 0.03, 0.47, 1.45, 0.84, 0.06, 0...</code></pre>
+<p>As a first step in modeling, it’s always a good idea to explore the variables in the dataset. Figure <a href="#fig:fig0">1</a> is a pairplot that compare each pair of variables as scatterplots in the lower diagonal, densities on the diagonal and correlations written in the upper diagonal <span class="citation">(Schloerke et al. <a href="#ref-ggally" role="doc-biblioref">2018</a>)</span>. Figure <a href="#fig:fig1">2</a> show the correlation between chlorophyll-<em>a</em> (outcome) with other six predictor variables using a linear and quadratic equations is unfit for these dataset.</p>
+<pre class="r"><code>crtr.wide %&gt;%
+  select(-salinity)%&gt;%
+  mutate(season = lubridate::month(date) %&gt;% as.integer(),
+         season = replace(season,season %in% c(1:4,11:12), &quot;NE&quot;),
+         season = replace(season,season %in% c(5:10), &quot;SE&quot;))%&gt;%
+  GGally::ggscatmat(columns = 4:10,color=&quot;season&quot;, alpha=1, corMethod = &quot;spearman&quot;)+
+  ggsci::scale_color_jco()+
+  ggpubr::theme_pubclean()+
+  theme(strip.background = element_blank(), 
+        legend.position = &quot;right&quot;,
+        legend.key = element_blank())</code></pre>
+<div class="figure"><span id="fig:fig0"></span>
+<img src="/post/2020-05-11-regression-with-tidymodels_files/figure-html/fig0-1.png" alt="Pair plot of numerical variables" width="672" />
+<p class="caption">
+Figure 1: Pair plot of numerical variables
+</p>
+</div>
+<pre class="r"><code>require(wesanderson)
+
+wesa = wes_palettes %&gt;% names()
+
+crtr.wide %&gt;%
+  select(-salinity)%&gt;%
+  filter(nitrate &lt; 1 &amp; phosphate &lt; 1.2 &amp; chl &lt; 1) %&gt;% 
+  pivot_longer(cols = 5:10, names_to = &quot;predictor&quot;, values_to = &quot;data&quot;) %&gt;%
+  # filter(sites == &quot;Bawe&quot;)%&gt;%
+  ggplot(aes(x = data, y = chl))+
+  scale_y_continuous(trans = scales::sqrt_trans(), labels = function(x) round(x,2))+
+  # scale_x_continuous(trans = scales::sqrt_trans(), labels = function(x) round(x,2))+
+  geom_jitter()+
+  geom_smooth(se = FALSE, method = &quot;lm&quot;, formula = &quot;y ~ poly(x,2)&quot;, aes(color = &quot;Quadratic&quot;))+
+  geom_smooth(se = FALSE, method = &quot;lm&quot;, formula = &quot;y ~ x&quot;, aes(color = &quot;Linear&quot;))+
+   ggsci::scale_color_jco()+
+  facet_wrap(~predictor, scales = &quot;free_x&quot;)+
+  ggpubr::theme_pubclean()+
+  theme(strip.background.x = element_blank(), legend.key = element_blank(), 
+        legend.position = &quot;right&quot;, panel.background = element_rect(colour = &quot;black&quot;))</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2020-05-11-regression-with-tidymodels_files/figure-html/fig1-1.png" alt="Correalation of " width="672" />
+<p class="caption">
+Figure 2: Correalation of
+</p>
+</div>
+</div>
+<div id="resample" class="section level2">
+<h2>Resample</h2>
+<p>In machine learning, one risk is the machine learns too well our sample data and is then less accurate during a real-world testing. This phenomenon is called <em>overtraining</em> or <em>overfitting</em>. We overcome this problem by splitting the dataset into a training and testing sets. The training set is used to train the model while the test set is reserved to later estimate how well the model might work on new or wild data.</p>
+<p>The splitting is based on ratios and the widely used ratios include 80/20, 75/25, or 7/30, with the training data receiving a bigger proportion of the dataset and the test set get the remaining small portion.</p>
+<p>For our sample that has only 52 observations, it make sense to use 70/30 split ratio. we use the fraction <code>set.seed(4595)</code> from base R to fix the random number generator from <strong>rsample</strong> package <span class="citation">(Kuhn, Chow, and Wickham <a href="#ref-rsample" role="doc-biblioref">2020</a>)</span>. This prevent generating new data in each execution.</p>
+<p>the function <code>initial_split</code> from the <strong>rsample</strong> package is designed to split the dataset into a training and testing sets. We purse the data to be split and the proportion that serve as a cutpoint of the two sets.</p>
+<pre class="r"><code>set.seed(4595)
+
+crtr.split = crtr.clean %&gt;%
+  rsample::initial_split(prop = 0.7)
+
+crtr.split</code></pre>
+<pre><code>&lt;Training/Validation/Total&gt;
+&lt;29/12/41&gt;</code></pre>
+<p>Given the 41 total observations, we reserve 12 observations as a test set and kept 70% of the dataset (29 observation) as train set. From the <code>crtr.split</code> object, we pull both the train set with the <code>training</code> function and the test set with a <code>testing</code> function.</p>
+<pre class="r"><code>## pull train set
+crtr.train = crtr.split %&gt;% 
+  training()
+
+## pull test set
+crtr.test = crtr.split %&gt;% 
+  testing()</code></pre>
+<p>We can have a glimpse of the train dataset using a <code>glimpse</code> function from <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span>.</p>
+<pre class="r"><code>crtr.train %&gt;% glimpse()</code></pre>
+<pre><code>Rows: 29
+Columns: 7
+$ chl         &lt;dbl&gt; 0.26, 0.38, 0.43, 0.30, 0.64, 0.35, 0.22, 0.36, 0.14, 0...
+$ temperature &lt;dbl&gt; 28.4, 26.5, 26.5, 26.4, 25.7, 25.4, 26.2, 26.4, 25.5, 2...
+$ do          &lt;dbl&gt; 5.95, 5.94, 5.90, 6.10, 6.21, 6.01, 6.44, 6.26, 5.64, 6...
+$ ph          &lt;dbl&gt; 7.88, 7.77, 7.82, 7.85, 7.84, 7.79, 7.76, 7.85, 7.83, 7...
+$ ammonia     &lt;dbl&gt; 0.80, 0.60, 0.64, 0.90, 0.72, 0.67, 0.65, 0.46, 0.63, 0...
+$ phosphate   &lt;dbl&gt; 0.28, 0.34, 0.42, 0.68, 0.32, 0.52, 0.86, 0.26, 0.42, 0...
+$ nitrate     &lt;dbl&gt; 0.07, 0.06, 0.38, 0.68, 0.08, 0.42, 0.78, 0.08, 0.37, 0...</code></pre>
+<p>The printed output shows that we have seven variables and all are numeric</p>
+</div>
+<div id="recipe" class="section level2">
+<h2>recipe</h2>
+<p>The <strong>recipes</strong> package <span class="citation">(Kuhn and Wickham <a href="#ref-recipes" role="doc-biblioref">2020</a><a href="#ref-recipes" role="doc-biblioref">a</a>)</span> define a recipe object that we will use for modeling and to conduct preprocessing of variables. The four main functions are <code>recipe()</code>, <code>prep()</code>, <code>juice()</code> and <code>bake()</code>. <code>recipe()</code> defines the operations on the data and the associated roles. Once the preprocessing steps are defined, any parameters are estimated using <code>prep()</code>.</p>
+<p>Recipes can be created manually by sequentially adding roles to variables in a data set. First, we will create a recipe object from the train set data and then specify the processing steps and transform the data with <code>step_*</code>. once the recipe is ready we prep it. For example, to create a simple recipe containing only an outcome and predictors and have the predictors normalized and missing values in predictors imputed:</p>
+<pre class="r"><code>crtr.recipe = crtr.train %&gt;%
+  recipe(chl ~ .) %&gt;%
+  step_normalize(all_numeric()) %&gt;%
+  step_corr(all_numeric())%&gt;%
+  step_knnimpute(all_numeric()) %&gt;%
+  prep()
+
+crtr.recipe</code></pre>
+<pre><code>Data Recipe
+
+Inputs:
+
+      role #variables
+   outcome          1
+ predictor          6
+
+Training data contained 29 data points and no missing data.
+
+Operations:
+
+Centering and scaling for temperature, do, ph, ammonia, ... [trained]
+Correlation filter removed no terms [trained]
+K-nearest neighbor imputation for do, ph, ammonia, phosphate, ... [trained]</code></pre>
+<p>Once the data are ready for transformation, the <code>juices()</code> extract transformed training set while the <code>bake()</code> function create a new testing set.</p>
+<pre class="r"><code>crtr.training = crtr.recipe %&gt;%
+  juice()
+
+crtr.testing = crtr.recipe %&gt;%
+  bake(crtr.test)</code></pre>
+</div>
+<div id="build-models" class="section level2">
+<h2>Build Models</h2>
+<div id="random-forest" class="section level3">
+<h3>Random Forest</h3>
+<p>We begin by fitting a random forest model.</p>
+<div id="make-random-forest-model" class="section level4">
+<h4>Make random forest model</h4>
+<p>We specify the model using the <strong>parsnip</strong> package <span class="citation">(Kuhn and Vaughan <a href="#ref-parsnip" role="doc-biblioref">2020</a><a href="#ref-parsnip" role="doc-biblioref">a</a>)</span>. This package provides a tidy, unified interface to models for a range of models without getting bogged down in the syntactical minutiae of the underlying packages. The <strong>parsnip</strong> package help us to specify ;</p>
+<ul>
+<li>the <code>type</code> of model e.g <strong>random forest</strong>,</li>
+<li>the <code>mode</code> of the model whether is <code>regression</code> or <code>classification</code></li>
+<li>the computational <code>engine</code> is the name of the R package.</li>
+</ul>
+<p>Based on the information above, we can use <strong>parsnip</strong> package to build our model as;</p>
+<pre class="r"><code>rf.model = rand_forest() %&gt;%
+  set_engine(engine = &quot;ranger&quot;) %&gt;%
+  set_mode(mode = &quot;regression&quot;)
+
+rf.model</code></pre>
+<pre><code>Random Forest Model Specification (regression)
+
+Computational engine: ranger </code></pre>
+</div>
+<div id="train-random-forest-model" class="section level4">
+<h4>Train random forest model</h4>
+<p>Once we have specified the model type, engine and mode, the model can be trained with the <code>fit</code> function. We simply parse into the fit the specified model and the transformed training set extracted from the prepped recipe.</p>
+<pre class="r"><code>rf.fit = rf.model %&gt;%
+  fit(chl ~ ., data = crtr.training)</code></pre>
+</div>
+<div id="predict-with-random-forest" class="section level4">
+<h4>predict with random forest</h4>
+<p>To get our predicted results, we use the <code>predict()</code> function to find the estimated chlorophyll-<em>a</em>. First, let’s generate the estimated chlorophyll-<em>a</em> values by simply parse the random forest model <code>rf.model</code> we specified and the transformed testing set we created from a prepped recipe. We also stitch the predicted values to the transformed train set with <code>bind_cols</code> function;</p>
+<pre class="r"><code>rf.predict = rf.fit %&gt;%
+  predict(crtr.testing) %&gt;%
+  bind_cols(crtr.testing) 
+
+rf.predict</code></pre>
+<pre><code># A tibble: 12 x 8
+     .pred temperature      do      ph ammonia phosphate nitrate     chl
+     &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+ 1  0.0278       0.750  0.884  -0.947    0.258   -0.560   -0.625 -1.50  
+ 2 -0.0202       0.370  1.44   -0.870    0.291   -0.560   -0.677  0.504 
+ 3  0.0453      -0.392  0.977  -2.33     0.291   -0.560   -0.521 -0.0237
+ 4 -0.173       -0.265  0.861  -1.41     0.588    0.0415   1.66  -0.235 
+ 5 -0.0443      -0.201  1.07   -1.02     1.35     2.01     2.49   0.346 
+ 6 -0.274       -1.15   0.0720  0.284    0.291   -0.961   -0.573  0.399 
+ 7 -0.140       -0.265 -0.624   0.515    0.158   -1.12    -0.625 -0.499 
+ 8  0.0790       0.814 -0.392  -0.0239   2.80    -0.480   -0.625 -0.763 
+ 9 -0.193        0.814 -1.39   -0.485   -1.10    -0.720   -0.573  0.0819
+10 -0.231        1.00  -1.41   -0.101    0.621    0.482    0.206  1.35  
+11 -0.417        0.370 -0.856   0.438   -1.10    -0.640   -0.573  1.61  
+12  1.30         1.38  -0.949   2.44     0.456    0.362   -0.677 -0.657 </code></pre>
+<p>When making predictions, the tidymodels convention is to always produce a tibble of results with standardized column names. This makes it easy to combine the original data and the predictions in a usable format:</p>
+</div>
+<div id="evaluate-the-rf-model" class="section level4">
+<h4>Evaluate the rf model</h4>
+<p>So far, we have built a model and preprocessed data with a recipe. We predicted new data as a way to bundle a parsnip model and recipe together. The next step is to assess or evaluate the accuracy of the model. We use a <code>metrics</code> function from <strong>yardstick</strong> package <span class="citation">(Kuhn and Vaughan <a href="#ref-yardstick" role="doc-biblioref">2020</a><a href="#ref-yardstick" role="doc-biblioref">b</a>)</span>to assess the accuracy of the model by comparing the predicted versus the original outcome variable. Note that we use the predicted dataset we just computed using <code>predict</code> function.</p>
+<pre class="r"><code>rf.predict %&gt;%
+  metrics(truth = chl, estimate = .pred)</code></pre>
+<pre><code># A tibble: 3 x 3
+  .metric .estimator .estimate
+  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+1 rmse    standard       1.10 
+2 rsq     standard       0.221
+3 mae     standard       0.857</code></pre>
+</div>
+</div>
+<div id="linear-regression-approach" class="section level3">
+<h3>Linear regression approach</h3>
+<div id="make-linear-model" class="section level4">
+<h4>Make linear model</h4>
+<p>The good of <strong>tidymodels</strong> is that when we change the model, we do not need to start over again from the beginning but rather change the engine. For instance, we replace the <code>ranger</code> engine with <code>lm</code> to specify the linear model using the <strong>parsnip</strong> package <span class="citation">(Kuhn and Vaughan <a href="#ref-parsnip" role="doc-biblioref">2020</a><a href="#ref-parsnip" role="doc-biblioref">a</a>)</span> .</p>
+<pre class="r"><code>lm.model = linear_reg() %&gt;%
+  set_engine(engine = &quot;lm&quot;) %&gt;%
+  set_mode(mode = &quot;regression&quot;)</code></pre>
+</div>
+<div id="train-linear-model" class="section level4">
+<h4>Train Linear model</h4>
+<p>Once we have specified the model type, engine and mode, the model can be trained with the <code>fit</code> function;</p>
+<pre class="r"><code>lm.fit = lm.model %&gt;%
+  fit(chl ~ ., data = crtr.training)</code></pre>
+</div>
+<div id="predict-with-linear-model" class="section level4">
+<h4>Predict with linear model</h4>
+<p>Once the model is fitted, This fitted object lm_fit has the lm model output built-in, which you can access with lm_fit$fit, but there are some benefits to using the fitted parsnip model object when it comes to predicting. To predict the values we use <code>predict</code> function and parse the model and standardized testing values we computed from the recipe <span class="citation">(R Core Team <a href="#ref-r" role="doc-biblioref">2018</a>)</span>. Note that here we use the transformed test set and not the original from the split object. In this case we use the model to predict the value and stitch the testing values using the <code>bind_cols</code> function;</p>
+<pre class="r"><code>lm.predict = lm.fit %&gt;%
+  predict(crtr.testing) %&gt;%
+  bind_cols(crtr.testing) 
+
+lm.predict</code></pre>
+<pre><code># A tibble: 12 x 8
+     .pred temperature      do      ph ammonia phosphate nitrate     chl
+     &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+ 1 -0.236        0.750  0.884  -0.947    0.258   -0.560   -0.625 -1.50  
+ 2 -0.0649       0.370  1.44   -0.870    0.291   -0.560   -0.677  0.504 
+ 3 -0.728       -0.392  0.977  -2.33     0.291   -0.560   -0.521 -0.0237
+ 4 -0.764       -0.265  0.861  -1.41     0.588    0.0415   1.66  -0.235 
+ 5  0.0740      -0.201  1.07   -1.02     1.35     2.01     2.49   0.346 
+ 6  0.0151      -1.15   0.0720  0.284    0.291   -0.961   -0.573  0.399 
+ 7 -0.135       -0.265 -0.624   0.515    0.158   -1.12    -0.625 -0.499 
+ 8  0.323        0.814 -0.392  -0.0239   2.80    -0.480   -0.625 -0.763 
+ 9 -0.772        0.814 -1.39   -0.485   -1.10    -0.720   -0.573  0.0819
+10 -0.117        1.00  -1.41   -0.101    0.621    0.482    0.206  1.35  
+11 -0.263        0.370 -0.856   0.438   -1.10    -0.640   -0.573  1.61  
+12  1.13         1.38  -0.949   2.44     0.456    0.362   -0.677 -0.657 </code></pre>
+</div>
+<div id="evaluate-linear-model" class="section level4">
+<h4>Evaluate linear model</h4>
+<p>Once we have our <code>lm.predict</code> dataset that contains the predicted and test values, we can now use the <code>metrics</code> fiction to evaluate the accuracy of the model.</p>
+<pre class="r"><code>lm.predict%&gt;%
+  metrics(truth = chl, estimate = .pred)</code></pre>
+<pre><code># A tibble: 3 x 3
+  .metric .estimator .estimate
+  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+1 rmse    standard      1.07  
+2 rsq     standard      0.0337
+3 mae     standard      0.929 </code></pre>
+</div>
+<div id="estimate-stats" class="section level4">
+<h4>Estimate stats</h4>
+<p>Sometimes you may wish to plot predicted values with different predictors. To do that you need to create a new tidied data from the the model with <code>tidy</code> function and parse <code>interval = TRUE</code> argument as shown in the code below. This create a tibble shown below and the same data is plotted in figure <a href="#fig:fig3">3</a>.</p>
+<pre class="r"><code>lm.fit.stats = lm.fit %&gt;% 
+  tidy(interval = TRUE)
+
+lm.fit.stats</code></pre>
+<pre><code># A tibble: 7 x 5
+  term         estimate std.error statistic p.value
+  &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+1 (Intercept)  1.25e-15     0.172  7.25e-15  1.00  
+2 temperature -4.82e- 2     0.258 -1.87e- 1  0.854 
+3 do           1.83e- 1     0.214  8.58e- 1  0.400 
+4 ph           3.88e- 1     0.307  1.26e+ 0  0.220 
+5 ammonia      1.59e- 1     0.209  7.64e- 1  0.453 
+6 phosphate    3.98e- 1     0.225  1.77e+ 0  0.0913
+7 nitrate     -3.00e- 1     0.274 -1.09e+ 0  0.286 </code></pre>
+<pre class="r"><code>lm.fit.stats %&gt;%
+  slice(-1) %&gt;%
+  ggplot(aes(x = term, y = estimate)) +
+  geom_point(size = 4)+
+  geom_errorbar(aes(ymin = estimate-std.error, ymax = estimate+std.error), width = .2)+
+  scale_y_continuous(breaks = seq(-1.5,1.5,0.5))+
+  ggpubr::theme_pubclean()+
+  theme(axis.text = element_text(size = 10))+
+  labs(x = &quot;&quot;, y = &quot;Estimated chl&quot;)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2020-05-11-regression-with-tidymodels_files/figure-html/fig3-1.png" alt="Estimated value of chlorophyll concentration at different predictors" width="672" />
+<p class="caption">
+Figure 3: Estimated value of chlorophyll concentration at different predictors
+</p>
+</div>
+</div>
+</div>
+<div id="bayesian-approach" class="section level3">
+<h3>Bayesian approach</h3>
+<div id="make-bayes-model" class="section level4">
+<h4>Make Bayes Model</h4>
+<p>For Bayesian, we also change the engine and specified are called <code>prior</code> and <code>prior_intercept</code>. It turns out that <code>linear_reg()</code> has a <code>stan</code> engine. Since these prior distribution arguments are specific to the Stan software, they are passed as arguments to <code>parsnip::set_engine()</code>.</p>
+<pre class="r"><code>prior.dist = rstanarm::student_t(df = 1)</code></pre>
+<pre class="r"><code>set.seed(401)
+
+## make the parsnip model
+bayes.model = linear_reg() %&gt;%
+  set_engine(engine = &quot;stan&quot;, 
+             prior_intercept = prior.dist, 
+             prior = prior.dist) %&gt;%
+  set_mode(mode = &quot;regression&quot;)</code></pre>
+<p>This kind of Bayesian analysis (like many models) involves randomly generated numbers in its fitting procedure. We can use <code>set.seed()</code> to ensure that the same (pseudo-)random numbers are generated each time we run this code. The number 123 isn’t special or related to our data; it is just a “seed” used to choose random numbers.</p>
+</div>
+<div id="train-bayes-model" class="section level4">
+<h4>Train Bayes model</h4>
+<p>Once we have defined the Bayesian model, we train it using a transformed testing set;</p>
+<pre class="r"><code>## train the bayes model
+bayes.fit = bayes.model%&gt;%
+  fit(chl ~ ., data = crtr.testing)
+
+bayes.fit</code></pre>
+<pre><code>parsnip model object
+
+Fit time:  1.7s 
+stan_glm
+ family:       gaussian [identity]
+ formula:      chl ~ .
+ observations: 12
+ predictors:   7
+------
+            Median MAD_SD
+(Intercept)  0.4    0.4  
+temperature -0.5    0.6  
+do          -0.4    0.4  
+ph          -0.2    0.3  
+ammonia     -0.3    0.3  
+phosphate    0.6    0.8  
+nitrate     -0.2    0.6  
+
+Auxiliary parameter(s):
+      Median MAD_SD
+sigma 1.0    0.3   
+
+------
+* For help interpreting the printed output see ?print.stanreg
+* For info on the priors used see ?prior_summary.stanreg</code></pre>
+</div>
+<div id="predict-bayes-fit" class="section level4">
+<h4>Predict Bayes fit</h4>
+<pre class="r"><code>bayes.predict = bayes.fit %&gt;%
+  predict(crtr.testing) %&gt;%
+  bind_cols(crtr.testing)
+
+bayes.predict</code></pre>
+<pre><code># A tibble: 12 x 8
+     .pred temperature      do      ph ammonia phosphate nitrate     chl
+     &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+ 1 -0.500        0.750  0.884  -0.947    0.258   -0.560   -0.625 -1.50  
+ 2 -0.570        0.370  1.44   -0.870    0.291   -0.560   -0.677  0.504 
+ 3  0.211       -0.392  0.977  -2.33     0.291   -0.560   -0.521 -0.0237
+ 4 -0.0976      -0.265  0.861  -1.41     0.588    0.0415   1.66  -0.235 
+ 5  0.475       -0.201  1.07   -1.02     1.35     2.01     2.49   0.346 
+ 6  0.280       -1.15   0.0720  0.284    0.291   -0.961   -0.573  0.399 
+ 7  0.0727      -0.265 -0.624   0.515    0.158   -1.12    -0.625 -0.499 
+ 8 -0.902        0.814 -0.392  -0.0239   2.80    -0.480   -0.625 -0.763 
+ 9  0.681        0.814 -1.39   -0.485   -1.10    -0.720   -0.573  0.0819
+10  0.554        1.00  -1.41   -0.101    0.621    0.482    0.206  1.35  
+11  0.552        0.370 -0.856   0.438   -1.10    -0.640   -0.573  1.61  
+12 -0.119        1.38  -0.949   2.44     0.456    0.362   -0.677 -0.657 </code></pre>
+</div>
+<div id="evaluate-bayes-model" class="section level4">
+<h4>Evaluate Bayes model</h4>
+<pre class="r"><code>bayes.predict %&gt;%
+  metrics(truth = chl, estimate = .pred)</code></pre>
+<pre><code># A tibble: 3 x 3
+  .metric .estimator .estimate
+  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+1 rmse    standard       0.646
+2 rsq     standard       0.415
+3 mae     standard       0.533</code></pre>
+</div>
+<div id="bayes.fit.stats" class="section level4">
+<h4>Bayes.fit.stats</h4>
+<p>To update the parameter table, the <code>tidy()</code> method is once again used:</p>
+<pre class="r"><code>bayes.stats = bayes.fit %&gt;% 
+  tidy(intervals = TRUE)
+
+bayes.stats</code></pre>
+<pre><code># A tibble: 7 x 5
+  term        estimate std.error  lower upper
+  &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
+1 (Intercept)    0.373     0.425 -0.394 1.07 
+2 temperature   -0.472     0.564 -1.44  0.559
+3 do            -0.428     0.416 -1.14  0.340
+4 ph            -0.170     0.341 -0.772 0.461
+5 ammonia       -0.318     0.312 -0.864 0.244
+6 phosphate      0.600     0.757 -0.812 1.89 
+7 nitrate       -0.206     0.625 -1.22  0.942</code></pre>
+<pre class="r"><code>bayes.stats %&gt;% 
+  slice(-1) %&gt;%
+  ggplot(aes(x = term, y = estimate)) +
+  geom_point(size = 4)+
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = .2)+
+  scale_y_continuous(breaks = seq(-1.5,1.5,0.5))+
+  ggpubr::theme_pubclean()+
+  theme(axis.text = element_text(size = 10))+
+  labs(x = &quot;&quot;, y = &quot;Estimated chl&quot;)</code></pre>
+<p><img src="/post/2020-05-11-regression-with-tidymodels_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+</div>
+</div>
+<div id="references" class="section level3 unnumbered">
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-rsample">
+<p>Kuhn, Max, Fanny Chow, and Hadley Wickham. 2020. <em>Rsample: General Resampling Infrastructure</em>. <a href="https://CRAN.R-project.org/package=rsample">https://CRAN.R-project.org/package=rsample</a>.</p>
+</div>
+<div id="ref-parsnip">
+<p>Kuhn, Max, and Davis Vaughan. 2020a. <em>Parsnip: A Common Api to Modeling and Analysis Functions</em>. <a href="https://CRAN.R-project.org/package=parsnip">https://CRAN.R-project.org/package=parsnip</a>.</p>
+</div>
+<div id="ref-yardstick">
+<p>———. 2020b. <em>Yardstick: Tidy Characterizations of Model Performance</em>. <a href="https://CRAN.R-project.org/package=yardstick">https://CRAN.R-project.org/package=yardstick</a>.</p>
+</div>
+<div id="ref-recipes">
+<p>Kuhn, Max, and Hadley Wickham. 2020a. <em>Recipes: Preprocessing Tools to Create Design Matrices</em>. <a href="https://CRAN.R-project.org/package=recipes">https://CRAN.R-project.org/package=recipes</a>.</p>
+</div>
+<div id="ref-tidymodels">
+<p>———. 2020b. <em>Tidymodels: Easily Install and Load the ’Tidymodels’ Packages</em>. <a href="https://CRAN.R-project.org/package=tidymodels">https://CRAN.R-project.org/package=tidymodels</a>.</p>
+</div>
+<div id="ref-r">
+<p>R Core Team. 2018. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/">https://www.R-project.org/</a>.</p>
+</div>
+<div id="ref-ggally">
+<p>Schloerke, Barret, Jason Crowley, Di Cook, Francois Briatte, Moritz Marbach, Edwin Thoen, Amos Elberg, and Joseph Larmarange. 2018. <em>GGally: Extension to ’Ggplot2’</em>. <a href="https://CRAN.R-project.org/package=GGally">https://CRAN.R-project.org/package=GGally</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, Hadley. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+<div id="ref-readxl">
+<p>Wickham, Hadley, and Jennifer Bryan. 2018. <em>Readxl: Read Excel Files</em>. <a href="https://CRAN.R-project.org/package=readxl">https://CRAN.R-project.org/package=readxl</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+</div>
+</div>
+</div>

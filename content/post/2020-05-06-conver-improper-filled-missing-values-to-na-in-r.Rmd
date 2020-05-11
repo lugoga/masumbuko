@@ -24,7 +24,7 @@ link-citations: yes
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, comment=FALSE, quit = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, comment="", quit = TRUE)
 ```
 
 

@@ -1,0 +1,426 @@
+---
+title: Linear and Bayesian Regression Models with tidymodels package
+author: Masumbuko Semba
+date: '2020-05-11'
+slug: regression-with-tidymodels
+categories:
+  - Machine learning
+tags:
+  - regression
+  - classification
+  - Masumbuko Semba
+  - modelling
+  - tidymodels
+  - tidyverse
+  - Indian Ocean
+  - Tanzania
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, comment="", quit = TRUE)
+
+```
+
+
+As a data scientist, you need to distinguish between `regression predictive models` and `classification predictive models`.  Clear understanding of these models helps to choose the best one for a specific use case. In a nutshell, `regression predictive models and `classification predictive models` fall under supervised machine learning. The main difference between them is that the output variable---in regression is numerical (or continuous) while that for classification is categorical (or discrete).
+
+A big part of machine learning is `classification` — we want to know what class or group an observation belongs to. Therefore, the ability to precisely classify observations to their groups is valuable for various business applications like predicting the future based on historical data.
+
+For example, when provided with a dataset about environmental variables, and you are asked to predict productivity, that is a regression task because productivity measured in term of chlorophyll concentration will be a continuous output.
+
+In this post we will focus on regression. We will learn the steps of modelling using **tidymodels** [@tidymodels]. We first explore the data and check if it fit for modelling, we then split the dataset into a training and testing sets. Next, we will create a recipe object and define our model. Lastly, we will train a specified model and evaluate its performance. 
+
+I will use the same dataset for three different model's algorithms. Example of the common regression algorithms include `random forest`, `linear regression`, `support vector regression (SVR)` and `bayes`. Some algorithms, such as `logistic regression`, have the name `regression` in their functions but they are not regression algorithms.
+
+To follow use code in this article, you will need **tidymodels** [@tidymodels] and **tidyverse** packages [@tidyverse] installed in your machine. You can install them from CRAN. The chunk below highlight lines of code to install the packages if they are yet in your PC. 
+
+```{r, eval=FALSE}
+
+model.packages = c("tidymodels", "tidyverse")
+
+install.packages(model.packages)
+```
+
+Once installed, you can load the packages in your session. We often we use several packages to accomplish a task. Even in this post, though seems only two packages are loaded, these are ecosystems which  comes with dozens of packages bundled with them. 
+
+
+```{r, eval=TRUE}
+require(tidyverse)
+require(tidymodels)
+```
+
+
+## The CRTR data
+We use the data collected with the Institute of Marine Sciences of the University of Dar es Salaam to illustrate the concept. The data was collected through the Coral Reef Targeted Research and Capacity Building for Management (CRTR) project between 2008 and 2009. The dataset contains;
+
++ Chemical variables ---nitrate, phosphate, salinity, pH, dissolved oxygen and ammonia
++ Physical variables --- temperature
++ Biological variables--- chlorophyll-*a*
+
+Because the variables are organized in sheets of Excel spreadsheet, i used a `read_excel` function from **readxl** package [@readxl] to read the file from the sheet. And because there are several sheet, the processed was iterated with a `for` loop. Data from each sheet was allocated in the list file. The chunk below highlight the code used to read files in sheets. 
+
+```{r}
+
+variables = c("salinity", "temperature", "do", "ph", "chl", "ammonia", "phosphate", "nitrate")
+
+crtr.list = list()
+
+for (i in 1:length(variables)){
+  
+  crtr.list[[i]] = readxl::read_excel("crtr.xlsx", sheet = i) %>% 
+    mutate(variable = variables[i]) 
+
+}
+```
+
+The data was untidy and unsuitable for visualization and modelling in R. Therefore, the first thing I had to deal with the data was to tidy the variables in the dataset to a right format that **tidymodels** and **tidyverse** recognizes. First the dataset was unlisted with `bind_rows` function and the data was pivoted to long format and then back to wide format with only the variable of interested selected. 
+
+```{r}
+
+## organize in long form
+crtr.long = crtr.list %>% 
+  bind_rows() %>%
+  pivot_longer(cols =2:5, names_to = "sites", values_to = "data" ) 
+
+## organize in the wide form
+crtr.wide = crtr.long %>%
+  pivot_wider(names_from = variable, values_from = data) %>%
+  mutate(month = lubridate::month(Date, label = TRUE, 
+                                  abb = TRUE) %>% as.character()) %>%
+  mutate_if(is.character, as.factor) %>%
+  mutate_if(is.numeric, round, digits = 2)  %>%
+  select(date = Date, month,sites, chl, everything())
+
+
+```
+
+Let's us glimpse the dataset
+
+```{r}
+crtr.wide %>% 
+  glimpse()
+```
+
+As a first step in modeling, it’s always a good idea to explore the variables in the dataset. Figure \@ref(fig:fig0) is a pairplot that compare each pair of variables as scatterplots in the lower diagonal, densities on the diagonal and correlations written in the upper diagonal [@ggally]. Figure \@ref(fig:fig1) show the correlation between chlorophyll-*a* (outcome) with other six predictor variables using a linear and quadratic equations is unfit for these dataset. 
+
+
+```{r fig0, fig.cap="Pair plot of numerical variables"}
+
+crtr.wide %>%
+  select(-salinity)%>%
+  mutate(season = lubridate::month(date) %>% as.integer(),
+         season = replace(season,season %in% c(1:4,11:12), "NE"),
+         season = replace(season,season %in% c(5:10), "SE"))%>%
+  GGally::ggscatmat(columns = 4:10,color="season", alpha=1, corMethod = "spearman")+
+  ggsci::scale_color_jco()+
+  ggpubr::theme_pubclean()+
+  theme(strip.background = element_blank(), 
+        legend.position = "right",
+        legend.key = element_blank())
+```
+
+
+```{r fig1, fig.cap="Correalation of "}
+
+require(wesanderson)
+
+wesa = wes_palettes %>% names()
+
+crtr.wide %>%
+  select(-salinity)%>%
+  filter(nitrate < 1 & phosphate < 1.2 & chl < 1) %>% 
+  pivot_longer(cols = 5:10, names_to = "predictor", values_to = "data") %>%
+  # filter(sites == "Bawe")%>%
+  ggplot(aes(x = data, y = chl))+
+  scale_y_continuous(trans = scales::sqrt_trans(), labels = function(x) round(x,2))+
+  # scale_x_continuous(trans = scales::sqrt_trans(), labels = function(x) round(x,2))+
+  geom_jitter()+
+  geom_smooth(se = FALSE, method = "lm", formula = "y ~ poly(x,2)", aes(color = "Quadratic"))+
+  geom_smooth(se = FALSE, method = "lm", formula = "y ~ x", aes(color = "Linear"))+
+   ggsci::scale_color_jco()+
+  facet_wrap(~predictor, scales = "free_x")+
+  ggpubr::theme_pubclean()+
+  theme(strip.background.x = element_blank(), legend.key = element_blank(), 
+        legend.position = "right", panel.background = element_rect(colour = "black"))
+ 
+
+```
+
+
+```{r, echo=FALSE}
+crtr.clean = crtr.wide %>%
+  select(-salinity)%>%
+  filter(nitrate < 1 & phosphate < 1.2 & chl < 1)  %>%
+  select(-c(date:sites))
+```
+
+## Resample
+In machine learning, one risk is the machine learns too well our sample data and is then less accurate during a real-world testing. This phenomenon is called *overtraining* or *overfitting*. We overcome this problem by splitting the dataset into a training and testing sets. The training set is used to train the model while the test set is reserved to later estimate how well the model might work on new or wild data. 
+
+The splitting is based on ratios and the widely used ratios include 80/20, 75/25, or 7/30, with the training data receiving a bigger proportion of the dataset and the test set get the remaining small portion. 
+
+For our sample that has only 52 observations, it make sense to use 70/30 split ratio. we use the fraction `set.seed(4595)` from base R to fix the random number generator from **rsample** package [@rsample]. This prevent generating new data in each execution. 
+
+the function `initial_split` from the **rsample** package is designed to split the dataset into a training and testing sets. We purse the data to be split and the proportion that serve as a cutpoint of the two sets. 
+
+```{r}
+set.seed(4595)
+
+crtr.split = crtr.clean %>%
+  rsample::initial_split(prop = 0.7)
+
+crtr.split
+```
+
+Given the 41 total observations, we reserve 12 observations as a test set and kept 70% of the dataset (29 observation) as train set. From the `crtr.split` object, we pull both the train set with the `training` function and the test set with a `testing` function. 
+
+```{r}
+
+## pull train set
+crtr.train = crtr.split %>% 
+  training()
+
+## pull test set
+crtr.test = crtr.split %>% 
+  testing()
+
+```
+
+We can have a glimpse of the train dataset using a `glimpse` function from **dplyr** package [@dplyr].
+
+```{r}
+crtr.train %>% glimpse()
+```
+
+The printed output shows that we have seven variables and all are numeric
+
+## recipe
+
+The **recipes** package [@recipes] define a recipe object that we will use for modeling and to conduct preprocessing of variables. The four main functions are `recipe()`, `prep()`, `juice()` and `bake()`. `recipe()` defines the operations on the data and the associated roles. Once the preprocessing steps are defined, any parameters are estimated using `prep()`. 
+
+Recipes can be created manually by sequentially adding roles to variables in a data set. First, we will create a recipe object from the train set data and then specify the processing steps and transform the data with `step_*`. once the recipe is ready we prep it. For example, to create a simple recipe containing only an outcome and predictors and have the predictors normalized and missing values in predictors imputed:
+
+```{r}
+crtr.recipe = crtr.train %>%
+  recipe(chl ~ .) %>%
+  step_normalize(all_numeric()) %>%
+  step_corr(all_numeric())%>%
+  step_knnimpute(all_numeric()) %>%
+  prep()
+
+crtr.recipe
+```
+
+Once the data are ready for transformation, the `juices()` extract transformed training set while the `bake()` function create a new testing set.
+
+```{r}
+crtr.training = crtr.recipe %>%
+  juice()
+
+crtr.testing = crtr.recipe %>%
+  bake(crtr.test)
+  
+```
+
+
+## Build Models
+### Random Forest
+We begin by fitting a random forest model. 
+
+#### Make random forest model
+We specify the model using the **parsnip** package [@parsnip]. This package provides a tidy, unified interface to models for a range of models without getting bogged down in the syntactical minutiae of the underlying packages. The **parsnip** package help us to specify ;
+
++ the `type` of model e.g  **random forest**,
++ the `mode` of the model whether is `regression` or `classification`
++ the computational `engine` is the name of the R package.
+
+Based on the information above, we can use **parsnip** package to build our model as;
+
+```{r}
+rf.model = rand_forest() %>%
+  set_engine(engine = "ranger") %>%
+  set_mode(mode = "regression")
+
+rf.model
+```
+
+#### Train random forest model
+
+Once we have specified the model type, engine and mode, the model can be trained with the `fit` function. We simply parse into the fit the specified model and the transformed training set extracted from the prepped recipe. 
+
+```{r}
+rf.fit = rf.model %>%
+  fit(chl ~ ., data = crtr.training)
+
+```
+
+#### predict with random forest
+To get our predicted results, we use the `predict()` function to find the estimated chlorophyll-*a*. First, let’s generate the estimated chlorophyll-*a* values by simply parse the random forest model `rf.model` we specified and the transformed testing set we created from a prepped recipe. We also stitch the predicted values to the transformed train set with `bind_cols` function;
+
+```{r}
+rf.predict = rf.fit %>%
+  predict(crtr.testing) %>%
+  bind_cols(crtr.testing) 
+
+rf.predict
+
+```
+When making predictions, the tidymodels convention is to always produce a tibble of results with standardized column names. This makes it easy to combine the original data and the predictions in a usable format:
+
+#### Evaluate the rf model
+So far, we have built a model and preprocessed data with a recipe. We predicted new data as a way to bundle a parsnip model and recipe together. The next step is to assess or evaluate the accuracy of the model. We use a `metrics` function from **yardstick** package [@yardstick]to assess the accuracy of the model by comparing the predicted versus the original outcome variable. Note that we use the predicted dataset we just computed using `predict` function.
+
+```{r}
+rf.predict %>%
+  metrics(truth = chl, estimate = .pred)
+
+```
+
+
+### Linear regression approach
+#### Make linear model
+
+The good of **tidymodels** is that when we change the model, we do not need to start over again from the beginning but rather change the engine. For instance, we replace the `ranger` engine with `lm` to specify the linear model using the **parsnip** package [@parsnip] .
+
+```{r}
+
+lm.model = linear_reg() %>%
+  set_engine(engine = "lm") %>%
+  set_mode(mode = "regression")
+```
+
+#### Train Linear model
+Once we have specified the model type, engine and mode, the model can be trained with the `fit` function;
+
+```{r}
+lm.fit = lm.model %>%
+  fit(chl ~ ., data = crtr.training)
+
+```
+
+#### Predict with linear model
+Once the model is fitted, This fitted object lm_fit has the lm model output built-in, which you can access with lm_fit$fit, but there are some benefits to using the fitted parsnip model object when it comes to predicting. To predict the values we use `predict` function and parse the model and standardized testing values we computed from the recipe [@r]. Note that here we use the transformed test set and not the original from the split object.  In this case we use the model to predict the value and stitch the testing values using the `bind_cols` function; 
+
+```{r}
+lm.predict = lm.fit %>%
+  predict(crtr.testing) %>%
+  bind_cols(crtr.testing) 
+
+lm.predict
+```
+
+#### Evaluate linear model
+
+Once we have our `lm.predict` dataset that contains the predicted and test values, we can now use the `metrics` fiction to evaluate the accuracy of the model. 
+
+```{r}
+lm.predict%>%
+  metrics(truth = chl, estimate = .pred)
+```
+
+#### Estimate stats
+Sometimes you may wish to plot predicted values with different predictors. To do that you need to create a new tidied data from the the model with `tidy` function and parse `interval = TRUE` argument as shown in the code below. This create a tibble shown below and the same data is plotted in figure \@ref(fig:fig3).
+
+```{r}
+lm.fit.stats = lm.fit %>% 
+  tidy(interval = TRUE)
+
+lm.fit.stats
+```
+
+```{r fig3, fig.cap="Estimated value of chlorophyll concentration at different predictors" }
+lm.fit.stats %>%
+  slice(-1) %>%
+  ggplot(aes(x = term, y = estimate)) +
+  geom_point(size = 4)+
+  geom_errorbar(aes(ymin = estimate-std.error, ymax = estimate+std.error), width = .2)+
+  scale_y_continuous(breaks = seq(-1.5,1.5,0.5))+
+  ggpubr::theme_pubclean()+
+  theme(axis.text = element_text(size = 10))+
+  labs(x = "", y = "Estimated chl")
+```
+
+
+### Bayesian approach
+
+
+
+#### Make Bayes Model
+For Bayesian, we also change the engine and specified are called `prior` and `prior_intercept`. It turns out that `linear_reg()` has a `stan` engine. Since these prior distribution arguments are specific to the Stan software, they are passed as arguments to `parsnip::set_engine()`. 
+
+
+```{r}
+prior.dist = rstanarm::student_t(df = 1)
+
+```
+
+```{r}
+set.seed(401)
+
+## make the parsnip model
+bayes.model = linear_reg() %>%
+  set_engine(engine = "stan", 
+             prior_intercept = prior.dist, 
+             prior = prior.dist) %>%
+  set_mode(mode = "regression")
+```
+
+This kind of Bayesian analysis (like many models) involves randomly generated numbers in its fitting procedure. We can use `set.seed()` to ensure that the same (pseudo-)random numbers are generated each time we run this code. The number 123 isn’t special or related to our data; it is just a “seed” used to choose random numbers.
+
+#### Train Bayes model
+Once we have defined the Bayesian model, we train it using a transformed testing set;
+
+```{r}
+## train the bayes model
+bayes.fit = bayes.model%>%
+  fit(chl ~ ., data = crtr.testing)
+
+bayes.fit
+```
+
+
+#### Predict Bayes fit
+```{r}
+bayes.predict = bayes.fit %>%
+  predict(crtr.testing) %>%
+  bind_cols(crtr.testing)
+
+bayes.predict
+```
+
+#### Evaluate Bayes model
+```{r}
+bayes.predict %>%
+  metrics(truth = chl, estimate = .pred)
+```
+
+
+#### Bayes.fit.stats
+To update the parameter table, the `tidy()` method is once again used:
+```{r}
+bayes.stats = bayes.fit %>% 
+  tidy(intervals = TRUE)
+
+bayes.stats
+```
+
+
+
+```{r}
+bayes.stats %>% 
+  slice(-1) %>%
+  ggplot(aes(x = term, y = estimate)) +
+  geom_point(size = 4)+
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = .2)+
+  scale_y_continuous(breaks = seq(-1.5,1.5,0.5))+
+  ggpubr::theme_pubclean()+
+  theme(axis.text = element_text(size = 10))+
+  labs(x = "", y = "Estimated chl")
+```
+
+
+### References
+

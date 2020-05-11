@@ -6,10 +6,19 @@
     <description>Recent content in tidyverse on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 09 May 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 11 May 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/tidyverse/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Linear and Bayesian Regression Models with tidymodels package</title>
+      <link>/05/11/2020/regression-with-tidymodels/</link>
+      <pubDate>Mon, 11 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/05/11/2020/regression-with-tidymodels/</guid>
+      <description>As a data scientist, you need to distinguish between regression predictive models and classification predictive models. Clear understanding of these models helps to choose the best one for a specific use case. In a nutshell, regression predictive models andclassification predictive models` fall under supervised machine learning. The main difference between them is that the output variable—in regression is numerical (or continuous) while that for classification is categorical (or discrete).</description>
+    </item>
     
     <item>
       <title>A Unified Machine Learning in R with tidymodels</title>

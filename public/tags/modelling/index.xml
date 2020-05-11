@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>tidymodels on Masumbuko Semba&#39;s Blog</title>
-    <link>/tags/tidymodels/</link>
-    <description>Recent content in tidymodels on Masumbuko Semba&#39;s Blog</description>
+    <title>modelling on Masumbuko Semba&#39;s Blog</title>
+    <link>/tags/modelling/</link>
+    <description>Recent content in modelling on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 11 May 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/tidymodels/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/modelling/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -18,16 +18,6 @@
       
       <guid>/05/11/2020/regression-with-tidymodels/</guid>
       <description>As a data scientist, you need to distinguish between regression predictive models and classification predictive models. Clear understanding of these models helps to choose the best one for a specific use case. In a nutshell, regression predictive models andclassification predictive models` fall under supervised machine learning. The main difference between them is that the output variable—in regression is numerical (or continuous) while that for classification is categorical (or discrete).</description>
-    </item>
-    
-    <item>
-      <title>A Unified Machine Learning in R with tidymodels</title>
-      <link>/05/09/2020/a-unified-machine-learning-in-r-with-tidymodels/</link>
-      <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/05/09/2020/a-unified-machine-learning-in-r-with-tidymodels/</guid>
-      <description>tidymodelstidymodels is a suite of packages that make machine learning with R a breeze. R has many packages for machine learning, each with their own syntax and function arguments. tidymodels aims to provide an unified interface, which allows data scientists to focus on the problem they’re trying to solve, instead of wasting time with learning package syntax.
-The tidymodels has a modular approach meaning that specific, smaller packages designed to work hand in hand.</description>
     </item>
     
   </channel>
