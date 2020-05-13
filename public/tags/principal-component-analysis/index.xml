@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Principal Component Analysis on Masumbuko Semba&#39;s Blog</title>
+    <link>/tags/principal-component-analysis/</link>
+    <description>Recent content in Principal Component Analysis on Masumbuko Semba&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 13 May 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/principal-component-analysis/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>A simple Principal Component Analysis (PCA) in R </title>
+      <link>/05/13/2020/simple-pca-in-r/</link>
+      <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/05/13/2020/simple-pca-in-r/</guid>
+      <description>Principal Component Analysis (PCA)Principal Component Analysis (PCA) is widely used to explore data. This technique allows you visualize and understand how variables in the dataset varies. Therefore, PCA is particularly helpful where the dataset contain many variables.This is a method of unsupervised learning that allows you to better understand the variability in the data set and how different variables are related.
+The Components in PCA are the underlying structure in the data.</description>
+    </item>
+    
+  </channel>
+</rss>

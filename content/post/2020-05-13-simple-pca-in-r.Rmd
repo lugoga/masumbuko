@@ -1,0 +1,177 @@
+---
+title: 'A simple Principal Component Analysis (PCA) in R '
+author: Masumbuko Semba
+date: '2020-05-13'
+slug: simple-pca-in-r
+categories:
+  - Oceanography
+tags:
+  - Masumbuko Semba
+  - Machine Learning
+  - chlorophyll
+  - Pemba Channel
+  - Zanzibar Channel
+  - PCA
+  - Principal Component Analysis
+  - R
+  - RStudio
+  - tidyverse
+  - Indian Ocean
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "")
+
+
+```
+
+
+### Principal Component Analysis (PCA)
+Principal Component Analysis (PCA) is widely used to explore data. This technique allows you visualize and understand how variables in the dataset varies. Therefore, PCA is particularly helpful where the dataset contain many variables.This is a method of unsupervised learning that allows you to better understand the variability in the data set and how different variables are related.
+
+The Components in PCA are the underlying structure in the data. They indicates the directions where there is the most variance, the directions where the data is most spread out. This means that PCA helps us to find the straight line that best spreads the data out when it is projected along it. This is the first principal component, the straight line that shows the most substantial variance in the data.
+
+PCA is a type of linear transformation on a given data set that has values for a certain number of variables (coordinates) for a certain amount of spaces. This linear transformation fits this dataset to a new coordinate system in such a way that the most significant variance is found on the first coordinate, and each subsequent coordinate is orthogonal to the last and has a lesser variance. In this way, you transform a set of x correlated variables over y samples to a set of p uncorrelated principal components over the same samples. We need to load some packages in R session that we are going to use in this post. I prefer loading the packages in my session using the `require()` function, but you can load using `library()` function.  
+
+
+```{r}
+require(tidyverse)
+require(kableExtra)
+require(factoextra)
+require(ggbiplot)
+```
+
+
+### Exploring the data
+Before we dive in to the analysis, we want to explore our data set and become familiar with it.
+We use a simple and easy to understand dataset. This dataset consists of data on 120 observations sampled in Pemba and Zanzibar channel during the wet and dry season. Table \@ref(tab:tab1) shows the sampled ten observations of the the dataset. There nine variables, two are factor (channel and season variables) and the other seven are numerical variables. 
+
+```{r, echo=FALSE}
+data = read_csv("pangani.csv")%>%
+  select(-c(1:2))  %>%
+  select(channel = site, season, everything()) 
+```
+
+
+```{r tab1}
+
+set.seed(1254)
+
+data %>%
+  mutate_if(is.numeric, round, digits = 3) %>% 
+  sample_n(10)%>%
+  kableExtra::kable(format = "html", caption = "A sample of dataset", align = "c") %>%
+  kableExtra::add_header_above(c("", "", "Numerical Variables" = 7)) %>%
+  kableExtra::column_spec(column = 1:2, width = "2cm", background = "lightblue") %>%
+  kableExtra::column_spec(3:9, width = "2cm", background = "pink")
+```
+
+Figure \@ref(fig:scatmatplot) is a pairplot that compare each pair of variables as scatterplots in the lower diagonal, densities on the diagonal and correlations written in the upper diagonal. I picked `spearman` rank correlation to evaluate the correlation of environmental variables to chlorophyll concentration at dry and wet season. We notice that physical and chemical variables influence chlorophyll-*a*  either positive or negative at different seasons. 
+
+```{r scatmatplot, fig.cap="A pairplot showing the asoociation of numerical values sampled in dry and wet seeasons",}
+
+require(GGally)
+
+data %>% 
+  GGally::ggscatmat(columns = 3:9 ,color = "season", corMethod = "spearman") +
+  ggsci::scale_color_jco()+
+  ggpubr::theme_pubclean()+
+  theme(strip.background = element_rect(fill = "grey90"), 
+        axis.text = element_text(size = 8), 
+        legend.position = "right",
+        legend.key = element_blank())
+
+```
+
+### Compute the Principal Components
+PCA prefer numerical data, therefore, we need to trim off the dataset channel and season variables, because they are categorical variables. Once we have removed the categorical variables, we also need to filter variables for a particular season. I will start with the dry season. We use the `filter` function from **dpyr** [@dplyr] package to drop all observation collected during the rain season.
+
+```{r}
+## Dry season
+dry.season = data %>% 
+  filter(season == "Dry") 
+```
+
+
+Our dataset is reduced to seven numerical variables and 60 observation collected during the dry season in Pemba and Zanzibar channel. To compute PCA, we simply parse the arguments `data = dry.season` and `scale = TRUE` in `prcomp()` function, which performs a principal components analysis and assign the output as `dry.pca`. 
+
+```{r}
+## PCA computation
+dry.pca = dry.season %>% 
+  select(3:9) %>%
+  prcomp(scale. = TRUE, center = TRUE)
+```
+
+Then We can summarize our PCA object with `summary()`.
+```{r}
+dry.pca %>% 
+  summary() 
+```
+
+We get seven principal components, called PC1-9. Each of these explains a percentage of the total variation in the dataset. That is to say: `PC1` explains 32% of the total variance, which means that nearly one-thirds of the information in the dataset can be encapsulated by just that one Principal Component. `PC2` explains 25% of the variance. So, by knowing the position of a sample in relation to just `PC1` and `PC2`, you can get a very accurate view on where it stands in relation to other samples, as just `PC1` and `PC2` can explain 57% of the variance.
+
+### Plotting PCA
+@factoextra developed a **factoextra** package that provide tools to extract and visualize the output of exploratory multivariate data analyses, including PCA [@r]. However, in this post will make a *biplot* using a **ggbiplot** package [@ggbiplot]. A biplot allows to visualize how the samples relate to one another in PCA (which samples are similar and which are different) and simultaneously reveal how each variable contributes to each principal component. 
+
+A **ggbiplot** package is easy to use and offers a user-friendly and pretty function to plot biplots [@ggbiplot]. If **biplot** package is yet in your machine, you can simply install it from github as the code below shows;
+ 
+```{r, eval=FALSE}
+devtools::install_github("vqv/ggbiplot")
+
+```
+ 
+Figure \@ref(fig:fig1) is a biplot generated using `ggbiplot` function in the code below. The axes are seen as arrows originating from the center point. Here, you we that the variables $PO_4^{-}$, $O_2$, $Chl-a$, and $NO_3^{-}$ a all contribute to PC1, with higher values in those variables moving the samples to the right on this plot. This lets you see how the data points relate to the axes, but it's not very informative without knowing which point corresponds to which sample season.
+
+```{r fig1, fig.cap="A regular biplot"}
+dry.pca %>% 
+  ggbiplot::ggbiplot()
+```
+
+Since we know the channel the data were collected, we can put the points into Pemba and Zanzibar channels. We can further customize the biplot by parsing argument `ellipse = TRUE`, which will draw an ellipse around each group. The code below generates figure \@ref(fig:fig2)
+
+```{r fig2, fig.cap="Customized biplot"}
+dry.pca %>% 
+  ggbiplot::ggbiplot(
+    scale = 1, 
+    groups = dry.season$channel, 
+    ellipse = T)
+```
+
+A customized figure \@ref(fig:fig2) reveal a distinct of data for the two channel. By looking on PC, we find that the points and ellipse to the left is purely Pemba channel whereas to the right is Zanzibar channel. Looking at the axes, we also notice that the data at Pemba channel are characterized by low values of sst, phosphate and dissolved oxygen for PC1 and high values of SST PC2. The Zanzibar channel on contrary is characterized with positive values of pH, nitrate and chl for PC1. Salinity and chl are somehow in the middle.
+
+Of course, we have many principal components available, each of which map differently to the original variables. We can ask `ggbiplot` to plot these other components, by parsing the `choices` argument. Figure \@ref(fig:fig3) was generated using `PC5` and `PC6`:
+
+```{r fig3, fig.cap="Customized biplot"}
+dry.pca %>% 
+  ggbiplot::ggbiplot(
+    scale = 1, 
+    groups = dry.season$channel, 
+    choices=c(5,6),
+    ellipse = T)
+```
+
+We don't see much in figure \@ref(fig:fig3) because PC5 and PC6 explain very small percentages of the total variation, so it would be surprising if we found that they were very informative and separated the groups or revealed apparent patterns.
+
+### Customize `ggbiplot`
+As `ggbiplot` is based on the **ggplot** function, you can use the same set of graphical parameters to alter our biplots as you would for any ggplot. For instance, figure \@ref(fig:fig5) we simply added the reference line with `geom_vline` and `geom_hline()`. We also changed from the default to`theme_pubclean()` from **ggpubr** [@ggpubr] and strip off the legend title and position legend to the top of the plot with `theme()`.
+
+
+```{r fig5, fig.cap="Customized biplot"}
+dry.pca %>% 
+  ggbiplot::ggbiplot( scale = 1, 
+    groups = dry.season$channel, 
+    ellipse = T) +
+  geom_vline(xintercept = 0, linetype = 3)+
+  geom_hline(yintercept = 0, linetype = 3)+
+  ggpubr::theme_pubclean() + 
+  theme(legend.position = "top", legend.title = element_blank(), legend.key = element_blank())
+```
+
+
+### Refeences
+

@@ -3,17 +3,92 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/categories/</loc>
-    <lastmod>2020-05-11T00:00:00+00:00</lastmod>
+    <loc>/05/13/2020/simple-pca-in-r/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/classification/</loc>
-    <lastmod>2020-05-11T00:00:00+00:00</lastmod>
+    <loc>/categories/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/chlorophyll/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/indian-ocean/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/machine-learning/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/masumbuko-semba/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/oceanography/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/pca/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/pemba-channel/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/principal-component-analysis/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/r/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/rstudio/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/tidyverse/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/zanzibar-channel/</loc>
+    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/classification/</loc>
     <lastmod>2020-05-11T00:00:00+00:00</lastmod>
   </url>
   
@@ -28,32 +103,12 @@
   </url>
   
   <url>
-    <loc>/tags/masumbuko-semba/</loc>
-    <lastmod>2020-05-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/</loc>
-    <lastmod>2020-05-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/modelling/</loc>
     <lastmod>2020-05-11T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/</loc>
-    <lastmod>2020-05-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/regression/</loc>
-    <lastmod>2020-05-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
     <lastmod>2020-05-11T00:00:00+00:00</lastmod>
   </url>
   
@@ -64,11 +119,6 @@
   
   <url>
     <loc>/tags/tidymodels/</loc>
-    <lastmod>2020-05-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/tidyverse/</loc>
     <lastmod>2020-05-11T00:00:00+00:00</lastmod>
   </url>
   
@@ -94,11 +144,6 @@
   
   <url>
     <loc>/tags/marine/</loc>
-    <lastmod>2020-05-10T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/oceanography/</loc>
     <lastmod>2020-05-10T00:00:00+00:00</lastmod>
   </url>
   
@@ -153,22 +198,7 @@
   </url>
   
   <url>
-    <loc>/tags/pemba-channel/</loc>
-    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/categories/r/</loc>
-    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/r/</loc>
-    <lastmod>2020-05-06T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/rstudio/</loc>
     <lastmod>2020-05-06T00:00:00+00:00</lastmod>
   </url>
   
@@ -438,17 +468,12 @@
   </url>
   
   <url>
-    <loc>/tags/chlorophyll/</loc>
+    <loc>/categories/modis/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/modis/</loc>
-    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/modis/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
   

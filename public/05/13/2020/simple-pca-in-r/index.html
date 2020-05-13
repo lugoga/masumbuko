@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.64.1" />
+
+
+<title>A simple Principal Component Analysis (PCA) in R  - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="A simple Principal Component Analysis (PCA) in R  - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">8 min read</span>
+    
+
+    <h1 class="article-title">A simple Principal Component Analysis (PCA) in R </h1>
+
+    
+    <span class="article-date">2020/05/13</span>
+    
+
+    <div class="article-content">
+      
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<div id="principal-component-analysis-pca" class="section level3">
+<h3>Principal Component Analysis (PCA)</h3>
+<p>Principal Component Analysis (PCA) is widely used to explore data. This technique allows you visualize and understand how variables in the dataset varies. Therefore, PCA is particularly helpful where the dataset contain many variables.This is a method of unsupervised learning that allows you to better understand the variability in the data set and how different variables are related.</p>
+<p>The Components in PCA are the underlying structure in the data. They indicates the directions where there is the most variance, the directions where the data is most spread out. This means that PCA helps us to find the straight line that best spreads the data out when it is projected along it. This is the first principal component, the straight line that shows the most substantial variance in the data.</p>
+<p>PCA is a type of linear transformation on a given data set that has values for a certain number of variables (coordinates) for a certain amount of spaces. This linear transformation fits this dataset to a new coordinate system in such a way that the most significant variance is found on the first coordinate, and each subsequent coordinate is orthogonal to the last and has a lesser variance. In this way, you transform a set of x correlated variables over y samples to a set of p uncorrelated principal components over the same samples. We need to load some packages in R session that we are going to use in this post. I prefer loading the packages in my session using the <code>require()</code> function, but you can load using <code>library()</code> function.</p>
+<pre class="r"><code>require(tidyverse)
+require(kableExtra)
+require(factoextra)
+require(ggbiplot)</code></pre>
+</div>
+<div id="exploring-the-data" class="section level3">
+<h3>Exploring the data</h3>
+<p>Before we dive in to the analysis, we want to explore our data set and become familiar with it.
+We use a simple and easy to understand dataset. This dataset consists of data on 120 observations sampled in Pemba and Zanzibar channel during the wet and dry season. Table <a href="#tab:tab1">1</a> shows the sampled ten observations of the the dataset. There nine variables, two are factor (channel and season variables) and the other seven are numerical variables.</p>
+<pre class="r"><code>set.seed(1254)
+
+data %&gt;%
+  mutate_if(is.numeric, round, digits = 3) %&gt;% 
+  sample_n(10)%&gt;%
+  kableExtra::kable(format = &quot;html&quot;, caption = &quot;A sample of dataset&quot;, align = &quot;c&quot;) %&gt;%
+  kableExtra::add_header_above(c(&quot;&quot;, &quot;&quot;, &quot;Numerical Variables&quot; = 7)) %&gt;%
+  kableExtra::column_spec(column = 1:2, width = &quot;2cm&quot;, background = &quot;lightblue&quot;) %&gt;%
+  kableExtra::column_spec(3:9, width = &quot;2cm&quot;, background = &quot;pink&quot;)</code></pre>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>A sample of dataset
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="7">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Numerical Variables
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:center;">
+channel
+</th>
+<th style="text-align:center;">
+season
+</th>
+<th style="text-align:center;">
+sst
+</th>
+<th style="text-align:center;">
+pH
+</th>
+<th style="text-align:center;">
+salinity
+</th>
+<th style="text-align:center;">
+do
+</th>
+<th style="text-align:center;">
+chl
+</th>
+<th style="text-align:center;">
+po4
+</th>
+<th style="text-align:center;">
+nitrate
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Pemba
+</td>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Dry
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+28.2
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+8.04
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+35.0
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+5.86
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.001
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.836
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.462
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Zanzibar
+</td>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Wet
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+28.0
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+8.09
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+35.0
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+6.01
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.531
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.420
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.501
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Pemba
+</td>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Wet
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+27.6
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+7.98
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+34.0
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+6.98
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.921
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.166
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.574
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Zanzibar
+</td>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Wet
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+27.8
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+8.10
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+35.0
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+6.26
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.199
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.443
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.391
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Pemba
+</td>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Dry
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+28.6
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+7.94
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+34.8
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+5.20
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.001
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.767
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.511
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Zanzibar
+</td>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Wet
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+28.0
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+8.04
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+34.0
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+6.26
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+1.126
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.397
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.623
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Pemba
+</td>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Dry
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+28.5
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+8.04
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+34.0
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+6.20
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.001
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.767
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.694
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Pemba
+</td>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Dry
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+28.0
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+8.03
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+35.0
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+5.30
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.001
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.698
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.464
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Zanzibar
+</td>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Wet
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+28.0
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+8.05
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+34.8
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+6.00
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.026
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.065
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.550
+</td>
+</tr>
+<tr>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Pemba
+</td>
+<td style="text-align:center;width: 2cm; background-color: lightblue !important;">
+Wet
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+28.9
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+8.06
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+34.5
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+5.34
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.062
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.305
+</td>
+<td style="text-align:center;width: 2cm; background-color: pink !important;">
+0.317
+</td>
+</tr>
+</tbody>
+</table>
+<p>Figure <a href="#fig:scatmatplot">1</a> is a pairplot that compare each pair of variables as scatterplots in the lower diagonal, densities on the diagonal and correlations written in the upper diagonal. I picked <code>spearman</code> rank correlation to evaluate the correlation of environmental variables to chlorophyll concentration at dry and wet season. We notice that physical and chemical variables influence chlorophyll-<em>a</em> either positive or negative at different seasons.</p>
+<pre class="r"><code>require(GGally)
+
+data %&gt;% 
+  GGally::ggscatmat(columns = 3:9 ,color = &quot;season&quot;, corMethod = &quot;spearman&quot;) +
+  ggsci::scale_color_jco()+
+  ggpubr::theme_pubclean()+
+  theme(strip.background = element_rect(fill = &quot;grey90&quot;), 
+        axis.text = element_text(size = 8), 
+        legend.position = &quot;right&quot;,
+        legend.key = element_blank())</code></pre>
+<div class="figure"><span id="fig:scatmatplot"></span>
+<img src="/post/2020-05-13-simple-pca-in-r_files/figure-html/scatmatplot-1.png" alt="A pairplot showing the asoociation of numerical values sampled in dry and wet seeasons" width="672" />
+<p class="caption">
+Figure 1: A pairplot showing the asoociation of numerical values sampled in dry and wet seeasons
+</p>
+</div>
+</div>
+<div id="compute-the-principal-components" class="section level3">
+<h3>Compute the Principal Components</h3>
+<p>PCA prefer numerical data, therefore, we need to trim off the dataset channel and season variables, because they are categorical variables. Once we have removed the categorical variables, we also need to filter variables for a particular season. I will start with the dry season. We use the <code>filter</code> function from <strong>dpyr</strong> <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span> package to drop all observation collected during the rain season.</p>
+<pre class="r"><code>## Dry season
+dry.season = data %&gt;% 
+  filter(season == &quot;Dry&quot;) </code></pre>
+<p>Our dataset is reduced to seven numerical variables and 60 observation collected during the dry season in Pemba and Zanzibar channel. To compute PCA, we simply parse the arguments <code>data = dry.season</code> and <code>scale = TRUE</code> in <code>prcomp()</code> function, which performs a principal components analysis and assign the output as <code>dry.pca</code>.</p>
+<pre class="r"><code>## PCA computation
+dry.pca = dry.season %&gt;% 
+  select(3:9) %&gt;%
+  prcomp(scale. = TRUE, center = TRUE)</code></pre>
+<p>Then We can summarize our PCA object with <code>summary()</code>.</p>
+<pre class="r"><code>dry.pca %&gt;% 
+  summary() </code></pre>
+<pre><code>Importance of components:
+                          PC1    PC2    PC3    PC4    PC5     PC6    PC7
+Standard deviation     1.5046 1.3373 0.9955 0.8483 0.7964 0.63574 0.4459
+Proportion of Variance 0.3234 0.2555 0.1416 0.1028 0.0906 0.05774 0.0284
+Cumulative Proportion  0.3234 0.5789 0.7205 0.8233 0.9139 0.97160 1.0000</code></pre>
+<p>We get seven principal components, called PC1-9. Each of these explains a percentage of the total variation in the dataset. That is to say: <code>PC1</code> explains 32% of the total variance, which means that nearly one-thirds of the information in the dataset can be encapsulated by just that one Principal Component. <code>PC2</code> explains 25% of the variance. So, by knowing the position of a sample in relation to just <code>PC1</code> and <code>PC2</code>, you can get a very accurate view on where it stands in relation to other samples, as just <code>PC1</code> and <code>PC2</code> can explain 57% of the variance.</p>
+</div>
+<div id="plotting-pca" class="section level3">
+<h3>Plotting PCA</h3>
+<p><span class="citation">Kassambara and Mundt (<a href="#ref-factoextra" role="doc-biblioref">2020</a>)</span> developed a <strong>factoextra</strong> package that provide tools to extract and visualize the output of exploratory multivariate data analyses, including PCA <span class="citation">(R Core Team <a href="#ref-r" role="doc-biblioref">2018</a>)</span>. However, in this post will make a <em>biplot</em> using a <strong>ggbiplot</strong> package <span class="citation">(Vu <a href="#ref-ggbiplot" role="doc-biblioref">2011</a>)</span>. A biplot allows to visualize how the samples relate to one another in PCA (which samples are similar and which are different) and simultaneously reveal how each variable contributes to each principal component.</p>
+<p>A <strong>ggbiplot</strong> package is easy to use and offers a user-friendly and pretty function to plot biplots <span class="citation">(Vu <a href="#ref-ggbiplot" role="doc-biblioref">2011</a>)</span>. If <strong>biplot</strong> package is yet in your machine, you can simply install it from github as the code below shows;</p>
+<pre class="r"><code>devtools::install_github(&quot;vqv/ggbiplot&quot;)</code></pre>
+<p>Figure <a href="#fig:fig1">2</a> is a biplot generated using <code>ggbiplot</code> function in the code below. The axes are seen as arrows originating from the center point. Here, you we that the variables <span class="math inline">\(PO_4^{-}\)</span>, <span class="math inline">\(O_2\)</span>, <span class="math inline">\(Chl-a\)</span>, and <span class="math inline">\(NO_3^{-}\)</span> a all contribute to PC1, with higher values in those variables moving the samples to the right on this plot. This lets you see how the data points relate to the axes, but it’s not very informative without knowing which point corresponds to which sample season.</p>
+<pre class="r"><code>dry.pca %&gt;% 
+  ggbiplot::ggbiplot()</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2020-05-13-simple-pca-in-r_files/figure-html/fig1-1.png" alt="A regular biplot" width="672" />
+<p class="caption">
+Figure 2: A regular biplot
+</p>
+</div>
+<p>Since we know the channel the data were collected, we can put the points into Pemba and Zanzibar channels. We can further customize the biplot by parsing argument <code>ellipse = TRUE</code>, which will draw an ellipse around each group. The code below generates figure <a href="#fig:fig2">3</a></p>
+<pre class="r"><code>dry.pca %&gt;% 
+  ggbiplot::ggbiplot(
+    scale = 1, 
+    groups = dry.season$channel, 
+    ellipse = T)</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2020-05-13-simple-pca-in-r_files/figure-html/fig2-1.png" alt="Customized biplot" width="672" />
+<p class="caption">
+Figure 3: Customized biplot
+</p>
+</div>
+<p>A customized figure <a href="#fig:fig2">3</a> reveal a distinct of data for the two channel. By looking on PC, we find that the points and ellipse to the left is purely Pemba channel whereas to the right is Zanzibar channel. Looking at the axes, we also notice that the data at Pemba channel are characterized by low values of sst, phosphate and dissolved oxygen for PC1 and high values of SST PC2. The Zanzibar channel on contrary is characterized with positive values of pH, nitrate and chl for PC1. Salinity and chl are somehow in the middle.</p>
+<p>Of course, we have many principal components available, each of which map differently to the original variables. We can ask <code>ggbiplot</code> to plot these other components, by parsing the <code>choices</code> argument. Figure <a href="#fig:fig3">4</a> was generated using <code>PC5</code> and <code>PC6</code>:</p>
+<pre class="r"><code>dry.pca %&gt;% 
+  ggbiplot::ggbiplot(
+    scale = 1, 
+    groups = dry.season$channel, 
+    choices=c(5,6),
+    ellipse = T)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2020-05-13-simple-pca-in-r_files/figure-html/fig3-1.png" alt="Customized biplot" width="672" />
+<p class="caption">
+Figure 4: Customized biplot
+</p>
+</div>
+<p>We don’t see much in figure <a href="#fig:fig3">4</a> because PC5 and PC6 explain very small percentages of the total variation, so it would be surprising if we found that they were very informative and separated the groups or revealed apparent patterns.</p>
+</div>
+<div id="customize-ggbiplot" class="section level3">
+<h3>Customize <code>ggbiplot</code></h3>
+<p>As <code>ggbiplot</code> is based on the <strong>ggplot</strong> function, you can use the same set of graphical parameters to alter our biplots as you would for any ggplot. For instance, figure <a href="#fig:fig5">5</a> we simply added the reference line with <code>geom_vline</code> and <code>geom_hline()</code>. We also changed from the default to<code>theme_pubclean()</code> from <strong>ggpubr</strong> <span class="citation">(Kassambara <a href="#ref-ggpubr" role="doc-biblioref">2020</a>)</span> and strip off the legend title and position legend to the top of the plot with <code>theme()</code>.</p>
+<pre class="r"><code>dry.pca %&gt;% 
+  ggbiplot::ggbiplot( scale = 1, 
+    groups = dry.season$channel, 
+    ellipse = T) +
+  geom_vline(xintercept = 0, linetype = 3)+
+  geom_hline(yintercept = 0, linetype = 3)+
+  ggpubr::theme_pubclean() + 
+  theme(legend.position = &quot;top&quot;, legend.title = element_blank(), legend.key = element_blank())</code></pre>
+<div class="figure"><span id="fig:fig5"></span>
+<img src="/post/2020-05-13-simple-pca-in-r_files/figure-html/fig5-1.png" alt="Customized biplot" width="672" />
+<p class="caption">
+Figure 5: Customized biplot
+</p>
+</div>
+</div>
+<div id="refeences" class="section level3 unnumbered">
+<h3>Refeences</h3>
+<div id="refs" class="references">
+<div id="ref-ggpubr">
+<p>Kassambara, Alboukadel. 2020. <em>Ggpubr: ’Ggplot2’ Based Publication Ready Plots</em>. <a href="https://CRAN.R-project.org/package=ggpubr">https://CRAN.R-project.org/package=ggpubr</a>.</p>
+</div>
+<div id="ref-factoextra">
+<p>Kassambara, Alboukadel, and Fabian Mundt. 2020. <em>Factoextra: Extract and Visualize the Results of Multivariate Data Analyses</em>. <a href="https://CRAN.R-project.org/package=factoextra">https://CRAN.R-project.org/package=factoextra</a>.</p>
+</div>
+<div id="ref-r">
+<p>R Core Team. 2018. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/">https://www.R-project.org/</a>.</p>
+</div>
+<div id="ref-ggbiplot">
+<p>Vu, Vincent Q. 2011. <em>Ggbiplot: A Ggplot2 Based Biplot</em>. <a href="http://github.com/vqv/ggbiplot">http://github.com/vqv/ggbiplot</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+
