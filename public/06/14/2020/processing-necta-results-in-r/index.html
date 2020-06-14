@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.64.1" />
+
+
+<title>Processing NECTA Results in R - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Processing NECTA Results in R - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">19 min read</span>
+    
+
+    <h1 class="article-title">Processing NECTA Results in R</h1>
+
+    
+    <span class="article-date">2020/06/14</span>
+    
+
+    <div class="article-content">
+      
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<p>The the <a href="https://necta.go.tz">National Examinations Council of Tanzania</a> publishes Primary and Secondary Education Examination Results. But the <a href="https://maktaba.tetea.org/results/">National Library Services</a> archieve this results. While a fantastic resource for history primary and secondary school results, these records are painful to analyze using software because of the grades results is organized is untidy and in messy.</p>
+<p>You need to work on this column of the result to have a clean and right format dataset for exploration and modelling. The <strong>tidyverse</strong> ecocystem has two excellent packages for manipulating files that are not amenable to analysis because of inconsistencies and structure: <strong>tidyr</strong> provides many tools for cleaning up messy data, <strong>dplyr</strong> provides many tools for restructuring data.</p>
+<p>The tables are in HTML tables—a standard way to display tabular information online. But tables on the web are primarily designed for displaying and consuming data, not for analytical purposes. To make working with HTML tables easier and less time-consuming, Christian Rubba <span class="citation">(<a href="#ref-htmltab" role="doc-biblioref">2016</a>)</span> developed a <strong>htmltab</strong> package for the R system that tries to alleviate these problems directly in the parsing stage when the structural information is still available.</p>
+<div id="load-packages" class="section level2">
+<h2>Load Packages</h2>
+<p>This post uses R packages, which are collections of R code that help users code more efficiently. We load these packages with the function <code>require()</code>. The specific packages we’ll use here include <strong>tidyverse</strong> for data manipulation and visualization <span class="citation">(Wickham <a href="#ref-tidyverse" role="doc-biblioref">2017</a>)</span> and <strong>htmltab</strong> to import HTML tables into data frame <span class="citation">(Rubba <a href="#ref-htmltab" role="doc-biblioref">2016</a>)</span> and <strong>readxl</strong> for export of the structured dataset into Excel <span class="citation">(Wickham and Bryan <a href="#ref-readxl" role="doc-biblioref">2018</a>)</span>. If you have not installed any of these packages before, you will need to do so before loading them (if you run the code below prior to installing the packages, you should see a message indicating that the package is not available). If you have installed these before, then you can skip this step.</p>
+<p>You can install these package, as follows:</p>
+<pre class="r"><code>packs = c(&quot;tidyverse&quot;, &quot;htmltab)
+
+install.packages(packs)</code></pre>
+<p>Once you have installed the package, you can simply them into your session using a <code>require()</code> function. Please note that you only need to install the package once, and when is already installed, the next time you want to use it you simply load it into the session.</p>
+<pre class="r"><code>require(tidyverse)
+require(htmltab)</code></pre>
+</div>
+<div id="result" class="section level2">
+<h2>The 2019 Secondary Education Results</h2>
+<p>I will use a 2019 Form IV results to demostrate the idea. The results are hosted at this <a href="https://maktaba.tetea.org/exam-results/CSEE2019/csee.htm">link</a>. Is a HTML table and we can only read this using the right function in R. For this post I will use the <code>htmltab</code> function from <strong>htmltab</strong> package <span class="citation">(Rubba <a href="#ref-htmltab" role="doc-biblioref">2016</a>)</span>. At a minimum, <code>htmltab()</code> needs to be fed the HTML document as well as an information where to find the table in the page. After a bit of testing out , I found that it is the 3<sup>rd</sup> table in the page, so I pass 9 to the which argument:</p>
+<pre class="r"><code>index = htmltab::htmltab(doc = &quot;https://maktaba.tetea.org/exam-results/CSEE2019/csee.htm&quot;, which = 3)</code></pre>
+<p>We can print the dataset to have a glimpse of the ten rows. We notice that the file structure is similar to the table format in the <code>html</code> document. It contains three columns. But the function used the first row observation as the column names. We need to structure the data and ensure Ilboru is one of the observation of the dataset and not the variable name. We give the data its contents</p>
+<pre class="r"><code>index %&gt;%
+  # head() %&gt;%
+  as_tibble()</code></pre>
+</div>
+<div id="index" class="section level2">
+<h2>Create School Index</h2>
+<p>We need to create a data frame that has three columns for school index, school name and the year of exam results. With that dataset will be able to pull results of each school. First we need to change the variable name in the index dataset into rows, there is no straight function to do that particular task, I created a simple function to that for me. This function will return the data frame with columns as observation, which is actually what is suppose to be.</p>
+<pre class="r"><code>var2row = function(x){
+  
+  require(tidyverse)
+  
+  data = x %&gt;% 
+     names() %&gt;% 
+     t() %&gt;% 
+     as_tibble() %&gt;% 
+     rename(column1 = 1, column2 = 2, column3 = 3)
+  
+  return(data)
+}</code></pre>
+<p>Once we have created the function, we can use to create the firs row of observation in the dataset from the index dataset. We simply return the observation in its place</p>
+<pre class="r"><code>firs.row = index %&gt;%
+  var2row()
+
+firs.row</code></pre>
+<p>We can now stitch the first row data we simply created above with the observation in the index dataset. We do that using a<code>bind_rows</code> function from <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span>. We need to change the column names for the <code>index</code> dataset to match those in the firs.row dataset before we bind them.</p>
+<pre class="r"><code>## rename
+index = index %&gt;%
+     rename(column1 = 1, column2 = 2, column3 = 3)
+
+## stitch them together
+index = firs.row %&gt;%
+  bind_rows(index)</code></pre>
+<p>The index structure is in the format widely known as <em>wide format</em>, but we need to transform it to <em>long format</em>. I use a <code>pivot_longer</code> function from <strong>dplyr</strong> package to transform the dataset <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span>.
+`</p>
+<pre class="r"><code>index = index %&gt;% 
+     pivot_longer(cols = 1:3, names_to = &quot;column&quot;, values_to = &quot;school&quot;) 
+
+index</code></pre>
+<p>The <code>pivot_longer</code> function changes the shape of the dataset from three columns to two. It moves the variable names to a <code>new column</code>and all school to a <code>new school column</code>, which contains the index and name of each school as observations.</p>
+<p>We also need to separate the index and school name into separate columns. We can do that using the <code>separate</code> function from <strong>tidyr</strong> package <span class="citation">(Wickham and Henry <a href="#ref-tidyr" role="doc-biblioref">2018</a>)</span>. Careful looking on the index is the mixture of letter and number forming a five number characters. We can use this as a criterion to separate the school into index and name and add a new column using a <code>mutate</code> function form <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span></p>
+<pre class="r"><code>schools.index =  index %&gt;% 
+     select(-column) %&gt;%
+     separate(col = school, into = c(&quot;index&quot;, &quot;name&quot;), sep = 5) %&gt;%
+     mutate(index = tolower(index)) %&gt;% mutate(year = 2019)
+
+schools.index</code></pre>
+</div>
+<div id="dowload-the-schoool-result" class="section level2">
+<h2>Dowload the schoool result</h2>
+<p>In <a href="#result">section</a> we only need to prepare the dataset in a proper format. This index is then used to download the results for each school. The code below will download results for each school results in 2019. Because there are 5000 school results, its tedious to do manually, instead I use the power programming to iterate the process. It use <code>for</code> loop to iterate. The loop create a tag which correspond the <code>HTML</code> url for each school. Once the the tag is created, is fed into the <code>htmltab</code> function, which download the HTML table as data frame. Then the name, index and year columns are added for each school. In summary, the iteration prepare a tag file for each school and download and reorganize the data in tabular form for each school. Once the result for a school is download and organized is stored in the list file that is created as container .</p>
+<pre class="r"><code>necta2019 = list() ## preoccupied file to store list file for each shool results
+
+for (i in 1:nrow(schools.index)){
+  
+  ## create a tag for each school
+  tag = paste0(&quot;https://maktaba.tetea.org/exam-results/CSEE2019/&quot;,schools.index$index[i],&quot;.htm&quot;)
+  
+  ## read a tag and mutate variable for each school
+  necta2019[[i]] = htmltab::htmltab(doc = tag, which = 3)  %&gt;%
+      mutate(index = schools.index$index[i],
+             school = schools.index$name[i], 
+             year = schools.index$year[i]) %&gt;% 
+        as_tibble()
+
+}</code></pre>
+</div>
+<div id="create-table-from-a-list" class="section level2">
+<h2>Create table from a list</h2>
+<p>The function <code>bind_rows</code> was used to stitch together all table in the list necta2019 into a large single tibble file. Once the tibble is created, a <code>clean_names</code> function from <strong>janitor</strong> packages takes messy column names that have periods, capitalized letters, spaces, etc. into meaningful column names.</p>
+<pre class="r"><code>necta2019 = necta2019 %&gt;% 
+  bind_rows() %&gt;% 
+  janitor::clean_names() %&gt;%
+  rename(school = schoo1)
+
+necta2019 %&gt;%
+  glimpse()</code></pre>
+<pre><code>Rows: 482,545
+Columns: 8
+$ cno               &lt;chr&gt; &quot;P0101/0001&quot;, &quot;P0101/0002&quot;, &quot;P0101/0003&quot;, &quot;P0101/...
+$ sex               &lt;chr&gt; &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;,...
+$ aggt              &lt;chr&gt; &quot;-&quot;, &quot;-&quot;, &quot;-&quot;, &quot;-&quot;, &quot;-&quot;, &quot;-&quot;, &quot;-&quot;, &quot;-&quot;, &quot;-&quot;, &quot;-&quot;,...
+$ div               &lt;chr&gt; &quot;IV&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;0&quot;, &quot;IV&quot;, &quot;0&quot;, &quot;IV&quot;, &quot;IV&quot;, ...
+$ detailed_subjects &lt;chr&gt; &quot;HIST - &#39;C&#39;   GEO - &#39;F&#39;   ENGL - &#39;D&#39;   LIT ENG - ...
+$ index             &lt;chr&gt; &quot;p0101&quot;, &quot;p0101&quot;, &quot;p0101&quot;, &quot;p0101&quot;, &quot;p0101&quot;, &quot;p01...
+$ school            &lt;chr&gt; &quot; AZANIA  CENTRE&quot;, &quot; AZANIA  CENTRE&quot;, &quot; AZANIA  C...
+$ year              &lt;dbl&gt; 2019, 2019, 2019, 2019, 2019, 2019, 2019, 2019, 2...</code></pre>
+</div>
+<div id="tidy-the-data" class="section level2">
+<h2>Tidy the data</h2>
+<p>When we glimpse, we see that the dataset now has results of 482545 individuals and 8 variables including:</p>
+<ul>
+<li>cno: center of candidate</li>
+<li>sex: gender of candidate</li>
+<li>aggt: aggregated marks</li>
+<li>div: the division a candidate scored in the exm</li>
+<li>detailed_subjects: the grade for each subjects a candidate scored in the results</li>
+<li>index: school index</li>
+<li>school: name of the school</li>
+<li>year: the year of the exam</li>
+</ul>
+<p>The internal structure of the dataset shows that the aggregate are character format, while they are suppose to be integer. The subject is a categorical variable—a descriptive type of variable with multiple levels for which the levels signify grade level (table <a href="#tab:tab1">1</a>). unfortunately, the way this data is organized make analysis impossible, unless structured and untidy to the right format that analytical tools can understand.</p>
+<p>The messy state of this file mirrors the challenge of data obtained from other sources. The dataset contains more than one variables we don’t need, and uses column names that have spaces between words. The subject grades are poled in one column. All these things make the data tough to work with.</p>
+<table class="table table-striped" style="font-size: 12px; width: auto !important; ">
+<caption style="font-size: initial !important;">
+<span id="tab:tab1">Table 1: </span>A sample for 2019 CSEE results dataset
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Candidate
+Number
+</th>
+<th style="text-align:left;">
+Gender
+</th>
+<th style="text-align:left;">
+Aggregation
+</th>
+<th style="text-align:left;">
+Division
+</th>
+<th style="text-align:left;">
+Subjects and Grades
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+S5394/0009
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+23
+</td>
+<td style="text-align:left;">
+III
+</td>
+<td style="text-align:left;">
+CIV - ‘C’ HIST - ‘C’ GEO - ‘D’ KISW - ‘C’ ENGL - ‘D’ PHY - ‘F’ CHEM - ‘C’ BIO - ‘C’ B/MATH - ‘F’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S2216/0096
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+24
+</td>
+<td style="text-align:left;">
+III
+</td>
+<td style="text-align:left;">
+CIV - ‘D’ HIST - ‘D’ GEO - ‘C’ KISW - ‘B’ ENGL - ‘D’ CHEM - ‘D’ BIO - ‘C’ B/MATH - ‘F’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S1051/0150
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+14
+</td>
+<td style="text-align:left;">
+I
+</td>
+<td style="text-align:left;">
+CIV - ‘B’ HIST - ‘C’ GEO - ‘B’ KISW - ‘A’ ENGL - ‘B’ PHY - ‘C’ CHEM - ‘C’ BIO - ‘B’ B/MATH - ‘B’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S2142/0013
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+21
+</td>
+<td style="text-align:left;">
+II
+</td>
+<td style="text-align:left;">
+CIV - ‘C’ HIST - ‘C’ GEO - ‘C’ KISW - ‘B’ ENGL - ‘C’ PHY - ‘D’ CHEM - ‘D’ BIO - ‘C’ B/MATH - ‘D’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S1941/0103
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+33
+</td>
+<td style="text-align:left;">
+IV
+</td>
+<td style="text-align:left;">
+CIV - ‘F’ HIST - ‘F’ GEO - ‘F’ KISW - ‘F’ ENGL - ‘D’ BIO - ‘D’ B/MATH - ‘F’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S3226/0294
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+27
+</td>
+<td style="text-align:left;">
+IV
+</td>
+<td style="text-align:left;">
+CIV - ‘D’ HIST - ‘D’ GEO - ‘D’ KISW - ‘C’ ENGL - ‘C’ BIO - ‘D’ B/MATH - ‘F’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S2178/0011
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+25
+</td>
+<td style="text-align:left;">
+III
+</td>
+<td style="text-align:left;">
+CIV - ‘D’ HIST - ‘D’ GEO - ‘D’ KISW - ‘C’ ENGL - ‘C’ CHEM - ‘C’ BIO - ‘D’ B/MATH - ‘D’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S1776/0020
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+34
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+CIV - ‘F’ HIST - ‘F’ GEO - ‘F’ KISW - ‘D’ ENGL - ‘F’ BIO - ‘F’ B/MATH - ‘F’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+P1304/0013
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+35
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+CIV - ‘F’ HIST - ‘F’ GEO - ‘F’ E/D/KIISLAMU - ‘F’ KISW - ‘F’ ENGL - ‘F’ BIO - ‘F’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S0744/0080
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+31
+</td>
+<td style="text-align:left;">
+IV
+</td>
+<td style="text-align:left;">
+CIV - ‘D’ HIST - ‘F’ GEO - ‘F’ KISW - ‘C’ ENGL - ‘D’ BIO - ‘F’ B/MATH - ‘F’
+</td>
+</tr>
+</tbody>
+</table>
+<p>Since the candidate are grouped either <code>private</code> or <code>school</code> candiate, we need to separate the <code>cno</code> column into the two groups. This will allow later to analyse separate the private and from school candidate. We separate the column with the <code>separate</code> function from <strong>tidyr</strong> package and then select only the variable of interest wit <code>select</code> function from <strong>dplyr</strong> package.</p>
+<pre class="r"><code>necta.tb = necta2019 %&gt;%
+  separate(col = cno, into = c(&quot;center&quot;, &quot;index&quot;), sep = &quot;/&quot;, remove = FALSE) %&gt;%
+  separate(col = center, into = c(&quot;center_type&quot;, &quot;a&quot;), sep = 1) %&gt;%
+  select(school, center_type, sex, aggt, div, subjects = detailed_subjects) 
+
+necta.tb</code></pre>
+<pre><code># A tibble: 482,545 x 6
+   school       center_type sex   aggt  div   subjects                          
+   &lt;chr&gt;        &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;                             
+ 1 &quot; AZANIA  C~ P           F     -     IV    HIST - &#39;C&#39;   GEO - &#39;F&#39;   ENGL - &#39;~
+ 2 &quot; AZANIA  C~ P           F     -     0     PHY - &#39;F&#39;   CHEM - &#39;D&#39;   BIO - &#39;F~
+ 3 &quot; AZANIA  C~ P           F     -     0     CIV - &#39;F&#39;   HIST - &#39;F&#39;   GEO - &#39;F~
+ 4 &quot; AZANIA  C~ P           F     -     0     PHY - &#39;D&#39;   B/MATH - &#39;F&#39;          
+ 5 &quot; AZANIA  C~ P           F     -     0     CIV - &#39;D&#39;   HIST - &#39;F&#39;   GEO - &#39;F~
+ 6 &quot; AZANIA  C~ P           F     -     IV    CIV - &#39;C&#39;   HIST - &#39;C&#39;   GEO - &#39;D&#39;
+ 7 &quot; AZANIA  C~ P           F     -     0     CIV - &#39;D&#39;   GEO - &#39;F&#39;   BIO - &#39;F&#39;~
+ 8 &quot; AZANIA  C~ P           F     -     IV    HIST - &#39;F&#39;   GEO - &#39;F&#39;   KISW - &#39;~
+ 9 &quot; AZANIA  C~ P           F     -     IV    PHY - &#39;D&#39;   CHEM - &#39;D&#39;   B/MATH -~
+10 &quot; AZANIA  C~ P           F     -     0     PHY - &#39;F&#39;   CHEM - &#39;F&#39;   BIO - &#39;F&#39;
+# ... with 482,535 more rows</code></pre>
+<p>We also notice that a <code>aggt</code> variable for some candidate is filled with <code>-</code>. Looking at this variable, I noticed that these are missing values and are supposed to denoted as <code>NA</code> instead of <code>-</code>. Therefore, we need to convert these values into NA. <strong>dplyr</strong> has a function called <code>na_if</code> which does the work as shown in the chunk below. We only need to specify the symbol that we want to change to NA.</p>
+<pre class="r"><code>necta.tb = necta.tb %&gt;%
+  na_if(&quot;-&quot;)
+
+necta.tb</code></pre>
+<pre><code># A tibble: 482,545 x 6
+   school       center_type sex   aggt  div   subjects                          
+   &lt;chr&gt;        &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;                             
+ 1 &quot; AZANIA  C~ P           F     &lt;NA&gt;  IV    HIST - &#39;C&#39;   GEO - &#39;F&#39;   ENGL - &#39;~
+ 2 &quot; AZANIA  C~ P           F     &lt;NA&gt;  0     PHY - &#39;F&#39;   CHEM - &#39;D&#39;   BIO - &#39;F~
+ 3 &quot; AZANIA  C~ P           F     &lt;NA&gt;  0     CIV - &#39;F&#39;   HIST - &#39;F&#39;   GEO - &#39;F~
+ 4 &quot; AZANIA  C~ P           F     &lt;NA&gt;  0     PHY - &#39;D&#39;   B/MATH - &#39;F&#39;          
+ 5 &quot; AZANIA  C~ P           F     &lt;NA&gt;  0     CIV - &#39;D&#39;   HIST - &#39;F&#39;   GEO - &#39;F~
+ 6 &quot; AZANIA  C~ P           F     &lt;NA&gt;  IV    CIV - &#39;C&#39;   HIST - &#39;C&#39;   GEO - &#39;D&#39;
+ 7 &quot; AZANIA  C~ P           F     &lt;NA&gt;  0     CIV - &#39;D&#39;   GEO - &#39;F&#39;   BIO - &#39;F&#39;~
+ 8 &quot; AZANIA  C~ P           F     &lt;NA&gt;  IV    HIST - &#39;F&#39;   GEO - &#39;F&#39;   KISW - &#39;~
+ 9 &quot; AZANIA  C~ P           F     &lt;NA&gt;  IV    PHY - &#39;D&#39;   CHEM - &#39;D&#39;   B/MATH -~
+10 &quot; AZANIA  C~ P           F     &lt;NA&gt;  0     PHY - &#39;F&#39;   CHEM - &#39;F&#39;   BIO - &#39;F&#39;
+# ... with 482,535 more rows</code></pre>
+</div>
+<div id="unpack-the-subjects" class="section level2">
+<h2>Unpack the subjects</h2>
+<p>The messy in this dataset is the subject column. Because the column combine the subjects and grades, separated with a <code>hyphen</code> (Table <a href="#tab:tab2">2</a>). We need to unpack this column so that each subjects bear its column and the corresponding values—grade for each candidate are treated as observations. This is where the <strong>stringr</strong> package comes into play <span class="citation">(Wickham <a href="#ref-stringr" role="doc-biblioref">2019</a>)</span>.</p>
+<table class="table table-striped" style="font-size: 12px; width: auto !important; ">
+<caption style="font-size: initial !important;">
+<span id="tab:tab2">Table 2: </span>A sample for 2019 CSEE results dataset
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+sex
+</th>
+<th style="text-align:left;">
+Division
+</th>
+<th style="text-align:left;">
+Subjects
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+III
+</td>
+<td style="text-align:left;">
+CIV - ‘C’ HIST - ‘D’ GEO - ‘C’ KISW - ‘C’ ENGL - ‘C’ CHEM - ‘D’ BIO - ‘C’ B/MATH - ‘F’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+III
+</td>
+<td style="text-align:left;">
+CIV - ‘C’ HIST - ‘C’ GEO - ‘D’ KISW - ‘C’ ENGL - ‘C’ BIO - ‘D’ B/MATH - ‘F’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+II
+</td>
+<td style="text-align:left;">
+CIV - ‘C’ HIST - ‘C’ GEO - ‘C’ E/D/KIISLAMU - ‘C’ KISW - ‘B’ ENGL - ‘C’ CHEM - ‘D’ BIO - ‘C’ B/MATH - ‘F’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+II
+</td>
+<td style="text-align:left;">
+CIV - ‘C’ HIST - ‘C’ GEO - ‘C’ B/KNOWL - ‘C’ KISW - ‘B’ ENGL - ‘C’ LIT ENG - ‘C’ BIO - ‘C’ B/MATH - ‘D’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+IV
+</td>
+<td style="text-align:left;">
+CIV - ‘D’ GEO - ‘F’ ENGL - ‘D’ B/MATH - ‘F’ COMM - ‘D’ B/KEEPING - ‘C’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+IV
+</td>
+<td style="text-align:left;">
+CIV - ‘F’ GEO - ‘F’ E/D/KIISLAMU - ‘D’ KISW - ‘D’ ENGL - ‘D’ ARABIC LANGUAGE - ‘F’ PHY - ‘F’ CHEM - ‘F’ BIO - ‘F’ B/MATH - ‘F’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+I
+</td>
+<td style="text-align:left;">
+CIV - ‘B’ HIST - ‘C’ GEO - ‘C’ B/KNOWL - ‘B’ KISW - ‘B’ ENGL - ‘A’ BIO - ‘C’ B/MATH - ‘C’ COMM - ‘C’ B/KEEPING - ‘C’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+III
+</td>
+<td style="text-align:left;">
+CIV - ‘C’ HIST - ‘D’ GEO - ‘D’ KISW - ‘B’ ENGL - ‘C’ LIT ENG - ‘D’ BIO - ‘D’ B/MATH - ‘F’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+I
+</td>
+<td style="text-align:left;">
+CIV - ‘A’ HIST - ‘A’ GEO - ‘A’ KISW - ‘A’ ENGL - ‘B’ PHY - ‘A’ CHEM - ‘A’ BIO - ‘A’ B/MATH - ‘A’
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+IV
+</td>
+<td style="text-align:left;">
+CIV - ‘F’ HIST - ‘F’ GEO - ‘F’ KISW - ‘C’ ENGL - ‘C’ BIO - ‘F’ B/MATH - ‘F’
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="create-location-index-of-each-subject" class="section level2">
+<h2>Create location index of each subject</h2>
+<p>To separate grade and subjects, we need first to identify the locations of subjects and grade for each individual. I noticed that the location of subject for each individuals differs based on whether the candidate is private or school. The other thing make this separation hard is the present of whitespace in the subject variable. After exploring the dataset with <code>str_locate</code> function from <strong>stringr</strong>, I realized for each subjects there area bout four whitespace, and the number of each subjects differs depend on the whether the abbreviation used three letters (i.e CIV) or four letters(ie. ENGL). Therefore, I created a vector that contains the common subjects and assign it a name as <code>subjects.common</code>. I also created a vector that represent the number of character of that particular subjects and assign it a names <code>subjects.letters</code>. Lastly I added the number of spaces into the <code>subjects.letters</code>. With this small technique, I was able to detect the position of grade of each subject. Because of the number of subjects selected were 9 and the number of individuals are 482545 making a of 4.34290510^{6} observations. That’s is a lot if I have to do it by clicking the mouse for each individual.</p>
+<p>To overcome this challenge, I use the power of programming to tell a computer what to do for us with a <code>loop</code>. Before looping, a pre–container file was created that will store the subject location</p>
+<pre class="r"><code>subjects = necta.tb %&gt;%
+  # slice(1:10) %&gt;% 
+  pull(subjects)
+
+## create a vector of the common subjects you need to extract
+subjects.common = c(&quot;CIV&quot;, &quot;HIST&quot;, &quot;GEO&quot;, &quot;KISW&quot;, &quot;ENGL&quot;, &quot;PHY&quot;, &quot;CHEM&quot;, &quot;BIO&quot;, &quot;B/MATH&quot;)
+## count and create a vector of number of character for each subject
+subjects.letters = c(3,4,3,4,4,3,4,3,6)
+## we notice that each subject has four white space, so we add them in subjects.letters
+somo.letters = subjects.letters+4
+
+
+grade.location = list()
+
+for (j in 1:length(subjects.common)){
+  
+  grade.location[[j]] = subjects %&gt;% 
+    str_locate(pattern = subjects.common[j]) %&gt;% 
+    as_tibble() %&gt;% 
+    mutate(start = start+somo.letters[j], end = start, 
+           subject = subjects.common[j])
+  
+}
+
+grade.location = grade.location %&gt;% bind_rows()</code></pre>
+<pre class="r"><code>grade.location %&gt;% drop_na() %&gt;% group_by(subject) %&gt;% slice(1,n())</code></pre>
+<pre><code># A tibble: 18 x 3
+# Groups:   subject [9]
+   start   end subject
+   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  
+ 1    48    48 B/MATH 
+ 2   111   111 B/MATH 
+ 3    33    33 BIO    
+ 4    96    96 BIO    
+ 5    21    21 CHEM   
+ 6    84    84 CHEM   
+ 7     8     8 CIV    
+ 8     8     8 CIV    
+ 9    34    34 ENGL   
+10    59    59 ENGL   
+11    21    21 GEO    
+12    33    33 GEO    
+13     9     9 HIST   
+14    21    21 HIST   
+15    34    34 KISW   
+16    46    46 KISW   
+17     8     8 PHY    
+18    71    71 PHY    </code></pre>
+</div>
+<div id="create-new-subjects-variables" class="section level2">
+<h2>Create New Subjects Variables</h2>
+<p>Once we have established the locations for grades for each individual, we can use them to extract the grades and assign them to the respective subject column. Because of big number of observations to process, we iterate the process again with a for loop. But rather than using the pre–occupied contain, this time we simply extract the grades for particular subjects and bind them as column to the main dataset. The code below contains lines that was used to extract nine subjects of 482545 candindate who sat for NAtional Exams in 2019.</p>
+<pre class="r"><code>necta.tb = necta.tb %&gt;% select(1:6)
+
+for (i in 1:length(subjects.common)){
+  
+      ## choose the subject to extract grades
+      somo = grade.location %&gt;% filter(subject == subjects.common[i])
+      ## what is the name of the subject, we use it to rename the tibble later
+      kijisomo = subjects.common[i]
+      
+      ## extract the grades and put in the tibble
+      mh = str_sub(string = subjects, start = somo$start, end = somo$end) %&gt;% as_tibble()
+      ## change colonames
+      colnames(mh) = kijisomo
+      
+      ## stitch the subject into the dataset as a new column
+      necta.tb = necta.tb %&gt;% bind_cols(mh)
+      
+
+}</code></pre>
+<p>Table <a href="#tab:tab3">3</a> shows the grades each individual scored for each subjects separated into columns. Candidates who never sat for a particular subject are assigned with NA for missing value. This dataset is in the right format now and can help us answer several questions.</p>
+<table class="table table-striped" style="font-size: 12px; width: auto !important; ">
+<caption style="font-size: initial !important;">
+<span id="tab:tab3">Table 3: </span>Results o 2019 CSEE candindate with subjects separated into individual column
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+school
+</th>
+<th style="text-align:left;">
+center_type
+</th>
+<th style="text-align:left;">
+sex
+</th>
+<th style="text-align:left;">
+aggt
+</th>
+<th style="text-align:left;">
+div
+</th>
+<th style="text-align:left;">
+CIV
+</th>
+<th style="text-align:left;">
+HIST
+</th>
+<th style="text-align:left;">
+GEO
+</th>
+<th style="text-align:left;">
+KISW
+</th>
+<th style="text-align:left;">
+ENGL
+</th>
+<th style="text-align:left;">
+PHY
+</th>
+<th style="text-align:left;">
+CHEM
+</th>
+<th style="text-align:left;">
+BIO
+</th>
+<th style="text-align:left;">
+B/MATH
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+MWANTINI
+</td>
+<td style="text-align:left;">
+S
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+22
+</td>
+<td style="text-align:left;">
+III
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+B
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+F
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+USHETU
+</td>
+<td style="text-align:left;">
+S
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+35
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ITWANGI
+</td>
+<td style="text-align:left;">
+S
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+IV
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IBUNGILA
+</td>
+<td style="text-align:left;">
+S
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+22
+</td>
+<td style="text-align:left;">
+III
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+B
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+F
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MPANDA NDOGO
+</td>
+<td style="text-align:left;">
+S
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+33
+</td>
+<td style="text-align:left;">
+IV
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IYOGELO
+</td>
+<td style="text-align:left;">
+S
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+24
+</td>
+<td style="text-align:left;">
+III
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+F
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+JAPAN
+</td>
+<td style="text-align:left;">
+S
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+26
+</td>
+<td style="text-align:left;">
+IV
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+F
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MKOMBOZI
+</td>
+<td style="text-align:left;">
+S
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+27
+</td>
+<td style="text-align:left;">
+IV
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+F
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NYUKI
+</td>
+<td style="text-align:left;">
+S
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+33
+</td>
+<td style="text-align:left;">
+IV
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+D
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SENGEREMA T.R.C. CENTRE
+</td>
+<td style="text-align:left;">
+P
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:left;">
+35
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:left;">
+F
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>In this post we have seen how to obtain HTML table archives exam results using <strong>htmltab</strong> package <span class="citation">(Rubba <a href="#ref-htmltab" role="doc-biblioref">2016</a>)</span> and process in R using <strong>tidyverse</strong> <span class="citation">(Wickham <a href="#ref-tidyverse" role="doc-biblioref">2017</a>)</span> and <strong>janitor</strong> packages [<span class="citation">Firke (<a href="#ref-janitor" role="doc-biblioref">2020</a>)</span>}. The main point that I emphasize is that we must focus on how to separate grades from subjects. This is useful because it open the doors for advanced analysis in the education system in Tanzania and we might grasp some insights that are bundled in this important variable. So check the power of tools in <strong>stringr</strong> packages <span class="citation">(Wickham <a href="#ref-stringr" role="doc-biblioref">2019</a>)</span>that helped us to overcome the hurdle os bundled grades in subject variables. Until next time, wish you all the best in your data for education with a bonus code below that used to generate figure <a href="#fig:fig3">1</a> that show the number of candidate who major either in science or arts subjects for 2019.</p>
+<pre class="r"><code>necta.tb %&gt;% 
+  filter(center_type == &quot;S&quot; &amp; sex %in% c(&quot;F&quot;, &quot;M&quot;) &amp; div %in% c(&quot;I&quot;, &quot;II&quot;, &quot;III&quot;, &quot;IV&quot;, &quot;0&quot;)) %&gt;% 
+  mutate(major = if_else(is.na(PHY), &quot;ART&quot;, &quot;SCIENCE&quot;)) %&gt;%
+  # group_by(sex, major) %&gt;%
+  # summarise(count = n())%&gt;%
+  # ungroup()%&gt;%
+  # mutate(percentage = count/sum(count) *100) %&gt;%
+  ggplot()+
+  geom_bar(aes(x = sex, fill = major), position = position_dodge(.9))+
+  ggsci::scale_fill_jama(name = &quot;Major\nsubject&quot;)+
+  facet_wrap(~div,  nrow = 1)+
+  # coord_cartesian(expand = c(1000,0))+ 
+  ggpubr::theme_pubclean()+
+  theme(legend.position = &quot;right&quot;, legend.key.height = unit(1,&quot;lines&quot;),
+        legend.key.width = unit(1,&quot;lines&quot;), strip.background = element_blank(), panel.background = element_rect(colour = 1, fill = NA, size = .2))+
+  labs(y = &quot;candindates&quot;)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2020-06-14-processing-necta-results-in-r_files/figure-html/fig3-1.png" alt="Number of candidate major either in sciene and arts subjects based on gender" width="768" />
+<p class="caption">
+Figure 1: Number of candidate major either in sciene and arts subjects based on gender
+</p>
+</div>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-janitor">
+<p>Firke, Sam. 2020. <em>Janitor: Simple Tools for Examining and Cleaning Dirty Data</em>. <a href="https://CRAN.R-project.org/package=janitor">https://CRAN.R-project.org/package=janitor</a>.</p>
+</div>
+<div id="ref-htmltab">
+<p>Rubba, Christian. 2016. <em>Htmltab: Assemble Data Frames from Html Tables</em>. <a href="https://CRAN.R-project.org/package=htmltab">https://CRAN.R-project.org/package=htmltab</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, Hadley. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+<div id="ref-stringr">
+<p>———. 2019. <em>Stringr: Simple, Consistent Wrappers for Common String Operations</em>. <a href="https://CRAN.R-project.org/package=stringr">https://CRAN.R-project.org/package=stringr</a>.</p>
+</div>
+<div id="ref-readxl">
+<p>Wickham, Hadley, and Jennifer Bryan. 2018. <em>Readxl: Read Excel Files</em>. <a href="https://CRAN.R-project.org/package=readxl">https://CRAN.R-project.org/package=readxl</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+<div id="ref-tidyr">
+<p>Wickham, Hadley, and Lionel Henry. 2018. <em>Tidyr: Easily Tidy Data with ’Spread()’ and ’Gather()’ Functions</em>. <a href="https://CRAN.R-project.org/package=tidyr">https://CRAN.R-project.org/package=tidyr</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

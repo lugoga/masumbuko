@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>NECTA on Masumbuko Semba&#39;s Blog</title>
+    <link>/tags/necta/</link>
+    <description>Recent content in NECTA on Masumbuko Semba&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 14 Jun 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/necta/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Processing NECTA Results in R</title>
+      <link>/06/14/2020/processing-necta-results-in-r/</link>
+      <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/06/14/2020/processing-necta-results-in-r/</guid>
+      <description>The the National Examinations Council of Tanzania publishes Primary and Secondary Education Examination Results. But the National Library Services archieve this results. While a fantastic resource for history primary and secondary school results, these records are painful to analyze using software because of the grades results is organized is untidy and in messy.
+You need to work on this column of the result to have a clean and right format dataset for exploration and modelling.</description>
+    </item>
+    
+  </channel>
+</rss>

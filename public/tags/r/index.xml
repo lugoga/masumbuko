@@ -6,10 +6,20 @@
     <description>Recent content in R on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 13 May 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 14 Jun 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Processing NECTA Results in R</title>
+      <link>/06/14/2020/processing-necta-results-in-r/</link>
+      <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/06/14/2020/processing-necta-results-in-r/</guid>
+      <description>The the National Examinations Council of Tanzania publishes Primary and Secondary Education Examination Results. But the National Library Services archieve this results. While a fantastic resource for history primary and secondary school results, these records are painful to analyze using software because of the grades results is organized is untidy and in messy.
+You need to work on this column of the result to have a clean and right format dataset for exploration and modelling.</description>
+    </item>
     
     <item>
       <title>A simple Principal Component Analysis (PCA) in R </title>
