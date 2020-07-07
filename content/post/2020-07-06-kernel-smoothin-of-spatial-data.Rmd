@@ -1,0 +1,162 @@
+---
+title: Kernel smoothing of Spatial Data
+author: Masumbuko Semba
+date: '2020-07-06'
+slug: kernel-smoothin-of-spatial-data
+categories:
+  - Oceanography
+  - R
+  - MODIS
+  - satellite
+  - Statistics
+tags:
+  - Satellite
+  - MODIS
+  - Masumbuko Semba
+  - PFZ
+  - Tanzania
+  - EEZ
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "", results = "hide")
+
+```
+
+Kernel density estimation is a popular tool for visualizing the distribution of data. In this post, we are going to look on how to create smoothed map of random points. We will use a shapefile dataset that contains potential fishing zones derived from sea surface temperature recorded between January and June 2020 in Pemba channel. You can simply download the file from this [link](https://github.com/lugoga/masumbuko/raw/master/content/post/pfz.rar). 
+
+Once you have downloaded the file, unzip and browse in the uncompressed file you find the shapefile `pfz.shp` (together with it’s corresponding `.DBF`. `.PRJ` and `.SHX` files). Set the folder containing these files as your R working directory.You will need to load three packages shown in the chunk below to accomplish this exercise. If these packages are not installed in your machine, you can install them with `install.packages()`.
+
+```{r}
+require(sf)
+require(btb)
+require(tidyverse)
+```
+
+Once we have uncompressed the file, we can use `st_read()` function to read the file [@sf].
+
+```{r}
+fronts.polygons = st_read("pfz/pfz.shp", quiet = TRUE)
+
+fronts.polygons
+```
+
+A glimpse of a dataset tell us that this dataset is a simple feature with `r nrow(fronts.polygons)` polygon features [@tidyr]. These features are projected in Universal Transverse Mercator Zone 37 South [@sf]. The dataset has date which tell us the data of the fronts. The source variable is of no meaning and we can skip for now. 
+
+Since the polygon are in UTM, we can compute the area of each polygon with `st_area()` function [@sf]. We compute areas in square kilometer and filter out the area of the Exclusive Economic Zone from the dataset [@janitor; @dplyr]. 
+
+```{r}
+fronts.polygons.area = fronts.polygons %>%
+  mutate(area_km2 = as.numeric(st_area(geometry)/1000000),
+         month = lubridate::month(date, label = TRUE))%>% filter(area_km2 < 200000)
+```
+
+We then converting the polygon into point by using the `st_cast()` function
+```{r}
+fronts.points.wgs = fronts.polygons.area %>%
+   # st_crop(xmin = 38, ymin = -6, xmax = 40, ymax = -4)%>%
+  # st_transform(4326)  %>%
+  st_cast("POINT") %>%
+   mutate(month = lubridate::month(date, label = TRUE))
+```
+
+## Kernel Smoothin of PFZ
+The `kernelSmoothing()` function allows to square and smooth geolocated data points [@btb]. It calculates a classical kernel smoothing (conservative) or a geographically weighted median. There are four major call modes of the function. The first call mode is kernelSmoothing(obs, epsg, cellsize, bandwith) for a classical kernel smoothing and automatic grid. The second call mode is kernelSmoothing(obs, epsg, cellsize, bandwith, quantiles) for a geographically weighted median and automatic grid. The third call mode is kernelSmoothing(obs, epsg, cellsize, bandwith, centroids) for a classical kernel smoothing and user grid. The fourth call mode is kernelSmoothing(obs, epsg, cellsize, bandwith, quantiles, centroids) for a geographically weighted median and user grid.
+
+For this post, we will focus on the first call that only square and smooth geolocated potential fishing zones and compute the total number that fall in each grid. Before we compute we need first to convert the points from the simple feature to tibble that contains `eastings (x)`, `northings (y)` to allow the `kernelSmoothing()` function to work. Unfortunate, the function throw an error when only two variables are provided, hence I had to compute the area to make a third column, though not usef in the analysis. 
+
+```{r}
+
+fronts.points.tb = fronts.points.wgs %>% 
+  st_coordinates() %>%
+  as_tibble() %>%
+  rename(x = X, y = Y) %>%
+  mutate(area = fronts.points.wgs$area_km2) 
+
+```
+
+Once the file is created, we can smooth into grid with the kernelSmoothing by passing the four arguments, a `sEPSG` is projection code and for our case the code for the area is `32737`. The second argument is `iCellSize` which define the length and width of the grid, for this case I chose 10000 (~10km). A iCellSize value must be in the same unit as the northings and eastings. for our case is in meters. 
+
+A third argument in the function i a `iBandwidth`, which is the radius of the Kernel Density. This bandwidth acts as a smoothing parameter, controlling the balance between bias and variance. A large bandwidth leads to a very smooth (i.e. high-bias) density distribution. A small bandwidth leads to an unsmooth (i.e. high-variance) density distribution. The unit of measurement is free. It must be the same as the unit of iCellSize variable. The last argument is a `vQuantiles`, which compute values that relate to the rank order of values in that distribution. This will calculate the third variable in our dataset(area) into the 10,50 and 90^th^ quantile. As mentioned earlier, it is not useful for area, but is useful is other variables are of interest. 
+
+The output of the `kernelSmoothing` is a simple feature in UTM coordinates, hence we need to convert to Geographical Coordinate System using `st_transform` function. The `EPSG` code for `WGS84` is 4326, which is parsed in the argument. 
+
+
+```{r}
+
+fronts.smoothed = fronts.points.tb %>%
+  kernelSmoothing(sEPSG = "32737",
+                  iCellSize = 10000L,
+                  iBandwidth = 20000L,
+                  vQuantiles = c(0.1, 0.5, 0.9)) %>%
+  st_transform(4326) %>%
+  st_as_sf() 
+
+```
+
+```{r, echo=FALSE}
+
+tz.ke = st_read("e:/Data Manipulation/Deep sea/data/africa.shp", quiet = TRUE) %>% 
+  filter(CNTRY_NAME %in% c("Tanzania", "Kenya"))
+```
+
+## Visualizing
+TWe can then plot the spatial distribution of smoothed potential fishing zones using ggplot2. Figure \@ref(fig:fig1) that show variation of PFZ in the Pemba channel was generated using the code below; 
+
+```{r fig1, fig.width=4.5, fig.height=5, fig.cap="Spatial Distribution of Potential fishing zones in the Pemba channel. Color codes using Viridis pallete"}
+
+fronts.smoothed %>%
+  st_crop(xmin = 38, ymin = -6.5, xmax = 41, ymax = -3) %>%
+  ggplot() +
+  geom_sf(aes(fill = nbObs), col = NA)+
+  geom_sf(data = tz.ke, fill = "grey80") +
+  coord_sf(xlim = c(38.6, 39.8), ylim = c(-6,-4.6))+
+  # scale_fill_gradientn(colours = mycolor, breaks = seq(0,110,10), name = "Number\nof PFZs",
+  #                      guide = guide_colorbar(reverse = TRUE, nbin = 11, raster = FALSE,barheight = unit(6,"cm")))+
+  scale_fill_viridis_c() +
+  metR::scale_x_longitude(ticks = 0.4)+
+  metR::scale_y_latitude(breaks = seq(-5.8,-4.8, length.out = 4) %>% round(1))+
+  theme_bw() +
+  theme(legend.position = c(0.13,.45),
+        axis.text = element_text(size = 11, colour = "black"),
+        legend.background = element_rect(fill = "grey83")) +
+  ggspatial::annotation_north_arrow(location = "tl", width = unit(.75, "cm"), height = unit(.75, "cm"))+
+  ggspatial::annotation_scale(location = "bl", text_cex = .9)
+```
+
+Though figure \@ref(fig:fig1) clearly indicate that the areas with high and low density of fishing zones, but the color code might hide some crues. To enhance this, after several trial, I came up with my color code below that was used to plot figure \@ref(fig:fig2)). 
+
+```{r}
+mycolor = c("#7f007f", "#0000ff",  "#007fff", "#00ffff", "#00bf00", "#7fdf00",
+            "#ffff00", "#ff7f00", "#ff3f00", "#ff0000", "#bf0000")
+
+```
+
+
+```{r fig2, fig.width=4.5, fig.height=5, fig.cap="Spatial Distribution of Potential fishing zones in the Pemba channel. Customized color codes"}
+
+fronts.smoothed %>%
+  st_crop(xmin = 38, ymin = -6.5, xmax = 41, ymax = -3) %>%
+  ggplot() +
+  geom_sf(aes(fill = nbObs), col = NA)+
+  geom_sf(data = tz.ke, fill = "grey80") +
+  coord_sf(xlim = c(38.6, 39.8), ylim = c(-6,-4.6))+
+  scale_fill_gradientn(colours = mycolor, breaks = seq(100,1400,120), name = "Number\nof PFZs",
+                       guide = guide_colorbar(reverse = TRUE, nbin = 11, raster = FALSE,barheight = unit(6,"cm")))+
+  metR::scale_x_longitude(ticks = 0.4)+
+  metR::scale_y_latitude(breaks = seq(-5.8,-4.8, length.out = 4) %>% round(1))+
+  theme_bw() +
+  theme(legend.position = c(0.13,.45),
+        axis.text = element_text(size = 11, colour = "black"),
+        legend.background = element_rect(fill = "grey83")) +
+  ggspatial::annotation_north_arrow(location = "tl", width = unit(.75, "cm"), height = unit(.75, "cm"))+
+  ggspatial::annotation_scale(location = "bl", text_cex = .9)
+```
+
+
+
+## Cited
