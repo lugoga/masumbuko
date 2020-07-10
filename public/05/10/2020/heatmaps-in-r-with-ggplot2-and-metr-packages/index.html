@@ -184,7 +184,7 @@ Figure 3: Cross section of ocean Current velocity in shallow water along Jambe I
 Figure 4: Cross section of ocean Current velocity in shallow water along Jambe Island, in Tanga region. . The grey color which represent the bottom depth has disappeared
 </p>
 </div>
-<p>Since version 3.3.0, <strong>ggplot2</strong> added a <code>geom_contour_filled</code> function that works similar to <code>geom_contour_fill</code> of <strong>metR</strong> package. It plot filled contour of gridded data without interpolating the missing values. The chunk below generates figure <a href="#fig:fig5"><strong>??</strong></a>.</p>
+<p>Since version 3.3.0, <strong>ggplot2</strong> added a <code>geom_contour_filled</code> function that works similar to <code>geom_contour_fill</code> of <strong>metR</strong> package. It plot filled contour of gridded data without interpolating the missing values. The chunk below generates figure <a href="#fig:fig5">5</a>.</p>
 <pre class="r"><code>transect.gg = shallow.tb %&gt;% 
    # filter(depth &lt; 6) %&gt;%
    ggplot(aes(x = lon, y = depth)) +
@@ -204,8 +204,13 @@ Figure 4: Cross section of ocean Current velocity in shallow water along Jambe I
   metR::scale_x_longitude(ticks = 0.005,position = &quot;bottom&quot;)
 
 transect.gg</code></pre>
-<p><img src="/post/2020-05-10-heatmaps-in-r-with-ggplot2-and-metr-packages_files/figure-html/fig5-1.png" width="816" /></p>
-<p>You may might not be interested with default viridis color that from <code>geom_contour_filled</code> function (figure <a href="#fig:fig5"><strong>??</strong></a>). The customized figure <a href="#fig:fig6"><strong>??</strong></a> was generate used the chunk below.</p>
+<div class="figure"><span id="fig:fig5"></span>
+<img src="/post/2020-05-10-heatmaps-in-r-with-ggplot2-and-metr-packages_files/figure-html/fig5-1.png" alt="heatmap with default viridis color" width="816" />
+<p class="caption">
+Figure 5: heatmap with default viridis color
+</p>
+</div>
+<p>You may might not be interested with default viridis color that from <code>geom_contour_filled</code> function (figure <a href="#fig:fig5">5</a>). The customized figure <a href="#fig:fig6">6</a> was generate used the chunk below.</p>
 <pre class="r"><code>transect.gg  +
   scale_fill_manual(values = pal,  labels = seq(0.304,2.129, length.out = 10) %&gt;% round(2))+
   guides(fill = guide_legend(title.position = &quot;right&quot;,direction = &quot;vertical&quot;,
@@ -213,7 +218,14 @@ transect.gg</code></pre>
                                barheight = .5, barwidth = .95,
                                title.hjust = 0.5, raster = FALSE,
                                title = expression(Current~velocity~(ms^{-1}))))</code></pre>
-<p><img src="/post/2020-05-10-heatmaps-in-r-with-ggplot2-and-metr-packages_files/figure-html/fig6-1.png" width="816" /></p>
+<div class="figure"><span id="fig:fig6"></span>
+<img src="/post/2020-05-10-heatmaps-in-r-with-ggplot2-and-metr-packages_files/figure-html/fig6-1.png" alt="Heatmap with manual filled color" width="816" />
+<p class="caption">
+Figure 6: Heatmap with manual filled color
+</p>
+</div>
+<pre class="r"><code>mycolor = c(&quot;#7f007f&quot;, &quot;#0000ff&quot;,  &quot;#007fff&quot;, &quot;#00ffff&quot;, &quot;#00bf00&quot;, &quot;#7fdf00&quot;,
+            &quot;#ffff00&quot;, &quot;#ff7f00&quot;, &quot;#ff3f00&quot;, &quot;#ff0000&quot;, &quot;#bf0000&quot;)</code></pre>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>

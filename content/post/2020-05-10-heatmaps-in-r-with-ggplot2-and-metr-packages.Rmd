@@ -146,7 +146,7 @@ transect.metr +
 
 Since version 3.3.0, **ggplot2** added a `geom_contour_filled` function that works similar to `geom_contour_fill` of **metR** package. It plot filled contour of gridded data without interpolating the missing values. The chunk below generates figure \@ref(fig:fig5).
 
-```{r fig5, fig.height=3., fig.width=8.5}
+```{r fig5, fig.height=3., fig.width=8.5, fig.cap="heatmap with default viridis color"}
 
 transect.gg = shallow.tb %>% 
    # filter(depth < 6) %>%
@@ -173,7 +173,7 @@ transect.gg
 
 You may might not be interested with default viridis color that from `geom_contour_filled` function (figure \@ref(fig:fig5)). The customized figure \@ref(fig:fig6) was generate used the chunk below.
 
-```{r fig6, fig.height=3., fig.width=8.5}
+```{r fig6, fig.height=3., fig.width=8.5, fig.cap="Heatmap with manual filled color"}
 transect.gg  +
   scale_fill_manual(values = pal,  labels = seq(0.304,2.129, length.out = 10) %>% round(2))+
   guides(fill = guide_legend(title.position = "right",direction = "vertical",
@@ -182,5 +182,13 @@ transect.gg  +
                                title.hjust = 0.5, raster = FALSE,
                                title = expression(Current~velocity~(ms^{-1}))))
 ```
+
+
+```{r}
+mycolor = c("#7f007f", "#0000ff",  "#007fff", "#00ffff", "#00bf00", "#7fdf00",
+            "#ffff00", "#ff7f00", "#ff3f00", "#ff0000", "#bf0000")
+```
+
+
 
 ## References

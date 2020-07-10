@@ -6,10 +6,30 @@
     <description>Recent content in Oceanography on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 14 Apr 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 04 Jul 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/oceanography/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Mapping with cartopy in python</title>
+      <link>/07/04/2020/mapping-with-cartopy-in-python/</link>
+      <pubDate>Sat, 04 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/07/04/2020/mapping-with-cartopy-in-python/</guid>
+      <description>Today we will learn about Cartopy, one of the most common packages for making maps within python. Another popular and powerful library is Basemap; however, Basemap is going away and being replaced with Cartopy in the near future, For this reason, investing your time in learning mapping in python with Cartopy module is recommended.
+We thank Research in Computing Earth Sciences because most of material in this post are gleaned from their website.</description>
+    </item>
+    
+    <item>
+      <title>Python as a tool for oceagraphy and marine sciences</title>
+      <link>/07/02/2020/python-as-a-tool-for-oceagraphy-and-marine-sciences/</link>
+      <pubDate>Thu, 02 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/07/02/2020/python-as-a-tool-for-oceagraphy-and-marine-sciences/</guid>
+      <description>During the last couple of decades, Matlab has been the most commonly-used scripting language in physical oceanography (Bengtsson 2018), and it has a large user base in many other fields. However, Python has been gaining ground, often being adopted by former Matlab users as well as by newcomers. Here is a little background to help you understand this shift, and why we advocate using Python from the start.
+Python was designed by a computer scientist as a general–purpose scripting language for easy adoption and widespread use.</description>
+    </item>
     
     <item>
       <title>CTD Profiling in Tanga</title>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.64.1" />
+
+
+<title>Integrate R and Python in Rstudio to Power Your Analytical Capability - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Integrate R and Python in Rstudio to Power Your Analytical Capability - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">7 min read</span>
+    
+
+    <h1 class="article-title">Integrate R and Python in Rstudio to Power Your Analytical Capability</h1>
+
+    
+    <span class="article-date">2020/07/10</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p>If you work with data science, <code>R</code> and <code>Python</code> must be the two programming languages that you use the most. Both <code>R</code> and <code>Python</code> are quite robust languages and either one of them is actually sufficient to carry out the data analysis task. However, instead of considering them as tools that supplement each other, more often you will find people dealing with data claim one language to be better than the other. Truth be told, <code>R</code> and <code>Python</code> are excellent tools in ther own right but are often conceived as rivals. One major reason for such view lies on the experts. Because data analysts have divided the data science field into camps based on the choice of the programming language they are familiar with.</p>
+<p>There major two camps—<em>R camp</em> and <em>Python camp</em>—and history is the testimony that camps can not livel in <em>harmony</em>. Members of both camps believe that their choice of language . Honestly, I do not hold to their opinion, but rather wish I have skills for both languages. So, whether you have in R or Python camp, one thing you will notice is that the problem we have in data science is simply that divergence does not lie with the tools but with the people using those tools.</p>
+<p>I believe there are few people in the Data Science community who use both R and Pythhon in their analytical workflow. But majority are committed to only one programming language, but wish they had access to some functions from other language. Therefore, there is no reason that hold us to stick using this programming language or the other. Our ultimate goal should be to do better analytics and derive better insights and choice of which programming language to use should not hinder us from reaching our goals.</p>
+<p>The questions that always resolute in my mind is whether can we utilize the statistical power of R along with the programming capabilities of Python?. Its undeniable truth that there are definitely some high and low points for both languages and if we can utilize the strength of both, we can end up dong a much better job. Thanks to Kevin Ushey and his collegues <span class="citation">(<a href="#ref-reticulate" role="doc-biblioref">2019</a>)</span> for devloping a reticulate package. <strong>reticulate</strong> package provides a comprehensive set of tools that allows to work with R and Python in the same environment. The <strong>reticulate</strong> package provide the following facilities;</p>
+<ul>
+<li>Calling Python from R in a variety of ways including <code>rmarkdown</code>, <code>sourcing</code>, <code>Python scripts</code>, importing Python modules and using Python interactively within and R session.</li>
+<li>Translation between R and Python objects—for example <code>r_to_py</code> function allows to construct R to Pandas data frame and <code>py_to_r()</code> function convert python object like data frame, matrix and etc to R</li>
+<li>Flexible binding to different versions of Python including virtual environments and conda environment.</li>
+</ul>
+<div id="setup-python-in-rstudio" class="section level2">
+<h2>Setup Python in Rstudio</h2>
+<p>To make python work in Rstudio, we must make some setup. The first thing we need to load the reticulate package. Once the reticulate package in the workspace, we use the <code>use_python(PATH)</code> and define the path of Python or Anaconda in your local machine.</p>
+<blockquote>
+<p>Note that setting the Python enviroment and loading the reticulate package is done in the R chunk</p>
+</blockquote>
+<pre class="r"><code>require(reticulate)
+use_python(&quot;c:/Python/Anaconda3/&quot;)</code></pre>
+<p>Once we have configured the Python environment in R, we must also load some module from R into Rstudio. This will make the functions in these module avaiable for our processing and plotting. We use the convention naming of Python package as seen in the chunk below.</p>
+<blockquote>
+<p>Note that loading Python modules in R session must be done inside the Python chunk. Otherwise you get an error message or a chunk fail to iterate the process</p>
+</blockquote>
+<pre class="python"><code>import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns</code></pre>
+<div id="tibble-to-pandas-dataframe" class="section level4">
+<h4>Tibble to Pandas Dataframe</h4>
+<p>In this section we use function from R to read the dataset from the local machine into R session. The function <code>readxl::read_excel()</code> function is used <span class="citation">(Wickham and Bryan <a href="#ref-readxl" role="doc-biblioref">2018</a>)</span>. The outocome after reading the file is the <em>tibble</em> format—a modern data frame from the tidyverse ecosystem <span class="citation">(Wickham <a href="#ref-tidyverse" role="doc-biblioref">2017</a>)</span>. We first load the tidyverse</p>
+<pre class="r"><code>require(tidyverse)</code></pre>
+<p>read the excel file with readxl and manipulate the data with dplyr to the write format</p>
+<pre class="r"><code>kgr = readxl::read_excel(&quot;dege.xlsx&quot;)</code></pre>
+<p>Once the tibble file is in the environment, we need to convert from tibble data frame into pandas dataframe. Make a copy of pandas dataframe from tible with the <code>r.</code> function</p>
+<blockquote>
+<p>note that conversion from tibble to pandas data frame must be done in the Python chunk and not R chunk</p>
+</blockquote>
+<pre class="r"><code>kgr_df = kgr %&gt;% mutate(month = lubridate::month(time, abbr = T, label = T))%&gt;% select(sst,chl, month) </code></pre>
+<p>Then construct pandas data frame from tibble</p>
+<pre class="python"><code>##
+kgrpy = r.kgr_df</code></pre>
+<p>We then the power of seaborn package from Python to visualize. For this case, I used the function <code>pairplot</code>—a pairwise plot that show the relationships of variables present in pandas Dataframe. The chunk below was used to plot figure <a href="#fig:fig1">1</a></p>
+<pre class="python"><code>## make a pairplot with seaborn
+sns.pairplot(kgrpy, hue=&quot;month&quot;)</code></pre>
+<pre><code>&lt;seaborn.axisgrid.PairGrid object at 0x000000002B94CE48&gt;</code></pre>
+<pre class="python"><code>plt.show()</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2020-07-10-integrate-r-and-python-in-rstudio-to-power-your-analytical-capability_files/figure-html/fig1-1.png" alt="The relationship of variables in the Pandas Dataframe" width="556" />
+<p class="caption">
+Figure 1: The relationship of variables in the Pandas Dataframe
+</p>
+</div>
+<p>The chunk below highlight the scatterplot of the relationship between SST and chlorophyll concentration plotted with <code>scatterplot()</code>function from <strong>seaborn</strong> module and the plot is represented in figure <a href="#fig:fig2">2</a></p>
+<pre class="python"><code>fig = plt.figure()
+sns.scatterplot(data=kgrpy, x=&#39;chl&#39;, y=&#39;sst&#39;, hue=&#39;month&#39;)
+plt.xlabel(&quot;Concentration of Chlorophyll (mg/l)&quot;)
+plt.ylabel(&quot;Sea surface temperature&quot;)
+plt.gca().legend_.remove()
+plt.show()</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2020-07-10-integrate-r-and-python-in-rstudio-to-power-your-analytical-capability_files/figure-html/fig2-1.png" alt="Relationship between SST and Chlorophyll" width="432" />
+<p class="caption">
+Figure 2: Relationship between SST and Chlorophyll
+</p>
+</div>
+</div>
+<div id="heatmaps-with-seaborn-module" class="section level4">
+<h4>heatmaps with seaborn module</h4>
+<p>Heatmaps are three dimensional plots, as previous, we have to import the data into workspace and manipulate it so that months use the label instead of numbers.</p>
+<pre class="r"><code>kgr = readxl::read_excel(&quot;dege.xlsx&quot;)</code></pre>
+<pre class="r"><code>kgr_dt_df = kgr %&gt;% 
+  mutate(month = lubridate::month(time, abbr = T, label = T))%&gt;% 
+  select(sst,chl, month, year) </code></pre>
+<p>Since we have used R chunk, to use seaborn Python module function, we must convert the data first to pandas Dataframe, which then allows us the capability of Python. We use the <code>r.</code> function to convert from tibble to pandas data frame</p>
+<pre class="python"><code>
+# Then  construct pandas data frame from tibble
+kgr_dt_heatmap = r.kgr_dt_df </code></pre>
+<p>Then prepare the file to three dimension that the function <code>sns.heatmap</code> recognize. We arrange in such way that the index which represent Y-column become months, the column which represent the x-axis become year and the values to be filled are chlorophyll. The chunk below hihglights</p>
+<pre class="python"><code>
+kgrpy_piv = pd.pivot_table(data=kgr_dt_heatmap, values=&quot;chl&quot;, index=&#39;month&#39;, columns=&#39;year&#39;)</code></pre>
+<p>Once we have prepared the dataset in the format that heatmap function from seaboarn understand we can plot. Figure <a href="#fig:fig1b">3</a> was generated using the chunk below;</p>
+<pre class="python"><code>
+fig, axes = plt.subplots(nrows=1, ncols=1)
+sns.heatmap(data=kgrpy_piv, cmap = &quot;jet&quot;, xticklabels=True, yticklabels=True)
+# plt.gca().invert_yaxis()
+# plt.xlabel([39.4,39.6,39.8,40.0])
+plt.show()</code></pre>
+<div class="figure"><span id="fig:fig1b"></span>
+<img src="/post/2020-07-10-integrate-r-and-python-in-rstudio-to-power-your-analytical-capability_files/figure-html/fig1b-1.png" alt="heatmaps showing variation of chlorophyll over years and months" width="672" />
+<p class="caption">
+Figure 3: heatmaps showing variation of chlorophyll over years and months
+</p>
+</div>
+<p>Similarly, the heatmap of sea surface temperature shown in figure <a href="#fig:fig2b">4</a> was generated using the chunk below;</p>
+<pre class="python"><code>
+kgrpy_piv_sst = pd.pivot_table(data=kgr_dt_heatmap, values=&quot;sst&quot;, index=&#39;month&#39;, columns=&#39;year&#39;)
+fig, axes = plt.subplots(nrows=1, ncols=1)
+
+sns.heatmap(data=kgrpy_piv_sst, cmap = &quot;jet&quot;, xticklabels=True, yticklabels=True)
+# plt.gca().invert_yaxis()
+# plt.xlabel([39.4,39.6,39.8,40.0])
+plt.show()</code></pre>
+<div class="figure"><span id="fig:fig2b"></span>
+<img src="/post/2020-07-10-integrate-r-and-python-in-rstudio-to-power-your-analytical-capability_files/figure-html/fig2b-1.png" alt="heatmaps showing variation of SST over years and months" width="672" />
+<p class="caption">
+Figure 4: heatmaps showing variation of SST over years and months
+</p>
+</div>
+</div>
+<div id="pandas-dataframe-to-tibble" class="section level4">
+<h4>Pandas Dataframe to Tibble</h4>
+<p>In this section we use function from Python to read the dataset from the local machine into R session. The function <code>pd.read_excell()</code> function is used. The outocome after reading the file is the Pandas Dataframe.</p>
+<pre class="python"><code>kgpy = pd.read_excel(&quot;dege.xlsx&quot;)</code></pre>
+<p>Once the Pandas Dataframe file is in the environment, we need to convert it to tibble data dataframe. A <code>py</code> function from reticulate package is used as the chunk below illustrates:</p>
+<blockquote>
+<p>note that conversion from pandas to tibble data frame must be done in the R chunk and not Python chunk</p>
+</blockquote>
+<pre class="r"><code>kg_r = py$kgpy</code></pre>
+<p>We then use the <code>mutate</code> function from <strong>dplyr</strong> <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span> to create new column called <code>month</code> and then select <code>sst</code>, <code>chl</code>, and <code>month</code> variables.</p>
+<pre class="r"><code>kg_r = kg_r%&gt;% mutate(month = lubridate::month(time, abbr = T, label = T))%&gt;% select(sst,chl, month) </code></pre>
+<p>Then, we can visualize the dataset with <strong>ggplot</strong> package <span class="citation">(Wickham <a href="#ref-ggplot" role="doc-biblioref">2016</a>)</span>. The chunk below was used to generate figure <a href="#fig:fig3">5</a></p>
+<pre class="r"><code>ggplot(data = kg_r, aes(x = chl, y = sst, col = month))+
+  geom_point(size = 2)+
+  labs(x = expression(Chlorophyll~concentration(mgm^{-3})),
+       y = expression(Sea~surface~temperature(degree*C)))+
+  theme(legend.key = element_blank())</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2020-07-10-integrate-r-and-python-in-rstudio-to-power-your-analytical-capability_files/figure-html/fig3-1.png" alt="Relationship between chlorophyll concentration and sea surface temperature" width="672" />
+<p class="caption">
+Figure 5: Relationship between chlorophyll concentration and sea surface temperature
+</p>
+</div>
+</div>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-reticulate">
+<p>Ushey, Kevin, JJ Allaire, and Yuan Tang. 2019. <em>Reticulate: Interface to ’Python’</em>. <a href="https://CRAN.R-project.org/package=reticulate">https://CRAN.R-project.org/package=reticulate</a>.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>———. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+<div id="ref-readxl">
+<p>Wickham, Hadley, and Jennifer Bryan. 2018. <em>Readxl: Read Excel Files</em>. <a href="https://CRAN.R-project.org/package=readxl">https://CRAN.R-project.org/package=readxl</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

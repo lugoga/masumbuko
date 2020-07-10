@@ -6,17 +6,36 @@
     <description>Recent content in Masumbuko Semba on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 06 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 10 Jul 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/masumbuko-semba/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Kernel smoothing of Spatial Data</title>
-      <link>/07/06/2020/kernel-smoothin-of-spatial-data/</link>
-      <pubDate>Mon, 06 Jul 2020 00:00:00 +0000</pubDate>
+      <title>Integrate R and Python in Rstudio to Power Your Analytical Capability</title>
+      <link>/07/10/2020/integrate-r-and-python-in-rstudio-to-power-your-analytical-capability/</link>
+      <pubDate>Fri, 10 Jul 2020 00:00:00 +0000</pubDate>
       
-      <guid>/07/06/2020/kernel-smoothin-of-spatial-data/</guid>
+      <guid>/07/10/2020/integrate-r-and-python-in-rstudio-to-power-your-analytical-capability/</guid>
+      <description>If you work with data science, R and Python must be the two programming languages that you use the most. Both R and Python are quite robust languages and either one of them is actually sufficient to carry out the data analysis task. However, instead of considering them as tools that supplement each other, more often you will find people dealing with data claim one language to be better than the other.</description>
+    </item>
+    
+    <item>
+      <title>Mapping with cartopy in python</title>
+      <link>/07/04/2020/mapping-with-cartopy-in-python/</link>
+      <pubDate>Sat, 04 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/07/04/2020/mapping-with-cartopy-in-python/</guid>
+      <description>Today we will learn about Cartopy, one of the most common packages for making maps within python. Another popular and powerful library is Basemap; however, Basemap is going away and being replaced with Cartopy in the near future, For this reason, investing your time in learning mapping in python with Cartopy module is recommended.
+We thank Research in Computing Earth Sciences because most of material in this post are gleaned from their website.</description>
+    </item>
+    
+    <item>
+      <title>Kernel smoothing of Spatial Data</title>
+      <link>/06/30/2020/kernel-smoothin-of-spatial-data/</link>
+      <pubDate>Tue, 30 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/06/30/2020/kernel-smoothin-of-spatial-data/</guid>
       <description>Kernel density estimation is a popular tool for visualizing the distribution of data. In this post, we are going to look on how to create smoothed map of random points. We will use a shapefile dataset that contains potential fishing zones derived from sea surface temperature recorded between January and June 2020 in Pemba channel. You can simply download the file from this link.
 Once you have downloaded the file, unzip and browse in the uncompressed file you find the shapefile pfz.</description>
     </item>

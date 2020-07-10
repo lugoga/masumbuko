@@ -6,33 +6,150 @@
     <description>Recent content in Tags on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 06 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 10 Jul 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>EEZ</title>
-      <link>/tags/eez/</link>
-      <pubDate>Mon, 06 Jul 2020 00:00:00 +0000</pubDate>
+      <title>dplyr</title>
+      <link>/tags/dplyr/</link>
+      <pubDate>Fri, 10 Jul 2020 00:00:00 +0000</pubDate>
       
-      <guid>/tags/eez/</guid>
+      <guid>/tags/dplyr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ggplot2</title>
+      <link>/tags/ggplot2/</link>
+      <pubDate>Fri, 10 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/ggplot2/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Masumbuko Semba</title>
       <link>/tags/masumbuko-semba/</link>
-      <pubDate>Mon, 06 Jul 2020 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 10 Jul 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/masumbuko-semba/</guid>
       <description></description>
     </item>
     
     <item>
+      <title>matplotlib</title>
+      <link>/tags/matplotlib/</link>
+      <pubDate>Fri, 10 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/matplotlib/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Pandas</title>
+      <link>/tags/pandas/</link>
+      <pubDate>Fri, 10 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/pandas/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>programming</title>
+      <link>/tags/programming/</link>
+      <pubDate>Fri, 10 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/programming/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Semba</title>
+      <link>/tags/semba/</link>
+      <pubDate>Fri, 10 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/semba/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>mapping</title>
+      <link>/tags/mapping/</link>
+      <pubDate>Sat, 04 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/mapping/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Oceanography</title>
+      <link>/tags/oceanography/</link>
+      <pubDate>Sat, 04 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/oceanography/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>python</title>
+      <link>/tags/python/</link>
+      <pubDate>Sat, 04 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/python/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Coastal Waters</title>
+      <link>/tags/coastal-waters/</link>
+      <pubDate>Thu, 02 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/coastal-waters/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Indian Ocean</title>
+      <link>/tags/indian-ocean/</link>
+      <pubDate>Thu, 02 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/indian-ocean/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Marine</title>
+      <link>/tags/marine/</link>
+      <pubDate>Thu, 02 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/marine/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Tanzania</title>
+      <link>/tags/tanzania/</link>
+      <pubDate>Thu, 02 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/tanzania/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>EEZ</title>
+      <link>/tags/eez/</link>
+      <pubDate>Tue, 30 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/eez/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>MODIS</title>
       <link>/tags/modis/</link>
-      <pubDate>Mon, 06 Jul 2020 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 30 Jun 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/modis/</guid>
       <description></description>
@@ -41,7 +158,7 @@
     <item>
       <title>PFZ</title>
       <link>/tags/pfz/</link>
-      <pubDate>Mon, 06 Jul 2020 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 30 Jun 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/pfz/</guid>
       <description></description>
@@ -50,18 +167,9 @@
     <item>
       <title>Satellite</title>
       <link>/tags/satellite/</link>
-      <pubDate>Mon, 06 Jul 2020 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 30 Jun 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/satellite/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Tanzania</title>
-      <link>/tags/tanzania/</link>
-      <pubDate>Mon, 06 Jul 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/tanzania/</guid>
       <description></description>
     </item>
     
@@ -84,15 +192,6 @@
     </item>
     
     <item>
-      <title>Semba</title>
-      <link>/tags/semba/</link>
-      <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/semba/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>tidyverse</title>
       <link>/tags/tidyverse/</link>
       <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
@@ -107,15 +206,6 @@
       <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/chlorophyll/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Indian Ocean</title>
-      <link>/tags/indian-ocean/</link>
-      <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/indian-ocean/</guid>
       <description></description>
     </item>
     
@@ -219,29 +309,11 @@
     </item>
     
     <item>
-      <title>Coastal Waters</title>
-      <link>/tags/coastal-waters/</link>
-      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/coastal-waters/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>heatmaps</title>
       <link>/tags/heatmaps/</link>
       <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/heatmaps/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Marine</title>
-      <link>/tags/marine/</link>
-      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/marine/</guid>
       <description></description>
     </item>
     
@@ -372,15 +444,6 @@
     </item>
     
     <item>
-      <title>Oceanography</title>
-      <link>/tags/oceanography/</link>
-      <pubDate>Tue, 14 Apr 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/oceanography/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>Seabird</title>
       <link>/tags/seabird/</link>
       <pubDate>Tue, 14 Apr 2020 00:00:00 +0000</pubDate>
@@ -422,15 +485,6 @@
       <pubDate>Mon, 06 Apr 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/donut-chart/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>ggplot2</title>
-      <link>/tags/ggplot2/</link>
-      <pubDate>Mon, 06 Apr 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/ggplot2/</guid>
       <description></description>
     </item>
     
@@ -561,15 +615,6 @@
     </item>
     
     <item>
-      <title>mapping</title>
-      <link>/tags/mapping/</link>
-      <pubDate>Sun, 26 Jan 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/mapping/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>sf</title>
       <link>/tags/sf/</link>
       <pubDate>Sun, 26 Jan 2020 00:00:00 +0000</pubDate>
@@ -665,15 +710,6 @@
       <pubDate>Wed, 06 Nov 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/graphics/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>programming</title>
-      <link>/tags/programming/</link>
-      <pubDate>Wed, 06 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/programming/</guid>
       <description></description>
     </item>
     
@@ -795,7 +831,7 @@
     </item>
     
     <item>
-      <title>Bookdown</title>
+      <title>bookdown</title>
       <link>/tags/bookdown/</link>
       <pubDate>Mon, 15 Apr 2019 00:00:00 +0000</pubDate>
       

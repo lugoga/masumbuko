@@ -1,7 +1,7 @@
 ---
 title: Kernel smoothing of Spatial Data
 author: Masumbuko Semba
-date: '2020-07-06'
+date: '2020-06-30'
 slug: kernel-smoothin-of-spatial-data
 categories:
   - Oceanography

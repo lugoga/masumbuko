@@ -1,0 +1,446 @@
+---
+title: Mapping with cartopy in python
+author: Masumbuko Semba
+date: '2020-07-04'
+slug: mapping-with-cartopy-in-python
+categories:
+  - Python
+tags:
+  - mapping
+  - python
+  - Masumbuko Semba
+  - Oceanography
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+Today we will learn about Cartopy, one of the most common packages for making maps within python. Another popular and powerful library is Basemap; however, Basemap is going away and being replaced with Cartopy in the near future, For this reason, investing your time in learning mapping in python with Cartopy module is recommended.
+
+We thank [Research in Computing Earth Sciences](https://rabernat.github.io/research_computing_2018/maps-with-cartopy.html) because most of material in this post are gleaned from their website. I also thank Phil Elson, a developer of Cartopy and created excellent [Cartopy Tutorial](https://github.com/SciTools/cartopy-tutorial)
+
+Cartopy makes use of the powerful `PROJ.4`, `numpy` and `shapely` libraries and includes a programatic interface built on top of **Matplotlib** for the creation of publication quality maps. Key features of cartopy are its object oriented projection definitions, and its ability to transform points, lines, vectors, polygons and images between those projections.
+
+## Cartopy Projections and other reference systems
+In Cartopy, each projection is a class. Most classes of projection can be configured in projection-specific ways, although Cartopy takes an opinionated stance on sensible defaults. Let's create a Plate Carree projection instance.To do so, we need cartopy's crs module. This is typically imported as ccrs (Cartopy Coordinate Reference Systems).
+
+Before we import the modules we need for mapping, we first have to initialize the linkage of python in Rstudio using the **reticulate** package and also set the environment in which the seesion will fetch python functions and package. You must load the reticulate package and set the enviroment while in R chunk;
+
+```{r}
+require(reticulate)
+use_python("c:/Python/Anaconda3/")
+
+```
+
+We then import some Python's modules using the `import` function. Make sure that you insert the Pyhon chunk for you to load these modules
+```{python}
+
+import numpy as np
+import pandas as pd
+import cartopy.crs as ccrs
+import cartopy
+import matplotlib.pyplot as plt
+
+```
+
+We can access the Mollweide projection with the code chunk below;
+```{python}
+ccrs.Mollweide()
+```
+
+## Drawing a map
+Cartopy optionally depends upon **matplotlib**, and each projection knows how to create a matplotlib Axes (or AxesSubplot) that can represent itself.
+
+The Axes that the projection creates is a cartopy.mpl.geoaxes.GeoAxes. This Axes subclass overrides some of matplotlib's existing methods, and adds a number of extremely useful ones for drawing maps.
+
+We'll go back and look at those methods shortly, but first, let's actually see the cartopy+matplotlib dance in action:
+
+```{python}
+import matplotlib.pyplot as plt
+
+plt.axes(projection=ccrs.PlateCarree())
+plt.show()
+```
+
+That was a little underwhelming, but we can see that the Axes created is indeed one of those GeoAxes[Subplot] instances.
+
+One of the most useful methods that this class adds on top of the standard matplotlib Axes class is the coastlines method. With no arguments, it will add the Natural Earth 1:110,000,000 scale coastline data to the map.
+
+```{python}
+
+plt.figure()
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.coastlines()
+plt.show()
+
+```
+
+We could just as equally created a matplotlib subplot with one of the many approaches that exist. For example, the plt.subplots function could be used:
+
+```{python}
+
+fig, ax = plt.subplots(subplot_kw={'projection': ccrs.PlateCarree()})
+ax.coastlines()
+plt.show
+```
+
+
+Projection classes have options we can use to customize the map so that Africa is at the center
+```{python}
+ax = plt.axes(projection=ccrs.PlateCarree(central_longitude=0))
+ax.coastlines()
+plt.show()
+```
+
+## Useful methods of a GeoAxes
+The cartopy.mpl.geoaxes.GeoAxes class adds a number of useful methods. Let's take a look at:
+
+i. `set_global` - zoom the map out as much as possible
+i. `set_extent` - zoom the map to the given bounding box
+i. `gridlines` - add a graticule (and optionally labels) to the axes
+i. `coastlines` - add Natural Earth coastlines to the axes
+i. `stock_img` - add a low-resolution Natural Earth background image to the axes
+i. `imshow` - add an image (numpy array) to the axes
+i. `add_geometries` - add a collection of geometries (Shapely) to the axes
+
+Some More Examples of Different Global Projections
+
+```{python}
+
+projections = [ccrs.PlateCarree(),
+               ccrs.Robinson(),
+               ccrs.Mercator(),
+               ccrs.Orthographic(),
+               ccrs.InterruptedGoodeHomolosine()
+              ]
+
+
+for proj in projections:
+    plt.figure()
+    ax = plt.axes(projection=proj)
+    ax.stock_img()
+    ax.coastlines()
+    ax.set_title(f'{type(proj)}')
+    plt.show()
+
+```
+
+
+## Regional Maps
+To create a regional map, we use the `set_extent` method of GeoAxis to limit the size of the region.
+
+```{python, eval=FALSE}
+central_lon =43, central_lat = -8.5
+extent = [35, 50, -16.5, 0]
+ax = plt.axes(projection=ccrs.PlateCarree(central_lon, central_lat))
+ax.set_extent(extent)
+ax.gridlines()
+ax.coastlines(resolution='50m')
+plt.show()
+
+```
+
+## Adding Features to the Map
+To give our map more styles and details, we add cartopy.feature objects. Many useful features are built in. These "default features" are at coarse (110m) resolution.
+
+i. `cartopy.feature.BORDERS`	Country boundaries
+i. `cartopy.feature.COASTLINE`	Coastline, including major islands
+`cartopy.feature.LAKES`	Natural and artificial lakes
+i. `cartopy.feature.LAND`	Land polygons, including major islands
+i. `cartopy.feature.OCEAN`	Ocean polygons
+i. `cartopy.feature.RIVERS`	Single-line drainages, including lake centerlines
+i. `cartopy.feature.STATES`	(limited to the United States at this scale)
+
+```{python}
+import cartopy.feature as cfeature
+import numpy as np
+
+central_lat = 37.5
+central_lon = -96
+extent = [28, 45, -25, 2]
+central_lon = np.mean(extent[:2])
+central_lat = np.mean(extent[2:])
+
+plt.figure(figsize=(6, 6))
+ax = plt.axes(projection=ccrs.EquidistantConic(central_lon, central_lat))
+ax.set_extent(extent)
+
+ax.add_feature(cartopy.feature.OCEAN)
+ax.add_feature(cartopy.feature.LAND, edgecolor='black')
+ax.add_feature(cartopy.feature.LAKES, edgecolor='black')
+ax.add_feature(cartopy.feature.RIVERS)
+ax.gridlines()
+# ax.gridlines(draw_labels=True, xlocs=[32, 36, 40, 44])
+plt.show()
+```
+
+
+
+```{python}
+rivers_50m = cfeature.NaturalEarthFeature('physical', 'rivers_lake_centerlines', '10m')
+
+central_lat = 37.5
+central_lon = -96
+extent = [28, 45, -25, 2]
+central_lon = np.mean(extent[:2])
+central_lat = np.mean(extent[2:])
+
+plt.figure(figsize=(6, 6))
+ax = plt.axes(projection=ccrs.EquidistantConic(central_lon, central_lat))
+ax.set_extent(extent)
+
+ax.add_feature(cartopy.feature.OCEAN)
+ax.add_feature(cartopy.feature.LAND, edgecolor='black')
+ax.add_feature(cartopy.feature.LAKES, edgecolor='black')
+ax.add_feature(rivers_50m, facecolor='None', edgecolor='b')
+ax.gridlines()
+plt.show()
+```
+
+## Plotting 2D (Raster) Data
+The same principles apply to 2D data. Below we create some example data defined in regular lat / lon coordinates. for this case we will load the global sea surface temperature data. The data is stored as netcdf format and hence we need to load the 
+
+```{python}
+
+import netCDF4 as nc
+
+```
+
+Then we a `Dataset` function from the netCDF4 module to read the file
+
+```{python}
+sst = nc.Dataset("e:/MatlabWorking/GHRSST/20150101.nc")
+```
+
+We need to extract different variables that are stored in the file. But before we extract them, we must look on the internal structure of the file and identify the variables with correct names. We can do that using the `nc.variables` function
+```{python, eval = FALSE}
+sst.variables
+```
+
+We noticed that the file is the array of `lon`. `lat`, `analysed_sst`, and `time`. The time is the single interval. Then, we extract the variables as the chunk below shows;
+```{python}
+time = sst.variables['time']
+lon = sst.variables['lon']
+lat = sst.variables['lat']
+data = sst.variables['analysed_sst']
+
+```
+
+Because the data is in the rectangular grid, we also need to convert the `lon` and `lat` to rectangular grid with `np.meshgrid()`. The purpose of meshgrid is to create a rectangular grid out of an array of x values and an array of y values
+```{python}
+
+lon2d, lat2d = np.meshgrid(lon, lat)
+
+```
+
+Because the temperature was recorded in Kelvin scale, we can simpy convert to degree by simply substracting with 273
+```{python}
+
+datar = data[0,:,:]-273
+# datar = np.flipud(datar)
+```
+
+Then we can map the spatial distribution of sea surface temperature around the global as shown in figure \@ref(fig:sst)
+
+```{python sst, fig.cap = "Sea surface temperature"}
+
+plt.figure(figsize=(6,5))
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.set_global()
+# ax.set_extent([-170,170,-30,30])
+ax.coastlines()
+ax.contourf(lon2d, lat2d, datar, cmap = "jet")
+ax.gridlines(draw_labels=True, xlocs=np.arange(-180,180,30))
+plt.show()
+
+```
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+from matplotlib.offsetbox import AnchoredText
+
+
+
+fig = plt.figure()
+# ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.set_extent([80, 170, -45, 30], crs=ccrs.PlateCarree())
+
+# Put a background image on for nice sea rendering.
+ax.stock_img()
+
+# Create a feature for States/Admin 1 regions at 1:50m from Natural Earth
+states_provinces = cfeature.NaturalEarthFeature(
+    category='cultural',
+    name='admin_1_states_provinces_lines',
+    scale='50m',
+    facecolor='none')
+
+SOURCE = 'Natural Earth'
+LICENSE = 'public domain'
+
+ax.add_feature(cfeature.LAND)
+ax.add_feature(cfeature.COASTLINE)
+ax.add_feature(states_provinces, edgecolor='gray')
+
+# Add a text annotation for the license information to the
+# the bottom right corner.
+text = AnchoredText(r'$\mathcircled{{c}}$ {}; license: {}'
+                    ''.format(SOURCE, LICENSE),
+                    loc=4, prop={'size': 12}, frameon=True)
+ax.add_artist(text)
+plt.show()
+
+
+```
+
+```{python}
+
+fig = plt.figure()
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.set_extent([20, 70, -40, 20], crs=ccrs.PlateCarree())
+ax.add_feature(cfeature.LAND, edgecolor='gray')
+ax.add_feature(cfeature.BORDERS)
+ax.add_feature(cfeature.COASTLINE)
+ax.gridlines(xlocs=np.arange(20,70,10), draw_labels=True, crs=ccrs.PlateCarree())
+plt.show()
+```
+
+
+```{python}
+
+fig = plt.figure()
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.set_extent([20, 70, -40, 20], crs=ccrs.PlateCarree())
+# Put a background image on for nice sea rendering.
+ax.stock_img()
+ax.add_feature(cfeature.BORDERS)
+ax.add_feature(cfeature.COASTLINE)
+ax.gridlines(xlocs=np.arange(20,70,10), draw_labels=True, crs=ccrs.PlateCarree())
+plt.show()
+```
+
+```{python}
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
+ax.set_extent([-20, 60, -40, 45], crs=ccrs.PlateCarree())
+ax.stock_img()
+ax.add_feature(cfeature.LAND)
+ax.add_feature(cfeature.OCEAN)
+ax.add_feature(cfeature.COASTLINE)
+ax.add_feature(cfeature.BORDERS, linestyle='dotted')
+ax.add_feature(cfeature.LAKES, alpha=0.5)
+ax.add_feature(cfeature.RIVERS)
+plt.show()
+```
+
+
+## Global Map
+An example of a simple map that compares Geodetic and Plate Carree lines between two locations.
+
+```{python}
+ 
+fig = plt.figure(figsize=(8, 4))
+ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson(central_longitude=0))
+ax.set_global()
+ax.stock_img()
+ax.coastlines()
+ax.gridlines()
+# ax.plot(-0.08, 51.53, 'o', transform=ccrs.PlateCarree())
+# ax.plot([-0.08, 132], [51.53, 43.17], transform=ccrs.PlateCarree())
+# ax.plot([-0.08, 132], [51.53, 43.17], transform=ccrs.Geodetic())
+plt.show()
+```
+
+## Filled contours
+We use the gridded sea surface temperature and because I want to see the pacific and Indian ocean, I used the Mollweide projection and center the longitude to 130.
+
+```{python}
+## read the netcdf file with Dataset function from netCDF4 module
+sst = nc.Dataset("e:/MatlabWorking/GHRSST/20050101.nc")
+## sst.variables
+## extract individual varibales in the nc file
+time = sst.variables['time'][:]
+lon = sst.variables['lon'][:]
+lat = sst.variables['lat'][:]
+sst = sst.variables['analysed_sst']
+## extract an array of the first day and convert temperature from Kelvin to Degree Celsius
+sstr = sst[0,:,:]-273
+
+## create a rectangular of the long and lat
+lon2d, lat2d = np.meshgrid(lon, lat)
+
+
+plt.figure(figsize=(8,4))
+ax = plt.axes(projection=ccrs.Mollweide(central_longitude=160),)
+ax.set_global()
+# ax.set_extent([-170,170,-30,30])
+ax.coastlines()
+ax.contourf(lon2d, lat2d, datar, transform=ccrs.PlateCarree(), cmap='nipy_spectral')
+# ax.gridlines(draw_labels=True, xlocs=np.arange(-180,180,30))# unsupported with Mollweide
+plt.show()
+
+```
+
+We can also read and map the mean sea level anomaly as the chunk below illustrate
+```{python}
+## read mean sea level anomaly data
+msla = nc.Dataset("e:/MatlabWorking/Altimetry/msla_h/indian_ocean-twosat-msla-h_010193_311295.nc")
+## msla.variables
+time = msla.variables['time'][:]
+lon = msla.variables['lon'][:]
+lat = msla.variables['lat'][:]
+sla = msla.variables['sla']
+sla30 = sla[30,:,:]
+
+lon2d, lat2d = np.meshgrid(lon, lat)
+
+plt.figure(figsize=(6,5))
+ax = plt.axes(projection=ccrs.Mollweide(central_longitude=60))
+# ax.set_global()
+ax.set_extent([20,120,-50,20])
+ax.coastlines()
+# ax.add_feature(cfeature.BORDERS, linestyle = "dotted") # uncomment to plot country boundaries
+ax.contourf(lon2d, lat2d, sla30, transform=ccrs.PlateCarree(), cmap='nipy_spectral')
+ax.gridlines(draw_labels=False, xlocs=np.arange(-180,180,30))
+plt.show()
+```
+
+
+
+<!-- ```{python, eval = FALSE} -->
+<!-- from sklearn import preprocessing -->
+
+<!-- sla30[sla30 == -2147483647] = np.nan -->
+<!-- normalized_sla = preprocessing.normalize(sla30) -->
+
+<!-- sla30_nan = sla30.copy -->
+<!-- sla30_nan[sla30_nan == -2147483647] = np.nan -->
+
+<!-- plt.figure(figsize=(6,5)) -->
+<!-- ax = plt.axes(projection=ccrs.Mollweide(central_longitude=60)) -->
+<!-- # ax.set_global() -->
+<!-- ax.set_extent([20,120,-50,20]) -->
+<!-- ax.coastlines() -->
+<!-- # ax.add_feature(cfeature.BORDERS, linestyle = "dotted") # uncomment to plot country boundaries -->
+<!-- ax.contourf(lon2d, lat2d, sla30, transform=ccrs.PlateCarree(), cmap='nipy_spectral') -->
+<!-- ax.gridlines(draw_labels=False, xlocs=np.arange(-180,180,30)) -->
+<!-- plt.show() -->
+<!-- ``` -->
+
+
+<!-- ```{python, eval = FALSE} -->
+<!-- import numpy as np -->
+<!-- import matplotlib.pyplot as plt -->
+<!-- import iris -->
+<!-- import iris.plot as iplt -->
+<!-- import iris.quickplot as qplt -->
+
+<!-- import iris.analysis.cartography -->
+<!-- ``` -->
+
+

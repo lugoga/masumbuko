@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.64.1" />
+
+
+<title>Kernel smoothing of Spatial Data - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Kernel smoothing of Spatial Data - Masumbuko Semba&#39;s Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/grani_logo-01.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/post/">Posts</a></li>
+    
+    <li><a href="/publication/">Publications</a></li>
+    
+    <li><a href="/project/">Projects</a></li>
+    
+    <li><a href="https://github.com/lugoga">GitHub</a></li>
+    
+    <li><a href="/links/">Links</a></li>
+    
+    <li><a href="/resume/">Resume</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">6 min read</span>
+    
+
+    <h1 class="article-title">Kernel smoothing of Spatial Data</h1>
+
+    
+    <span class="article-date">2020/06/30</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p>Kernel density estimation is a popular tool for visualizing the distribution of data. In this post, we are going to look on how to create smoothed map of random points. We will use a shapefile dataset that contains potential fishing zones derived from sea surface temperature recorded between January and June 2020 in Pemba channel. You can simply download the file from this <a href="https://github.com/lugoga/masumbuko/raw/master/content/post/pfz.rar">link</a>.</p>
+<p>Once you have downloaded the file, unzip and browse in the uncompressed file you find the shapefile <code>pfz.shp</code> (together with it’s corresponding <code>.DBF</code>. <code>.PRJ</code> and <code>.SHX</code> files). Set the folder containing these files as your R working directory.You will need to load three packages shown in the chunk below to accomplish this exercise. If these packages are not installed in your machine, you can install them with <code>install.packages()</code>.</p>
+<pre class="r"><code>require(sf)
+require(btb)
+require(tidyverse)</code></pre>
+<p>Once we have uncompressed the file, we can use <code>st_read()</code> function to read the file <span class="citation">(Pebesma <a href="#ref-sf" role="doc-biblioref">2018</a>)</span>.</p>
+<pre class="r"><code>fronts.polygons = st_read(&quot;pfz/pfz.shp&quot;, quiet = TRUE)
+
+fronts.polygons</code></pre>
+<p>A glimpse of a dataset tell us that this dataset is a simple feature with 7693 polygon features <span class="citation">(Wickham and Henry <a href="#ref-tidyr" role="doc-biblioref">2018</a>)</span>. These features are projected in Universal Transverse Mercator Zone 37 South <span class="citation">(Pebesma <a href="#ref-sf" role="doc-biblioref">2018</a>)</span>. The dataset has date which tell us the data of the fronts. The source variable is of no meaning and we can skip for now.</p>
+<p>Since the polygon are in UTM, we can compute the area of each polygon with <code>st_area()</code> function <span class="citation">(Pebesma <a href="#ref-sf" role="doc-biblioref">2018</a>)</span>. We compute areas in square kilometer and filter out the area of the Exclusive Economic Zone from the dataset <span class="citation">(Firke <a href="#ref-janitor" role="doc-biblioref">2020</a>; Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span>.</p>
+<pre class="r"><code>fronts.polygons.area = fronts.polygons %&gt;%
+  mutate(area_km2 = as.numeric(st_area(geometry)/1000000),
+         month = lubridate::month(date, label = TRUE))%&gt;% filter(area_km2 &lt; 200000)</code></pre>
+<p>We then converting the polygon into point by using the <code>st_cast()</code> function</p>
+<pre class="r"><code>fronts.points.wgs = fronts.polygons.area %&gt;%
+   # st_crop(xmin = 38, ymin = -6, xmax = 40, ymax = -4)%&gt;%
+  # st_transform(4326)  %&gt;%
+  st_cast(&quot;POINT&quot;) %&gt;%
+   mutate(month = lubridate::month(date, label = TRUE))</code></pre>
+<div id="kernel-smoothin-of-pfz" class="section level2">
+<h2>Kernel Smoothin of PFZ</h2>
+<p>The <code>kernelSmoothing()</code> function allows to square and smooth geolocated data points <span class="citation">(Santos et al. <a href="#ref-btb" role="doc-biblioref">2020</a>)</span>. It calculates a classical kernel smoothing (conservative) or a geographically weighted median. There are four major call modes of the function. The first call mode is kernelSmoothing(obs, epsg, cellsize, bandwith) for a classical kernel smoothing and automatic grid. The second call mode is kernelSmoothing(obs, epsg, cellsize, bandwith, quantiles) for a geographically weighted median and automatic grid. The third call mode is kernelSmoothing(obs, epsg, cellsize, bandwith, centroids) for a classical kernel smoothing and user grid. The fourth call mode is kernelSmoothing(obs, epsg, cellsize, bandwith, quantiles, centroids) for a geographically weighted median and user grid.</p>
+<p>For this post, we will focus on the first call that only square and smooth geolocated potential fishing zones and compute the total number that fall in each grid. Before we compute we need first to convert the points from the simple feature to tibble that contains <code>eastings (x)</code>, <code>northings (y)</code> to allow the <code>kernelSmoothing()</code> function to work. Unfortunate, the function throw an error when only two variables are provided, hence I had to compute the area to make a third column, though not usef in the analysis.</p>
+<pre class="r"><code>fronts.points.tb = fronts.points.wgs %&gt;% 
+  st_coordinates() %&gt;%
+  as_tibble() %&gt;%
+  rename(x = X, y = Y) %&gt;%
+  mutate(area = fronts.points.wgs$area_km2) </code></pre>
+<p>Once the file is created, we can smooth into grid with the kernelSmoothing by passing the four arguments, a <code>sEPSG</code> is projection code and for our case the code for the area is <code>32737</code>. The second argument is <code>iCellSize</code> which define the length and width of the grid, for this case I chose 10000 (~10km). A iCellSize value must be in the same unit as the northings and eastings. for our case is in meters.</p>
+<p>A third argument in the function i a <code>iBandwidth</code>, which is the radius of the Kernel Density. This bandwidth acts as a smoothing parameter, controlling the balance between bias and variance. A large bandwidth leads to a very smooth (i.e. high-bias) density distribution. A small bandwidth leads to an unsmooth (i.e. high-variance) density distribution. The unit of measurement is free. It must be the same as the unit of iCellSize variable. The last argument is a <code>vQuantiles</code>, which compute values that relate to the rank order of values in that distribution. This will calculate the third variable in our dataset(area) into the 10,50 and 90<sup>th</sup> quantile. As mentioned earlier, it is not useful for area, but is useful is other variables are of interest.</p>
+<p>The output of the <code>kernelSmoothing</code> is a simple feature in UTM coordinates, hence we need to convert to Geographical Coordinate System using <code>st_transform</code> function. The <code>EPSG</code> code for <code>WGS84</code> is 4326, which is parsed in the argument.</p>
+<pre class="r"><code>fronts.smoothed = fronts.points.tb %&gt;%
+  kernelSmoothing(sEPSG = &quot;32737&quot;,
+                  iCellSize = 10000L,
+                  iBandwidth = 20000L,
+                  vQuantiles = c(0.1, 0.5, 0.9)) %&gt;%
+  st_transform(4326) %&gt;%
+  st_as_sf() </code></pre>
+</div>
+<div id="visualizing" class="section level2">
+<h2>Visualizing</h2>
+<p>TWe can then plot the spatial distribution of smoothed potential fishing zones using ggplot2. Figure <a href="#fig:fig1">1</a> that show variation of PFZ in the Pemba channel was generated using the code below;</p>
+<pre class="r"><code>fronts.smoothed %&gt;%
+  st_crop(xmin = 38, ymin = -6.5, xmax = 41, ymax = -3) %&gt;%
+  ggplot() +
+  geom_sf(aes(fill = nbObs), col = NA)+
+  geom_sf(data = tz.ke, fill = &quot;grey80&quot;) +
+  coord_sf(xlim = c(38.6, 39.8), ylim = c(-6,-4.6))+
+  # scale_fill_gradientn(colours = mycolor, breaks = seq(0,110,10), name = &quot;Number\nof PFZs&quot;,
+  #                      guide = guide_colorbar(reverse = TRUE, nbin = 11, raster = FALSE,barheight = unit(6,&quot;cm&quot;)))+
+  scale_fill_viridis_c() +
+  metR::scale_x_longitude(ticks = 0.4)+
+  metR::scale_y_latitude(breaks = seq(-5.8,-4.8, length.out = 4) %&gt;% round(1))+
+  theme_bw() +
+  theme(legend.position = c(0.13,.45),
+        axis.text = element_text(size = 11, colour = &quot;black&quot;),
+        legend.background = element_rect(fill = &quot;grey83&quot;)) +
+  ggspatial::annotation_north_arrow(location = &quot;tl&quot;, width = unit(.75, &quot;cm&quot;), height = unit(.75, &quot;cm&quot;))+
+  ggspatial::annotation_scale(location = &quot;bl&quot;, text_cex = .9)</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2020-07-06-kernel-smoothin-of-spatial-data_files/figure-html/fig1-1.png" alt="Spatial Distribution of Potential fishing zones in the Pemba channel. Color codes using Viridis pallete" width="432" />
+<p class="caption">
+Figure 1: Spatial Distribution of Potential fishing zones in the Pemba channel. Color codes using Viridis pallete
+</p>
+</div>
+<p>Though figure <a href="#fig:fig1">1</a> clearly indicate that the areas with high and low density of fishing zones, but the color code might hide some crues. To enhance this, after several trial, I came up with my color code below that was used to plot figure <a href="#fig:fig2">2</a>).</p>
+<pre class="r"><code>mycolor = c(&quot;#7f007f&quot;, &quot;#0000ff&quot;,  &quot;#007fff&quot;, &quot;#00ffff&quot;, &quot;#00bf00&quot;, &quot;#7fdf00&quot;,
+            &quot;#ffff00&quot;, &quot;#ff7f00&quot;, &quot;#ff3f00&quot;, &quot;#ff0000&quot;, &quot;#bf0000&quot;)</code></pre>
+<pre class="r"><code>fronts.smoothed %&gt;%
+  st_crop(xmin = 38, ymin = -6.5, xmax = 41, ymax = -3) %&gt;%
+  ggplot() +
+  geom_sf(aes(fill = nbObs), col = NA)+
+  geom_sf(data = tz.ke, fill = &quot;grey80&quot;) +
+  coord_sf(xlim = c(38.6, 39.8), ylim = c(-6,-4.6))+
+  scale_fill_gradientn(colours = mycolor, breaks = seq(100,1400,120), name = &quot;Number\nof PFZs&quot;,
+                       guide = guide_colorbar(reverse = TRUE, nbin = 11, raster = FALSE,barheight = unit(6,&quot;cm&quot;)))+
+  metR::scale_x_longitude(ticks = 0.4)+
+  metR::scale_y_latitude(breaks = seq(-5.8,-4.8, length.out = 4) %&gt;% round(1))+
+  theme_bw() +
+  theme(legend.position = c(0.13,.45),
+        axis.text = element_text(size = 11, colour = &quot;black&quot;),
+        legend.background = element_rect(fill = &quot;grey83&quot;)) +
+  ggspatial::annotation_north_arrow(location = &quot;tl&quot;, width = unit(.75, &quot;cm&quot;), height = unit(.75, &quot;cm&quot;))+
+  ggspatial::annotation_scale(location = &quot;bl&quot;, text_cex = .9)</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2020-07-06-kernel-smoothin-of-spatial-data_files/figure-html/fig2-1.png" alt="Spatial Distribution of Potential fishing zones in the Pemba channel. Customized color codes" width="432" />
+<p class="caption">
+Figure 2: Spatial Distribution of Potential fishing zones in the Pemba channel. Customized color codes
+</p>
+</div>
+</div>
+<div id="cited" class="section level2 unnumbered">
+<h2>Cited</h2>
+<div id="refs" class="references">
+<div id="ref-janitor">
+<p>Firke, Sam. 2020. <em>Janitor: Simple Tools for Examining and Cleaning Dirty Data</em>. <a href="https://CRAN.R-project.org/package=janitor">https://CRAN.R-project.org/package=janitor</a>.</p>
+</div>
+<div id="ref-sf">
+<p>Pebesma, Edzer. 2018. <em>Sf: Simple Features for R</em>. <a href="https://CRAN.R-project.org/package=sf">https://CRAN.R-project.org/package=sf</a>.</p>
+</div>
+<div id="ref-btb">
+<p>Santos, Arlindo Dos, Francois Semecurbe, Auriane Renaud, Cynthia Faivre, Thierry Cornely, Farida Marouchi, and Farida Marouchi. 2020. <em>Btb: Beyond the Border - Kernel Density Estimation for Urban Geography</em>. <a href="https://CRAN.R-project.org/package=btb">https://CRAN.R-project.org/package=btb</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+<div id="ref-tidyr">
+<p>Wickham, Hadley, and Lionel Henry. 2018. <em>Tidyr: Easily Tidy Data with ’Spread()’ and ’Gather()’ Functions</em>. <a href="https://CRAN.R-project.org/package=tidyr">https://CRAN.R-project.org/package=tidyr</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//https-semba-blog-netlify-com.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-127756435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

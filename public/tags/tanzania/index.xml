@@ -6,17 +6,27 @@
     <description>Recent content in Tanzania on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 06 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 02 Jul 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/tanzania/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Kernel smoothing of Spatial Data</title>
-      <link>/07/06/2020/kernel-smoothin-of-spatial-data/</link>
-      <pubDate>Mon, 06 Jul 2020 00:00:00 +0000</pubDate>
+      <title>Python as a tool for oceagraphy and marine sciences</title>
+      <link>/07/02/2020/python-as-a-tool-for-oceagraphy-and-marine-sciences/</link>
+      <pubDate>Thu, 02 Jul 2020 00:00:00 +0000</pubDate>
       
-      <guid>/07/06/2020/kernel-smoothin-of-spatial-data/</guid>
+      <guid>/07/02/2020/python-as-a-tool-for-oceagraphy-and-marine-sciences/</guid>
+      <description>During the last couple of decades, Matlab has been the most commonly-used scripting language in physical oceanography (Bengtsson 2018), and it has a large user base in many other fields. However, Python has been gaining ground, often being adopted by former Matlab users as well as by newcomers. Here is a little background to help you understand this shift, and why we advocate using Python from the start.
+Python was designed by a computer scientist as a general–purpose scripting language for easy adoption and widespread use.</description>
+    </item>
+    
+    <item>
+      <title>Kernel smoothing of Spatial Data</title>
+      <link>/06/30/2020/kernel-smoothin-of-spatial-data/</link>
+      <pubDate>Tue, 30 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/06/30/2020/kernel-smoothin-of-spatial-data/</guid>
       <description>Kernel density estimation is a popular tool for visualizing the distribution of data. In this post, we are going to look on how to create smoothed map of random points. We will use a shapefile dataset that contains potential fishing zones derived from sea surface temperature recorded between January and June 2020 in Pemba channel. You can simply download the file from this link.
 Once you have downloaded the file, unzip and browse in the uncompressed file you find the shapefile pfz.</description>
     </item>

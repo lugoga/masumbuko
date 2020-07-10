@@ -1,0 +1,132 @@
+---
+title: Python as a tool for oceagraphy and marine sciences
+author: Masumbuko Semba
+date: '2020-07-02'
+slug: python-as-a-tool-for-oceagraphy-and-marine-sciences
+categories:
+  - Python
+tags:
+  - python
+  - Semba
+  - Oceanography
+  - Marine
+  - Indian Ocean
+  - Tanzania
+  - Coastal Waters
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "")
+
+```
+
+During the last couple of decades, Matlab has been the most commonly-used scripting language in physical oceanography [@rmatlab], and it has a large user base in many other fields. However, Python has been gaining ground, often being adopted by former Matlab users as well as by newcomers. Here is a little background to help you understand this shift, and why we advocate using Python from the start.
+
+Python was designed by a computer scientist as a general--purpose scripting language for easy adoption and widespread use. People tried it and liked it, and the result is that it is widely used throughout the software world, for all sorts of tasks, large and small. There is a vast array of Python packages that are freely available to do all sorts of things—including the sorts of things that oceanographers and other scientists do; but these packages are not neatly bound up in a single product, and the documentation for the language itself and for the packages is similarly scattered and of varying quality.
+
+Why I think we should use open source software package like Python instead of proprietary programming language?
+Like R, Python is fundamentally a better computer language in many ways and free open software with large community support.
+
+i. It is suitable for a wider variety of tasks.
+i. It scales better from the shortest of scripts to large software projects.
+i. It facilitates writing clearer and more concise code.
+i. With associated tools, it makes for easier access to existing high-performance codes in compiled languages, and for using smaller pieces of compiled code to speed up critical sections.
+i. Because Python is Free and Open Source Software (FOSS), you can install it on any machine without having to deal with a license manager.
+i. For the same reason, Python code that is part of a research project can be run by anyone, anywhere, to verify or extend the results.
+i. Most Python packages you are likely to want to use are developed in an open environment. The scientific Python ecosystem is dynamic and friendly.
+
+The usefulness of Python for data science stems primarily from the large and active ecosystem of third-party packages: **NumPy** for manipulation of homogeneous array based data, **Pandas** for manipulation of heterogeneous and labeled data, **SciPy** for common scientific computing tasks, **Matplotlib** for publication-quality visualizations,  and **Scikit-Learn** for machine learning, and related tools--to effectively store, manipulate, and gain insight from data. 
+
+
+Let's us configure our session so that we can make full access of Python language in R Studio. We do that by loading a **reticulate** package first before we configure as the chunk below highlight;
+
+```{r}
+require(reticulate)
+use_python("c:/Python/Anaconda3/")
+
+```
+
+
+Once we have configured the Python environment in R, we must also load some module from R into Rstudio. This will make the functions in these module available for our processing and plotting. We use the convention naming of Python package as seen in the chunk below.
+
+> Note that loading Python modules in R session must be done inside the Python chunk. Otherwise you get an error message or a chunk fail to iterate the process
+
+```{python}
+import netCDF4 as nc
+import numpy as np
+import pandas as pd
+import seaborn as sns
+# from mpl_toolkits.basemap import Basemap
+
+```
+
+## Data
+We will use temperature data for this post. This dataset can be obtained from the Group of High Resolution Sea Surface Temperature (GHRSST) from [this](https://www.ghrsst.org/products-and-services/real-time-data/). We then use `nc.Dataset` function from **netCDF4** module to read the NetCDF file
+
+```{python}
+sst = nc.Dataset("e:/MatlabWorking/GHRSST/20150101.nc")
+```
+
+We then use a `.` function to access the variables in the dataset
+
+```{python}
+sst.variables
+```
+
+## Extracting the variables
+The need to separate variable should be done after you have explored how the data is structured and how the variableas are organized. for drawing maps, we need three variables, longitude,latitude and temperature. These has to be extracted from the netcdf file. We notice that the dataset is an array with `time`,   `lon`, `lat` and `analysed_sst` variables. We can simply extract the variables as the chunk below highlight. 
+
+```{python}
+time = sst.variables['time']
+lon = sst.variables['lon']
+lat = sst.variables['lat']
+data = sst.variables['analysed_sst']
+
+```
+
+Once we have extracted the variables from the dataset, we can check the dimension of the 
+```{python}
+data.dimensions
+```
+
+## Visualization with Matplotlib
+Matplotlib is a multiplatform data visualization library built on NumPy arrays, and designed to work with the broader SciPy stack. One of Matplotlib’s most important features is its ability to play well with many operating systems and graphics backends. Matplotlib supports dozens of backends and output types, which means you can count on it to work regardless of which operating system you are using or which output format you wish. 
+
+Before we dive into the details of creating visualizations with Matplotlib, there are a few useful things you should know about using the package. Just as we use the `np` shorthand for **NumPy** and the `pd` shorthand for **Pandas**, we will use some standard shorthands for **Matplotlib** imports:
+
+```{python}
+import matplotlib.pyplot as plt
+
+```
+
+The `plt` interface is what we will use to plot sea surface temperatue in this post. Because we are using Matplotlib from within a script, the function` plt.show()` is our friend. `plt.show()` starts an event loop, looks for all currently active figure objects, and display your figure or figures. For all Matplotlib plots, we start by creating a figure and an axes. In their simplest form, a figure and axes can be created as follows 
+
+
+```{python fig1, fig.cap = "Global Sea surface temperature"}
+fig, axes = plt.subplots(nrows=1, ncols=1)
+plt.imshow(data[0,:,:]-273,)
+plt.colorbar()
+plt.show()
+```
+
+The `plt.show()` command does a lot under the hood, as it must interact with your system’s interactive graphical backend.
+From figure \@ref(fig:fig1), we notice the figure is flipped upside down. we need to correct the data and map it in the correct orientation. we use `np.flipud` function from numpy module for correcting the orientation. we can correct the array using a `flipud` function from **NumPy** module.
+
+```{python fig2, fig.cap = "Corrected sea surface temperature"}
+
+datar = np.flipud(data[0,:,:]-273)
+
+fig, axes = plt.subplots(nrows=1, ncols=1)
+plt.imshow(datar, cmap = "jet")
+plt.colorbar()
+plt.clim(5,30)
+plt.show()
+```
+
+
+
+## Cited Material
