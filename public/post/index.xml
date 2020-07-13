@@ -61,6 +61,16 @@ You need to work on this column of the result to have a clean and right format d
     </item>
     
     <item>
+      <title>Plots in Interactive Maps with R </title>
+      <link>/06/13/2020/plots-in-interactive-maps-with-r/</link>
+      <pubDate>Sat, 13 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/06/13/2020/plots-in-interactive-maps-with-r/</guid>
+      <description>Introductionrequire(shiny)require(leaflet.minicharts)require(leaflet)require(sf)require(tidyverse)We first create a basemap that will be used in all the following examples
+tilesURL = &amp;quot;http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}&amp;quot;basemap = leaflet(width = &amp;quot;100%&amp;quot;, height = &amp;quot;800px&amp;quot;) %&amp;gt;%addTiles(tilesURL)basemap{&#34;x&#34;:{&#34;options&#34;:{&#34;crs&#34;:{&#34;crsClass&#34;:&#34;L.CRS.EPSG3857&#34;,&#34;code&#34;:null,&#34;proj4def&#34;:null,&#34;projectedBounds&#34;:null,&#34;options&#34;:{}}},&#34;calls&#34;:[{&#34;method&#34;:&#34;addTiles&#34;,&#34;args&#34;:[&#34;http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}&#34;,null,null,{&#34;minZoom&#34;:0,&#34;maxZoom&#34;:18,&#34;tileSize&#34;:256,&#34;subdomains&#34;:&#34;abc&#34;,&#34;errorTileUrl&#34;:&#34;&#34;,&#34;tms&#34;:false,&#34;noWrap&#34;:false,&#34;zoomOffset&#34;:0,&#34;zoomReverse&#34;:false,&#34;opacity&#34;:1,&#34;zIndex&#34;:1,&#34;detectRetina&#34;:false}]}]},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}Census DataIs the proportional of married people similar across all regions in Tanzania? To answer this question let us focus on the census data of 2002.</description>
+    </item>
+    
+    <item>
       <title>A simple Principal Component Analysis (PCA) in R </title>
       <link>/05/13/2020/simple-pca-in-r/</link>
       <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
