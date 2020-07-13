@@ -32,8 +32,9 @@ link-citations: yes
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<pre class="r"><code>require(shiny)
-require(leaflet.minicharts)
+<p>Often times when w are working with data, there always a geospatial component to the data—the locations. R has several packages that support interactivity of features, including maps. <span class="citation">Bachelier et al. (<a href="#ref-minicharts" role="doc-biblioref">2019</a>)</span> developed <strong>leaflet.minicharts</strong> package that enhance interactivity of maps by superimpose on the basemaps with interactive plots. In this post I illustrate tools *leaflet.minicharts** use case in which you have a set of species and you want an interactive map.</p>
+<p>leaflet.minicharts is an R package that provides two functions to add and update small charts on an interactive maps created with the package leaflet. These charts can be used to represent as many variables as desired associated to geographical points. Currently, three types of chart are supported: barcharts (the default), pie charts and polar area charts.</p>
+<pre class="r"><code>require(leaflet.minicharts)
 require(leaflet)
 require(sf)
 require(tidyverse)</code></pre>
@@ -50,12 +51,6 @@ basemap</code></pre>
 <div id="census-data" class="section level2">
 <h2>Census Data</h2>
 <p>Is the proportional of married people similar across all regions in Tanzania? To answer this question let us focus on the census data of 2002. We first import a simple feature into our session using <code>st_read</code> function from <strong>sf</strong> package <span class="citation">(Pebesma <a href="#ref-sf" role="doc-biblioref">2018</a>)</span>.</p>
-<pre><code>Reading layer `Tanzania_Region_EA_2002_region&#39; from data source `e:\GIS\Tanzania spatial data Bank\NBS correct\Tanzania_Region_EA_2002_region\Tanzania_Region_EA_2002_region.shp&#39; using driver `ESRI Shapefile&#39;
-Simple feature collection with 26 features and 40 fields
-geometry type:  MULTIPOLYGON
-dimension:      XY
-bbox:           xmin: 29.32717 ymin: -11.74633 xmax: 40.44502 ymax: -0.990231
-geographic CRS: Arc 1960</code></pre>
 <pre class="r"><code>region = st_read(&quot;NBS correct/Tanzania_Region_EA_2002_region/Tanzania_Region_EA_2002_region.shp&quot;)</code></pre>
 <pre class="r"><code>region %&gt;% glimpse()</code></pre>
 <pre><code>Rows: 26
@@ -101,12 +96,12 @@ $ ECONACTIV  &lt;dbl&gt; 939962, 718951, 782488, 915218, 1022792, 522155, 165115
 $ VOTINGPOP  &lt;dbl&gt; 835618, 636377, 697481, 816401, 914577, 468278, 1479408,...
 $ DEPENDANT  &lt;dbl&gt; 2732.6, 2209.9, 2429.6, 2309.3, 4237.8, 1833.4, 9244.9, ...
 $ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((36.85407 -6..., MULTIPOLYGO...</code></pre>
-<p>A glimpse reveal a subtle internal structure of the dataset. It’s a simple feature with polygons representing the geographical boundary of 26 regions in Tanzania. Each region contains demographic information collected in 2002 Housing and Population Census. We are only interested with number of people by gender and marital status, which we select them using <code>select</code> function from <strong>dplyr</strong> package. Before the variable were selected, colnames were cleaned using <code>clean_names()</code> function from <strong>janitor</strong> package <span class="citation">(Firke <a href="#ref-janitor" role="doc-biblioref">2020</a>)</span>.</p>
+<p>A glimpse reveal a subtle internal structure of the dataset. It’s a simple feature with polygons representing the geographical boundary of 26 regions in Tanzania. Each region contains demographic information collected in 2002 Housing and Population Census. We are only interested with number of people by gender and marital status, which we select them using <code>select</code> function from <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span>. Before the variable were selected, colnames were cleaned using <code>clean_names()</code> function from <strong>janitor</strong> package <span class="citation">(Firke <a href="#ref-janitor" role="doc-biblioref">2020</a>)</span>.</p>
 <pre class="r"><code>region = region %&gt;% 
   janitor::clean_names() %&gt;%  
   select(regname,male,female,single, maried) %&gt;% 
   st_transform(4326)</code></pre>
-<p>Since we need the centroid points of the region, <code>st_point_on_surface</code> function from <strong>sf</strong> package was used to convert polygon to point feature. Then longitude and latitude of centroid points were extracted using <code>st_coordinates</code> function and combined with the attributes information to produce a tibble. Once the tibble was obtained, a total population in each region was computed by summing the number of male and female in each region.</p>
+<p>Since we need the centroid points of the region, <code>st_point_on_surface</code> function from <strong>sf</strong> package was used to convert polygon to point feature <span class="citation">(Pebesma <a href="#ref-sf" role="doc-biblioref">2018</a>)</span>. Then longitude and latitude of centroid points were extracted using <code>st_coordinates</code> function and combined with the attributes information to produce a tibble. Once the tibble was obtained, a total population in each region was computed by summing the number of male and female in each region.</p>
 <pre class="r"><code>region.tb = region %&gt;% 
   st_point_on_surface() %&gt;% 
   st_coordinates() %&gt;% 
@@ -154,11 +149,17 @@ basemap %&gt;%
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>
 <div id="refs" class="references">
+<div id="ref-minicharts">
+<p>Bachelier, Veronique, Jalal-Edine ZAWAM, Benoit Thieurmel, and Francois Guillem. 2019. <em>Leaflet.minicharts: Mini Charts for Interactive Maps</em>. <a href="https://CRAN.R-project.org/package=leaflet.minicharts">https://CRAN.R-project.org/package=leaflet.minicharts</a>.</p>
+</div>
 <div id="ref-janitor">
 <p>Firke, Sam. 2020. <em>Janitor: Simple Tools for Examining and Cleaning Dirty Data</em>. <a href="https://CRAN.R-project.org/package=janitor">https://CRAN.R-project.org/package=janitor</a>.</p>
 </div>
 <div id="ref-sf">
 <p>Pebesma, Edzer. 2018. <em>Sf: Simple Features for R</em>. <a href="https://CRAN.R-project.org/package=sf">https://CRAN.R-project.org/package=sf</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
 </div>
 </div>
 </div>

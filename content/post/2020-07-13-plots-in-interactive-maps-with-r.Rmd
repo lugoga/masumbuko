@@ -18,6 +18,10 @@ link-citations: yes
 
 ## Introduction
 
+Often times when w are working with data, there always a geospatial component to the data---the locations. R has several packages that support interactivity of features, including maps. @minicharts developed **leaflet.minicharts** package that enhance interactivity of maps by superimpose on the basemaps with interactive plots. In this post I illustrate tools *leaflet.minicharts** use case in which you have a set of species and you want an interactive map.
+
+leaflet.minicharts is an R package that provides two functions to add and update small charts on an interactive maps created with the package leaflet. These charts can be used to represent as many variables as desired associated to geographical points. Currently, three types of chart are supported: barcharts (the default), pie charts and polar area charts.
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "")
@@ -26,7 +30,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "
 
 
 ```{r}
-require(shiny)
+
 require(leaflet.minicharts)
 require(leaflet)
 require(sf)
@@ -50,7 +54,7 @@ basemap
 Is the proportional of married people similar across all regions in Tanzania? To answer this question let us focus on the census data of 2002. We first import a simple feature into our session using `st_read` function from **sf** package [@sf].
 
 ```{r, echo=FALSE}
-region = st_read("e:/GIS/Tanzania spatial data Bank/NBS correct/Tanzania_Region_EA_2002_region/Tanzania_Region_EA_2002_region.shp")
+region = st_read("e:/GIS/Tanzania spatial data Bank/NBS correct/Tanzania_Region_EA_2002_region/Tanzania_Region_EA_2002_region.shp", quiet = TRUE)
 ```
 
 
@@ -64,7 +68,7 @@ region = st_read("NBS correct/Tanzania_Region_EA_2002_region/Tanzania_Region_EA_
 region %>% glimpse()
 ```
 
-A glimpse reveal a subtle internal structure of the dataset. It's a simple feature with polygons representing the geographical boundary of 26 regions in Tanzania. Each region contains demographic information collected in 2002 Housing and Population Census. We are only interested with number of people by gender and marital status, which we select them using `select` function from **dplyr** package. Before the variable were selected, colnames were cleaned using `clean_names()` function from **janitor** package [@janitor].  
+A glimpse reveal a subtle internal structure of the dataset. It's a simple feature with polygons representing the geographical boundary of 26 regions in Tanzania. Each region contains demographic information collected in 2002 Housing and Population Census. We are only interested with number of people by gender and marital status, which we select them using `select` function from **dplyr** package [@dplyr]. Before the variable were selected, colnames were cleaned using `clean_names()` function from **janitor** package [@janitor].  
 
 ```{r}
 region = region %>% 
@@ -73,7 +77,7 @@ region = region %>%
   st_transform(4326)
 ```
 
-Since we need the centroid points of the region, `st_point_on_surface` function from **sf** package was used to convert polygon to point feature. Then longitude and latitude of centroid points were extracted using `st_coordinates` function and combined with the attributes information to produce a tibble. Once the tibble was obtained, a total population in each region was computed by summing the number of male and female in each region. 
+Since we need the centroid points of the region, `st_point_on_surface` function from **sf** package was used to convert polygon to point feature [@sf]. Then longitude and latitude of centroid points were extracted using `st_coordinates` function and combined with the attributes information to produce a tibble. Once the tibble was obtained, a total population in each region was computed by summing the number of male and female in each region. 
 
 ```{r}
 region.tb = region %>% 
