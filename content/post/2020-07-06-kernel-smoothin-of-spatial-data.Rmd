@@ -137,9 +137,9 @@ mycolor = c("#7f007f", "#0000ff",  "#007fff", "#00ffff", "#00bf00", "#7fdf00",
 ```
 
 
-```{r fig2, fig.width=4.5, fig.height=5, fig.cap="Spatial Distribution of Potential fishing zones in the Pemba channel. Customized color codes"}
+```{r fig2, fig.width=4.5, fig.height=5.5, fig.cap="Spatial Distribution of Potential fishing zones in the Pemba channel. Customized color codes"}
 
-fronts.smoothed %>%
+ke.pfz = fronts.smoothed %>%
   st_crop(xmin = 38, ymin = -6.5, xmax = 41, ymax = -3) %>%
   ggplot() +
   geom_sf(aes(fill = nbObs), col = NA)+
@@ -150,13 +150,127 @@ fronts.smoothed %>%
   metR::scale_x_longitude(ticks = 0.4)+
   metR::scale_y_latitude(breaks = seq(-5.8,-4.8, length.out = 4) %>% round(1))+
   theme_bw() +
-  theme(legend.position = c(0.13,.45),
+ theme(legend.position = c(0.13,.45),
         axis.text = element_text(size = 11, colour = "black"),
-        legend.background = element_rect(fill = "grey83")) +
+        legend.background = element_rect(fill = "grey83"),
+        plot.caption = ggtext::element_markdown()) +
   ggspatial::annotation_north_arrow(location = "tl", width = unit(.75, "cm"), height = unit(.75, "cm"))+
-  ggspatial::annotation_scale(location = "bl", text_cex = .9)
+  ggspatial::annotation_scale(location = "bl", text_cex = .9)+
+  labs(caption = "<span style = 'font-size:8pt;color:#888888'> Data Source: Tanzania Fisheries Research Insitute <br> Moderate Resolution Imaging Spectroradiometer, <br> Plymouth Marine Laboratory </span>")
+
+ke.pfz
 ```
 
+## Smoothing density
+Sometimes you might want a smoothed grid or filled contour rather than the polygons presented in figure \@ref(fig:fig2). To address that some people would interpolate to impute the value into grids. Another approach is to rasterize the feature---converting simple feature into gridded raster. I prefer the second approach to make smoothing of potential fishing zones in the Pemba Channel. To reduce computation load, I first reduce the feature to fall on the area of interest by cropping using `st_crop`.
+
+```{r}
+fronts.pemba = fronts.smoothed %>%
+  st_crop(xmin = 38, ymin = -7, xmax = 41, ymax = -3.5) %>%
+  select(nbObs)
+  
+```
+
+Once the feature in the area of interest are obtained, I can convert them from simple feature to raster using `st_rasterize` function from **stars** package [@stars]. To make the high resolution raster, I parsed `nx = 30` and `ny = 30` to define the number of grids in the area. 
+
+```{r}
+## convert sf into stars object
+fronts.pemba.raster = fronts.pemba %>%
+  stars::st_rasterize(nx = 30, ny = 30)
+
+# fronts.pemba.raster %>% plot()
+```
+
+The raster generated is cube object, therefore, to make it accessible to other package, I need to convert it to data frame. This was done using `as_tbl_cube` function from **cubelyr** package [@cubelyr], which allows to extract the longitude and latitude as vector object and a third variable observation in matrix form. 
+
+```{r}
+## convert to data table with cubelyr 
+fronts.pemba.tb = fronts.pemba.raster %>% cubelyr::as.tbl_cube()
+
+## oobtain individual compponent
+lon = fronts.pemba.tb$dims$x
+lat = fronts.pemba.tb$dims$y
+obs = fronts.pemba.tb$mets
+
+class(lon); class(lat); class(obs)
+```
+
+
+Then from the combinatin of lat, lon, and obs, I can create a data frame using `expand.grid` function. Once the data frame is created, the variables names were changed to meaningful names;
+
+```{r}
+fronts.pemba = expand.grid(lon,lat) %>% 
+  bind_cols(expand.grid(obs))  %>% 
+  rename(lon = 1, lat = 2)
+
+fronts.pemba %>% glimpse()
+
+```
+
+Once we have prepared our dataset, we can take the power of **ggplot2** [@ggplot] and its extensions **ggspatial** [@ggspatial], and **metR** [@metr] to make visual appealing maps. Figure \@ref(fig:fig3) show density variation of Potential fishing zones in the Pemba channel. This plot was generated using `geom_contour_fill` function from **metR** package [@metr]. Similarly, figure \@ref(fig:fig4) show the density of potential fishing zones in the Pemba channel presented as filled contour. This plot used default `geom_filled_contour` function that comes with **ggplot2** [@ggplot]. 
+
+```{r fig3, fig.width=4.5, fig.height=5.5, fig.cap="Smoothed spatial Distribution of Potential fishing zones in the Pemba channel. Customized color codes"}
+
+met.pfz = ggplot() +
+  # geom_contour_filled(data = fronts.pemba, aes(x = lon, y = lat, z = nbObs), bins = 12)+
+  metR::geom_contour_fill(data = fronts.pemba, aes(x = lon, y = lat, z = nbObs), bins = 120, na.fill = TRUE)+
+  geom_sf(data = tz.ke, fill = "grey80") +
+  coord_sf(xlim = c(38.6, 39.8), ylim = c(-6,-4.7))+
+  scale_fill_gradientn(colours = mycolor, breaks = seq(100,1400,120), name = "Number\nof PFZs",
+                       guide = guide_colorbar(reverse = TRUE, nbin = 11, raster = TRUE, barheight = unit(6,"cm")))+
+  metR::scale_x_longitude(ticks = 0.4)+
+  metR::scale_y_latitude(breaks = seq(-5.8,-4.8, length.out = 4) %>% round(1))+
+  theme_bw() +
+  theme(legend.position = c(0.13,.45),
+        axis.text = element_text(size = 11, colour = "black"),
+        legend.background = element_rect(fill = "grey83"),
+        plot.caption = ggtext::element_markdown()) +
+  ggspatial::annotation_north_arrow(location = "tl", width = unit(.75, "cm"), height = unit(.75, "cm"))+
+  ggspatial::annotation_scale(location = "bl", text_cex = .9)+
+  labs(caption = "<span style = 'font-size:8pt;color:#888888'> Data Source: Tanzania Fisheries Research Insitute <br> Moderate Resolution Imaging Spectroradiometer, <br> Plymouth Marine Laboratory </span>")
+
+met.pfz
+
+```
+
+             
+             
+
+```{r fig4, fig.width=4.5, fig.height=5.5, fig.cap="Smoothed contour spatial Distribution of Potential fishing zones in the Pemba channel. Customized color codes"}
+
+mycolor2 = c("#040ED8", "#4196FF", "#86D9FF", "#9CEEFF", "#AFF5FF", "#CEFFFF", 
+             "#FFFE47", "#FFEB00", "#FF9000", "#FF4800", "#FF0000", "#9E0000")
+
+gg.pfz = ggplot() +
+  geom_contour_filled(data = fronts.pemba, aes(x = lon, y = lat, z = nbObs), bins = 12)+
+  # metR::geom_contour_fill(data = fronts.pemba, aes(x = lon, y = lat, z = nbObs), bins = 120, na.fill = TRUE)+
+  geom_sf(data = tz.ke, fill = "grey80") +
+  coord_sf(xlim = c(38.6, 39.8), ylim = c(-6,-4.7))+
+  # scale_fill_gradientn(colours = mycolor2, breaks = seq(100,1400,120), name = "Number\nof PFZs",
+  #                      guide = guide_colorbar(reverse = TRUE, nbin = 11, raster = TRUE, barheight = unit(6,"cm")))+
+  scale_fill_manual(name = "Number", values = mycolor2, label = seq(110,1400,110), 
+                    guide = guide_legend(keywidth = unit(4,"mm"), keyheight = unit(5,"mm"), reverse = FALSE))+
+  metR::scale_x_longitude(ticks = 0.4)+
+  metR::scale_y_latitude(breaks = seq(-5.8,-4.8, length.out = 4) %>% round(1))+
+  theme_bw() +
+  theme(legend.position = c(0.13,.45),
+        axis.text = element_text(size = 11, colour = "black"),
+        legend.background = element_rect(fill = "grey83"),
+        plot.caption = ggtext::element_markdown()) +
+  ggspatial::annotation_north_arrow(location = "tl", width = unit(.75, "cm"), height = unit(.75, "cm"))+
+  ggspatial::annotation_scale(location = "bl", text_cex = .9)+
+  labs(caption = "<span style = 'font-size:8pt;color:#888888'> Data Source: Tanzania Fisheries Research Insitute <br> Moderate Resolution Imaging Spectroradiometer, <br> Plymouth Marine Laboratory </span>")
+
+gg.pfz
+```
+
+To help a visual check appealing, I have combined the three maps in one plot shown in figure \@ref(fig:fig5). You can raise your eye to  pick of the three maps which is subtle in revealing the spatial distribution of PFZ in Pemba channel. Check on both color codes and the style used to represent these feature on space. The three maps were aligned using **patchwork** package [@patchwork].
+
+```{r fig5, fig.width=12, fig.height=5, fig.cap="Spatial maps of PFZ genated using density polygons [left panel],  smoothed raster using metr [middle panel] and filled contour [right panel]"}
+require(patchwork)
+
+ke.pfz + met.pfz + gg.pfz
+```
 
 
 ## Cited

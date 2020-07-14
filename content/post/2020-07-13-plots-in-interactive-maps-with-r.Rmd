@@ -1,5 +1,5 @@
 ---
-title: 'Plots in Interactive Maps with R '
+title: 'Interactive Plots and  Maps in R'
 author: Masumbuko Semba
 date: '2020-06-13'
 slug: plots-in-interactive-maps-with-r
@@ -18,9 +18,12 @@ link-citations: yes
 
 ## Introduction
 
-Often times when w are working with data, there always a geospatial component to the data---the locations. R has several packages that support interactivity of features, including maps. @minicharts developed **leaflet.minicharts** package that enhance interactivity of maps by superimpose on the basemaps with interactive plots. In this post I illustrate tools *leaflet.minicharts** use case in which you have a set of species and you want an interactive map.
+Often times when w are working with data, there always a geospatial component to the data---the locations. Most of us have used static maps to reveal information that other plots can not. And interactive maps can enliven geographic information to new insights. The most important type of interactivity, is the display of geographic data on interactive or ‘slippy’ web maps. Interactivity can take many forms, the most common and useful of which is the ability to pan around and zoom into any part of a geographic dataset overlaid on a ‘web map’ to show context.
 
-leaflet.minicharts is an R package that provides two functions to add and update small charts on an interactive maps created with the package leaflet. These charts can be used to represent as many variables as desired associated to geographical points. Currently, three types of chart are supported: barcharts (the default), pie charts and polar area charts.
+
+R has several packages that support interactivity of features, including maps. @minicharts developed **leaflet.minicharts** package that enhance interactivity of maps by superimpose on the basemaps with interactive plots. **leaflet.minicharts** is package in R bundled with functions to overlay plots on an interactive maps created with the leaflet package [@leaflet]. These plots can represent variables associated to geographical points.
+
+In this post, I will illustrate step by step overlaying of pie and bar plots on interactive map. I will also show adding single variable with value on an interactive map. Before we start rolling, let's first load the packages we want to use in this session. 
 
 
 ```{r setup, include=FALSE}
@@ -31,14 +34,15 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "
 
 ```{r}
 
-require(leaflet.minicharts)
 require(leaflet)
+require(leaflet.minicharts)
 require(sf)
 require(tidyverse)
 ```
 
 
-We first create a basemap that will be used in all the following examples
+Once we have loaded the packages in our session, we first create a basemap using **leaflet** package [@leaflet]. Leaflet maps are created with `leaflet()` function, the result of which is a leaflet map object which can be piped to other leaflet functions. This allows multiple map layers and control settings to be added interactively. Let's make an interactive leaflet basemap:
+
 
 ```{r}
 tilesURL = "http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
@@ -50,8 +54,9 @@ basemap
 ```
 
 ## Census Data
+The power of R is that you can pull data, manipulate the data, do some analyses, and visualize the data - all in one open source framework. Here we want to know whether a proportional of married people is similar across all regions in Tanzania? To answer this question let us focus on the census data of 2002. 
 
-Is the proportional of married people similar across all regions in Tanzania? To answer this question let us focus on the census data of 2002. We first import a simple feature into our session using `st_read` function from **sf** package [@sf].
+This population dataset is simple polygon feature with demographic information for each region in Tanzania. To use the dataset in R, we need first to import it into our session using `st_read` function from **sf** package [@sf].
 
 ```{r, echo=FALSE}
 region = st_read("e:/GIS/Tanzania spatial data Bank/NBS correct/Tanzania_Region_EA_2002_region/Tanzania_Region_EA_2002_region.shp", quiet = TRUE)
@@ -132,6 +137,8 @@ basemap %>%
                 showLabels = TRUE, 
                 width = 55)
 ```
+
+
 
 ## References
 

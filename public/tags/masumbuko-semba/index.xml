@@ -51,12 +51,12 @@ You need to work on this column of the result to have a clean and right format d
     </item>
     
     <item>
-      <title>Plots in Interactive Maps with R </title>
+      <title>Interactive Plots and  Maps in R</title>
       <link>/06/13/2020/plots-in-interactive-maps-with-r/</link>
       <pubDate>Sat, 13 Jun 2020 00:00:00 +0000</pubDate>
       
       <guid>/06/13/2020/plots-in-interactive-maps-with-r/</guid>
-      <description>IntroductionOften times when w are working with data, there always a geospatial component to the data—the locations. R has several packages that support interactivity of features, including maps. Bachelier et al. (2019) developed leaflet.minicharts package that enhance interactivity of maps by superimpose on the basemaps with interactive plots. In this post I illustrate tools *leaflet.minicharts** use case in which you have a set of species and you want an interactive map.</description>
+      <description>IntroductionOften times when w are working with data, there always a geospatial component to the data—the locations. Most of us have used static maps to reveal information that other plots can not. And interactive maps can enliven geographic information to new insights. The most important type of interactivity, is the display of geographic data on interactive or ‘slippy’ web maps. Interactivity can take many forms, the most common and useful of which is the ability to pan around and zoom into any part of a geographic dataset overlaid on a ‘web map’ to show context.</description>
     </item>
     
     <item>

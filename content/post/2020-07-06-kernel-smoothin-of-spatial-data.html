@@ -92,7 +92,7 @@ Figure 1: Spatial Distribution of Potential fishing zones in the Pemba channel. 
 <p>Though figure <a href="#fig:fig1">1</a> clearly indicate that the areas with high and low density of fishing zones, but the color code might hide some crues. To enhance this, after several trial, I came up with my color code below that was used to plot figure <a href="#fig:fig2">2</a>).</p>
 <pre class="r"><code>mycolor = c(&quot;#7f007f&quot;, &quot;#0000ff&quot;,  &quot;#007fff&quot;, &quot;#00ffff&quot;, &quot;#00bf00&quot;, &quot;#7fdf00&quot;,
             &quot;#ffff00&quot;, &quot;#ff7f00&quot;, &quot;#ff3f00&quot;, &quot;#ff0000&quot;, &quot;#bf0000&quot;)</code></pre>
-<pre class="r"><code>fronts.smoothed %&gt;%
+<pre class="r"><code>ke.pfz = fronts.smoothed %&gt;%
   st_crop(xmin = 38, ymin = -6.5, xmax = 41, ymax = -3) %&gt;%
   ggplot() +
   geom_sf(aes(fill = nbObs), col = NA)+
@@ -103,11 +103,15 @@ Figure 1: Spatial Distribution of Potential fishing zones in the Pemba channel. 
   metR::scale_x_longitude(ticks = 0.4)+
   metR::scale_y_latitude(breaks = seq(-5.8,-4.8, length.out = 4) %&gt;% round(1))+
   theme_bw() +
-  theme(legend.position = c(0.13,.45),
+ theme(legend.position = c(0.13,.45),
         axis.text = element_text(size = 11, colour = &quot;black&quot;),
-        legend.background = element_rect(fill = &quot;grey83&quot;)) +
+        legend.background = element_rect(fill = &quot;grey83&quot;),
+        plot.caption = ggtext::element_markdown()) +
   ggspatial::annotation_north_arrow(location = &quot;tl&quot;, width = unit(.75, &quot;cm&quot;), height = unit(.75, &quot;cm&quot;))+
-  ggspatial::annotation_scale(location = &quot;bl&quot;, text_cex = .9)</code></pre>
+  ggspatial::annotation_scale(location = &quot;bl&quot;, text_cex = .9)+
+  labs(caption = &quot;&lt;span style = &#39;font-size:8pt;color:#888888&#39;&gt; Data Source: Tanzania Fisheries Research Insitute &lt;br&gt; Moderate Resolution Imaging Spectroradiometer, &lt;br&gt; Plymouth Marine Laboratory &lt;/span&gt;&quot;)
+
+ke.pfz</code></pre>
 <div class="figure"><span id="fig:fig2"></span>
 <img src="/post/2020-07-06-kernel-smoothin-of-spatial-data_files/figure-html/fig2-1.png" alt="Spatial Distribution of Potential fishing zones in the Pemba channel. Customized color codes" width="432" />
 <p class="caption">
@@ -115,17 +119,124 @@ Figure 2: Spatial Distribution of Potential fishing zones in the Pemba channel. 
 </p>
 </div>
 </div>
+<div id="smoothing-density" class="section level2">
+<h2>Smoothing density</h2>
+<p>Sometimes you might want a smoothed grid or filled contour rather than the polygons presented in figure <a href="#fig:fig2">2</a>. To address that some people would interpolate to impute the value into grids. Another approach is to rasterize the feature—converting simple feature into gridded raster. I prefer the second approach to make smoothing of potential fishing zones in the Pemba Channel. To reduce computation load, I first reduce the feature to fall on the area of interest by cropping using <code>st_crop</code>.</p>
+<pre class="r"><code>fronts.pemba = fronts.smoothed %&gt;%
+  st_crop(xmin = 38, ymin = -7, xmax = 41, ymax = -3.5) %&gt;%
+  select(nbObs)</code></pre>
+<p>Once the feature in the area of interest are obtained, I can convert them from simple feature to raster using <code>st_rasterize</code> function from <strong>stars</strong> package <span class="citation">(<span class="citeproc-not-found" data-reference-id="stars"><strong>???</strong></span>)</span>. To make the high resolution raster, I parsed <code>nx = 30</code> and <code>ny = 30</code> to define the number of grids in the area.</p>
+<pre class="r"><code>## convert sf into stars object
+fronts.pemba.raster = fronts.pemba %&gt;%
+  stars::st_rasterize(nx = 30, ny = 30)
+
+# fronts.pemba.raster %&gt;% plot()</code></pre>
+<p>The raster generated is cube object, therefore, to make it accessible to other package, I need to convert it to data frame. This was done using <code>as_tbl_cube</code> function from <strong>cubelyr</strong> package <span class="citation">(<span class="citeproc-not-found" data-reference-id="cubelyr"><strong>???</strong></span>)</span>, which allows to extract the longitude and latitude as vector object and a third variable observation in matrix form.</p>
+<pre class="r"><code>## convert to data table with cubelyr 
+fronts.pemba.tb = fronts.pemba.raster %&gt;% cubelyr::as.tbl_cube()
+
+## oobtain individual compponent
+lon = fronts.pemba.tb$dims$x
+lat = fronts.pemba.tb$dims$y
+obs = fronts.pemba.tb$mets
+
+class(lon); class(lat); class(obs)</code></pre>
+<p>Then from the combinatin of lat, lon, and obs, I can create a data frame using <code>expand.grid</code> function. Once the data frame is created, the variables names were changed to meaningful names;</p>
+<pre class="r"><code>fronts.pemba = expand.grid(lon,lat) %&gt;% 
+  bind_cols(expand.grid(obs))  %&gt;% 
+  rename(lon = 1, lat = 2)
+
+fronts.pemba %&gt;% glimpse()</code></pre>
+<p>Once we have prepared our dataset, we can take the power of <strong>ggplot2</strong> <span class="citation">(Wickham <a href="#ref-ggplot" role="doc-biblioref">2016</a>)</span> and its extensions <strong>ggspatial</strong> <span class="citation">(Dunnington <a href="#ref-ggspatial" role="doc-biblioref">2020</a>)</span>, and <strong>metR</strong> <span class="citation">(Campitelli <a href="#ref-metr" role="doc-biblioref">2019</a>)</span> to make visual appealing maps. Figure <a href="#fig:fig3">3</a> show density variation of Potential fishing zones in the Pemba channel. This plot was generated using <code>geom_contour_fill</code> function from <strong>metR</strong> package <span class="citation">(Campitelli <a href="#ref-metr" role="doc-biblioref">2019</a>)</span>. Similarly, figure <a href="#fig:fig4">4</a> show the density of potential fishing zones in the Pemba channel presented as filled contour. This plot used default <code>geom_filled_contour</code> function that comes with <strong>ggplot2</strong> <span class="citation">(Wickham <a href="#ref-ggplot" role="doc-biblioref">2016</a>)</span>.</p>
+<pre class="r"><code>met.pfz = ggplot() +
+  # geom_contour_filled(data = fronts.pemba, aes(x = lon, y = lat, z = nbObs), bins = 12)+
+  metR::geom_contour_fill(data = fronts.pemba, aes(x = lon, y = lat, z = nbObs), bins = 120, na.fill = TRUE)+
+  geom_sf(data = tz.ke, fill = &quot;grey80&quot;) +
+  coord_sf(xlim = c(38.6, 39.8), ylim = c(-6,-4.7))+
+  scale_fill_gradientn(colours = mycolor, breaks = seq(100,1400,120), name = &quot;Number\nof PFZs&quot;,
+                       guide = guide_colorbar(reverse = TRUE, nbin = 11, raster = TRUE, barheight = unit(6,&quot;cm&quot;)))+
+  metR::scale_x_longitude(ticks = 0.4)+
+  metR::scale_y_latitude(breaks = seq(-5.8,-4.8, length.out = 4) %&gt;% round(1))+
+  theme_bw() +
+  theme(legend.position = c(0.13,.45),
+        axis.text = element_text(size = 11, colour = &quot;black&quot;),
+        legend.background = element_rect(fill = &quot;grey83&quot;),
+        plot.caption = ggtext::element_markdown()) +
+  ggspatial::annotation_north_arrow(location = &quot;tl&quot;, width = unit(.75, &quot;cm&quot;), height = unit(.75, &quot;cm&quot;))+
+  ggspatial::annotation_scale(location = &quot;bl&quot;, text_cex = .9)+
+  labs(caption = &quot;&lt;span style = &#39;font-size:8pt;color:#888888&#39;&gt; Data Source: Tanzania Fisheries Research Insitute &lt;br&gt; Moderate Resolution Imaging Spectroradiometer, &lt;br&gt; Plymouth Marine Laboratory &lt;/span&gt;&quot;)
+
+met.pfz</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2020-07-06-kernel-smoothin-of-spatial-data_files/figure-html/fig3-1.png" alt="Smoothed spatial Distribution of Potential fishing zones in the Pemba channel. Customized color codes" width="432" />
+<p class="caption">
+Figure 3: Smoothed spatial Distribution of Potential fishing zones in the Pemba channel. Customized color codes
+</p>
+</div>
+<pre class="r"><code>mycolor2 = c(&quot;#040ED8&quot;, &quot;#4196FF&quot;, &quot;#86D9FF&quot;, &quot;#9CEEFF&quot;, &quot;#AFF5FF&quot;, &quot;#CEFFFF&quot;, 
+             &quot;#FFFE47&quot;, &quot;#FFEB00&quot;, &quot;#FF9000&quot;, &quot;#FF4800&quot;, &quot;#FF0000&quot;, &quot;#9E0000&quot;)
+
+gg.pfz = ggplot() +
+  geom_contour_filled(data = fronts.pemba, aes(x = lon, y = lat, z = nbObs), bins = 12)+
+  # metR::geom_contour_fill(data = fronts.pemba, aes(x = lon, y = lat, z = nbObs), bins = 120, na.fill = TRUE)+
+  geom_sf(data = tz.ke, fill = &quot;grey80&quot;) +
+  coord_sf(xlim = c(38.6, 39.8), ylim = c(-6,-4.7))+
+  # scale_fill_gradientn(colours = mycolor2, breaks = seq(100,1400,120), name = &quot;Number\nof PFZs&quot;,
+  #                      guide = guide_colorbar(reverse = TRUE, nbin = 11, raster = TRUE, barheight = unit(6,&quot;cm&quot;)))+
+  scale_fill_manual(name = &quot;Number&quot;, values = mycolor2, label = seq(110,1400,110), 
+                    guide = guide_legend(keywidth = unit(4,&quot;mm&quot;), keyheight = unit(5,&quot;mm&quot;), reverse = FALSE))+
+  metR::scale_x_longitude(ticks = 0.4)+
+  metR::scale_y_latitude(breaks = seq(-5.8,-4.8, length.out = 4) %&gt;% round(1))+
+  theme_bw() +
+  theme(legend.position = c(0.13,.45),
+        axis.text = element_text(size = 11, colour = &quot;black&quot;),
+        legend.background = element_rect(fill = &quot;grey83&quot;),
+        plot.caption = ggtext::element_markdown()) +
+  ggspatial::annotation_north_arrow(location = &quot;tl&quot;, width = unit(.75, &quot;cm&quot;), height = unit(.75, &quot;cm&quot;))+
+  ggspatial::annotation_scale(location = &quot;bl&quot;, text_cex = .9)+
+  labs(caption = &quot;&lt;span style = &#39;font-size:8pt;color:#888888&#39;&gt; Data Source: Tanzania Fisheries Research Insitute &lt;br&gt; Moderate Resolution Imaging Spectroradiometer, &lt;br&gt; Plymouth Marine Laboratory &lt;/span&gt;&quot;)
+
+gg.pfz</code></pre>
+<div class="figure"><span id="fig:fig4"></span>
+<img src="/post/2020-07-06-kernel-smoothin-of-spatial-data_files/figure-html/fig4-1.png" alt="Smoothed contour spatial Distribution of Potential fishing zones in the Pemba channel. Customized color codes" width="432" />
+<p class="caption">
+Figure 4: Smoothed contour spatial Distribution of Potential fishing zones in the Pemba channel. Customized color codes
+</p>
+</div>
+<p>To help a visual check appealing, I have combined the three maps in one plot shown in figure <a href="#fig:fig5">5</a>. You can raise your eye to pick of the three maps which is subtle in revealing the spatial distribution of PFZ in Pemba channel. Check on both color codes and the style used to represent these feature on space. The three maps were aligned using <strong>patchwork</strong> package <span class="citation">(Pedersen <a href="#ref-patchwork" role="doc-biblioref">2020</a>)</span>.</p>
+<pre class="r"><code>require(patchwork)
+
+ke.pfz + met.pfz + gg.pfz</code></pre>
+<div class="figure"><span id="fig:fig5"></span>
+<img src="/post/2020-07-06-kernel-smoothin-of-spatial-data_files/figure-html/fig5-1.png" alt="Spatial maps of PFZ genated using density polygons [left panel],  smoothed raster using metr [middle panel] and filled contour [right panel]" width="1152" />
+<p class="caption">
+Figure 5: Spatial maps of PFZ genated using density polygons [left panel], smoothed raster using metr [middle panel] and filled contour [right panel]
+</p>
+</div>
+</div>
 <div id="cited" class="section level2 unnumbered">
 <h2>Cited</h2>
 <div id="refs" class="references">
+<div id="ref-metr">
+<p>Campitelli, Elio. 2019. <em>MetR: Tools for Easier Analysis of Meteorological Fields</em>. <a href="https://CRAN.R-project.org/package=metR">https://CRAN.R-project.org/package=metR</a>.</p>
+</div>
+<div id="ref-ggspatial">
+<p>Dunnington, Dewey. 2020. <em>Ggspatial: Spatial Data Framework for Ggplot2</em>. <a href="https://CRAN.R-project.org/package=ggspatial">https://CRAN.R-project.org/package=ggspatial</a>.</p>
+</div>
 <div id="ref-janitor">
 <p>Firke, Sam. 2020. <em>Janitor: Simple Tools for Examining and Cleaning Dirty Data</em>. <a href="https://CRAN.R-project.org/package=janitor">https://CRAN.R-project.org/package=janitor</a>.</p>
 </div>
 <div id="ref-sf">
 <p>Pebesma, Edzer. 2018. <em>Sf: Simple Features for R</em>. <a href="https://CRAN.R-project.org/package=sf">https://CRAN.R-project.org/package=sf</a>.</p>
 </div>
+<div id="ref-patchwork">
+<p>Pedersen, Thomas Lin. 2020. <em>Patchwork: The Composer of Plots</em>. <a href="https://CRAN.R-project.org/package=patchwork">https://CRAN.R-project.org/package=patchwork</a>.</p>
+</div>
 <div id="ref-btb">
 <p>Santos, Arlindo Dos, Francois Semecurbe, Auriane Renaud, Cynthia Faivre, Thierry Cornely, Farida Marouchi, and Farida Marouchi. 2020. <em>Btb: Beyond the Border - Kernel Density Estimation for Urban Geography</em>. <a href="https://CRAN.R-project.org/package=btb">https://CRAN.R-project.org/package=btb</a>.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
 </div>
 <div id="ref-dplyr">
 <p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>

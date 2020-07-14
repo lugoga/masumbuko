@@ -1,4 +1,4 @@
-baseurl = "https://semba-blog.netlify.com/"
+baseurl = "https://semba-blog.netlify.app/"
 languageCode = "en-us"
 title = "Masumbuko Semba's Blog"
 theme = "hugo-lithium"
@@ -50,9 +50,9 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
 [params]
     author = "Masumbuko Semba"
-    dateFormat = "2006/01/02"
+    dateFormat = "2006-01-02"
     description = "A blog that deals with R scripting for Marine Environmental issues."
-    footer = "&copy; [Semba Masumbuko](https://semba-blog.netlify.com/) 2018"
+    footer = "&copy; [Semba Masumbuko](https://semba-blog.netlify.com/) 2020"
 
     # options for highlight.js (version, additional languages, and theme)
     highlightjsVersion = "9.11.0"
@@ -69,6 +69,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     height = 50
     alt = "Logo"
     
+
 
     
     

@@ -6,8 +6,8 @@
 <meta name="generator" content="Hugo 0.64.1" />
 
 
-<title>Plots in Interactive Maps with R  - Masumbuko Semba&#39;s Blog</title>
-<meta property="og:title" content="Plots in Interactive Maps with R  - Masumbuko Semba&#39;s Blog">
+<title>Interactive Plots and  Maps in R - Masumbuko Semba&#39;s Blog</title>
+<meta property="og:title" content="Interactive Plots and  Maps in R - Masumbuko Semba&#39;s Blog">
 
 
 
@@ -67,13 +67,13 @@
 
   <article class="article">
     
-    <span class="article-duration">6 min read</span>
+    <span class="article-duration">7 min read</span>
     
 
-    <h1 class="article-title">Plots in Interactive Maps with R </h1>
+    <h1 class="article-title">Interactive Plots and  Maps in R</h1>
 
     
-    <span class="article-date">2020/06/13</span>
+    <span class="article-date">Saturday, Jun 13, 2020</span>
     
 
     <div class="article-content">
@@ -94,13 +94,14 @@
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>Often times when w are working with data, there always a geospatial component to the data—the locations. R has several packages that support interactivity of features, including maps. <span class="citation">Bachelier et al. (<a href="#ref-minicharts" role="doc-biblioref">2019</a>)</span> developed <strong>leaflet.minicharts</strong> package that enhance interactivity of maps by superimpose on the basemaps with interactive plots. In this post I illustrate tools *leaflet.minicharts** use case in which you have a set of species and you want an interactive map.</p>
-<p>leaflet.minicharts is an R package that provides two functions to add and update small charts on an interactive maps created with the package leaflet. These charts can be used to represent as many variables as desired associated to geographical points. Currently, three types of chart are supported: barcharts (the default), pie charts and polar area charts.</p>
-<pre class="r"><code>require(leaflet.minicharts)
-require(leaflet)
+<p>Often times when w are working with data, there always a geospatial component to the data—the locations. Most of us have used static maps to reveal information that other plots can not. And interactive maps can enliven geographic information to new insights. The most important type of interactivity, is the display of geographic data on interactive or ‘slippy’ web maps. Interactivity can take many forms, the most common and useful of which is the ability to pan around and zoom into any part of a geographic dataset overlaid on a ‘web map’ to show context.</p>
+<p>R has several packages that support interactivity of features, including maps. <span class="citation">Bachelier et al. (<a href="#ref-minicharts" role="doc-biblioref">2019</a>)</span> developed <strong>leaflet.minicharts</strong> package that enhance interactivity of maps by superimpose on the basemaps with interactive plots. <strong>leaflet.minicharts</strong> is package in R bundled with functions to overlay plots on an interactive maps created with the leaflet package <span class="citation">(Cheng, Karambelkar, and Xie <a href="#ref-leaflet" role="doc-biblioref">2018</a>)</span>. These plots can represent variables associated to geographical points.</p>
+<p>In this post, I will illustrate step by step overlaying of pie and bar plots on interactive map. I will also show adding single variable with value on an interactive map. Before we start rolling, let’s first load the packages we want to use in this session.</p>
+<pre class="r"><code>require(leaflet)
+require(leaflet.minicharts)
 require(sf)
 require(tidyverse)</code></pre>
-<p>We first create a basemap that will be used in all the following examples</p>
+<p>Once we have loaded the packages in our session, we first create a basemap using <strong>leaflet</strong> package <span class="citation">(Cheng, Karambelkar, and Xie <a href="#ref-leaflet" role="doc-biblioref">2018</a>)</span>. Leaflet maps are created with <code>leaflet()</code> function, the result of which is a leaflet map object which can be piped to other leaflet functions. This allows multiple map layers and control settings to be added interactively. Let’s make an interactive leaflet basemap:</p>
 <pre class="r"><code>tilesURL = &quot;http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}&quot;
 
 basemap = leaflet(width = &quot;100%&quot;, height = &quot;800px&quot;) %&gt;%
@@ -112,7 +113,8 @@ basemap</code></pre>
 </div>
 <div id="census-data" class="section level2">
 <h2>Census Data</h2>
-<p>Is the proportional of married people similar across all regions in Tanzania? To answer this question let us focus on the census data of 2002. We first import a simple feature into our session using <code>st_read</code> function from <strong>sf</strong> package <span class="citation">(Pebesma <a href="#ref-sf" role="doc-biblioref">2018</a>)</span>.</p>
+<p>The power of R is that you can pull data, manipulate the data, do some analyses, and visualize the data - all in one open source framework. Here we want to know whether a proportional of married people is similar across all regions in Tanzania? To answer this question let us focus on the census data of 2002.</p>
+<p>This population dataset is simple polygon feature with demographic information for each region in Tanzania. To use the dataset in R, we need first to import it into our session using <code>st_read</code> function from <strong>sf</strong> package <span class="citation">(Pebesma <a href="#ref-sf" role="doc-biblioref">2018</a>)</span>.</p>
 <pre class="r"><code>region = st_read(&quot;NBS correct/Tanzania_Region_EA_2002_region/Tanzania_Region_EA_2002_region.shp&quot;)</code></pre>
 <pre class="r"><code>region %&gt;% glimpse()</code></pre>
 <pre><code>Rows: 26
@@ -213,6 +215,9 @@ basemap %&gt;%
 <div id="refs" class="references">
 <div id="ref-minicharts">
 <p>Bachelier, Veronique, Jalal-Edine ZAWAM, Benoit Thieurmel, and Francois Guillem. 2019. <em>Leaflet.minicharts: Mini Charts for Interactive Maps</em>. <a href="https://CRAN.R-project.org/package=leaflet.minicharts">https://CRAN.R-project.org/package=leaflet.minicharts</a>.</p>
+</div>
+<div id="ref-leaflet">
+<p>Cheng, Joe, Bhaskar Karambelkar, and Yihui Xie. 2018. <em>Leaflet: Create Interactive Web Maps with the Javascript ’Leaflet’ Library</em>. <a href="https://CRAN.R-project.org/package=leaflet">https://CRAN.R-project.org/package=leaflet</a>.</p>
 </div>
 <div id="ref-janitor">
 <p>Firke, Sam. 2020. <em>Janitor: Simple Tools for Examining and Cleaning Dirty Data</em>. <a href="https://CRAN.R-project.org/package=janitor">https://CRAN.R-project.org/package=janitor</a>.</p>
