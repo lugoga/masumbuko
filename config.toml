@@ -3,7 +3,7 @@ languageCode = "en-us"
 title = "Masumbuko Semba's Blog"
 theme = "hugo-lithium"
 googleAnalytics = "UA-127756435-1"
-disqusShortname = "https-semba-blog-netlify-com"
+disqusShortname = "https-semba-blog-netlify-app"
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
 
@@ -41,18 +41,18 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     name = "Resume"
     url = "/resume/"
 	weight = 6
-    
+	
 [[menu.main]]
-    name = "GitHub"
-    url = "https://github.com/lugoga"
+    name = "Dashboard"
+    url = "/margs/"
     weight = 5
-
+    
 
 [params]
     author = "Masumbuko Semba"
     dateFormat = "2006-01-02"
     description = "A blog that deals with R scripting for Marine Environmental issues."
-    footer = "&copy; [Semba Masumbuko](https://semba-blog.netlify.com/) 2020"
+    footer = "&copy; [Semba Masumbuko](https://semba-blog.netlify.app/) 2020"
 
     # options for highlight.js (version, additional languages, and theme)
     highlightjsVersion = "9.11.0"
