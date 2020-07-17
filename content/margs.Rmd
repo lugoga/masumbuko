@@ -12,7 +12,8 @@ knitr::opts_chunk$set(echo = FALSE)
 <!-- Embed the app in a blogdown post -->
 <!-- Once created and deployed, I simply embed my shiny app in my Rmarkdown file with a little html <iframe src="myurl"> </iframe> -->
 
-<iframe width="800" height="600" scrolling="no" frameborder="no"  src="https://lugoga.github.io/interactive-margs/"> </iframe>
+<iframe width="800" height="1000" scrolling="no" frameborder="no"  src="https://lugoga.github.io/interactive-margs/"> </iframe>
+
 
 
 

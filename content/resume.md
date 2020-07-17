@@ -23,7 +23,7 @@ date: "2019-09-19T21:48:51-07:00"
 
 **Designing graphic**:  Design graphics and typeset books
 
-**Blogger**: blog about coding using python, Matlab and R programming languages for data sciences and analysis. The blog is found at this link www.semba-blog.netlify.app
+**Blogger**: blog about coding using python, Matlab and R programming languages for data sciences and analysis. The blog is found at this [link](https://semba-blog.netlify.app/)
 
 **Reviewer**: PLOSONE
 
