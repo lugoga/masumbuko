@@ -1,0 +1,183 @@
+---
+title: Analyse PCA results in tidyverse context
+author: Masumbuko Semba
+date: '2020-06-02'
+slug: analyse-pca-results-in-tidyverse-context
+categories: []
+tags:
+  - PCA
+  - tidyverse
+  - tidy
+  - Masumbuko Semba
+  - analysis
+  - Principal Component Analysis
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+
+<p>In the previous post I illustrated a simple way to do Principal Component Analysis in R. I simply used the output results from <code>prcomp()</code> function of <strong>R base</strong>. But, I constantly find hard to the untidy output that <code>prcomp</code> generates and wished to get a tidy result. In this post I will illustrate the approaches that I was inspired by Claus Wilke in the post <a href="https://clauswilke.com/blog/2020/09/07/pca-tidyverse-style/">PCA tidyverse style</a>.</p>
+<p>I will extend the PCA analysis I explained in the <a href="https://semba-blog.netlify.app/05/13/2020/simple-pca-in-r/">A simple Principal Component Analysis (PCA) in R</a>. If your new in this kind of analysis, I would recommend you to read that post before you proceeed with this post. <a href="https://semba-blog.netlify.app/05/13/2020/simple-pca-in-r/">A simple Principal Component Analysis (PCA) in R</a> will familiarize with the general concept and you can easily follow later once you have a glimpse of PCA and its core function and how is done in R.</p>
+<p>I first load the packages I am going to use in this session. I will load several packages highlighted in the chunk below;</p>
+<pre class="r"><code>require(tidyverse)
+require(kableExtra)
+require(factoextra)
+require(ggbiplot)</code></pre>
+<div id="load-the-dataset" class="section level3">
+<h3>Load the dataset</h3>
+<p>I use a simple and easy to understand dataset. This dataset consists of data on 120 observations sampled in Pemba and Zanzibar channel during the wet and dry season. This dataset has nine variables, two are factor (channel and season variables) and the other seven are numerical variables. We can see the descriptive statistics of the numerical variables below;</p>
+<pre class="r"><code>data %&gt;%
+  summarytools::descr()</code></pre>
+<pre><code>Descriptive Statistics  
+data  
+N: 120  
+
+                       chl       do   nitrate       pH      po4   salinity      sst
+----------------- -------- -------- --------- -------- -------- ---------- --------
+             Mean     0.17     5.83      0.60     8.30     0.47      34.80    27.89
+          Std.Dev     0.31     0.70      0.67     0.46     0.24       0.64     0.59
+              Min     0.00     4.04      0.11     7.94     0.03      33.00    26.00
+               Q1     0.00     5.31      0.35     8.03     0.29      34.50    27.50
+           Median     0.00     5.88      0.47     8.05     0.44      34.95    27.90
+               Q3     0.17     6.23      0.64     8.50     0.65      35.00    28.20
+              Max     1.26     7.60      5.29     9.60     1.11      37.00    29.50
+              MAD     0.00     0.68      0.22     0.06     0.27       0.37     0.44
+              IQR     0.16     0.91      0.28     0.28     0.35       0.50     0.70
+               CV     1.82     0.12      1.11     0.06     0.52       0.02     0.02
+         Skewness     1.83     0.30      5.25     1.20     0.38      -0.16     0.12
+      SE.Skewness     0.22     0.22      0.22     0.22     0.22       0.22     0.22
+         Kurtosis     2.13    -0.10     31.34    -0.39    -0.43       1.65     0.29
+          N.Valid   120.00   120.00    120.00   120.00   120.00     120.00   120.00
+        Pct.Valid   100.00   100.00    100.00   100.00   100.00     100.00   100.00</code></pre>
+</div>
+<div id="compute-the-principal-components" class="section level3">
+<h3>Compute the Principal Components</h3>
+<p>PCA prefer numerical data, therefore, we need to trim off the dataset channel and season variables, because they are categorical variables. Once we have removed the categorical variables, we also need to filter variables for a particular season. I will start with the dry season. We use the <code>filter</code> function from <strong>dpyr</strong> <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span> package to drop all observation collected during the rain season.</p>
+<pre class="r"><code>## Dry season
+dry.season = data %&gt;% 
+  filter(season == &quot;Dry&quot;) </code></pre>
+<p>Our dataset is reduced to seven numerical variables and 60 observation collected during the dry season in Pemba and Zanzibar channel. To compute PCA, we simply parse the arguments <code>data = dry.season</code> and <code>scale = TRUE</code> in <code>prcomp()</code> function, which performs a principal components analysis and assign the output as <code>dry.pca</code>. But before running PCA, I first select numeric variables with <code>select(where(is.numeric))</code>.</p>
+<pre class="r"><code>## PCA computation
+dry.pca = dry.season %&gt;% 
+  select(where(is.numeric)) %&gt;%
+  prcomp(scale. = TRUE, center = TRUE)</code></pre>
+<p>Then We can summarize our PCA object with <code>summary()</code>.</p>
+<pre class="r"><code>dry.pca %&gt;% 
+  summary()</code></pre>
+<pre><code>Importance of components:
+                          PC1    PC2    PC3    PC4    PC5     PC6    PC7
+Standard deviation     1.5046 1.3373 0.9955 0.8483 0.7964 0.63574 0.4459
+Proportion of Variance 0.3234 0.2555 0.1416 0.1028 0.0906 0.05774 0.0284
+Cumulative Proportion  0.3234 0.5789 0.7205 0.8233 0.9139 0.97160 1.0000</code></pre>
+<p>We get seven principal components, called PC1-9. Each of these explains a percentage of the total variation in the dataset. That is to say: <code>PC1</code> explains 32% of the total variance, which means that nearly one-thirds of the information in the dataset can be encapsulated by just that one Principal Component. <code>PC2</code> explains 25% of the variance. So, by knowing the position of a sample in relation to just <code>PC1</code> and <code>PC2</code>, you can get a very accurate view on where it stands in relation to other samples, as just <code>PC1</code> and <code>PC2</code> can explain 57% of the variance.</p>
+</div>
+<div id="tidy-approach-of-the-result" class="section level3">
+<h3>tidy approach of the result</h3>
+<p>David Robinson, Alex Hayes and Simon Couch <span class="citation">(<a href="#ref-broom" role="doc-biblioref">2020</a>)</span> developed a <strong>broom</strong> package that allows to convert statistical results into tidy tibbles. that is to say the <strong>broom</strong> package takes the messy output results from models, PCA or t.test, and turns them into tidy tibbles.</p>
+<p><strong>broom</strong> package attempt to bridge the gap from untidy outputs of <em>predictions</em> and <em>estimations</em> to the tidy data we want to work with. broom is particularly designed to work with Hadley’s <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span>.</p>
+<p>When we do PCA, Our focus is centered to explore the;</p>
+<ul>
+<li>data in PC coordinates.</li>
+<li>rotation matrix.</li>
+<li>variance explained by each PC.</li>
+</ul>
+<div id="data-in-pc-coordinate" class="section level4">
+<h4>Data in PC Coordinate</h4>
+<p>The rotation matrix is stored as <code>dry.pca$rotation</code>, but here we’ll extract it using the <code>tidy()</code> function from <strong>broom</strong>. When applied to <code>prcomp</code> objects, the <code>tidy()</code> function takes an additional argument <code>matrix</code>, which we set to <code>matrix = "rotation"</code> to extract the rotation matrix.</p>
+<pre class="r"><code>dry.pca %&gt;%
+  broom::tidy(matrix = &quot;rotation&quot;)</code></pre>
+<pre><code># A tibble: 49 x 3
+   column      PC   value
+   &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;
+ 1 sst          1 -0.545 
+ 2 pH           2  0.123 
+ 3 salinity     3 -0.0544
+ 4 do           4  0.316 
+ 5 chl          5  0.146 
+ 6 po4          6 -0.699 
+ 7 nitrate      7 -0.275 
+ 8 sst          1  0.593 
+ 9 pH           2 -0.194 
+10 salinity     3  0.0245
+# ... with 39 more rows</code></pre>
+<p>Instead of viewing the coordinates, you might be interested in the fitted values and residuals for each of the original points in the PCA For this, use <code>augment</code>, which augments the original data with information from the PCA:</p>
+<pre class="r"><code>dry.pca %&gt;%
+  broom::augment(dry.season)  %&gt;%glimpse()</code></pre>
+<pre><code>Rows: 60
+Columns: 17
+$ .rownames  &lt;fct&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1...
+$ channel    &lt;chr&gt; &quot;Pemba&quot;, &quot;Pemba&quot;, &quot;Pemba&quot;, &quot;Pemba&quot;, &quot;Pemba&quot;, &quot;Pemba&quot;, &quot;P...
+$ season     &lt;chr&gt; &quot;Dry&quot;, &quot;Dry&quot;, &quot;Dry&quot;, &quot;Dry&quot;, &quot;Dry&quot;, &quot;Dry&quot;, &quot;Dry&quot;, &quot;Dry&quot;, ...
+$ sst        &lt;dbl&gt; 29.5, 29.3, 28.8, 29.0, 28.6, 28.6, 28.0, 28.0, 28.5, 28...
+$ pH         &lt;dbl&gt; 8.01, 8.02, 8.01, 8.01, 8.02, 8.00, 8.04, 8.04, 8.01, 8....
+$ salinity   &lt;dbl&gt; 34.0, 34.8, 34.0, 34.8, 35.0, 34.8, 35.0, 35.5, 34.8, 36...
+$ do         &lt;dbl&gt; 5.65, 5.06, 5.21, 5.06, 5.40, 5.11, 5.13, 6.06, 5.11, 5....
+$ chl        &lt;dbl&gt; 0.00163, 0.00182, 0.00190, 0.00134, 0.00134, 0.00146, 0....
+$ po4        &lt;dbl&gt; 1.0670600, 0.8360900, 0.7899000, 0.7206100, 0.6744100, 0...
+$ nitrate    &lt;dbl&gt; 0.10866, 0.12085, 0.15745, 0.12085, 0.14525, 0.16965, 0....
+$ .fittedPC1 &lt;dbl&gt; -3.3128016, -2.2025913, -1.8998934, -1.6988577, -1.30608...
+$ .fittedPC2 &lt;dbl&gt; -0.44077004, 0.55118634, 0.02897391, 0.99291382, 0.83997...
+$ .fittedPC3 &lt;dbl&gt; 0.732658833, 0.331566334, 1.262170852, 0.317429665, -0.0...
+$ .fittedPC4 &lt;dbl&gt; 0.28245839, 0.04114448, 0.27015852, 0.20242301, -0.12900...
+$ .fittedPC5 &lt;dbl&gt; 0.32047482, 1.02972979, 0.39836162, 0.55981611, 0.160406...
+$ .fittedPC6 &lt;dbl&gt; -0.21252088, -0.71467529, -0.26994931, -0.56760900, -0.4...
+$ .fittedPC7 &lt;dbl&gt; -1.15788428, -0.44056637, -0.11623603, -0.15009189, 0.17...</code></pre>
+<p>Now, we want to plot the data in PC coordinates. In general, this means combining the PC coordinates with the original dataset, so we can color points by categorical variables present in the original data but removed for the PCA. We do this with the <code>augment()</code> function from <strong>broom</strong>, which takes as arguments the fitted model and the original data. The columns containing the fitted coordinates are called <code>.fittedPC1, .fittedPC2</code>, etc. We can plot then;</p>
+<pre class="r"><code>dry.pca %&gt;%
+  broom::augment(dry.season) %&gt;%
+  ggplot(aes(x = .fittedPC1, y = .fittedPC2, col = channel))+
+  geom_point(size = 3) +
+  ggsci::scale_color_jco()</code></pre>
+<div class="figure"><span id="fig:fig2"></span>
+<img src="/post/2020-06-02-analyse-pca-results-in-tidyverse-context_files/figure-html/fig2-1.png" alt="Fitted components" width="672" />
+<p class="caption">
+Figure 1: Fitted components
+</p>
+</div>
+</div>
+<div id="look-at-the-variance-explained-by-each-pc" class="section level4">
+<h4>Look at the variance explained by each PC</h4>
+<p>Finally, we’ll plot the variance explained by each PC. We can again extract this information using the <code>tidy()</code> function from <strong>broom</strong>, now by setting the matrix argument to <code>matrix = "eigenvalues</code>.</p>
+<pre class="r"><code>dry.pca %&gt;%
+  broom::tidy(matrix = &quot;eigenvalues&quot;)</code></pre>
+<pre><code># A tibble: 7 x 4
+     PC std.dev percent cumulative
+  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;
+1     1   1.50   0.323       0.323
+2     2   1.34   0.255       0.579
+3     3   0.996  0.142       0.720
+4     4   0.848  0.103       0.823
+5     5   0.796  0.0906      0.914
+6     6   0.636  0.0577      0.972
+7     7   0.446  0.0284      1    </code></pre>
+<p>You notice that we get a tibble format of the values, we can use these values to plot</p>
+<pre class="r"><code>dry.pca %&gt;%
+  broom::tidy(matrix = &quot;eigenvalues&quot;) %&gt;%
+  ggplot()+
+  geom_col(aes(x = PC, y = percent), fill = &quot;maroon&quot;) +
+  geom_line(aes(x = PC, y = cumulative))+
+  geom_point(aes(x = PC, y = cumulative), size = 3) +
+  scale_y_continuous(labels = scales::percent_format(), expand = expansion(mult = c(0,0.01)))+
+  scale_x_continuous(breaks = 1:8)</code></pre>
+<div class="figure"><span id="fig:fig3"></span>
+<img src="/post/2020-06-02-analyse-pca-results-in-tidyverse-context_files/figure-html/fig3-1.png" alt="EigenValues of the seven PCA components" width="672" />
+<p class="caption">
+Figure 2: EigenValues of the seven PCA components
+</p>
+</div>
+<p>The first and second component captures 60% of the variation in the data (Figure <a href="#fig:fig3">2</a>) and, as we can see from the figure <a href="#fig:fig2">1</a>, nicely separates the Pemba channel samples from the Zanzibar channel samples.</p>
+</div>
+</div>
+<div id="cited-materials" class="section level3 unnumbered">
+<h3>Cited materials</h3>
+<div id="refs" class="references">
+<div id="ref-broom">
+<p>Robinson, David, and Alex Hayes. 2020. <em>Broom: Convert Statistical Analysis Objects into Tidy Tibbles</em>. <a href="https://CRAN.R-project.org/package=broom">https://CRAN.R-project.org/package=broom</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+</div>
+</div>

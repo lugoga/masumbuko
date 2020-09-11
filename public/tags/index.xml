@@ -210,6 +210,42 @@
     </item>
     
     <item>
+      <title>analysis</title>
+      <link>/tags/analysis/</link>
+      <pubDate>Tue, 02 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/analysis/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>PCA</title>
+      <link>/tags/pca/</link>
+      <pubDate>Tue, 02 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/pca/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Principal Component Analysis</title>
+      <link>/tags/principal-component-analysis/</link>
+      <pubDate>Tue, 02 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/principal-component-analysis/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>tidy</title>
+      <link>/tags/tidy/</link>
+      <pubDate>Tue, 02 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/tidy/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>chlorophyll</title>
       <link>/tags/chlorophyll/</link>
       <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
@@ -228,29 +264,11 @@
     </item>
     
     <item>
-      <title>PCA</title>
-      <link>/tags/pca/</link>
-      <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/pca/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>Pemba Channel</title>
       <link>/tags/pemba-channel/</link>
       <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/pemba-channel/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Principal Component Analysis</title>
-      <link>/tags/principal-component-analysis/</link>
-      <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/principal-component-analysis/</guid>
       <description></description>
     </item>
     
@@ -476,15 +494,6 @@
       <pubDate>Tue, 14 Apr 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/tanga/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>analysis</title>
-      <link>/tags/analysis/</link>
-      <pubDate>Mon, 06 Apr 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/analysis/</guid>
       <description></description>
     </item>
     

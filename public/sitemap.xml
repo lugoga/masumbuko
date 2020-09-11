@@ -138,12 +138,12 @@
   </url>
   
   <url>
-    <loc>/categories/modis/</loc>
+    <loc>/tags/modis/</loc>
     <lastmod>2020-06-30T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/modis/</loc>
+    <loc>/categories/modis/</loc>
     <lastmod>2020-06-30T00:00:00+00:00</lastmod>
   </url>
   
@@ -203,6 +203,31 @@
   </url>
   
   <url>
+    <loc>/06/02/2020/analyse-pca-results-in-tidyverse-context/</loc>
+    <lastmod>2020-06-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/analysis/</loc>
+    <lastmod>2020-06-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/pca/</loc>
+    <lastmod>2020-06-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/principal-component-analysis/</loc>
+    <lastmod>2020-06-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/tidy/</loc>
+    <lastmod>2020-06-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/05/13/2020/simple-pca-in-r/</loc>
     <lastmod>2020-05-13T00:00:00+00:00</lastmod>
   </url>
@@ -218,17 +243,7 @@
   </url>
   
   <url>
-    <loc>/tags/pca/</loc>
-    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/pemba-channel/</loc>
-    <lastmod>2020-05-13T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/principal-component-analysis/</loc>
     <lastmod>2020-05-13T00:00:00+00:00</lastmod>
   </url>
   
@@ -395,11 +410,6 @@
   <url>
     <loc>/tags/tanga/</loc>
     <lastmod>2020-04-14T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/analysis/</loc>
-    <lastmod>2020-04-06T00:00:00+00:00</lastmod>
   </url>
   
   <url>

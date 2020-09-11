@@ -1,0 +1,143 @@
+---
+title: Analyse PCA results in tidyverse context
+author: Masumbuko Semba
+date: '2020-06-02'
+slug: analyse-pca-results-in-tidyverse-context
+categories: []
+tags:
+  - PCA
+  - tidyverse
+  - tidy
+  - Masumbuko Semba
+  - analysis
+  - Principal Component Analysis
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "")
+
+```
+
+In the previous post I illustrated a simple way to do Principal Component Analysis in R. I simply used the output results from `prcomp()` function of **R base**. But, I constantly find hard to the untidy output that `prcomp` generates and wished to get a tidy result. In this post I will illustrate the approaches that I was inspired by Claus Wilke in the post [PCA tidyverse style](https://clauswilke.com/blog/2020/09/07/pca-tidyverse-style/). 
+
+I will extend the PCA analysis I explained in the [A simple Principal Component Analysis (PCA) in R](https://semba-blog.netlify.app/05/13/2020/simple-pca-in-r/). If your new in this kind of analysis, I would recommend you to read that post before you proceeed with this post. [A simple Principal Component Analysis (PCA) in R](https://semba-blog.netlify.app/05/13/2020/simple-pca-in-r/) will familiarize with the general concept and you can easily follow later once you have  a glimpse of PCA and its core function and how is done in R.
+
+I first load the packages I am going to use in this session. I will load several packages highlighted in the chunk below;
+
+
+```{r}
+require(tidyverse)
+require(kableExtra)
+require(factoextra)
+require(ggbiplot)
+```
+
+### Load the dataset
+I use a simple and easy to understand dataset. This dataset consists of data on 120 observations sampled in Pemba and Zanzibar channel during the wet and dry season. This dataset has nine variables, two are factor (channel and season variables) and the other seven are numerical variables. We can see the descriptive statistics of the numerical variables below;
+
+```{r, echo=FALSE}
+data = read_csv("pangani.csv")%>%
+  select(-c(1:2))  %>%
+  select(channel = site, season, everything()) 
+```
+
+
+```{r}
+data %>%
+  summarytools::descr()
+```
+
+### Compute the Principal Components
+PCA prefer numerical data, therefore, we need to trim off the dataset channel and season variables, because they are categorical variables. Once we have removed the categorical variables, we also need to filter variables for a particular season. I will start with the dry season. We use the `filter` function from **dpyr** [@dplyr] package to drop all observation collected during the rain season.
+
+```{r}
+## Dry season
+dry.season = data %>% 
+  filter(season == "Dry") 
+```
+
+
+Our dataset is reduced to seven numerical variables and 60 observation collected during the dry season in Pemba and Zanzibar channel. To compute PCA, we simply parse the arguments `data = dry.season` and `scale = TRUE` in `prcomp()` function, which performs a principal components analysis and assign the output as `dry.pca`. But before running PCA, I first select numeric variables with `select(where(is.numeric))`.
+
+```{r}
+## PCA computation
+dry.pca = dry.season %>% 
+  select(where(is.numeric)) %>%
+  prcomp(scale. = TRUE, center = TRUE)
+```
+
+Then We can summarize our PCA object with `summary()`.
+```{r}
+dry.pca %>% 
+  summary()
+```
+
+We get seven principal components, called PC1-9. Each of these explains a percentage of the total variation in the dataset. That is to say: `PC1` explains 32% of the total variance, which means that nearly one-thirds of the information in the dataset can be encapsulated by just that one Principal Component. `PC2` explains 25% of the variance. So, by knowing the position of a sample in relation to just `PC1` and `PC2`, you can get a very accurate view on where it stands in relation to other samples, as just `PC1` and `PC2` can explain 57% of the variance.
+
+### tidy approach of the result
+David Robinson, Alex Hayes and Simon Couch [-@broom] developed a **broom** package that allows to convert statistical results into tidy tibbles. that is to say the **broom** package takes the messy output results from models, PCA  or t.test, and turns them into tidy tibbles.
+
+**broom**  package attempt to bridge the gap from untidy outputs of *predictions* and *estimations* to the tidy data we want to work with. broom is particularly designed to work with Hadley’s **dplyr** package [@dplyr].
+
+
+
+
+When we do PCA, Our focus is centered to explore the;
+
++ data in PC coordinates.
++ rotation matrix.
++ variance explained by each PC.
+
+#### Data in PC Coordinate
+The rotation matrix is stored as `dry.pca$rotation`, but here we’ll extract it using the `tidy()` function from **broom**. When applied to `prcomp` objects, the `tidy()` function takes an additional argument `matrix`, which we set to `matrix = "rotation"` to extract the rotation matrix.
+
+```{r}
+dry.pca %>%
+  broom::tidy(matrix = "rotation")
+```
+Instead of viewing the coordinates, you might be interested in the fitted values and residuals for each of the original points in the PCA For this, use `augment`, which augments the original data with information from the PCA:
+
+```{r}
+dry.pca %>%
+  broom::augment(dry.season)  %>%glimpse()
+```
+
+Now, we want to plot the data in PC coordinates. In general, this means combining the PC coordinates with the original dataset, so we can color points by categorical variables present in the original data but removed for the PCA. We do this with the `augment()` function from **broom**, which takes as arguments the fitted model and the original data. The columns containing the fitted coordinates are called `.fittedPC1, .fittedPC2`, etc. We can plot then;
+
+```{r fig2, fig.cap="Fitted components"}
+
+dry.pca %>%
+  broom::augment(dry.season) %>%
+  ggplot(aes(x = .fittedPC1, y = .fittedPC2, col = channel))+
+  geom_point(size = 3) +
+  ggsci::scale_color_jco()
+```
+
+#### Look at the variance explained by each PC
+Finally, we’ll plot the variance explained by each PC. We can again extract this information using the `tidy()` function from **broom**, now by setting the matrix argument to `matrix = "eigenvalues`.
+
+```{r}
+dry.pca %>%
+  broom::tidy(matrix = "eigenvalues")
+```
+
+You notice that we get a tibble format of the values, we can use these values to plot
+```{r fig3, fig.cap="EigenValues of the seven PCA components"}
+dry.pca %>%
+  broom::tidy(matrix = "eigenvalues") %>%
+  ggplot()+
+  geom_col(aes(x = PC, y = percent), fill = "maroon") +
+  geom_line(aes(x = PC, y = cumulative))+
+  geom_point(aes(x = PC, y = cumulative), size = 3) +
+  scale_y_continuous(labels = scales::percent_format(), expand = expansion(mult = c(0,0.01)))+
+  scale_x_continuous(breaks = 1:8)
+  
+```
+
+The first and second component captures 60% of the variation in the data (Figure \@ref(fig:fig3)) and, as we can see from the figure \@ref(fig:fig2), nicely separates the Pemba channel samples from the Zanzibar channel samples.
+
+### Cited materials
