@@ -27,7 +27,11 @@ require(factoextra)
 require(ggbiplot)</code></pre>
 <div id="load-the-dataset" class="section level3">
 <h3>Load the dataset</h3>
-<p>I use a simple and easy to understand dataset. This dataset consists of data on 120 observations sampled in Pemba and Zanzibar channel during the wet and dry season. This dataset has nine variables, two are factor (channel and season variables) and the other seven are numerical variables. We can see the descriptive statistics of the numerical variables below;</p>
+<p>I use a simple and easy to understand dataset. This dataset consists of data on 120 observations sampled in Pemba and Zanzibar channel during the wet and dry season. This dataset has nine variables, two are factor (channel and season variables) and the other seven are numerical variables. I used <code>read_csv</code> to load the data and rearrange the order of variable with <code>select()</code> functions from <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span></p>
+<pre class="r"><code>data = read_csv(&quot;pangani.csv&quot;)%&gt;%
+  select(-c(1:2))  %&gt;%
+  select(channel = site, season, everything()) </code></pre>
+<p>I use <code>descr()</code> function from <strong>summarytools</strong> package <span class="citation">(Comtois <a href="#ref-summarytools" role="doc-biblioref">2020</a>)</span> to get descriptive statistics of the numerical variables in the dataset;</p>
 <pre class="r"><code>data %&gt;%
   summarytools::descr()</code></pre>
 <pre><code>Descriptive Statistics  
@@ -76,8 +80,7 @@ Cumulative Proportion  0.3234 0.5789 0.7205 0.8233 0.9139 0.97160 1.0000</code><
 <div id="tidy-approach-of-the-result" class="section level3">
 <h3>tidy approach of the result</h3>
 <p>David Robinson, Alex Hayes and Simon Couch <span class="citation">(<a href="#ref-broom" role="doc-biblioref">2020</a>)</span> developed a <strong>broom</strong> package that allows to convert statistical results into tidy tibbles. that is to say the <strong>broom</strong> package takes the messy output results from models, PCA or t.test, and turns them into tidy tibbles.</p>
-<p><strong>broom</strong> package attempt to bridge the gap from untidy outputs of <em>predictions</em> and <em>estimations</em> to the tidy data we want to work with. broom is particularly designed to work with Hadley’s <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span>.</p>
-<p>When we do PCA, Our focus is centered to explore the;</p>
+<p><strong>broom</strong> package attempt to bridge the gap from untidy outputs of <em>predictions</em> and <em>estimations</em> to the tidy data we want to work with. broom is particularly designed to work with Hadley’s <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span>. In a nutshell, When we do PCA, Our focus is centered to explore the;</p>
 <ul>
 <li>data in PC coordinates.</li>
 <li>rotation matrix.</li>
@@ -173,6 +176,9 @@ Figure 2: EigenValues of the seven PCA components
 <div id="cited-materials" class="section level3 unnumbered">
 <h3>Cited materials</h3>
 <div id="refs" class="references">
+<div id="ref-summarytools">
+<p>Comtois, Dominic. 2020. <em>Summarytools: Tools to Quickly and Neatly Summarize Data</em>. <a href="https://CRAN.R-project.org/package=summarytools">https://CRAN.R-project.org/package=summarytools</a>.</p>
+</div>
 <div id="ref-broom">
 <p>Robinson, David, and Alex Hayes. 2020. <em>Broom: Convert Statistical Analysis Objects into Tidy Tibbles</em>. <a href="https://CRAN.R-project.org/package=broom">https://CRAN.R-project.org/package=broom</a>.</p>
 </div>

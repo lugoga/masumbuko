@@ -37,14 +37,15 @@ require(ggbiplot)
 ```
 
 ### Load the dataset
-I use a simple and easy to understand dataset. This dataset consists of data on 120 observations sampled in Pemba and Zanzibar channel during the wet and dry season. This dataset has nine variables, two are factor (channel and season variables) and the other seven are numerical variables. We can see the descriptive statistics of the numerical variables below;
+I use a simple and easy to understand dataset. This dataset consists of data on 120 observations sampled in Pemba and Zanzibar channel during the wet and dry season. This dataset has nine variables, two are factor (channel and season variables) and the other seven are numerical variables. I used `read_csv` to load the data and rearrange the order of variable with `select()` functions from **dplyr** package [@dplyr]
 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 data = read_csv("pangani.csv")%>%
   select(-c(1:2))  %>%
   select(channel = site, season, everything()) 
 ```
 
+I use `descr()` function from **summarytools** package [@summarytools] to get  descriptive statistics of the numerical variables in the dataset;
 
 ```{r}
 data %>%
@@ -81,12 +82,7 @@ We get seven principal components, called PC1-9. Each of these explains a percen
 ### tidy approach of the result
 David Robinson, Alex Hayes and Simon Couch [-@broom] developed a **broom** package that allows to convert statistical results into tidy tibbles. that is to say the **broom** package takes the messy output results from models, PCA  or t.test, and turns them into tidy tibbles.
 
-**broom**  package attempt to bridge the gap from untidy outputs of *predictions* and *estimations* to the tidy data we want to work with. broom is particularly designed to work with Hadley’s **dplyr** package [@dplyr].
-
-
-
-
-When we do PCA, Our focus is centered to explore the;
+**broom**  package attempt to bridge the gap from untidy outputs of *predictions* and *estimations* to the tidy data we want to work with. broom is particularly designed to work with Hadley’s **dplyr** package [@dplyr]. In a nutshell, When we do PCA, Our focus is centered to explore the;
 
 + data in PC coordinates.
 + rotation matrix.
