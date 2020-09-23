@@ -6,7 +6,7 @@
     <description>Recent content in Tags on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 31 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 23 Sep 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,9 +14,36 @@
     <item>
       <title>Masumbuko Semba</title>
       <link>/tags/masumbuko-semba/</link>
-      <pubDate>Fri, 31 Jul 2020 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/masumbuko-semba/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Semba</title>
+      <link>/tags/semba/</link>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/semba/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Temperature</title>
+      <link>/tags/temperature/</link>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/temperature/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Zambezi</title>
+      <link>/tags/zambezi/</link>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/zambezi/</guid>
       <description></description>
     </item>
     
@@ -80,15 +107,6 @@
       <pubDate>Fri, 10 Jul 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/programming/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Semba</title>
-      <link>/tags/semba/</link>
-      <pubDate>Fri, 10 Jul 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/semba/</guid>
       <description></description>
     </item>
     
@@ -917,15 +935,6 @@
       <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/primary-productivity/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Temperature</title>
-      <link>/tags/temperature/</link>
-      <pubDate>Fri, 15 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/temperature/</guid>
       <description></description>
     </item>
     

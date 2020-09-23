@@ -6,10 +6,19 @@
     <description>Recent content in Masumbuko Semba on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 31 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 23 Sep 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/masumbuko-semba/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Compute the annual trend in temperature in R with EnvStats</title>
+      <link>/09/23/2020/compute-the-annual-trend-in-temperature-in-r-with-envstats/</link>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/09/23/2020/compute-the-annual-trend-in-temperature-in-r-with-envstats/</guid>
+      <description>IntroductionOften in environmental studies we are interested in assessing the presence or absence of a long term trend. A widely applied is a parametric test for trend, which involves fitting a linear model that includes some measure of time as one of the predictor variables, and possibly allowing for serially correlated errors in the model. Instead of fitting the data to time series parametric test, Stephen Millard bundles several functions in EnvStats package that are non–parametric and agnostic in dealing with trend (Millard 2013).</description>
+    </item>
     
     <item>
       <title>A shiny WebApp of the Lake Tanganyika </title>

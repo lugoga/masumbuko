@@ -1,0 +1,373 @@
+---
+title: Compute the annual trend in temperature in R with EnvStats
+author: Masumbuko Semba
+date: '2020-09-23'
+slug: compute-the-annual-trend-in-temperature-in-r-with-envstats
+categories:
+  - R
+tags:
+  - Temperature
+  - Semba
+  - Masumbuko Semba
+  - Zambezi
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+<link href="/rmarkdown-libs/lightable/lightable.css" rel="stylesheet" />
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>Often in environmental studies we are interested in assessing the presence or absence of a long term trend. A widely applied is a parametric test for trend, which involves fitting a linear model that includes some measure of time as one of the predictor variables, and possibly allowing for serially correlated errors in the model. Instead of fitting the data to time series parametric test, Stephen Millard bundles several functions in <strong>EnvStats</strong> package that are non–parametric and agnostic in dealing with trend <span class="citation">(Millard <a href="#ref-envstats" role="doc-biblioref">2013</a>)</span>.</p>
+<p>These functions include <code>kendallTrendTest()</code>for computing annual trend and <code>kendallSeasonalTrendTest()</code> for computing the seasonal trends. One advantage of these tools is that are non-parametric test—trend test that does not assume normally distributed errors. In this post I will illustrate how to use these tools to assess the annual rate of change in temperature and precipitation for selected stations within the Zambezi river catchment.</p>
+<p>Before we proceed, we need to load some packages that we are going to use in this post.</p>
+<pre class="r"><code>library(EnvStats) 
+require(tidyverse)
+require(magrittr)</code></pre>
+</div>
+<div id="data" class="section level3">
+<h3>Data</h3>
+<p>We use maximum temperature data collected from ten sites in Zambezi River Basin between 1980 and 2015. The data is already processed and organized in long form to make it easy to manipulate and plotting in R. We can import the dataset using a <code>read_csv</code> function from <strong>readr</strong> package <span class="citation">(Wickham, Hester, and Francois <a href="#ref-readr" role="doc-biblioref">2017</a>)</span></p>
+<pre class="r"><code>data = read_csv(&quot;data/TmaxIndexed.csv&quot;)</code></pre>
+<pre class="r"><code>data %&gt;% 
+  # sample_n(10) %&gt;% 
+  glimpse()</code></pre>
+<pre><code>FALSE Rows: 3,253
+FALSE Columns: 4
+FALSE $ Site  &lt;chr&gt; &quot;Mongu&quot;, &quot;Mongu&quot;, &quot;Mongu&quot;, &quot;Mongu&quot;, &quot;Mongu&quot;, &quot;Mongu&quot;, &quot;Mongu&quot;...
+FALSE $ Year  &lt;dbl&gt; 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1...
+FALSE $ Month &lt;chr&gt; &quot;Jan&quot;, &quot;Jan&quot;, &quot;Jan&quot;, &quot;Jan&quot;, &quot;Jan&quot;, &quot;Jan&quot;, &quot;Jan&quot;, &quot;Jan&quot;, &quot;Jan&quot;...
+FALSE $ Tem   &lt;dbl&gt; 29.0, 30.6, 29.9, 28.4, 28.6, 28.7, 30.5, 29.1, 28.9, 32.4, 3...</code></pre>
+<p>We notice that the dataset contains four columns and 3235 observations. The columns include the site, year of and month of observation and temperature value. We notice that months are character, because we need to make a date from year and month, we first create a new column for day and then convert the character months into integer using the <code>case_when</code> function. We then create a date variables from day, mnth and year columns with <code>make_date</code> function from <strong>lubridate</strong> package <span class="citation">(Grolemund and Wickham <a href="#ref-lubridate" role="doc-biblioref">2011</a>)</span>. Notice that <code>janitor::clean_names()</code> was used to make columns names with lowercase <span class="citation">(Firke <a href="#ref-janitor" role="doc-biblioref">2020</a>)</span>.</p>
+<pre class="r"><code>data = data %&gt;% 
+  janitor::clean_names()%&gt;%
+  rename(data = 4) %&gt;% 
+  mutate(variable = &quot;tmax&quot;, 
+         day = 15, 
+         months = case_when(month == &quot;Jan&quot;~1, month == &quot;Feb&quot;~2,month == &quot;Mar&quot;~3,month == &quot;Apr&quot;~4,
+                            month == &quot;May&quot;~5,month == &quot;Jun&quot;~6,month == &quot;Jul&quot;~7,month == &quot;Aug&quot;~8,
+                            month == &quot;Sep&quot;~9,month == &quot;Oct&quot;~10,month == &quot;Nov&quot;~11,month == &quot;Dec&quot;~12),
+         date = lubridate::make_date(year = year, month = months, day = day)) %&gt;% 
+  select(site, date,month, year, variable, data)</code></pre>
+</div>
+<div id="annual-trend" class="section level3">
+<h3>Annual Trend</h3>
+<p>We then need to understand the annual rate of change in temperature (trend) for each site. We can compute for each site manual. However, we can use the for loop to iterate the process for us. Lets us first create the vector file of all the site names that we are going to use as a count of the looping process.</p>
+<pre class="r"><code>site.names = data %&gt;% distinct(site) %&gt;% pull()</code></pre>
+<p>I also create a container with a name <code>change.tmax</code> as a list file that will store the resulted data frame of change in temperature. In a nutshell, the loop will first pick temperature data for a particular site <code>data %&gt;% filter(site == site.names[i])</code> and compute the annual trend of temperature over a period by parsing <code>kendallTrendTest(data ~ year)</code>. The result of trend is converted to a tibble with <code>tidy</code> function from <strong>broom</strong> package <span class="citation">(Robinson and Hayes <a href="#ref-broom" role="doc-biblioref">2020</a>)</span>. The tibble file now is in convenient format that <strong>tidyverse</strong> <span class="citation">(Wickham <a href="#ref-tidyverse" role="doc-biblioref">2017</a>)</span> package like <strong>dplyr</strong> <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span> understand and we can further process the results with <code>mutate</code> function to insert the names and the variables and also <code>select</code> only the variables of interested. We picked four variables that are</p>
+<ul>
+<li>site: name of the station</li>
+<li>variable: the variable of interest, for this case is maximum temperature,</li>
+<li>tau: the rate of change</li>
+<li>slope of the trend</li>
+<li>statistic of the change and,</li>
+<li>p-value: help to draw the the conclusion whether the change is is significant</li>
+</ul>
+<p>Then the final output of the computation is stored in container <code>change.tmax[[i]]</code>, where the <code>i</code> is represent the site.</p>
+<pre class="r"><code>change.tmax = list()
+
+for (i in 1:length(site.names)){
+
+change.tmax[[i]] = data %&gt;% filter(site == site.names[i]) %$% 
+  kendallTrendTest(data ~ year) %&gt;% broom::tidy()%&gt;%
+  mutate(site = site.names[i], variable = &quot;tmax&quot;) %&gt;%
+  select(site, variable, tau = 1, slope = 2, statistic, p_value = 5) 
+
+}</code></pre>
+<p>As mentioned earlier, the result of rate of change for the ten sites is in tibble, but these tibble files are stored in a list and hence to access them and make a single data frame, we use a function <code>bind_rows</code> from <strong>dplyr</strong> package. Once the tibble is ready, we create a new column <code>change</code> and convert the p-values into categorical based the magic number <code>0.05</code> as cut of points. The tau with corresponding p.values below <code>0.05</code> are treated as annual change in temperature is significant and those above <code>0.05</code> their annual changes are not significant. We simply create the <code>change</code> using <code>if_else</code> function from <strong>dplyr</strong> for purpose of distinguish the significant while we plot with color.</p>
+<pre class="r"><code>annual.change = change.tmax %&gt;% 
+  bind_rows() %&gt;%
+  mutate(change = if_else(p_value &lt; 0.05, true = &quot;Significant&quot;, false = &quot;Insignificant&quot;))</code></pre>
+<p>Table <a href="#tab:tab1">1</a> reveal that a rate of change in temperature (tau) for ten sites in Zambezi River basin vary. With exception to Senang site, which has experience a decreasing trend in temperature, the remaining sites have increased trend in temperature range from 0.005<sup>o</sup>C/year at Seschek to about 0.031<sup>o</sup>C/year at Songwe (Table <a href="#tab:tab1">1</a>). We also notice that Banket and Songwe are the only sites with significant change in temperature (Table <a href="#tab:tab1">1</a>. The estimated annual trend at Songwe is is 0.031<sup>o</sup>C/year. The p-value associated with the annual Kendall test for trend is p = 0.0002, which is less than 0.05, indicating the annual increase in temperature of about 0.031<sup>o</sup>C/year is significant.</p>
+<pre class="r"><code>annual.change %&gt;%
+  select(-variable) %&gt;%
+  mutate(across(is.numeric, round, 4)) %&gt;%
+  kableExtra::kable(caption = &quot;The annual change in temperature for selected station in the Zambezi River Basin&quot;, col.names = c(&quot;Sites&quot;, &quot;Tau&quot;, &quot;Slope&quot;, &quot;Statistics&quot;, &quot;p-values&quot;, &quot;Change&quot;)) %&gt;%
+  kableExtra::column_spec(column = 2:5, width = &quot;2cm&quot;)%&gt;%
+  kableExtra::column_spec(column = 6, width = &quot;4cm&quot;)  %&gt;%
+  kableExtra::kable_styling(font_size = ifelse(knitr:::is_latex_output(), 11, 14),
+                            latex_options = c(&quot;hold_position&quot;, &quot;repeat_header&quot;))</code></pre>
+<table class="table" style="font-size: 14px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:tab1">Table 1: </span>The annual change in temperature for selected station in the Zambezi River Basin
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Sites
+</th>
+<th style="text-align:right;">
+Tau
+</th>
+<th style="text-align:right;">
+Slope
+</th>
+<th style="text-align:right;">
+Statistics
+</th>
+<th style="text-align:right;">
+p-values
+</th>
+<th style="text-align:left;">
+Change
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Mongu
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0573
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0222
+</td>
+<td style="text-align:right;width: 2cm; ">
+1.5805
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.1140
+</td>
+<td style="text-align:left;width: 4cm; ">
+Insignificant
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Kaoma
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0270
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0095
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.6886
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.4911
+</td>
+<td style="text-align:left;width: 4cm; ">
+Insignificant
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Kabomp
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0099
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0000
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.2045
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.8380
+</td>
+<td style="text-align:left;width: 4cm; ">
+Insignificant
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Senang
+</td>
+<td style="text-align:right;width: 2cm; ">
+-0.0223
+</td>
+<td style="text-align:right;width: 2cm; ">
+-0.0125
+</td>
+<td style="text-align:right;width: 2cm; ">
+-0.4412
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.6591
+</td>
+<td style="text-align:left;width: 4cm; ">
+Insignificant
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Seshek
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0057
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0000
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.1250
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.9005
+</td>
+<td style="text-align:left;width: 4cm; ">
+Insignificant
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Harare
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0318
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0133
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.9022
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.3669
+</td>
+<td style="text-align:left;width: 4cm; ">
+Insignificant
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Banket
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0850
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0375
+</td>
+<td style="text-align:right;width: 2cm; ">
+2.4076
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0161
+</td>
+<td style="text-align:left;width: 4cm; ">
+Significant
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chibero
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0577
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0250
+</td>
+<td style="text-align:right;width: 2cm; ">
+1.6339
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.1023
+</td>
+<td style="text-align:left;width: 4cm; ">
+Insignificant
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ruhuhu
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0264
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0077
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.7864
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.4316
+</td>
+<td style="text-align:left;width: 4cm; ">
+Insignificant
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Songwe
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.1273
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0312
+</td>
+<td style="text-align:right;width: 2cm; ">
+3.7431
+</td>
+<td style="text-align:right;width: 2cm; ">
+0.0002
+</td>
+<td style="text-align:left;width: 4cm; ">
+Significant
+</td>
+</tr>
+</tbody>
+</table>
+<p>We can make a plot of annual change (tau) and p-value and color the significance. This help us to visualize and spot easily the magnitude of change. ggplot was used to plot figure <a href="#fig:fig1">1</a>, which help us identify the rate of change and significance in a more intuitive way.</p>
+<pre class="r"><code>annual.change %&gt;% 
+  filter(variable == &quot;tmax&quot;) %&gt;%
+  ggplot(aes(x = tau, y = p_value, color = change))+
+  geom_point(size = 3)+
+  geom_vline(xintercept = 0, color = &quot;red&quot;, linetype = 2, size = .75)+
+  ggrepel::geom_text_repel(aes(label = site), point.padding = .25, segment.colour =&quot;grey70&quot;, show.legend = FALSE)+
+  ggsci::scale_color_d3(name = &quot;Change&quot;)+
+  # cowplot::theme_cowplot()+
+  # ggpubr::theme_pubr()+
+  theme(legend.position = c(.88,.15),
+        legend.key = element_blank(), 
+        legend.background = element_rect(fill = &quot;white&quot;, colour = &quot;black&quot;),
+        panel.background = element_rect(fill = &quot;white&quot;, colour = &quot;black&quot;),
+        panel.grid.major = element_line(colour = &quot;grey70&quot;, linetype = 3))+
+  labs(x = expression(Temperature~change~(degree*C)), y = &quot;p-values&quot;)+
+  scale_x_continuous(position = &quot;top&quot;, breaks = seq(-0.1,0.2,0.025))+
+  scale_y_reverse()</code></pre>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2020-09-23-compute-the-annual-trend-in-temperature-in-r-with-envstats_files/figure-html/fig1-1.png" alt="Annual change of temperature" width="576" />
+<p class="caption">
+Figure 1: Annual change of temperature
+</p>
+</div>
+<p>In summary, we have seen how to compute annual trend of temperature. We have also seen how to present the result in both tabular form and plots, in form that is easy for the eye. That’s it for today and next post I will show how to compute seasonal trend using almost similar approach used in this post.</p>
+</div>
+<div id="reference" class="section level3 unnumbered">
+<h3>Reference</h3>
+<div id="refs" class="references">
+<div id="ref-janitor">
+<p>Firke, Sam. 2020. <em>Janitor: Simple Tools for Examining and Cleaning Dirty Data</em>. <a href="https://CRAN.R-project.org/package=janitor">https://CRAN.R-project.org/package=janitor</a>.</p>
+</div>
+<div id="ref-lubridate">
+<p>Grolemund, Garrett, and Hadley Wickham. 2011. “Dates and Times Made Easy with lubridate.” <em>Journal of Statistical Software</em> 40 (3): 1–25. <a href="http://www.jstatsoft.org/v40/i03/">http://www.jstatsoft.org/v40/i03/</a>.</p>
+</div>
+<div id="ref-envstats">
+<p>Millard, Steven P. 2013. <em>EnvStats: An R Package for Environmental Statistics</em>. New York: Springer. <a href="http://www.springer.com">http://www.springer.com</a>.</p>
+</div>
+<div id="ref-broom">
+<p>Robinson, David, and Alex Hayes. 2020. <em>Broom: Convert Statistical Analysis Objects into Tidy Tibbles</em>. <a href="https://CRAN.R-project.org/package=broom">https://CRAN.R-project.org/package=broom</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, Hadley. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+<div id="ref-readr">
+<p>Wickham, Hadley, Jim Hester, and Romain Francois. 2017. <em>Readr: Read Rectangular Text Data</em>. <a href="https://CRAN.R-project.org/package=readr">https://CRAN.R-project.org/package=readr</a>.</p>
+</div>
+</div>
+</div>
