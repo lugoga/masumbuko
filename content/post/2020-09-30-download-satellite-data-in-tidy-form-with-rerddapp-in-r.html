@@ -1,0 +1,100 @@
+---
+title: Download satellite data in tidy form with rerddapp in R
+author: Masumbuko Semba
+date: '2020-09-30'
+slug: download-satellite-data-in-tidy-form-with-rerddapp-in-r
+categories: []
+tags:
+  - chlorophyll
+  - Satellite
+  - Semba
+  - RStudio
+  - Masumbuko Semba
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+
+<p>In the post titled <a href="https://semba-blog.netlify.app/04/15/2019/access-download-process-and-visualize-sea-surface-height-and-geostrophic-current-from-aviso-in-r/">Access, Download, Process and VIsualize sea surface height and geostrophic current from AVISO in R</a> posted in my blog on Monday, Apr 15, 2019, I explained how we can download the satellite data like sea surface height from AVISO in R. I illustrate in detail getting the data using <strong>xtractomatic</strong> package <span class="citation">(Mendelssohn <a href="#ref-xtracto" role="doc-biblioref">2018</a>)</span>. Though <strong>xtractomatic</strong> package provide functions that allows us to get access to the <code>ERDDAP</code> server and get the data, but one big challenge is that the data comes is array and need an expensive computation process, especially if you deal with gridded data for a long term time series.</p>
+<p>Failure of <strong>xtractomatic</strong> package to provide a tidy format of the gridded data is the reason to write an update post that compliment my previous post. In this post, I will explain an easy way of getting satellite data from <code>ERDAPP</code> server and dowload in tabular form, which is tidy to make use of the power of <strong>tidyverse</strong> bundles of packages <span class="citation">(Wickham <a href="#ref-tidyverse" role="doc-biblioref">2017</a>)</span>. We will use <strong>rerddap</strong> package <span class="citation">(Chamberlain <a href="#ref-rerddap" role="doc-biblioref">2017</a>)</span> instead of <strong>xtractomatic</strong> to accomplish the task. We need to load the package into our session. If you do not have the package in your machine, you can simply install directly from CRAN.</p>
+<pre class="r"><code>install.packages(&quot;rerddap&quot;)</code></pre>
+<p>Then load <strong>erddap</strong> and <strong>tidyverse</strong> packages that we are going to use in this post</p>
+<pre class="r"><code>require(rerddap)
+require(tidyverse)</code></pre>
+<p>The <code>ERDDAP</code> server has thousands of gridded and table dataset, and can be overwheliming to look at these dataset manually. The <strong>rerddap</strong> package has a <code>ed_search</code> function that allows us to query the server with specific type of keywords. For instance I am interested with all one day composite chlorophyll a dataset with global coverage. I can simply parse the argument <code>ed_search(query = "MODIS Chlorophyll-a Global 1 Day")</code> and get the list of all dataset that meet those criteria.</p>
+<pre class="r"><code>whichchl = ed_search(query = &quot;MODIS Chlorophyll-a Global 1 Day&quot;)</code></pre>
+<p>The list of <code>dataset</code> has a title and <code>dataset_id</code>. The <code>title</code> provide a glimpse of the dataset and the <code>dataset_id</code> is the key entry for which to download the data. I picked the monthly composite chlorophyll dataset <code>erdMH1chlamday</code> and used the <code>info</code> function from <strong>rerdapp</strong> package to obtain the internal information of the dataset;</p>
+<pre class="r"><code>info(&quot;erdMH1chlamday&quot;)</code></pre>
+<pre><code>&lt;ERDDAP info&gt; erdMH1chlamday 
+ Base URL: https://upwell.pfeg.noaa.gov/erddap/ 
+ Dimensions (range):  
+     time: (2003-01-16T00:00:00Z, 2020-08-16T00:00:00Z) 
+     latitude: (-89.97918, 89.97916) 
+     longitude: (-179.9792, 179.9792) 
+ Variables:  
+     chlorophyll: 
+         Units: mg m^-3 </code></pre>
+<pre class="r"><code># info(&quot;erdMH1chla1day&quot;)</code></pre>
+<p>The <code>erdMH1chlamday</code> function when parsed to the <code>info</code> function provide as with details like the variable names, the geographical extent in longitude and latitude and the time bound of the dataset. This information is useful as they guide us to select only the data available within the geographical extent and time bounds. If we define the extent and bound outside those in the dataset, we will get an error message.</p>
+<p>To download the gridded data, we use <code>griddap</code> function and define the latitude, longitude and time bounds of the data we wish to download. For instance the chunk below shows that I am interested with all monthly values of chlorophyll from 4 km MODIS dataset that are within longitude <code>metR::LonLabel(-76.30499)</code> and <code>metR::LonLabel(-77.03618)</code> and latitude <code>metR::LatLabel(34.248)</code> and <code>metR::LatLabel(34.3516)</code> and must be acquired between 2009-09-30 and 2013-09-30. Since I want tidy data, I parse a <code>fmt =  "csv"</code>, which will download and arrange the data in tabular form.</p>
+<pre class="r"><code>chla = griddap(&quot;erdMH1chlamday&quot;, 
+                      latitude =  c(34.248, 34.3516),
+                      longitude = c(-76.30499, -77.03618),
+                      time = c(&quot;2009-09-30&quot;, &quot;2013-09-30&quot;), 
+                      fmt = &quot;csv&quot;)</code></pre>
+<p>Once the data is downloaded, I can use a<code>mutate</code> function from <strong>dplyr</strong> package <span class="citation">(Wickham et al. <a href="#ref-dplyr" role="doc-biblioref">2018</a>)</span> to reformat the date into the right format using a <code>as_date()</code> from <strong>lubridate</strong> package <span class="citation">(Grolemund and Wickham <a href="#ref-lubridate" role="doc-biblioref">2011</a>)</span>. A sample tibble file of the dataset is presented below, which show the first and last three observations.</p>
+<pre class="r"><code>chla = chla %&gt;% 
+  mutate(time = lubridate::as_date(time))
+
+## Visualize the head and tail of the dataset
+chla %&gt;% FSA::headtail() %&gt;% as_tibble() </code></pre>
+<pre><code># A tibble: 6 x 4
+  time       latitude longitude chlorophyll
+  &lt;date&gt;        &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
+1 2009-09-16     34.4     -77.0       0.316
+2 2009-09-16     34.4     -77.0       0.324
+3 2009-09-16     34.4     -76.9       0.318
+4 2013-09-16     34.2     -76.4       0.274
+5 2013-09-16     34.2     -76.4       0.274
+6 2013-09-16     34.2     -76.3       0.271</code></pre>
+<pre class="r"><code>chla %&gt;%
+  filter(time &lt;= &quot;2009-12-16&quot;) %&gt;%
+  ggplot(aes(x = longitude, y = latitude)) +
+  geom_tile(aes(fill = chlorophyll))+
+  scale_fill_gradientn(colours = mycolor, trans = scales::log10_trans())+
+  facet_wrap(~time)</code></pre>
+<p>And figure <a href="#fig:fig1">1</a> created with <strong>ggplot2</strong> <span class="citation">(Wickham <a href="#ref-ggplot" role="doc-biblioref">2016</a>)</span> and <strong>metR</strong> <span class="citation">(Campitelli <a href="#ref-metr" role="doc-biblioref">2019</a>)</span> packages gives a visual appeal of how chlorophyll concentration in this area vary toward the end of the year 2009.</p>
+<div class="figure"><span id="fig:fig1"></span>
+<img src="/post/2020-09-30-download-satellite-data-in-tidy-form-with-rerddapp-in-r_files/figure-html/fig1-1.png" alt="Chlorophyll-a concentration of months for the last quarter of 2009" width="576" />
+<p class="caption">
+Figure 1: Chlorophyll-a concentration of months for the last quarter of 2009
+</p>
+</div>
+<div id="references" class="section level3 unnumbered">
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-metr">
+<p>Campitelli, Elio. 2019. <em>MetR: Tools for Easier Analysis of Meteorological Fields</em>. <a href="https://CRAN.R-project.org/package=metR">https://CRAN.R-project.org/package=metR</a>.</p>
+</div>
+<div id="ref-rerddap">
+<p>Chamberlain, Scott. 2017. <em>Rerddap: General Purpose Client for ’Erddap’ Servers</em>. <a href="https://CRAN.R-project.org/package=rerddap">https://CRAN.R-project.org/package=rerddap</a>.</p>
+</div>
+<div id="ref-lubridate">
+<p>Grolemund, Garrett, and Hadley Wickham. 2011. “Dates and Times Made Easy with lubridate.” <em>Journal of Statistical Software</em> 40 (3): 1–25. <a href="http://www.jstatsoft.org/v40/i03/">http://www.jstatsoft.org/v40/i03/</a>.</p>
+</div>
+<div id="ref-xtracto">
+<p>Mendelssohn, Roy. 2018. <em>Xtractomatic: Accessing Environmental Data from Erd’s Erddap Server</em>. <a href="https://CRAN.R-project.org/package=xtractomatic">https://CRAN.R-project.org/package=xtractomatic</a>.</p>
+</div>
+<div id="ref-ggplot">
+<p>Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="http://ggplot2.org">http://ggplot2.org</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>———. 2017. <em>Tidyverse: Easily Install and Load the ’Tidyverse’</em>. <a href="https://CRAN.R-project.org/package=tidyverse">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+<div id="ref-dplyr">
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2018. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+</div>
+</div>

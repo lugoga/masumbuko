@@ -1,0 +1,119 @@
+---
+title: Download satellite data in tidy form with rerddapp in R
+author: Masumbuko Semba
+date: '2020-09-30'
+slug: download-satellite-data-in-tidy-form-with-rerddapp-in-r
+categories: []
+tags:
+  - chlorophyll
+  - Satellite
+  - Semba
+  - RStudio
+  - Masumbuko Semba
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
+---
+
+
+In the post titled [Access, Download, Process and VIsualize sea surface height and geostrophic current from AVISO in R](https://semba-blog.netlify.app/04/15/2019/access-download-process-and-visualize-sea-surface-height-and-geostrophic-current-from-aviso-in-r/) posted in my blog on Monday, Apr 15, 2019, I explained how we can download the satellite data like sea surface height from AVISO in R. I illustrate in detail getting the data using **xtractomatic** package [@xtracto]. Though **xtractomatic** package provide functions that allows us to get access to the `ERDDAP` server and get the data, but one big challenge is that the data comes is array and need an expensive computation process, especially if you deal with gridded data for a long term time series. 
+
+Failure of **xtractomatic** package to provide a tidy format of the gridded data is the reason to write an update post that compliment my previous post. In this post, I will explain an easy way of getting satellite data from `ERDAPP` server and dowload in tabular form, which is tidy to make use of the power of **tidyverse** bundles of packages [@tidyverse]. We will use **rerddap** package [@rerddap] instead of **xtractomatic** to accomplish the task. We need to load the package into our session. If you do not have the package in your machine, you can simply install directly from CRAN. 
+
+```{r, eval=FALSE}
+install.packages("rerddap")
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "")
+```
+
+Then load **erddap** and **tidyverse** packages that we are going to use in this post
+
+```{r}
+require(rerddap)
+require(tidyverse)
+```
+
+The `ERDDAP` server has thousands of gridded and table dataset, and can be overwheliming to look at these dataset manually. The **rerddap** package has a `ed_search` function that allows us to query the server with specific type of keywords. For instance I am interested with all one day composite chlorophyll a dataset with global coverage. I can simply parse the argument `ed_search(query = "MODIS Chlorophyll-a Global 1 Day")` and get the list of all dataset that meet those criteria. 
+
+```{r}
+
+whichchl = ed_search(query = "MODIS Chlorophyll-a Global 1 Day")
+```
+
+The list of `dataset` has a title and `dataset_id`. The `title` provide a glimpse of the dataset and the `dataset_id` is the key entry for which to download the data. I picked the monthly composite chlorophyll dataset `erdMH1chlamday`  and used the `info` function from **rerdapp** package to obtain the internal information of the dataset;
+
+```{r}
+info("erdMH1chlamday")
+# info("erdMH1chla1day")
+```
+
+The `erdMH1chlamday` function when parsed to the `info` function provide as with details like the variable names, the geographical extent in longitude and latitude and the time bound of the dataset. This information is useful as they guide us to select only the data available within the geographical extent and time bounds. If we define the extent and bound outside those in the dataset, we will get an error message.
+
+To download the gridded data, we use `griddap` function and define the latitude, longitude and time bounds of the data we wish to download. For instance the chunk below shows that I am interested with all monthly values of chlorophyll from 4 km MODIS dataset that are within longitude `metR::LonLabel(-76.30499)` and `metR::LonLabel(-77.03618)` and latitude `metR::LatLabel(34.248)` and `metR::LatLabel(34.3516)` and must be acquired between 2009-09-30 and 2013-09-30. Since I want tidy data, I parse a `fmt =  "csv"`, which will download and arrange the data in tabular form.
+
+
+```{r}
+chla = griddap("erdMH1chlamday", 
+                      latitude =  c(34.248, 34.3516),
+                      longitude = c(-76.30499, -77.03618),
+                      time = c("2009-09-30", "2013-09-30"), 
+                      fmt = "csv")
+```
+
+Once the data is downloaded, I can use a`mutate` function from **dplyr** package [@dplyr] to reformat the date into the right format using a `as_date()` from **lubridate** package [@lubridate]. A sample tibble file of the dataset is presented below, which show the first and last three observations. 
+
+```{r}
+chla = chla %>% 
+  mutate(time = lubridate::as_date(time))
+
+## Visualize the head and tail of the dataset
+chla %>% FSA::headtail() %>% as_tibble() 
+```
+
+
+```{r, echo=FALSE}
+mycolor2 = c("#040ED8", "#2050FF", "#4196FF", "#6DC1FF", "#86D9FF", "#9CEEFF", "#AFF5FF", "#CEFFFF",
+             "#FFFE47", "#FFEB00", "#FFC400", "#FF9000", "#FF4800", "#FF0000", "#D50000", "#9E0000")
+
+mycolor = c("#7f007f", "#0000ff",  "#007fff", "#00ffff", "#00bf00", "#7fdf00",
+            "#ffff00", "#ff7f00", "#ff3f00", "#ff0000", "#bf0000")
+```
+
+
+```{r, eval=FALSE}
+chla %>%
+  filter(time <= "2009-12-16") %>%
+  ggplot(aes(x = longitude, y = latitude)) +
+  geom_tile(aes(fill = chlorophyll))+
+  scale_fill_gradientn(colours = mycolor, trans = scales::log10_trans())+
+  facet_wrap(~time)
+```
+
+And figure \@ref(fig:fig1) created with **ggplot2** [@ggplot] and **metR** [@metr] packages gives a visual appeal of how chlorophyll concentration in this area vary toward the end of the year 2009.
+
+```{r fig1, fig.width=6, fig.height=4, echo=FALSE, fig.cap="Chlorophyll-a concentration of months for the last quarter of 2009", echo=FALSE}
+chla %>%
+  as_tibble() %>% 
+  filter(time <="2009-12-16") %>%
+  ggplot(aes(x = longitude, y = latitude)) +
+  metR::geom_contour_fill(aes(z = chlorophyll), bins = 120, na.fill = TRUE)+
+  scale_fill_gradientn(colours = mycolor, 
+                       breaks = c(0.2,0.3,0.5,.8,1.2,1.8),
+                       trans = scales::log10_trans(), 
+                       guide = guide_colorbar(title = expression(Chlorophyll-a~(mgm^{-3})),
+                                              title.position = "right", 
+                                              title.theme = element_text(angle = 90),
+                                              title.hjust = 0.5,
+                                              barwidth = unit(0.5, "cm"),
+                                              barheight = unit(8, "cm")))+
+  facet_wrap(~time)+
+  metR::scale_x_longitude(breaks = seq(-77,-76.4,length.out = 4))+
+  metR::scale_y_latitude(breaks = seq(34.25,34.350,length.out = 4) %>% round(2))+
+  theme(strip.background = element_blank())
+```
+
+### References
+

@@ -6,10 +6,19 @@
     <description>Recent content in RStudio on Masumbuko Semba&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 13 May 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 30 Sep 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/rstudio/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Download satellite data in tidy form with rerddapp in R</title>
+      <link>/09/30/2020/download-satellite-data-in-tidy-form-with-rerddapp-in-r/</link>
+      <pubDate>Wed, 30 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/09/30/2020/download-satellite-data-in-tidy-form-with-rerddapp-in-r/</guid>
+      <description>In the post titled Access, Download, Process and VIsualize sea surface height and geostrophic current from AVISO in R posted in my blog on Monday, Apr 15, 2019, I explained how we can download the satellite data like sea surface height from AVISO in R. I illustrate in detail getting the data using xtractomatic package (Mendelssohn 2018). Though xtractomatic package provide functions that allows us to get access to the ERDDAP server and get the data, but one big challenge is that the data comes is array and need an expensive computation process, especially if you deal with gridded data for a long term time series.</description>
+    </item>
     
     <item>
       <title>A simple Principal Component Analysis (PCA) in R </title>
