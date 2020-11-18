@@ -51,6 +51,10 @@ Crawford, B., Herrera, M. D., Hernandez, N., Leclair, C. R., Jiddawi, N., Semba,
 
 ### Book chapters
 
+Semba M, Ndebele-Murisa MR, Mubaya CP, Kimirei IA, Chavula G, Mwedzi T, Mutimukuru-Maravanyika T, Zenda S (2020) Historical and Future Climate Scenarios of the Zambezi River Basin. In: Ndebele-Murisa MR, Kimirei IA, Mubaya CP, Bere TG, (eds.) Ecological Changes in the Zambezi River Basin. CODESRIA, Dakar, Senegal. pp. 115-150
+
+Ndebele-Murisa MR, Kimirei IA, Chavula G, Mwedzi T, Mutimukuru-Maravanyika T, Semba M (2020) A review of the comparative research method. In: Ndebele-Murisa MR, Kimirei IA, Mubaya CP, Bere TG (eds.) Ecological Changes in the Zambezi River Basin. CODESRIA, Dakar, Senegal. pp. 15-48
+
 Mahatane, A., Yunus D. Mgaya, R. B. Hoza, P. O. Onyango, and Semba M (2017). "Co-management of Lake Victoria Fisheries." In Lake Victoria Fisheries Resources : Research and Management in Tanzania, edited by Yunus D. Mgaya and Shigalla B. Mahongo, 219-39. Cham: *Springer International Publishing*.
 
 Kimirei, I. A., M. Semba, C. Mwakosya, Yunus D. Mgaya, and Shigalla B. Mahongo. (2017). "Environmental Changes in the Tanzanian Part of Lake Victoria." In Lake Victoria Fisheries Resources : Research and Management in Tanzania, edited by Yunus D. Mgaya and Shigalla B. Mahongo, 37-59. Cham: *Springer International Publishing*.
@@ -61,8 +65,14 @@ Kimirei, I., Igulu, M., Semba, M., & Lugendo, B. R. (2016). Small estuarine and 
 
 ### Online books
 
+Semba M, Peter N. & I. Kimirei (2020). Developing packages in R. Retrieve from "https://lugoga.github.io/r-package/"
+
 Semba M. (2018). A gentle Introduction of Coding with R. https://lugoga.github.io/learning_r/
 
 Semba M., Silas M., Matiku P., & Chande M. (2019) Spatial distribution of *octopus* fishery in Kilwa District. https://lugoga.github.io/octopus/
 
 Semba M. (2018). Putting fishing landing sites and their instranstructure on spatial aspect.  https://lugoga.github.io/master_thesis/
+
+### Packages
+
+1. a **wior** packaged built by Masumbuko Semba and Nyamisi Peter focusing on Easy Tidy and Process Oceanographic Data. The packages is basically developed to help marine and freshwater scientist access a large and varied format of in-situ and satellite data in easy way. In fact the package has made data access in much easy way. The authors are trying to remove the barrier of data access and leave a space for scientists to focus in much deeper thinking of their field rather than spending several days to understand codes for a specific data download. The package contains several tools that allows scientist to get a wide array of datasets. And the funny things is that you get a tidy format result of the download, which is easy to handle in R and also to share it out of R environment. The tidy format is in form that many scientist familiar with Excel spreadsheet will find it handy. You can access this package through this link: https://github.com/lugoga/wior
