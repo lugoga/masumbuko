@@ -121,6 +121,10 @@ Once we have defined the geographical extent of the area of interest, we can par
 
 ```{r}
 sst.tz = sst %>% raster::crop(tz.bbox)
+
+sst.tz %>% setMinMax()
+
+sst.tz[sst.tz < 26 | sst.tz > 29] = NA
 ```
 
 ## Map the raster interactive
@@ -133,6 +137,9 @@ In order to render the `RasterLayer` as an image, each cell value must be conver
 pal = colorNumeric(c("#7f007f", "#0000ff",  "#007fff", "#00ffff", "#00bf00", "#7fdf00",
 "#ffff00", "#ff7f00", "#ff3f00", "#ff0000", "#bf0000"), values(sst.tz),  na.color = "transparent")
 
+sst.color = c("#7f007f", "#0000ff",  "#007fff", "#00ffff", "#00bf00", "#7fdf00",
+"#ffff00", "#ff7f00", "#ff3f00", "#ff0000", "#bf0000")
+
 ```
 
 ```{r}
@@ -141,7 +148,7 @@ pal = colorNumeric(c("#7f007f", "#0000ff",  "#007fff", "#00ffff", "#00bf00", "#7
 
 leaflet() %>% 
   addTiles() %>%
-  addRasterImage(x = sst.tz, 
+  addRasterImage(x = sst.tz , 
                  colors = pal, 
                  opacity = 1) %>%
   addLegend(pal = pal, values = values(sst.tz),
@@ -150,6 +157,27 @@ leaflet() %>%
 
 ```
 
+We can also map with **ggplot2** package [@ggplot]
+
+```{r}
+require(ggplot2)
+aoi = spData::world %>% 
+  sf::st_crop(xmin = 38, xmax = 60, ymin = -6, ymax = 0)
+
+sst.tz %>%
+  as.data.frame(xy = TRUE) %>%
+  dplyr::rename(z = 3) %>%
+  ggplot(aes(x = x, y = y, fill = z)) + 
+  geom_raster()+
+  scale_fill_gradientn(colours = sst.color, breaks = seq(26,30,0.5), guide = guide_colorbar(title.position = "right", title = expression(Temperature~(degree*C)), title.theme = element_text(angle = 90)))+
+  ggspatial::layer_spatial(data = aoi)+
+  coord_sf(xlim = c(39,58), ylim = c(-5.6,-0.5))+
+  theme_bw() +
+  theme(axis.title = element_blank())
+  
+  
+  
+```
 
 For greater control in plotting the raster, you might want to use the tmap package.
 
