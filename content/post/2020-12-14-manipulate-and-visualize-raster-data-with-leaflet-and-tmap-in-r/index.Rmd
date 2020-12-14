@@ -1,19 +1,22 @@
 ---
-title: Visualize raster with leaflet and tmap in R
+title: Manipulate and Visualize Raster data with leaflet and tmap in R
 author: Masumbuko Semba
 date: '2020-12-14'
-slug: visualize-raster-with-leaflet-and-tmap-in-r
-categories: []
+slug: manipulate-and-visualize-raster-data-with-leaflet-and-tmap-in-r
+categories:
+  - MODIS
+  - Oceanography
+  - Python
+  - R
+  - satellite
 tags:
-  - chlorophyll
+  - Oceanography
+  - MODIS
   - Satellite
-  - Semba
-  - RStudio
   - Masumbuko Semba
-bibliography: [blog.bib]
-# csl: apa.csl
-link-citations: yes
+  - Semba
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "")
