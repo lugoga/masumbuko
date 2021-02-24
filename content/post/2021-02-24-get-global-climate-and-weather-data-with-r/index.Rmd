@@ -1,0 +1,170 @@
+---
+title: Get Global climate and weather data with R
+author: Masumbuko Semba
+date: '2021-02-24'
+slug: get-global-climate-and-weather-data-with-r
+categories:
+  - Oceanography
+tags:
+  - Masumbuko Semba
+  - Semba
+  - Climate
+  - Satellite
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = "")
+```
+
+Climatic change in the last few decades has had a widespread impact on both natural and human systems, observable on all continents. Ecological and environmental models using climatic data often rely on gridded data, such as *WorldClim*.
+
+[WorldClim](https://worldclim.org/data/index.html) is a set of global climate layers (gridded climate data in GeoTiff format) that can be used for mapping and spatial modeling. WordlClim version 2 contains average monthly climatic gridded data for the period 1970-2000 with different spatial resolutions, from 30 seconds (~1 km2) to 10 minutes (~340 km2). The dataset includes the main climatic variables (monthly minimum, mean and maximum temperature, precipitation, solar radiation, wind speed and water vapour pressure) 
+
+It also provides  19 derived bioclimatic variables (annual mean temperature, mean diurnal range,isothermality, temperature seasonality, max. temperature of warmest month, min. temperature of coldest month, temperature annual range, mean temperature of wettest quarter, mean temperature of driest quarter, mean temperature of warmest quarter, mean temperature of coldest quarter, annual precipitation,  precipitation of wettest month, precipitation of driest month, precipitation seasonality (coefficient of variation), precipitation of wettest quarter, precipitation of driest quarter, precipitation of warmest quarter, precipitation of coldest quarter). These layers (grid data) cover the global land areas except Antarctica. They are in the latitude / longitude coordinate reference system (not projected) and the datum is WGS84. 
+
+To make it easy to access and download, Robert Hijmans [-@raster] developed a `getData` function in **raster** packaged dedicated to dowload these data directly in R. The aim of this post is to illustrate how we can get these dataset in R and use the power of language to do statistics, modelling and plotting. Before we begin our session, let us first load the packages into our session
+
+> Please note that the temperature data are in °C * 10. This means that a value of 231 represents 23.1 °C. This does lead to some confusion, but it allows for much reduced file sizes which is important as for many downloading large files remains difficult. The unit used for the precipitation data is mm (millimeter).
+
+
+```{r}
+require(tidyverse)
+require(sf)
+```
+
+
+## Historical Climate Data
+Since we want historical data from *worldclim*, we must provide arguments `var`, and a resolution `res`. Valid variables names are `tmin`, `tmax`, `prec` and `bio`. Valid resolutions are 0.5, 2.5, 5, and 10 (minutes of a degree). In the case of `res=0.5`, you must also provide a lon and lat argument for a tile; for the lower resolutions global data will be downloaded. In all cases there are 12 (monthly) files for each variable except for 'bio' which contains 19 files.
+
+### Maximum temperature
+
+
+```{r, eval=TRUE}
+tmax = raster::getData(name = 'worldclim', var = 'tmax', res = 10)
+```
+
+We check the class of the dataset with `class` function
+```{r}
+tmax %>% class()
+```
+
+We get the information that is `rasterStack`---a collection of raster layer with the same spatial extent and resolution. Let us use `dim` function to check how many raster layers are there in this rasterstack. 
+```{r}
+tmax %>% dim()
+```
+
+We see that there are twelve layers---each layer represent a monthly climatological value of maximum temperature from January to December.
+```{r}
+tmax
+```
+
+We have noticed that the layer names are not descriptive, we know from our experience that the layers represent months, start from January all the way to December. Therefore, we need to change the layers name to a more descriptive variable names.
+
+```{r, eval=FALSE}
+
+names(tmax) = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+tmax
+
+```
+
+We notice that the temperature values are higher or below the range of temperature we know. This is because the values were multiplied by 10 to reduce the file size, we therefore, need to remove the scale factor by dividing by ten
+
+```{r}
+tmax = tmax/10
+```
+
+We then use a `plot` function from raster to visulaize the layer
+
+```{r}
+tmax %>% 
+  raster::plot()
+```
+
+```{r}
+tmax.tb = tmax %>%
+  raster::as.data.frame(xy = TRUE) %>%
+  pivot_longer(cols = 3:14, values_to = "tmax", names_to = "month")
+```
+
+```{r}
+
+ggplot() +
+  geom_raster(data = tmax.tb, aes(x = x, y = y, fill = tmax)) +
+  facet_wrap(~month)+
+  scale_fill_gradientn(colours = oce::oce.colors9A(120), na.value = NA)+
+  theme(panel.background = element_blank(), 
+        strip.background = element_blank(), 
+        axis.title = element_blank())+
+  scale_x_continuous(breaks = seq(-100,100,100), labels = metR::LonLabel(seq(-100,100,100)))+
+  scale_y_continuous(breaks = seq(-50,50,50), labels = metR::LatLabel(seq(-50,50,50)))
+
+```
+
+
+#### save the file
+
+Once we are happy with the data we have downloaded and cleaned up, we can now save it into our directory for future use. We do that using a `writeRaster` from **raster** package and specify the the file object and the filename as the chunk highlight
+
+```{r, eval=FALSE}
+
+tmax %>% 
+  raster::writeRaster(filename = "wcData/tmax_hist.tif")
+```
+
+### Minitmum Temperature
+
+```{r, eval=FALSE}
+tmin = raster::getData(name = 'worldclim', 
+                       var = 'tmin', 
+                       res = 10)
+```
+
+### Precipitation
+
+```{r, eval=FALSE}
+prec = raster::getData(name = 'worldclim', 
+                       var = 'prec', 
+                       res = 10)
+```
+
+### Bioclimatic variables
+
+Bioclimatic variables are derived from the monthly temperature and rainfall values in order to generate more biologically meaningful variables. These are often used in species distribution modeling and related ecological modeling techniques. The bioclimatic variables represent annual trends (e.g., mean annual temperature, annual precipitation) seasonality (e.g., annual range in temperature and precipitation) and extreme or limiting environmental factors (e.g., temperature of the coldest and warmest month, and precipitation of the wet and dry quarters). The list of all derived bio--climatic variable is shown in table \@ref(tab:tab1).
+
+```{r tab1, echo=FALSE}
+
+bio_clim = read_csv("e:/Data Manipulation/worldClim_bio.csv") 
+bio_clim %>% kableExtra::kable(caption = "Bioclimatic variables", col.names = c("Code", "Description")) %>%
+  kableExtra::column_spec(column = 1, width = "2cm")
+
+```
+
+
+```{r, eval=FALSE}
+bio = raster::getData(name = 'worldclim', var = 'bio', res = 10)
+```
+
+```{r, eval=FALSE}
+bio[[3]] %>% raster::plot(main = "Isothermality ")
+```
+```{r, eval=FALSE}
+
+bio %>% 
+  raster::writeRaster(filename = "wcData/bio_hist.tif")
+```
+
+
+## Future Climate Data
+
+To get (projected) future climate data (CMIP5), we must provide arguments `var` and `res` as above and add `model`, `rcp` and `year` arguments. Only resolutions `2.5`, `5`, and `10` are currently available.  For example, I am interested with the world feature maximum temperature 
+
+
+```{r, eval=FALSE}
+tmax_future = raster::getData('CMIP5', var='tmax', res=10, rcp=85, model='AC', year=70)
+
+names(tmax_future) = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+```
+
+
+

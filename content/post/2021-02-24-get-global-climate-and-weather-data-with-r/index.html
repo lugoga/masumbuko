@@ -1,0 +1,278 @@
+---
+title: Get Global climate and weather data with R
+author: Masumbuko Semba
+date: '2021-02-24'
+slug: get-global-climate-and-weather-data-with-r
+categories:
+  - Oceanography
+tags:
+  - Masumbuko Semba
+  - Semba
+  - Climate
+  - Satellite
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+<script src="{{< blogdown/postref >}}index_files/kePrint/kePrint.js"></script>
+<link href="{{< blogdown/postref >}}index_files/lightable/lightable.css" rel="stylesheet" />
+
+
+<p>Climatic change in the last few decades has had a widespread impact on both natural and human systems, observable on all continents. Ecological and environmental models using climatic data often rely on gridded data, such as <em>WorldClim</em>.</p>
+<p><a href="https://worldclim.org/data/index.html">WorldClim</a> is a set of global climate layers (gridded climate data in GeoTiff format) that can be used for mapping and spatial modeling. WordlClim version 2 contains average monthly climatic gridded data for the period 1970-2000 with different spatial resolutions, from 30 seconds (~1 km2) to 10 minutes (~340 km2). The dataset includes the main climatic variables (monthly minimum, mean and maximum temperature, precipitation, solar radiation, wind speed and water vapour pressure)</p>
+<p>It also provides 19 derived bioclimatic variables (annual mean temperature, mean diurnal range,isothermality, temperature seasonality, max. temperature of warmest month, min. temperature of coldest month, temperature annual range, mean temperature of wettest quarter, mean temperature of driest quarter, mean temperature of warmest quarter, mean temperature of coldest quarter, annual precipitation, precipitation of wettest month, precipitation of driest month, precipitation seasonality (coefficient of variation), precipitation of wettest quarter, precipitation of driest quarter, precipitation of warmest quarter, precipitation of coldest quarter). These layers (grid data) cover the global land areas except Antarctica. They are in the latitude / longitude coordinate reference system (not projected) and the datum is WGS84.</p>
+<p>To make it easy to access and download, Robert Hijmans <span class="citation">[-@raster]</span> developed a <code>getData</code> function in <strong>raster</strong> packaged dedicated to dowload these data directly in R. The aim of this post is to illustrate how we can get these dataset in R and use the power of language to do statistics, modelling and plotting. Before we begin our session, let us first load the packages into our session</p>
+<blockquote>
+<p>Please note that the temperature data are in °C * 10. This means that a value of 231 represents 23.1 °C. This does lead to some confusion, but it allows for much reduced file sizes which is important as for many downloading large files remains difficult. The unit used for the precipitation data is mm (millimeter).</p>
+</blockquote>
+<pre class="r"><code>require(tidyverse)
+require(sf)</code></pre>
+<div id="historical-climate-data" class="section level2">
+<h2>Historical Climate Data</h2>
+<p>Since we want historical data from <em>worldclim</em>, we must provide arguments <code>var</code>, and a resolution <code>res</code>. Valid variables names are <code>tmin</code>, <code>tmax</code>, <code>prec</code> and <code>bio</code>. Valid resolutions are 0.5, 2.5, 5, and 10 (minutes of a degree). In the case of <code>res=0.5</code>, you must also provide a lon and lat argument for a tile; for the lower resolutions global data will be downloaded. In all cases there are 12 (monthly) files for each variable except for ‘bio’ which contains 19 files.</p>
+<div id="maximum-temperature" class="section level3">
+<h3>Maximum temperature</h3>
+<pre class="r"><code>tmax = raster::getData(name = &#39;worldclim&#39;, var = &#39;tmax&#39;, res = 10)</code></pre>
+<p>We check the class of the dataset with <code>class</code> function</p>
+<pre class="r"><code>tmax %&gt;% class()</code></pre>
+<pre><code>[1] &quot;RasterStack&quot;
+attr(,&quot;package&quot;)
+[1] &quot;raster&quot;</code></pre>
+<p>We get the information that is <code>rasterStack</code>—a collection of raster layer with the same spatial extent and resolution. Let us use <code>dim</code> function to check how many raster layers are there in this rasterstack.</p>
+<pre class="r"><code>tmax %&gt;% dim()</code></pre>
+<pre><code>[1]  900 2160   12</code></pre>
+<p>We see that there are twelve layers—each layer represent a monthly climatological value of maximum temperature from January to December.</p>
+<pre class="r"><code>tmax</code></pre>
+<pre><code>class      : RasterStack 
+dimensions : 900, 2160, 1944000, 12  (nrow, ncol, ncell, nlayers)
+resolution : 0.1666667, 0.1666667  (x, y)
+extent     : -180, 180, -60, 90  (xmin, xmax, ymin, ymax)
+crs        : +proj=longlat +datum=WGS84 +no_defs 
+names      : tmax1, tmax2, tmax3, tmax4, tmax5, tmax6, tmax7, tmax8, tmax9, tmax10, tmax11, tmax12 
+min values :  -478,  -421,  -422,  -335,  -190,   -94,   -59,   -76,  -153,   -265,   -373,   -452 
+max values :   418,   414,   420,   429,   441,   467,   489,   474,   441,    401,    401,    413 </code></pre>
+<p>We have noticed that the layer names are not descriptive, we know from our experience that the layers represent months, start from January all the way to December. Therefore, we need to change the layers name to a more descriptive variable names.</p>
+<pre class="r"><code>names(tmax) = c(&quot;Jan&quot;, &quot;Feb&quot;, &quot;Mar&quot;, &quot;Apr&quot;, &quot;May&quot;, &quot;Jun&quot;, &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;, &quot;Oct&quot;, &quot;Nov&quot;, &quot;Dec&quot;)
+tmax</code></pre>
+<p>We notice that the temperature values are higher or below the range of temperature we know. This is because the values were multiplied by 10 to reduce the file size, we therefore, need to remove the scale factor by dividing by ten</p>
+<pre class="r"><code>tmax = tmax/10</code></pre>
+<p>We then use a <code>plot</code> function from raster to visulaize the layer</p>
+<pre class="r"><code>tmax %&gt;% 
+  raster::plot()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<pre class="r"><code>tmax.tb = tmax %&gt;%
+  raster::as.data.frame(xy = TRUE) %&gt;%
+  pivot_longer(cols = 3:14, values_to = &quot;tmax&quot;, names_to = &quot;month&quot;)</code></pre>
+<pre class="r"><code>ggplot() +
+  geom_raster(data = tmax.tb, aes(x = x, y = y, fill = tmax)) +
+  facet_wrap(~month)+
+  scale_fill_gradientn(colours = oce::oce.colors9A(120), na.value = NA)+
+  theme(panel.background = element_blank(), 
+        strip.background = element_blank(), 
+        axis.title = element_blank())+
+  scale_x_continuous(breaks = seq(-100,100,100), labels = metR::LonLabel(seq(-100,100,100)))+
+  scale_y_continuous(breaks = seq(-50,50,50), labels = metR::LatLabel(seq(-50,50,50)))</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<div id="save-the-file" class="section level4">
+<h4>save the file</h4>
+<p>Once we are happy with the data we have downloaded and cleaned up, we can now save it into our directory for future use. We do that using a <code>writeRaster</code> from <strong>raster</strong> package and specify the the file object and the filename as the chunk highlight</p>
+<pre class="r"><code>tmax %&gt;% 
+  raster::writeRaster(filename = &quot;wcData/tmax_hist.tif&quot;)</code></pre>
+</div>
+</div>
+<div id="minitmum-temperature" class="section level3">
+<h3>Minitmum Temperature</h3>
+<pre class="r"><code>tmin = raster::getData(name = &#39;worldclim&#39;, 
+                       var = &#39;tmin&#39;, 
+                       res = 10)</code></pre>
+</div>
+<div id="precipitation" class="section level3">
+<h3>Precipitation</h3>
+<pre class="r"><code>prec = raster::getData(name = &#39;worldclim&#39;, 
+                       var = &#39;prec&#39;, 
+                       res = 10)</code></pre>
+</div>
+<div id="bioclimatic-variables" class="section level3">
+<h3>Bioclimatic variables</h3>
+<p>Bioclimatic variables are derived from the monthly temperature and rainfall values in order to generate more biologically meaningful variables. These are often used in species distribution modeling and related ecological modeling techniques. The bioclimatic variables represent annual trends (e.g., mean annual temperature, annual precipitation) seasonality (e.g., annual range in temperature and precipitation) and extreme or limiting environmental factors (e.g., temperature of the coldest and warmest month, and precipitation of the wet and dry quarters). The list of all derived bio–climatic variable is shown in table <a href="#tab:tab1">1</a>.</p>
+<table>
+<caption>
+<span id="tab:tab1">Table 1: </span>Bioclimatic variables
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Code
+</th>
+<th style="text-align:left;">
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO1
+</td>
+<td style="text-align:left;">
+Annual Mean Temperature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO2
+</td>
+<td style="text-align:left;">
+Mean Diurnal Range (Mean of monthly (max temp - min temp))
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO3
+</td>
+<td style="text-align:left;">
+Isothermality (BIO2/BIO7) (&lt;d7&gt;100)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO4
+</td>
+<td style="text-align:left;">
+Temperature Seasonality (standard deviation &lt;d7&gt;100)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO5
+</td>
+<td style="text-align:left;">
+Max Temperature of Warmest Month
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO6
+</td>
+<td style="text-align:left;">
+Min Temperature of Coldest Month
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO7
+</td>
+<td style="text-align:left;">
+Temperature Annual Range (BIO5-BIO6)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO8
+</td>
+<td style="text-align:left;">
+Mean Temperature of Wettest Quarter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO9
+</td>
+<td style="text-align:left;">
+Mean Temperature of Driest Quarter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO10
+</td>
+<td style="text-align:left;">
+Mean Temperature of Warmest Quarter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO11
+</td>
+<td style="text-align:left;">
+Mean Temperature of Coldest Quarter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO12
+</td>
+<td style="text-align:left;">
+Annual Precipitation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO13
+</td>
+<td style="text-align:left;">
+Precipitation of Wettest Month
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO14
+</td>
+<td style="text-align:left;">
+Precipitation of Driest Month
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO15
+</td>
+<td style="text-align:left;">
+Precipitation Seasonality (Coefficient of Variation)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO16
+</td>
+<td style="text-align:left;">
+Precipitation of Wettest Quarter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO17
+</td>
+<td style="text-align:left;">
+Precipitation of Driest Quarter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO18
+</td>
+<td style="text-align:left;">
+Precipitation of Warmest Quarter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 2cm; ">
+BIO19
+</td>
+<td style="text-align:left;">
+Precipitation of Coldest Quarter
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>bio = raster::getData(name = &#39;worldclim&#39;, var = &#39;bio&#39;, res = 10)</code></pre>
+<pre class="r"><code>bio[[3]] %&gt;% raster::plot(main = &quot;Isothermality &quot;)</code></pre>
+<pre class="r"><code>bio %&gt;% 
+  raster::writeRaster(filename = &quot;wcData/bio_hist.tif&quot;)</code></pre>
+</div>
+</div>
+<div id="future-climate-data" class="section level2">
+<h2>Future Climate Data</h2>
+<p>To get (projected) future climate data (CMIP5), we must provide arguments <code>var</code> and <code>res</code> as above and add <code>model</code>, <code>rcp</code> and <code>year</code> arguments. Only resolutions <code>2.5</code>, <code>5</code>, and <code>10</code> are currently available. For example, I am interested with the world feature maximum temperature</p>
+<pre class="r"><code>tmax_future = raster::getData(&#39;CMIP5&#39;, var=&#39;tmax&#39;, res=10, rcp=85, model=&#39;AC&#39;, year=70)
+
+names(tmax_future) = c(&quot;Jan&quot;, &quot;Feb&quot;, &quot;Mar&quot;, &quot;Apr&quot;, &quot;May&quot;, &quot;Jun&quot;, &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;, &quot;Oct&quot;, &quot;Nov&quot;, &quot;Dec&quot;)</code></pre>
+</div>

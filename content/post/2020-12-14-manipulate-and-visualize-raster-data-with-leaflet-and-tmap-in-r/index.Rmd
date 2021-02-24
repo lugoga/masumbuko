@@ -15,6 +15,9 @@ tags:
   - Satellite
   - Masumbuko Semba
   - Semba
+bibliography: [blog.bib]
+# csl: apa.csl
+link-citations: yes
 ---
 
 
@@ -136,7 +139,7 @@ Finally, we will plot the sea surface temperature within the area of interest on
 
 In order to render the `RasterLayer` as an image, each cell value must be converted to an `RGB(A)` color. I used the `colorNumeric` function to specify the color scale as the chunk below highlight:
 
-```{r}
+```{r, echo=FALSE}
 pal = colorNumeric(c("#7f007f", "#0000ff",  "#007fff", "#00ffff", "#00bf00", "#7fdf00",
 "#ffff00", "#ff7f00", "#ff3f00", "#ff0000", "#bf0000"), values(sst.tz),  na.color = "transparent")
 

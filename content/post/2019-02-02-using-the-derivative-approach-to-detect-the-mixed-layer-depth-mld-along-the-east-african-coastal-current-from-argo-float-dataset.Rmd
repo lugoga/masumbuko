@@ -217,9 +217,7 @@ criterion.mld = eacc.extract.tb %>% bind_cols(mld.temp)
 ```
 
 # Conclusion
--@kelley2018r explained that although the mixed-layer depth (MLD) is a parameter of
-great interest, there is little agreement on how it should be defined. This is partly
-because the most appropriate definition can depend on the scientific application. This is clearly illustrated in figure \@ref(fig:mld-compare) that shows the discrepancy of the two approaches, with the derivative method giving a deeper MLD compared to the criterion method. 
+-@kelley2018r explained that although the mixed-layer depth (MLD) is a parameter of great interest, there is little agreement on how it should be defined. This is partly because the most appropriate definition can depend on the scientific application. This is clearly illustrated in figure \@ref(fig:mld-compare) that shows the discrepancy of the two approaches, with the derivative method giving a deeper MLD compared to the criterion method. 
 
 ```{r mld-compare, echo=FALSE, fig.height=2.4, fig.width=6.0, fig.align="center", fig.cap="Comparison of two methods for inferring mixed-layer depth. Red line: based on Conservative Temperature, with mixed-layer depths inferred using temperature criterion of 0.1 0.5 ◦C Pale green.: based on the peak of N2 derivative."}
 

@@ -2,6 +2,7 @@
 title: "List of Publications"
 date: "2019-09-19T21:48:51-07:00"
 ---
+Kyewalyanga, M.S., Peter, N., Semba, M. and Mahongo, S.B., 2020. Coastal upwelling and seasonal variation in phytoplankton biomass in the Pemba Channel. Western Indian Ocean Journal of Marine Science, (1/2020), pp.19-32.
 
 Semba M, Ndebele-Murisa MR, Mubaya CP, Kimirei IA, Chavula G, Mwedzi T, Mutimukuru-Maravanyika T, Zenda S (2020) Historical and Future Climate Scenarios of the Zambezi River Basin. In: Ndebele-Murisa MR, Kimirei IA, Mubaya CP, Bere TG, (eds.) Ecological Changes in the Zambezi River Basin. CODESRIA, Dakar, Senegal. pp. 115-150
 
