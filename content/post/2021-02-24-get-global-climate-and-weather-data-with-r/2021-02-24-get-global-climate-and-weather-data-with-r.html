@@ -12,9 +12,9 @@ tags:
   - Satellite
 ---
 
-<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
-<script src="{{< blogdown/postref >}}index_files/kePrint/kePrint.js"></script>
-<link href="{{< blogdown/postref >}}index_files/lightable/lightable.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+<link href="/rmarkdown-libs/lightable/lightable.css" rel="stylesheet" />
 
 
 <p>Climatic change in the last few decades has had a widespread impact on both natural and human systems, observable on all continents. Ecological and environmental models using climatic data often rely on gridded data, such as <em>WorldClim</em>.</p>
@@ -58,7 +58,7 @@ tmax</code></pre>
 <p>We then use a <code>plot</code> function from raster to visulaize the layer</p>
 <pre class="r"><code>tmax %&gt;% 
   raster::plot()</code></pre>
-<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="/post/2021-02-24-get-global-climate-and-weather-data-with-r/2021-02-24-get-global-climate-and-weather-data-with-r_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <pre class="r"><code>tmax.tb = tmax %&gt;%
   raster::as.data.frame(xy = TRUE) %&gt;%
   pivot_longer(cols = 3:14, values_to = &quot;tmax&quot;, names_to = &quot;month&quot;)</code></pre>
@@ -71,7 +71,7 @@ tmax</code></pre>
         axis.title = element_blank())+
   scale_x_continuous(breaks = seq(-100,100,100), labels = metR::LonLabel(seq(-100,100,100)))+
   scale_y_continuous(breaks = seq(-50,50,50), labels = metR::LatLabel(seq(-50,50,50)))</code></pre>
-<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="/post/2021-02-24-get-global-climate-and-weather-data-with-r/2021-02-24-get-global-climate-and-weather-data-with-r_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 <div id="save-the-file" class="section level4">
 <h4>save the file</h4>
 <p>Once we are happy with the data we have downloaded and cleaned up, we can now save it into our directory for future use. We do that using a <code>writeRaster</code> from <strong>raster</strong> package and specify the the file object and the filename as the chunk highlight</p>
