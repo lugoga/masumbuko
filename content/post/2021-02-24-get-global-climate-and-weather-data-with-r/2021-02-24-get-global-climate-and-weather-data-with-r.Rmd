@@ -1,7 +1,7 @@
 ---
 title: Get Global climate and weather data with R
 author: Masumbuko Semba
-date: '2021-02-24'
+date: '2020-12-30'
 slug: get-global-climate-and-weather-data-with-r
 categories:
   - Oceanography
