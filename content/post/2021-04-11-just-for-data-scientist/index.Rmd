@@ -1,0 +1,11 @@
+---
+title: just for data scientist
+author: Masumbuko Semba
+date: '2021-04-11'
+slug: just-for-data-scientist
+categories: []
+tags: []
+---
+
+## Introduction
+Some scientist have expressed the change in ocean circulation but for some of the coastal areas are unclear. In this email
