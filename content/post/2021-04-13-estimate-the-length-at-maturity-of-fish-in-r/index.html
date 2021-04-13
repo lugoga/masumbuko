@@ -1,0 +1,129 @@
+---
+title: Estimate the length at maturity of fish in R
+author: Masumbuko Semba
+date: '2021-04-13'
+slug: estimate-the-length-at-maturity-of-fish-in-r
+categories: []
+tags: []
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>An ogive (oh-jive), sometimes called a cumulative frequency polygon, is a type of frequency polygon that shows cumulative frequencies. In other words, the cumulative percents are added on the graph from left to right. An ogive graph plots cumulative frequency on the y-axis and class boundaries along the x-axis. It’s very similar to a histogram, only instead of rectangles, an ogive has a single point marking where the top right of the rectangle would be. It is usually easier to create this kind of graph from a frequency table.</p>
+<p>Representing cumulative frequency data on a graph is the most efficient way to understand the data and derive results.</p>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>We selected <em>Decapterus kurroides</em> to illustrate ogive graph. These data was collected from the field survey targeting <em>Decapterus kurroides</em> between 2018 and 2020. During the survey scientist selected a random sample of fish and recorded total length (cm), gutted weight (g), gonad weight (g), and maturity stage. Although both sexes were collected in these random samples, we only considered females in this study because the macroscopic staging of testes is difficult to assess. A total of 65 217 gonads were assigned to a macroscopic maturity stage according to the maturity scale of Balbontín and Fischer (1981). This scale defined six stages for Chilean hake: virgin (Stage 1), immature (Stage 2), maturation (Stage 3), maturation with recent spawning (Stage 4), spawning (Stage 5), and spent (Stage 6).</p>
+<p>A total of 1214 gonads collected during 2001 were analysed by the means of histology. Gonads were preserved in 10% buffered formalin. The sampling protocol included the dehydration of 3 mm thick subsamples of preserved gonad tissue embedded in paraffin. Sections, 5 μm wide, were stained with Harris’s haematoxylin and eosin was used to analyse and characterise the gonad development and thus determine the different maturity stages according to the modified scale of Herrera et al. (1988): virgin (Stage 1), immature (Stage 2), early maturing (Stage 3), late maturing (Stage 4), mature (Stage 5), ripe (Stage 6), spawning (Stage 7), partial post-spawning (Stage 8), and spent (Stage 9)</p>
+<pre class="r"><code>require(sizeMat)</code></pre>
+<pre><code>## Loading required package: sizeMat</code></pre>
+<pre class="r"><code>require(tidyverse)</code></pre>
+<pre><code>## Loading required package: tidyverse</code></pre>
+<pre><code>## -- Attaching packages --------------------------------------- tidyverse 1.3.0 --</code></pre>
+<pre><code>## v ggplot2 3.3.3     v purrr   0.3.4
+## v tibble  3.1.0     v dplyr   1.0.5
+## v tidyr   1.1.3     v stringr 1.4.0
+## v readr   1.4.0     v forcats 0.5.1</code></pre>
+<pre><code>## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>deca = read_csv(&quot;decapterus_spp&quot;)</code></pre>
+<pre class="r"><code>fm = y ~ poly(x, 3)
+
+deca %&gt;%
+  filter(tl_cm &gt; 10 &amp; weigth_g &lt; 120) %&gt;% 
+  ggplot(aes(x = tl_cm, y = weigth_g))+
+  geom_jitter()+
+  geom_smooth(method = &quot;lm&quot;, formula = fm)+
+  theme(panel.grid = element_line(linetype = &quot;dotted&quot;),
+        panel.background = element_rect(fill = NA, colour = &quot;black&quot;),
+        axis.text = element_text(size = 11, color = &quot;black&quot;), 
+        axis.title = element_text(size = 12, color = &quot;black&quot;))+
+  scale_y_continuous(limits =  c(20, NA))+
+  labs(x = &quot;Total length (cm)&quot;, y = &quot;Weight (gram)&quot;)</code></pre>
+<pre><code>## Warning: Removed 36 rows containing non-finite values (stat_smooth).</code></pre>
+<pre><code>## Warning: Removed 36 rows containing missing values (geom_point).</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-4-1.png" width="384" style="display: block; margin: auto;" /></p>
+</div>
+<div id="estimate-gonadal-maturity" class="section level2">
+<h2>Estimate gonadal maturity</h2>
+<p>The proportion of mature individuals at age or length, usually called the maturity ogive, is an important population attribute because it directly relates to the reproductive potential of the population. Knowledge of the maturity ogive is especially important in exploited fish populations because it determines the spawning biomass upon which conservation measurements are usually based. The estimation of the maturity ogive commonly consists of three steps.</p>
+<ul>
+<li>First, the spawning season must be identified.</li>
+<li>Second, representative samples of individuals collected during the spawning season are assessed to establish their maturity stage.</li>
+<li>Finally, observed proportions of maturity at length or age are computed which are then conventionally modelled using a logistic function.</li>
+</ul>
+<p>The maturity staging process is the most crucial step in estimating the maturity ogive because small errors in stage assignment can lead to profound variations in estimated parameters for the fitted model</p>
+<pre class="r"><code>deca_mat = sizeMat::gonad_mature(data = deca %&gt;% filter(tl_cm &gt; 10 &amp; weigth_g &lt; 120),
+                        varNames = c(&quot;tl_cm&quot;, &quot;maturity_stage&quot;), 
+                        inmName =  c(&quot;I&quot;,&quot;II&quot;), 
+                        matName = c(&quot;III&quot;, &quot;IV&quot;, &quot;V&quot;), 
+                        method = &quot;fq&quot;, 
+                        niter = 50)
+ 
+deca_mat %&gt;% print() </code></pre>
+<pre><code>## formula: Y = 1/1+exp-(A + B*X)</code></pre>
+<pre><code>##     Original Bootstrap (Median)
+## A   -20.615  -20.3125          
+## B   1.5332   1.5022            
+## L50 13.4461  13.4354           
+## R2  0.5889   -</code></pre>
+<pre class="r"><code># deca_mat %&gt;% plot()</code></pre>
+<pre class="r"><code>deca_mat$out %&gt;% as_tibble() %&gt;% 
+  ggplot(aes(x = x))+
+  geom_line(aes(y = fitted), col = &quot;blue&quot;, linetype = &quot;solid&quot;, size = 1.2)+
+  geom_line(aes(y = CIlower), col = &quot;blue&quot;, linetype = 6, size = .8)+
+  geom_line(aes(y = CIupper), col = &quot;blue&quot;, linetype = 6, size = .8)+
+  # modelr::geom_ref_line(h = 0.5, colour = &quot;red&quot;, size = 1)+
+  theme_bw()+
+  theme(panel.grid = element_line(linetype = &quot;dotted&quot;),
+        axis.text = element_text(size = 11, color = &quot;black&quot;), 
+        axis.title = element_text(size = 12, color = &quot;black&quot;))+
+  coord_cartesian(xlim = c(10,18))+
+  labs(x = &quot;Total length (cm)&quot;, y = &quot;Proportion&quot;)+
+  geom_segment(aes(x = 10, xend = 13.4461 , y = 0.5, yend = .5), color =&quot;red&quot;, size =1.2, linetype = &quot;dashed&quot;)+
+  geom_segment(aes(x = 13.4461, xend = 13.4461 , y = 0, yend = .5), color =&quot;red&quot;, size =1.2, linetype = &quot;dashed&quot;) +
+  scale_x_continuous(expand = c(0,0), breaks = seq(11,19,2))+
+  scale_y_continuous(expand = c(0,0), breaks = seq(0.25,1,.25))+
+  geom_text(x = 11.2, y = 0.85, label = expression(L[50]~13.4))</code></pre>
+<pre><code>## Warning in is.na(x): is.na() applied to non-(list or vector) of type
+## &#39;expression&#39;</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="384" style="display: block; margin: auto;" /></p>
+<pre class="r"><code> deca_mat_F = sizeMat::gonad_mature(data = deca %&gt;% filter(tl_cm &gt; 10 &amp; weigth_g &lt; 120 &amp; sex == &quot;F&quot;),
+                        varNames = c(&quot;tl_cm&quot;, &quot;maturity_stage&quot;), 
+                        inmName =  c(&quot;I&quot;,&quot;II&quot;), 
+                        matName = c(&quot;III&quot;, &quot;IV&quot;, &quot;V&quot;), 
+                        method = &quot;fq&quot;, 
+                        niter = 50)
+
+deca_mat_M = sizeMat::gonad_mature(data = deca %&gt;% filter(tl_cm &gt; 10 &amp; weigth_g &lt; 120 &amp; sex == &quot;M&quot;),
+                        varNames = c(&quot;tl_cm&quot;, &quot;maturity_stage&quot;), 
+                        inmName =  c(&quot;I&quot;,&quot;II&quot;), 
+                        matName = c(&quot;III&quot;, &quot;IV&quot;, &quot;V&quot;), 
+                        method = &quot;fq&quot;, 
+                        niter = 50)
+
+
+deca_mat_F$out %&gt;% as_tibble() %&gt;% mutate(sex = &quot;Female&quot;) %&gt;%
+  bind_rows(deca_mat_M$out %&gt;% as_tibble() %&gt;% mutate(sex = &quot;Male&quot;)) %&gt;% 
+  ggplot(aes(x = x, y = fitted, color = sex))+
+  geom_line(size = 0.75)+
+  geom_segment(aes(x = 10, xend = 13.5 , y = 0.5, yend = .5), color =&quot;red&quot;, size =.25, linetype = &quot;dashed&quot;, show.legend = FALSE)+
+  geom_segment(aes(x = 13.5, xend = 13.5 , y = 0, yend = .5), color =&quot;red&quot;, size =.25, linetype = &quot;dashed&quot;, show.legend = FALSE) +
+  geom_segment(aes(x = 10, xend = 13.3174 , y = 0.5, yend = .5), color =&quot;black&quot;, size =.25, linetype = &quot;dashed&quot;, show.legend = FALSE)+
+  geom_segment(aes(x = 13.3174, xend = 13.3174 , y = 0, yend = .5), color =&quot;black&quot;, size =.25, linetype = &quot;dashed&quot;, show.legend = FALSE) +
+  scale_x_continuous(expand = c(0,0), breaks = seq(10.8,19,2))+
+  scale_y_continuous(expand = c(0,0), breaks = seq(0.25,1,.25))+
+  annotate(geom = &quot;text&quot;,x = 11.2, y = 0.80, label = expression(L[50]~13.4), color = &quot;black&quot;) +
+  annotate(geom = &quot;text&quot;,x = 11.2, y = 0.85, label = expression(L[50]~13.5), color = &quot;red&quot;) +
+  theme_bw()+
+  theme(panel.grid = element_line(linetype = &quot;dotted&quot;),
+        legend.title = element_text(face = &quot;italic&quot;),
+        axis.text = element_text(size = 11, color = &quot;black&quot;), 
+        axis.title = element_text(size = 12, color = &quot;black&quot;), legend.position = c(.75,.25))+
+  coord_cartesian(xlim = c(10,18))+
+  scale_color_manual(values = c(&quot;red&quot;, &quot;black&quot;), name = &quot;D. kurroides&quot;)+
+  labs(x = &quot;Total length (cm)&quot;, y = &quot;Proportion Mature&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="384" style="display: block; margin: auto;" /></p>
+</div>
